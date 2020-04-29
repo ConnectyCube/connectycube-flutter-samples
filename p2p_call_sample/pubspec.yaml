@@ -1,0 +1,24 @@
+name: p2p_call_sample
+description: P2P Calls Sample
+
+version: 0.1.0
+
+environment:
+  sdk: ">=2.2.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+
+  connectycube_sdk:
+    path: '/Volumes/macOS_SSD/StudioProjects/flutter-sdk/'
+
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+
+flutter:
+  uses-material-design: true
