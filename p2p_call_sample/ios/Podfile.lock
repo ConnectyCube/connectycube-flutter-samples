@@ -1,0 +1,45 @@
+PODS:
+  - device_id (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+  - flutter_webrtc (0.2.2):
+    - Flutter
+    - GoogleWebRTC (= 1.1.29400)
+    - Libyuv (= 1703)
+  - GoogleWebRTC (1.1.29400)
+  - Libyuv (1703)
+  - package_info (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - device_id (from `.symlinks/plugins/device_id/ios`)
+  - Flutter (from `Flutter`)
+  - flutter_webrtc (from `.symlinks/plugins/flutter_webrtc/ios`)
+  - package_info (from `.symlinks/plugins/package_info/ios`)
+
+SPEC REPOS:
+  trunk:
+    - GoogleWebRTC
+    - Libyuv
+
+EXTERNAL SOURCES:
+  device_id:
+    :path: ".symlinks/plugins/device_id/ios"
+  Flutter:
+    :path: Flutter
+  flutter_webrtc:
+    :path: ".symlinks/plugins/flutter_webrtc/ios"
+  package_info:
+    :path: ".symlinks/plugins/package_info/ios"
+
+SPEC CHECKSUMS:
+  device_id: 4a0bf078741a3eec6ba0e6cc72e786395d5991b0
+  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  flutter_webrtc: 626ca239bcc4390a514a2ac2b21b16d0c58b33fe
+  GoogleWebRTC: cfb83bc346435a17fe06bb05f04ad826b858a7fb
+  Libyuv: 5f79ced0ee66e60a612ca97de1e6ccacd187a437
+  package_info: 873975fc26034f0b863a300ad47e7f1ac6c7ec62
+
+PODFILE CHECKSUM: 0ba44ad07df4ab62269dc769727cf0f12b1e453d
+
+COCOAPODS: 1.9.1
