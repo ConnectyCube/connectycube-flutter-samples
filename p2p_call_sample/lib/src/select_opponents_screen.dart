@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_apns/apns.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
@@ -90,6 +93,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   Set<int> _selectedUsers;
   P2PClient _callClient;
   P2PSession _currentCall;
+  bool _isSubscribed;
 
   @override
   Widget build(BuildContext context) {
@@ -177,6 +181,31 @@ class _BodyLayoutState extends State<BodyLayout> {
     _selectedUsers = {};
     _initCustomMediaConfigs();
     _initCalls();
+    _isSubscribed = false;
+
+    final connector = createPushConnector();
+
+    connector.configure(
+      onLaunch: onLaunch,
+      onResume: onResume,
+      onMessage: onMessage,
+      onBackgroundMessage: onBackgroundMessage,
+    );
+
+    connector.requestNotificationPermissions();
+
+    if (connector.token.value != null) {
+      String token = connector.token.value;
+      log('Have token : $token');
+      _subscribeToPushes(token);
+    } else {
+      log('Add token listener');
+      connector.token.addListener(() {
+        String token = connector.token.value;
+        log('Token updated: $token');
+        _subscribeToPushes(token);
+      });
+    }
   }
 
   void _initCalls() {
@@ -230,4 +259,73 @@ class _BodyLayoutState extends State<BodyLayout> {
     mediaConfig.minWidth = 1280;
     mediaConfig.minFrameRate = 30;
   }
+
+  void _subscribeToPushes(String token) {
+//    if (!_isSubscribed) {
+      CreateSubscriptionParameters parameters = CreateSubscriptionParameters();
+      parameters.environment = CubeEnvironment.DEVELOPMENT;
+
+      String deviceId;
+
+      if (Platform.isAndroid) {
+        parameters.channel = NotificationsChannels.GCM;
+        parameters.platform = CubePlatform.ANDROID;
+        parameters.bundleIdentifier =
+            "com.connectycube.flutter.p2p_call_sample"; // not required, a unique identifier for client's application. In iOS, this is the Bundle Identifier. In Android - package id
+        deviceId =
+            "2b6f0cc904d137be2e1730235f5664094b831186-android"; // some device identifier
+      } else if (Platform.isIOS) {
+        parameters.channel = NotificationsChannels.APNS;
+        parameters.platform = CubePlatform.IOS;
+        parameters.bundleIdentifier =
+            "com.connectycube.flutter.p2p-call-sample"; // not required, a unique identifier for client's application. In iOS, this is the Bundle Identifier. In Android - package id
+        deviceId =
+            "2b6f0cc904d137be2e1730235f5664094b831186-ios"; // some device identifier
+      }
+
+      parameters.udid = deviceId;
+      parameters.pushToken = token;
+
+      createSubscription(parameters.getRequestParameters())
+          .then((cubeSubscription) {
+        log('Successfully subscribed');
+        setState(() {
+          _isSubscribed = true;
+        });
+      }).catchError((error) {
+        log('Subscription ERROR $error');
+      });
+//    }
+  }
+}
+
+Future<dynamic> onBackgroundMessage(Map<String, dynamic> message) {
+  log('onBackgroundMessage, message: $message');
+  if (message.containsKey('data')) {
+    // Handle data message
+    final dynamic data = message['data'];
+  }
+
+  if (message.containsKey('notification')) {
+    // Handle notification message
+    final dynamic notification = message['notification'];
+  }
+
+  // Or do other work.
+  return Future.value();
+}
+
+Future<dynamic> onLaunch(Map<String, dynamic> data) {
+  log('onLaunch, message: $data');
+  return Future.value();
+}
+
+Future<dynamic> onResume(Map<String, dynamic> data) {
+  log('onResume, message: $data');
+  return Future.value();
+}
+
+Future<dynamic> onMessage(Map<String, dynamic> data) {
+  log('onMessage, message: $data');
+  return Future.value();
 }

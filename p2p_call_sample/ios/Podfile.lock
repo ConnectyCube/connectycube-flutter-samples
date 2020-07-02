@@ -1,45 +1,176 @@
 PODS:
   - device_id (0.0.1):
     - Flutter
+  - Firebase/Analytics (6.27.0):
+    - Firebase/Core
+  - Firebase/Core (6.27.0):
+    - Firebase/CoreOnly
+    - FirebaseAnalytics (= 6.6.1)
+  - Firebase/CoreOnly (6.27.0):
+    - FirebaseCore (= 6.8.0)
+  - Firebase/Messaging (6.27.0):
+    - Firebase/CoreOnly
+    - FirebaseMessaging (~> 4.5.0)
+  - firebase_messaging (0.0.1):
+    - Firebase/Core
+    - Firebase/Messaging
+    - Flutter
+  - FirebaseAnalytics (6.6.1):
+    - FirebaseCore (~> 6.8)
+    - FirebaseInstallations (~> 1.4)
+    - GoogleAppMeasurement (= 6.6.1)
+    - GoogleUtilities/AppDelegateSwizzler (~> 6.0)
+    - GoogleUtilities/MethodSwizzler (~> 6.0)
+    - GoogleUtilities/Network (~> 6.0)
+    - "GoogleUtilities/NSData+zlib (~> 6.0)"
+    - nanopb (~> 1.30905.0)
+  - FirebaseCore (6.8.0):
+    - FirebaseCoreDiagnostics (~> 1.3)
+    - GoogleUtilities/Environment (~> 6.5)
+    - GoogleUtilities/Logger (~> 6.5)
+  - FirebaseCoreDiagnostics (1.4.0):
+    - GoogleDataTransportCCTSupport (~> 3.1)
+    - GoogleUtilities/Environment (~> 6.5)
+    - GoogleUtilities/Logger (~> 6.5)
+    - nanopb (~> 1.30905.0)
+  - FirebaseInstallations (1.4.0):
+    - FirebaseCore (~> 6.8)
+    - GoogleUtilities/Environment (~> 6.6)
+    - GoogleUtilities/UserDefaults (~> 6.6)
+    - PromisesObjC (~> 1.2)
+  - FirebaseInstanceID (4.4.0):
+    - FirebaseCore (~> 6.8)
+    - FirebaseInstallations (~> 1.0)
+    - GoogleUtilities/Environment (~> 6.5)
+    - GoogleUtilities/UserDefaults (~> 6.5)
+  - FirebaseMessaging (4.5.0):
+    - FirebaseCore (~> 6.8)
+    - FirebaseInstanceID (~> 4.3)
+    - GoogleUtilities/AppDelegateSwizzler (~> 6.5)
+    - GoogleUtilities/Environment (~> 6.5)
+    - GoogleUtilities/Reachability (~> 6.5)
+    - GoogleUtilities/UserDefaults (~> 6.5)
+    - Protobuf (>= 3.9.2, ~> 3.9)
   - Flutter (1.0.0)
+  - flutter_apns (0.0.1):
+    - Flutter
   - flutter_webrtc (0.2.2):
     - Flutter
     - GoogleWebRTC (= 1.1.29400)
     - Libyuv (= 1703)
+  - GoogleAppMeasurement (6.6.1):
+    - GoogleUtilities/AppDelegateSwizzler (~> 6.0)
+    - GoogleUtilities/MethodSwizzler (~> 6.0)
+    - GoogleUtilities/Network (~> 6.0)
+    - "GoogleUtilities/NSData+zlib (~> 6.0)"
+    - nanopb (~> 1.30905.0)
+  - GoogleDataTransport (6.2.1)
+  - GoogleDataTransportCCTSupport (3.2.0):
+    - GoogleDataTransport (~> 6.1)
+    - nanopb (~> 1.30905.0)
+  - GoogleUtilities/AppDelegateSwizzler (6.6.0):
+    - GoogleUtilities/Environment
+    - GoogleUtilities/Logger
+    - GoogleUtilities/Network
+  - GoogleUtilities/Environment (6.6.0):
+    - PromisesObjC (~> 1.2)
+  - GoogleUtilities/Logger (6.6.0):
+    - GoogleUtilities/Environment
+  - GoogleUtilities/MethodSwizzler (6.6.0):
+    - GoogleUtilities/Logger
+  - GoogleUtilities/Network (6.6.0):
+    - GoogleUtilities/Logger
+    - "GoogleUtilities/NSData+zlib"
+    - GoogleUtilities/Reachability
+  - "GoogleUtilities/NSData+zlib (6.6.0)"
+  - GoogleUtilities/Reachability (6.6.0):
+    - GoogleUtilities/Logger
+  - GoogleUtilities/UserDefaults (6.6.0):
+    - GoogleUtilities/Logger
   - GoogleWebRTC (1.1.29400)
   - Libyuv (1703)
+  - nanopb (1.30905.0):
+    - nanopb/decode (= 1.30905.0)
+    - nanopb/encode (= 1.30905.0)
+  - nanopb/decode (1.30905.0)
+  - nanopb/encode (1.30905.0)
+  - notification_reactor (0.0.1):
+    - Flutter
   - package_info (0.0.1):
     - Flutter
+  - PromisesObjC (1.2.9)
+  - Protobuf (3.12.0)
 
 DEPENDENCIES:
   - device_id (from `.symlinks/plugins/device_id/ios`)
+  - Firebase/Analytics
+  - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - Flutter (from `Flutter`)
+  - flutter_apns (from `.symlinks/plugins/flutter_apns/ios`)
   - flutter_webrtc (from `.symlinks/plugins/flutter_webrtc/ios`)
+  - notification_reactor (from `.symlinks/plugins/notification_reactor/ios`)
   - package_info (from `.symlinks/plugins/package_info/ios`)
 
 SPEC REPOS:
   trunk:
+    - Firebase
+    - FirebaseAnalytics
+    - FirebaseCore
+    - FirebaseCoreDiagnostics
+    - FirebaseInstallations
+    - FirebaseInstanceID
+    - FirebaseMessaging
+    - GoogleAppMeasurement
+    - GoogleDataTransport
+    - GoogleDataTransportCCTSupport
+    - GoogleUtilities
     - GoogleWebRTC
     - Libyuv
+    - nanopb
+    - PromisesObjC
+    - Protobuf
 
 EXTERNAL SOURCES:
   device_id:
     :path: ".symlinks/plugins/device_id/ios"
+  firebase_messaging:
+    :path: ".symlinks/plugins/firebase_messaging/ios"
   Flutter:
     :path: Flutter
+  flutter_apns:
+    :path: ".symlinks/plugins/flutter_apns/ios"
   flutter_webrtc:
     :path: ".symlinks/plugins/flutter_webrtc/ios"
+  notification_reactor:
+    :path: ".symlinks/plugins/notification_reactor/ios"
   package_info:
     :path: ".symlinks/plugins/package_info/ios"
 
 SPEC CHECKSUMS:
   device_id: 4a0bf078741a3eec6ba0e6cc72e786395d5991b0
+  Firebase: fc4cbf6f1592636431821ef9a3c557e4dfd9f268
+  firebase_messaging: 21344b3b3a7d9d325d63a70e3750c0c798fe1e03
+  FirebaseAnalytics: 0ea640473474f036cabbc2576e20c2d63671c92f
+  FirebaseCore: feda061cb1ee6d8ad4824f4a4a8ffbcfe284f595
+  FirebaseCoreDiagnostics: 4505e4d4009b1d93f605088ee7d7764d5f0d1c84
+  FirebaseInstallations: 293f567159b6d66d1c990f13bb868066096c94ec
+  FirebaseInstanceID: 3b119bfe90e904851218159c9a4ecb847cc51d18
+  FirebaseMessaging: ad9e1a80ea64905e01a0ce1b3eb76a2944544151
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  flutter_apns: f516b118e423fe7c0a38771180549c4d6cb67c2f
   flutter_webrtc: 626ca239bcc4390a514a2ac2b21b16d0c58b33fe
+  GoogleAppMeasurement: 2fd5c5a56c069db635c8e7b92d4809a9591d0a69
+  GoogleDataTransport: 9a8a16f79feffc7f42096743de2a7c4815e84020
+  GoogleDataTransportCCTSupport: 489c1265d2c85b68187a83a911913d190012158d
+  GoogleUtilities: 39530bc0ad980530298e9c4af8549e991fd033b1
   GoogleWebRTC: cfb83bc346435a17fe06bb05f04ad826b858a7fb
   Libyuv: 5f79ced0ee66e60a612ca97de1e6ccacd187a437
+  nanopb: c43f40fadfe79e8b8db116583945847910cbabc9
+  notification_reactor: 5e4ae7bee76914d2b39d88f577a9a9e912cd8242
   package_info: 873975fc26034f0b863a300ad47e7f1ac6c7ec62
+  PromisesObjC: b48e0338dbbac2207e611750777895f7a5811b75
+  Protobuf: 2793fcd0622a00b546c60e7cbbcc493e043e9bb9
 
-PODFILE CHECKSUM: 0ba44ad07df4ab62269dc769727cf0f12b1e453d
+PODFILE CHECKSUM: 503f8548610402435c9757848bd6be4e19df5b51
 
 COCOAPODS: 1.9.1
