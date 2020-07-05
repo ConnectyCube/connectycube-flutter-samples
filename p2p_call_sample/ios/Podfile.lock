@@ -54,6 +54,10 @@ PODS:
   - Flutter (1.0.0)
   - flutter_apns (0.0.1):
     - Flutter
+  - flutter_call_kit (0.0.1):
+    - Flutter
+  - flutter_voip_push_notification (0.0.1):
+    - Flutter
   - flutter_webrtc (0.2.2):
     - Flutter
     - GoogleWebRTC (= 1.1.29400)
@@ -94,8 +98,6 @@ PODS:
     - nanopb/encode (= 1.30905.0)
   - nanopb/decode (1.30905.0)
   - nanopb/encode (1.30905.0)
-  - notification_reactor (0.0.1):
-    - Flutter
   - package_info (0.0.1):
     - Flutter
   - PromisesObjC (1.2.9)
@@ -107,8 +109,9 @@ DEPENDENCIES:
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
   - Flutter (from `Flutter`)
   - flutter_apns (from `.symlinks/plugins/flutter_apns/ios`)
+  - flutter_call_kit (from `.symlinks/plugins/flutter_call_kit/ios`)
+  - flutter_voip_push_notification (from `.symlinks/plugins/flutter_voip_push_notification/ios`)
   - flutter_webrtc (from `.symlinks/plugins/flutter_webrtc/ios`)
-  - notification_reactor (from `.symlinks/plugins/notification_reactor/ios`)
   - package_info (from `.symlinks/plugins/package_info/ios`)
 
 SPEC REPOS:
@@ -139,10 +142,12 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_apns:
     :path: ".symlinks/plugins/flutter_apns/ios"
+  flutter_call_kit:
+    :path: ".symlinks/plugins/flutter_call_kit/ios"
+  flutter_voip_push_notification:
+    :path: ".symlinks/plugins/flutter_voip_push_notification/ios"
   flutter_webrtc:
     :path: ".symlinks/plugins/flutter_webrtc/ios"
-  notification_reactor:
-    :path: ".symlinks/plugins/notification_reactor/ios"
   package_info:
     :path: ".symlinks/plugins/package_info/ios"
 
@@ -158,6 +163,8 @@ SPEC CHECKSUMS:
   FirebaseMessaging: ad9e1a80ea64905e01a0ce1b3eb76a2944544151
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_apns: f516b118e423fe7c0a38771180549c4d6cb67c2f
+  flutter_call_kit: 0598f2eec54579aa00b53fb68a622ccdb08fe4fe
+  flutter_voip_push_notification: f28f3ce1c6b835a3fa9e833f37f33dc1291ab888
   flutter_webrtc: 626ca239bcc4390a514a2ac2b21b16d0c58b33fe
   GoogleAppMeasurement: 2fd5c5a56c069db635c8e7b92d4809a9591d0a69
   GoogleDataTransport: 9a8a16f79feffc7f42096743de2a7c4815e84020
@@ -166,7 +173,6 @@ SPEC CHECKSUMS:
   GoogleWebRTC: cfb83bc346435a17fe06bb05f04ad826b858a7fb
   Libyuv: 5f79ced0ee66e60a612ca97de1e6ccacd187a437
   nanopb: c43f40fadfe79e8b8db116583945847910cbabc9
-  notification_reactor: 5e4ae7bee76914d2b39d88f577a9a9e912cd8242
   package_info: 873975fc26034f0b863a300ad47e7f1ac6c7ec62
   PromisesObjC: b48e0338dbbac2207e611750777895f7a5811b75
   Protobuf: 2793fcd0622a00b546c60e7cbbcc493e043e9bb9

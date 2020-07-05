@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_apns/apns.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
+import 'package:flutter_voip_push_notification/flutter_voip_push_notification.dart';
 
 import 'call_screen.dart';
 import 'utils/configs.dart' as utils;
@@ -94,6 +95,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   P2PClient _callClient;
   P2PSession _currentCall;
   bool _isSubscribed;
+  FlutterVoipPushNotification _voipPush = FlutterVoipPushNotification();
 
   @override
   Widget build(BuildContext context) {
@@ -187,25 +189,72 @@ class _BodyLayoutState extends State<BodyLayout> {
 
     connector.configure(
       onLaunch: onLaunch,
-      onResume: onResume,
-      onMessage: onMessage,
+//      onResume: onResume,
+//      onMessage: onMessage,
       onBackgroundMessage: onBackgroundMessage,
     );
 
     connector.requestNotificationPermissions();
 
-    if (connector.token.value != null) {
-      String token = connector.token.value;
-      log('Have token : $token');
-      _subscribeToPushes(token);
-    } else {
-      log('Add token listener');
-      connector.token.addListener(() {
-        String token = connector.token.value;
-        log('Token updated: $token');
-        _subscribeToPushes(token);
-      });
-    }
+//    if (connector.token.value != null) {
+//      String token = connector.token.value;
+//      log('Have token : $token');
+//      _subscribeToPushes(token);
+//    } else {
+//      log('Add token listener');
+//      connector.token.addListener(() {
+//        String token = connector.token.value;
+//        log('Token updated: $token');
+//        _subscribeToPushes(token);
+//      });
+//    }
+    configure();
+  }
+
+  // Configures a voip push notification
+  Future<void> configure() async {
+    // request permission (required)
+    await _voipPush.requestNotificationPermissions();
+
+    // listen to voip device token changes
+    _voipPush.onTokenRefresh.listen(onToken);
+
+    // do configure voip push
+    _voipPush.configure(onMessage: onMessage, onResume: onResume);
+  }
+
+  /// Called when the device token changes
+  void onToken(String token) {
+    log("onToken, token: $token");
+    _subscribeToPushes(token);
+  }
+
+  /// Called to receive notification when app is in foreground
+  ///
+  /// [isLocal] is true if its a local notification or false otherwise (remote notification)
+  /// [payload] the notification payload to be processed. use this to present a local notification
+  Future<dynamic> onMessage(bool isLocal, Map<String, dynamic> payload) {
+    // handle foreground notification
+    log("received on foreground payload: $payload, isLocal=$isLocal");
+    return null;
+  }
+
+  /// Called to receive notification when app is resuming from background
+  ///
+  /// [isLocal] is true if its a local notification or false otherwise (remote notification)
+  /// [payload] the notification payload to be processed. use this to present a local notification
+  Future<dynamic> onResume(bool isLocal, Map<String, dynamic> payload) {
+    // handle background notification
+    log("received on background payload: $payload, isLocal=$isLocal");
+    showLocalNotification(payload);
+    return null;
+  }
+
+  showLocalNotification(Map<String, dynamic> notification) {
+    String alert = notification["aps"]["alert"];
+    _voipPush.presentLocalNotification(LocalNotification(
+      alertBody: "Hello $alert",
+    ));
   }
 
   void _initCalls() {
@@ -262,39 +311,39 @@ class _BodyLayoutState extends State<BodyLayout> {
 
   void _subscribeToPushes(String token) {
 //    if (!_isSubscribed) {
-      CreateSubscriptionParameters parameters = CreateSubscriptionParameters();
-      parameters.environment = CubeEnvironment.DEVELOPMENT;
+    CreateSubscriptionParameters parameters = CreateSubscriptionParameters();
+    parameters.environment = CubeEnvironment.DEVELOPMENT;
 
-      String deviceId;
+    String deviceId;
 
-      if (Platform.isAndroid) {
-        parameters.channel = NotificationsChannels.GCM;
-        parameters.platform = CubePlatform.ANDROID;
-        parameters.bundleIdentifier =
-            "com.connectycube.flutter.p2p_call_sample"; // not required, a unique identifier for client's application. In iOS, this is the Bundle Identifier. In Android - package id
-        deviceId =
-            "2b6f0cc904d137be2e1730235f5664094b831186-android"; // some device identifier
-      } else if (Platform.isIOS) {
-        parameters.channel = NotificationsChannels.APNS;
-        parameters.platform = CubePlatform.IOS;
-        parameters.bundleIdentifier =
-            "com.connectycube.flutter.p2p-call-sample"; // not required, a unique identifier for client's application. In iOS, this is the Bundle Identifier. In Android - package id
-        deviceId =
-            "2b6f0cc904d137be2e1730235f5664094b831186-ios"; // some device identifier
-      }
+    if (Platform.isAndroid) {
+      parameters.channel = NotificationsChannels.GCM;
+      parameters.platform = CubePlatform.ANDROID;
+      parameters.bundleIdentifier =
+          "com.connectycube.flutter.p2p_call_sample"; // not required, a unique identifier for client's application. In iOS, this is the Bundle Identifier. In Android - package id
+      deviceId =
+          "2b6f0cc904d137be2e1730235f5664094b831186-android"; // some device identifier
+    } else if (Platform.isIOS) {
+      parameters.channel = NotificationsChannels.APNS_VOIP;
+      parameters.platform = CubePlatform.IOS;
+      parameters.bundleIdentifier =
+          "com.connectycube.flutter.p2p-call-sample"; // not required, a unique identifier for client's application. In iOS, this is the Bundle Identifier. In Android - package id
+      deviceId =
+          "2b6f0cc904d137be2e1730235f5664094b831186-ios"; // some device identifier
+    }
 
-      parameters.udid = deviceId;
-      parameters.pushToken = token;
+    parameters.udid = deviceId;
+    parameters.pushToken = token;
 
-      createSubscription(parameters.getRequestParameters())
-          .then((cubeSubscription) {
-        log('Successfully subscribed');
-        setState(() {
-          _isSubscribed = true;
-        });
-      }).catchError((error) {
-        log('Subscription ERROR $error');
+    createSubscription(parameters.getRequestParameters())
+        .then((cubeSubscription) {
+      log('Successfully subscribed');
+      setState(() {
+        _isSubscribed = true;
       });
+    }).catchError((error) {
+      log('Subscription ERROR $error');
+    });
 //    }
   }
 }

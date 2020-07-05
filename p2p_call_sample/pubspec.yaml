@@ -12,7 +12,12 @@ dependencies:
 
   connectycube_sdk:
     path: "/Volumes/macOS_SSD/StudioProjects/flutter-sdk/"
-  flutter_apns: ^1.1.0
+  flutter_apns:
+    git:
+      url:
+        git://github.com/mwaylabs/flutter-apns.git
+  flutter_voip_push_notification: ^0.0.3
+  flutter_call_kit: ^0.0.2
 
 dev_dependencies:
   flutter_test:
