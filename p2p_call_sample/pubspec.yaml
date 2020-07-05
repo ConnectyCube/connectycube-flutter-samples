@@ -10,8 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  connectycube_sdk:
-    path: "/Volumes/macOS_SSD/StudioProjects/flutter-sdk/"
+  connectycube_sdk: ^0.2.0-beta3
   flutter_apns:
     git:
       url:

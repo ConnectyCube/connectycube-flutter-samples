@@ -29,9 +29,9 @@ import PushKit
         // Register VoIP push token (a property of PKPushCredentials) with server
         FlutterVoipPushNotificationPlugin.didReceiveIncomingPush(with: payload, forType: type.rawValue)
         
-        FlutterCallKitPlugin.reportNewIncomingCall(String!, handle: <#T##String!#>, "generic"<#T##String!#>, false, callerName, YES)
-        
-         [FlutterCallKitPlugin reportNewIncomingCall:uuid handle:handle handleType:@"generic" hasVideo:false localizedCallerName:callerName fromPushKit: YES];
+//        FlutterCallKitPlugin.reportNewIncomingCall(String!, handle: <#T##String!#>, "generic"<#T##String!#>, false, callerName, YES)
+//
+//         [FlutterCallKitPlugin reportNewIncomingCall:uuid handle:handle handleType:@"generic" hasVideo:false localizedCallerName:callerName fromPushKit: YES];
     }
 
     // Handle incoming pushes
