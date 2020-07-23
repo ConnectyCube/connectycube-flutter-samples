@@ -208,7 +208,7 @@ class _BodyLayoutState extends State<BodyLayout> {
 //        _subscribeToPushes(token);
 //      });
 //    }
-    configure();
+//    configure();
   }
 
   // Configures a voip push notification
@@ -349,7 +349,7 @@ class _BodyLayoutState extends State<BodyLayout> {
 }
 
 Future<dynamic> onBackgroundMessage(Map<String, dynamic> message) {
-  log('onBackgroundMessage, message: $message');
+  log('onBackgroundMessage,message: $message');
   if (message.containsKey('data')) {
     // Handle data message
     final dynamic data = message['data'];

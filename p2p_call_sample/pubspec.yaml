@@ -10,7 +10,8 @@ dependencies:
   flutter:
     sdk: flutter
 
-  connectycube_sdk: ^0.2.0-beta3
+  connectycube_sdk:
+    path: /Users/tereha/StudioProjects/flutter-sdk/
   flutter_apns:
     git:
       url:
