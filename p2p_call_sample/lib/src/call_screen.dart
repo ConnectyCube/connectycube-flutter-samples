@@ -95,7 +95,6 @@ class IncomingCallScreen extends StatelessWidget {
 
   void _rejectCall(BuildContext context, CallSession callSession) {
     callSession.reject();
-    Navigator.pop(context);
   }
 
   Future<bool> _onBackPressed(BuildContext context) {
