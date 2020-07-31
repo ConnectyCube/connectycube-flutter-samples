@@ -10,6 +10,8 @@ The following code samples are available:
 <kbd><img alt="Flutter P2P Calls code sample, select users" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/select_opponents_screen.png" height="440" /></kbd>
 <kbd><img alt="Flutter P2P Calls code sample, video chat" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen.png" height="440" /></kbd>
 
+- [Conference Calls code sample](https://github.com/ConnectyCube/connectycube-flutter-samples/tree/master/conf_call_sample)
+
 ## Documentation
 
 All the samples use ConnectyCube SDK. The following tech integration documentation is available:
@@ -17,6 +19,7 @@ All the samples use ConnectyCube SDK. The following tech integration documentati
 - [Flutter SDK documentation](https://developers.connectycube.com/flutter/)
 - [Chat API](https://developers.connectycube.com/flutter/messaging)
 - [Video Chat API](https://developers.connectycube.com/flutter/videocalling)
+- [Conference Chat API](https://developers.connectycube.com/flutter/videocalling-conference)
 - [Authentication and Users](https://developers.connectycube.com/flutter/authentication-and-users)
 
 ## Have an issue?
