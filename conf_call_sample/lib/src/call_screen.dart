@@ -1,17 +1,20 @@
+import 'package:conf_call_sample/src/utils/call_manager.dart';
+import 'package:conf_call_sample/src/utils/video_config.dart';
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 class IncomingCallScreen extends StatelessWidget {
   static const String TAG = "IncomingCallScreen";
-  final P2PSession _callSession;
+  String _roomId;
+  List<int> _participantIds;
 
-  IncomingCallScreen(this._callSession);
+  IncomingCallScreen(this._roomId, this._participantIds);
 
   @override
   Widget build(BuildContext context) {
-    _callSession.onSessionClosed = (callSession) {
-      log("_onSessionClosed", TAG);
+    CallManager.instance.onCloseCall = () {
+      log("onCloseCall", TAG);
       Navigator.pop(context);
     };
 
@@ -32,7 +35,7 @@ class IncomingCallScreen extends StatelessWidget {
               ),
               Padding(
                 padding: EdgeInsets.only(bottom: 86),
-                child: Text(_callSession.opponentsIds.join(", "),
+                child: Text(_participantIds.join(", "),
                     style: TextStyle(fontSize: 18)),
               ),
               Row(
@@ -47,7 +50,7 @@ class IncomingCallScreen extends StatelessWidget {
                         color: Colors.white,
                       ),
                       backgroundColor: Colors.red,
-                      onPressed: () => _rejectCall(context, _callSession),
+                      onPressed: () => _rejectCall(context),
                     ),
                   ),
                   Padding(
@@ -59,7 +62,7 @@ class IncomingCallScreen extends StatelessWidget {
                         color: Colors.white,
                       ),
                       backgroundColor: Colors.green,
-                      onPressed: () => _acceptCall(context, _callSession),
+                      onPressed: () => _acceptCall(context),
                     ),
                   ),
                 ],
@@ -70,31 +73,23 @@ class IncomingCallScreen extends StatelessWidget {
   }
 
   _getCallTitle() {
-    String callType;
-
-    switch (_callSession.callType) {
-      case CallType.VIDEO_CALL:
-        callType = "Video";
-        break;
-      case CallType.AUDIO_CALL:
-        callType = "Audio";
-        break;
-    }
-
+    String callType = "Video";
     return "Incoming $callType call";
   }
 
-  void _acceptCall(BuildContext context, P2PSession callSession) {
+  void _acceptCall(BuildContext context) async {
+    ConferenceSession callSession = await ConferenceClient.instance.createCallSession(CubeChatConnection.instance.currentUser.id);
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => ConversationCallScreen(callSession, true),
+        builder: (context) => ConversationCallScreen(callSession, _roomId, _participantIds, true),
       ),
     );
   }
 
-  void _rejectCall(BuildContext context, P2PSession callSession) {
-    callSession.reject();
+  void _rejectCall(BuildContext context) {
+    CallManager.instance.reject(_roomId, false);
+    Navigator.pop(context);
   }
 
   Future<bool> _onBackPressed(BuildContext context) {
@@ -103,49 +98,71 @@ class IncomingCallScreen extends StatelessWidget {
 }
 
 class ConversationCallScreen extends StatefulWidget {
-  final P2PSession _callSession;
+  final ConferenceSession _callSession;
+  final String roomId;
+  final List<int> opponents;
   final bool _isIncoming;
 
   @override
   State<StatefulWidget> createState() {
-    return _ConversationCallScreenState(_callSession, _isIncoming);
+    return _ConversationCallScreenState(_callSession, roomId, opponents, _isIncoming);
   }
 
-  ConversationCallScreen(this._callSession, this._isIncoming);
+  ConversationCallScreen(this._callSession, this.roomId, this.opponents, this._isIncoming);
 }
 
-class _ConversationCallScreenState extends State<ConversationCallScreen>
-    implements RTCSessionStateCallback<P2PSession> {
+class _ConversationCallScreenState extends State<ConversationCallScreen> implements RTCSessionStateCallback<ConferenceSession> {
   static const String TAG = "_ConversationCallScreenState";
-  P2PSession _callSession;
+  ConferenceSession _callSession;
+  CallManager _callManager = CallManager.instance;
   bool _isIncoming;
+  String roomId;
+  final List<int> opponents;
   bool _isCameraEnabled = true;
   bool _isSpeakerEnabled = true;
   bool _isMicMute = false;
 
   Map<int, RTCVideoRenderer> streams = {};
 
-  _ConversationCallScreenState(this._callSession, this._isIncoming);
+  _ConversationCallScreenState(this._callSession, this.roomId, this.opponents, this._isIncoming);
 
   @override
   void initState() {
     super.initState();
+    _initCustomMediaConfigs();
+    _callManager.onReceiveRejectCall = _onReceiveRejectCall;
+    _callManager.onCloseCall = _onCloseCall;
 
     _callSession.onLocalStreamReceived = _addLocalMediaStream;
     _callSession.onRemoteStreamReceived = _addRemoteMediaStream;
     _callSession.onSessionClosed = _onSessionClosed;
+    _callSession.onPublishersReceived = onPublishersReceived;
+    _callSession.onPublisherLeft = onPublisherLeft;
+    _callSession.onError = onError;
 
     _callSession.setSessionCallbacksListener(this);
-    if (_isIncoming) {
-      _callSession.acceptCall();
-    } else {
-      _callSession.startCall();
-    }
+
+    _callSession.joinDialog(roomId, ((publishers) {
+      log("join session= $publishers", TAG);
+
+      if (!_isIncoming) {
+        _callManager.startCall(roomId, opponents, _callSession.currentUserId);
+      }
+    }));
+  }
+
+  void _onCloseCall() {
+    log("_onCloseCall", TAG);
+    _callSession.leave();
+  }
+
+  void _onReceiveRejectCall(String roomId, int participantId, bool isBusy) {
+    log("_onReceiveRejectCall got reject from user $participantId", TAG);
   }
 
   void _addLocalMediaStream(MediaStream stream) {
     log("_addLocalMediaStream", TAG);
-    _onStreamAdd(CubeChatConnection.instance.currentUser.id, stream);
+    _onStreamAdd(ConferenceClient.instance.currentUserId, stream);
   }
 
   void _addRemoteMediaStream(session, int userId, MediaStream stream) {
@@ -166,14 +183,36 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     });
   }
 
+  void _closeSessionIfLast() {
+    if (_callSession.allActivePublishers.length < 1) {
+      _callManager.stopCall();
+      _callSession.removeSessionCallbacksListener();
+      _callSession.leave();
+    }
+  }
+
   void _onSessionClosed(session) {
     log("_onSessionClosed", TAG);
     _callSession.removeSessionCallbacksListener();
     streams.forEach((opponentId, stream) {
       stream.dispose();
     });
-
+    (session as ConferenceSession).leave();
     Navigator.pop(context);
+  }
+
+  void onPublishersReceived(publishers) {
+    log("onPublishersReceived", TAG);
+    subscribeToPublishers(publishers);
+    handlePublisherReceived(publishers);
+  }
+
+  void onPublisherLeft(publisher) {
+    log("onPublisherLeft $publisher", TAG);
+  }
+
+  void onError(ex) {
+    log("onError $ex", TAG);
   }
 
   void _onStreamAdd(int opponentId, MediaStream stream) async {
@@ -185,6 +224,18 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     streamRender.objectFit = RTCVideoViewObjectFit.RTCVideoViewObjectFitCover;
     streamRender.mirror = true;
     setState(() => streams[opponentId] = streamRender);
+  }
+
+  void subscribeToPublishers(List<int> publishers) {
+    for (int publisher in publishers) {
+      _callSession.subscribeToPublisher(publisher);
+    }
+  }
+
+  void handlePublisherReceived(List<int> publishers) {
+    if (!_isIncoming) {
+      publishers.forEach((id) => _callManager.handleAcceptCall(id));
+    }
   }
 
   List<Widget> renderStreamsGrid(Orientation orientation) {
@@ -267,7 +318,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
                             ),
                           ),
                           Text(
-                            _callSession.opponentsIds.join(", "),
+                            _callSession.allActivePublishers.join(", "),
                             style: TextStyle(fontSize: 20),
                           ),
                         ],
@@ -372,7 +423,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   }
 
   _endCall() {
-    _callSession.hungUp();
+    _callManager.stopCall();
+    _callSession.leave();
   }
 
   Future<bool> _onBackPressed(BuildContext context) {
@@ -416,19 +468,35 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     });
   }
 
+  void _initCustomMediaConfigs() {
+    RTCMediaConfig mediaConfig = RTCMediaConfig.instance;
+    if(opponents.length == 1) {
+      mediaConfig.minHeight = HD_VIDEO.height;
+      mediaConfig.minWidth = HD_VIDEO.width;
+    } else if(opponents.length <= 3) {
+      mediaConfig.minHeight = VGA_VIDEO.height;
+      mediaConfig.minWidth = VGA_VIDEO.width;
+    } else {
+      mediaConfig.minHeight = QVGA_VIDEO.height;
+      mediaConfig.minWidth = QVGA_VIDEO.width;
+    }
+    mediaConfig.minFrameRate = 30;
+  }
+
   @override
-  void onConnectedToUser(P2PSession session, int userId) {
+  void onConnectedToUser(ConferenceSession session, int userId) {
     log("onConnectedToUser userId= $userId");
   }
 
   @override
-  void onConnectionClosedForUser(P2PSession session, int userId) {
+  void onConnectionClosedForUser(ConferenceSession session, int userId) {
     log("onConnectionClosedForUser userId= $userId");
     _removeMediaStream(session, userId);
+    _closeSessionIfLast();
   }
 
   @override
-  void onDisconnectedFromUser(P2PSession session, int userId) {
+  void onDisconnectedFromUser(ConferenceSession session, int userId) {
     log("onDisconnectedFromUser userId= $userId");
   }
 }
