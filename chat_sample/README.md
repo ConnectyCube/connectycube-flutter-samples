@@ -16,7 +16,7 @@ Project contains the following features implemented:
 
 ConnectyCube Flutter getting started - [https://developers.connectycube.com/flutter](https://developers.connectycube.com/flutter)
 
-ConnectyCube Chat API documentation - [)
+ConnectyCube Chat API documentation - [https://developers.connectycube.com/flutter/messaging](https://developers.connectycube.com/flutter/messaging)
 
 ## Screenshots
 
