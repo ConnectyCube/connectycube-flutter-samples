@@ -1,6 +1,6 @@
 # Chat and Video Chat code samples for Flutte and ConnectyCube
 
-This project contains P2P Calls code sample for Flutter platform based on [ConnectyCube](https://connectycube.com/) communication platform.
+This project contains chat and video chat code samples for Flutter platform based on [ConnectyCube](https://connectycube.com/) communication platform.
 
 The following code samples are available:
 
