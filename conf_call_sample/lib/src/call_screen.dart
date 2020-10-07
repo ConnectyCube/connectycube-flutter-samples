@@ -78,11 +78,13 @@ class IncomingCallScreen extends StatelessWidget {
   }
 
   void _acceptCall(BuildContext context) async {
-    ConferenceSession callSession = await ConferenceClient.instance.createCallSession(CubeChatConnection.instance.currentUser.id);
+    ConferenceSession callSession = await ConferenceClient.instance
+        .createCallSession(CubeChatConnection.instance.currentUser.id);
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) => ConversationCallScreen(callSession, _roomId, _participantIds, true),
+        builder: (context) =>
+            ConversationCallScreen(callSession, _roomId, _participantIds, true),
       ),
     );
   }
@@ -105,13 +107,16 @@ class ConversationCallScreen extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return _ConversationCallScreenState(_callSession, roomId, opponents, _isIncoming);
+    return _ConversationCallScreenState(
+        _callSession, roomId, opponents, _isIncoming);
   }
 
-  ConversationCallScreen(this._callSession, this.roomId, this.opponents, this._isIncoming);
+  ConversationCallScreen(
+      this._callSession, this.roomId, this.opponents, this._isIncoming);
 }
 
-class _ConversationCallScreenState extends State<ConversationCallScreen> implements RTCSessionStateCallback<ConferenceSession> {
+class _ConversationCallScreenState extends State<ConversationCallScreen>
+    implements RTCSessionStateCallback<ConferenceSession> {
   static const String TAG = "_ConversationCallScreenState";
   ConferenceSession _callSession;
   CallManager _callManager = CallManager.instance;
@@ -124,7 +129,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> impleme
 
   Map<int, RTCVideoRenderer> streams = {};
 
-  _ConversationCallScreenState(this._callSession, this.roomId, this.opponents, this._isIncoming);
+  _ConversationCallScreenState(
+      this._callSession, this.roomId, this.opponents, this._isIncoming);
 
   @override
   void initState() {
@@ -149,6 +155,15 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> impleme
         _callManager.startCall(roomId, opponents, _callSession.currentUserId);
       }
     }));
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    streams.forEach((opponentId, stream) async {
+      log("[dispose] dispose renderer for $opponentId", TAG);
+      await stream.dispose();
+    });
   }
 
   void _onCloseCall() {
@@ -194,9 +209,6 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> impleme
   void _onSessionClosed(session) {
     log("_onSessionClosed", TAG);
     _callSession.removeSessionCallbacksListener();
-    streams.forEach((opponentId, stream) {
-      stream.dispose();
-    });
     (session as ConferenceSession).leave();
     Navigator.pop(context);
   }
@@ -221,8 +233,6 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> impleme
     RTCVideoRenderer streamRender = RTCVideoRenderer();
     await streamRender.initialize();
     streamRender.srcObject = stream;
-    streamRender.objectFit = RTCVideoViewObjectFit.RTCVideoViewObjectFitCover;
-    streamRender.mirror = true;
     setState(() => streams[opponentId] = streamRender);
   }
 
@@ -242,7 +252,11 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> impleme
     List<Widget> streamsExpanded = streams.entries
         .map(
           (entry) => Expanded(
-            child: RTCVideoView(entry.value),
+            child: RTCVideoView(
+              entry.value,
+              mirror: true,
+              objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+            ),
           ),
         )
         .toList();
@@ -470,10 +484,10 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> impleme
 
   void _initCustomMediaConfigs() {
     RTCMediaConfig mediaConfig = RTCMediaConfig.instance;
-    if(opponents.length == 1) {
+    if (opponents.length == 1) {
       mediaConfig.minHeight = HD_VIDEO.height;
       mediaConfig.minWidth = HD_VIDEO.width;
-    } else if(opponents.length <= 3) {
+    } else if (opponents.length <= 3) {
       mediaConfig.minHeight = VGA_VIDEO.height;
       mediaConfig.minWidth = VGA_VIDEO.width;
     } else {

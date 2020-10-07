@@ -58,12 +58,13 @@ class SelectDialogScreen extends StatelessWidget {
               child: Text("OK"),
               onPressed: () {
                 signOut().then(
-                  (voidValue) {
+                      (voidValue) {
+                    CubeChatConnection.instance.destroy();
                     Navigator.pop(context); // cancel current Dialog
                     _navigateToLoginScreen(context);
                   },
                 ).catchError(
-                  (onError) {
+                      (onError) {
                     Navigator.pop(context); // cancel current Dialog
                     _navigateToLoginScreen(context);
                   },
@@ -116,16 +117,16 @@ class _BodyLayoutState extends State<BodyLayout> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                  FloatingActionButton(
-                    heroTag: "VideoCall",
-                    child: Icon(
-                      Icons.videocam,
-                      color: Colors.white,
-                    ),
-                    backgroundColor: Colors.blue,
-                    onPressed: () =>
-                        _startCall(_selectedUsers),
+                FloatingActionButton(
+                  heroTag: "VideoCall",
+                  child: Icon(
+                    Icons.videocam,
+                    color: Colors.white,
                   ),
+                  backgroundColor: Colors.blue,
+                  onPressed: () =>
+                      _startCall(_selectedUsers),
+                ),
               ],
             ),
           ],
@@ -178,7 +179,7 @@ class _BodyLayoutState extends State<BodyLayout> {
     };
 
     _callManager.onCloseCall = () {
-        _currentCall = null;
+      _currentCall = null;
     };
   }
 

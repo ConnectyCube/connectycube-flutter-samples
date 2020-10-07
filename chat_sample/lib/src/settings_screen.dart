@@ -250,7 +250,7 @@ class _BodyLayoutState extends State<BodyLayout> {
               onPressed: () {
                 signOut().then(
                   (voidValue) {
-                    CubeChatConnection.instance.logout();
+                    CubeChatConnection.instance.destroy();
                     SharedPrefs.instance.deleteUser();
                     Navigator.pop(context); // cancel current Dialog
                     Navigator.pop(context); // cancel current screen

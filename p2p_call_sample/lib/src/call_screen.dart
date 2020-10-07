@@ -143,6 +143,15 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     }
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    streams.forEach((opponentId, stream) async {
+      log("[dispose] dispose renderer for $opponentId", TAG);
+      await stream.dispose();
+    });
+  }
+
   void _addLocalMediaStream(MediaStream stream) {
     log("_addLocalMediaStream", TAG);
     _onStreamAdd(CubeChatConnection.instance.currentUser.id, stream);
@@ -169,9 +178,6 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   void _onSessionClosed(session) {
     log("_onSessionClosed", TAG);
     _callSession.removeSessionCallbacksListener();
-    streams.forEach((opponentId, stream) {
-      stream.dispose();
-    });
 
     Navigator.pop(context);
   }
@@ -182,8 +188,6 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     RTCVideoRenderer streamRender = RTCVideoRenderer();
     await streamRender.initialize();
     streamRender.srcObject = stream;
-    streamRender.objectFit = RTCVideoViewObjectFit.RTCVideoViewObjectFitCover;
-    streamRender.mirror = true;
     setState(() => streams[opponentId] = streamRender);
   }
 
@@ -191,7 +195,11 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     List<Widget> streamsExpanded = streams.entries
         .map(
           (entry) => Expanded(
-            child: RTCVideoView(entry.value),
+            child: RTCVideoView(
+              entry.value,
+              objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+              mirror: true,
+            ),
           ),
         )
         .toList();
