@@ -38,7 +38,7 @@ android {
 
     defaultConfig {
         applicationId "com.connectycube.flutter.p2p_call_sample"
-        minSdkVersion 18
+        minSdkVersion 21
         targetSdkVersion 28
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
