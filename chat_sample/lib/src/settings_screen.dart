@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:chat_sample/src/push_notifications_manager.dart';
+
 import '../src/utils/api_utils.dart';
 import '../src/utils/consts.dart';
 import '../src/utils/pref_util.dart';
@@ -251,6 +253,7 @@ class _BodyLayoutState extends State<BodyLayout> {
                 signOut().then(
                   (voidValue) {
                     CubeChatConnection.instance.destroy();
+                    PushNotificationsManager.instance.unsubscribe();
                     SharedPrefs.instance.deleteUser();
                     Navigator.pop(context); // cancel current Dialog
                     Navigator.pop(context); // cancel current screen

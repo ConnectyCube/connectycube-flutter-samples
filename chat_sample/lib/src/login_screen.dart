@@ -127,8 +127,8 @@ class LoginPageState extends State<LoginPage> {
 
   Future<Widget> getFilterChipsWidgets() async {
     if (_isLoginContinues) return SizedBox.shrink();
-    await SharedPrefs.instance.init();
-    CubeUser user = SharedPrefs.instance.getUser();
+    SharedPrefs sharedPrefs = await SharedPrefs.instance.init();
+    CubeUser user = sharedPrefs.getUser();
     if (user != null) {
       _loginToCC(context, user);
       return SizedBox.shrink();
@@ -273,7 +273,10 @@ class LoginPageState extends State<LoginPage> {
     createSession(user).then((cubeSession) async {
       var tempUser = user;
       user = cubeSession.user..password = tempUser.password;
-      if (saveUser) SharedPrefs.instance.saveNewUser(user);
+      if (saveUser)
+        SharedPrefs.instance.init().then((sharedPrefs) {
+          sharedPrefs.saveNewUser(user);
+        });
       _loginToCubeChat(context, user);
     }).catchError(_processLoginError);
   }

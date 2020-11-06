@@ -8,6 +8,8 @@ const String prefUserPsw = "pref_user_psw";
 const String prefUserName = "pref_user_name";
 const String prefUserId = "pref_user_id";
 const String prefUserAvatar = "pref_user_avatar";
+const String prefSubscriptionToken = "pref_subscription_token";
+const String prefSubscriptionId = "pref_subscription_id";
 
 class SharedPrefs {
   static final SharedPrefs _instance = SharedPrefs._internal();
@@ -19,14 +21,14 @@ class SharedPrefs {
 
   static SharedPrefs get instance => _instance;
 
-  Future<void> init() async {
-    Completer completer = Completer();
+  Future<SharedPrefs> init() async {
+    Completer completer = Completer<SharedPrefs>();
     if (inited) {
-      completer.complete();
+      completer.complete(_instance);
     } else {
       prefs = await SharedPreferences.getInstance();
       inited = true;
-      completer.complete();
+      completer.complete(_instance);
     }
     return completer.future;
   }
@@ -64,5 +66,21 @@ class SharedPrefs {
 
   deleteUser() {
     prefs.clear();
+  }
+
+  saveSubscriptionToken(String token) {
+    prefs?.setString(prefSubscriptionToken, token);
+  }
+
+  String getSubscriptionToken() {
+    return prefs?.getString(prefSubscriptionToken) ?? "";
+  }
+
+  saveSubscriptionId(int id) {
+    prefs?.setInt(prefSubscriptionId, id);
+  }
+
+  int getSubscriptionId() {
+    return prefs?.getInt(prefSubscriptionId) ?? 0;
   }
 }

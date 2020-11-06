@@ -1,14 +1,16 @@
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
-import '../src/settings_screen.dart';
-import '../src/utils/api_utils.dart';
-import '../src/utils/consts.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
+
+import 'package:cached_network_image/cached_network_image.dart';
+import '../src/push_notifications_manager.dart';
+import '../src/settings_screen.dart';
+import '../src/utils/api_utils.dart';
+import '../src/utils/consts.dart';
 
 import 'chat_dialog_screen.dart';
 import 'new_dialog_screen.dart';
@@ -314,6 +316,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   @override
   void initState() {
     super.initState();
+    PushNotificationsManager.instance.init();
     msgSubscription =
         chatMessagesManager.chatMessagesStream.listen(onReceiveMessage);
   }
