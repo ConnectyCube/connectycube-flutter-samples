@@ -44,6 +44,16 @@ App will automatically run on your Android device.
 
 App will automatically run on selected iOS device or simulator.
 
+### Configure Push notifications:
+1. Create an own app in the ConnectyCube admin panel (if not created yet);
+2. Create a project in the Firebase developer console (if not created yet);
+3. Add the Server API key from the Firebase developer console to the ConnectyCube admin panel for the Android platform ([short guide](https://developers.connectycube.com/flutter/push-notifications?id=android));
+4. Add Apple certificate for the iOS platform ([short guide, how to generate and set it to the admin panel](https://developers.connectycube.com/ios/push-notifications?id=create-apns-certificate));
+5. Add config files from the Firebase developer console to this project:
+    - for Android - file `google-services.json` by path `chat_sample/android/app/`;
+    - for iOS - file `GoogleService-Info.plist` by path `chat_sample/ios/Runner/` (if you have build problems on this step, try add this file via Xcode);
+6. Configure file `chat_sample/lib/src/utils/configs.dart` with your endpoints from the 1st. point of this guide;
+7. Build and run the app as usual;
 ## Can't build yourself?
 
 Got troubles with building Flutter code sample? Just create an issue at [Issues page](https://github.com/ConnectyCube/connectycube-flutter-samples/issues) - we will create the sample for you. For FREE!
