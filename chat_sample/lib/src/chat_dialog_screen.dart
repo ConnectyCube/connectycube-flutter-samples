@@ -9,7 +9,6 @@ import 'package:connectycube_sdk/connectycube_chat.dart';
 import 'package:connectycube_sdk/connectycube_storage.dart';
 import 'package:connectycube_sdk/src/chat/models/message_status_model.dart';
 import 'package:connectycube_sdk/src/chat/models/typing_status_model.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
@@ -76,7 +75,7 @@ class ChatScreenState extends State<ChatScreen> {
   final picker = ImagePicker();
   bool isLoading;
   String imageUrl;
-  List<CubeMessage> listMessage;
+  List<CubeMessage> listMessage = [];
   Timer typingTimer;
   bool isTyping = false;
   String userStatus = '';
@@ -104,13 +103,8 @@ class ChatScreenState extends State<ChatScreen> {
   void initState() {
     super.initState();
     focusNode.addListener(onFocusChange);
-    msgSubscription =
-        chatMessagesManager.chatMessagesStream.listen(onReceiveMessage);
-    deliveredSubscription =
-        statusesManager.deliveredStream.listen(onDeliveredMessage);
-    readSubscription = statusesManager.readStream.listen(onReadMessage);
-    typingSubscription =
-        typingStatusesManager.isTypingStream.listen(onTypingMessage);
+
+    initCubeChat();
 
     isLoading = false;
     imageUrl = '';
@@ -141,7 +135,9 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   Future uploadImageFile() async {
-    uploadFile(imageFile, true).then((cubeFile) {
+    uploadFileWithProgress(imageFile, isPublic: true, onProgress: (progress) {
+      log("uploadImageFile progress= $progress");
+    }).then((cubeFile) {
       var url = cubeFile.getPublicUrl();
       onSendChatAttachment(url);
     }).catchError((ex) {
@@ -519,19 +515,19 @@ class ChatScreenState extends State<ChatScreen> {
                 Material(
                   child: CircleAvatar(
                     backgroundImage:
-                        _occupants[message.senderId].avatar != null &&
+                        _occupants[message.senderId]?.avatar != null &&
                                 _occupants[message.senderId].avatar.isNotEmpty
                             ? NetworkImage(_occupants[message.senderId].avatar)
                             : null,
                     backgroundColor: greyColor2,
                     radius: 30,
                     child: getAvatarTextWidget(
-                      _occupants[message.senderId].avatar != null &&
+                      _occupants[message.senderId]?.avatar != null &&
                           _occupants[message.senderId].avatar.isNotEmpty,
                       _occupants[message.senderId]
-                          .fullName
-                          .substring(0, 2)
-                          .toUpperCase(),
+                          ?.fullName
+                          ?.substring(0, 2)
+                          ?.toUpperCase(),
                     ),
                   ),
                   borderRadius: BorderRadius.all(
@@ -797,7 +793,31 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   Future<bool> onBackPress() {
-    Navigator.of(context).popUntil(ModalRoute.withName("/SelectDialogScreen"));
+    Navigator.pushReplacementNamed(context, 'select_dialog', arguments: {USER_ARG_NAME: _cubeUser});
     return Future.value(false);
+  }
+
+  void initCubeChat() {
+    if (CubeChatConnection.instance.isAuthenticated()){
+      msgSubscription =
+          chatMessagesManager.chatMessagesStream.listen(onReceiveMessage);
+      deliveredSubscription =
+          statusesManager.deliveredStream.listen(onDeliveredMessage);
+      readSubscription = statusesManager.readStream.listen(onReadMessage);
+      typingSubscription =
+          typingStatusesManager.isTypingStream.listen(onTypingMessage);
+    } else {
+      CubeChatConnection.instance.connectionStateStream.listen((state) {
+        if(CubeChatConnectionState.Ready == state){
+          msgSubscription =
+              chatMessagesManager.chatMessagesStream.listen(onReceiveMessage);
+          deliveredSubscription =
+              statusesManager.deliveredStream.listen(onDeliveredMessage);
+          readSubscription = statusesManager.readStream.listen(onReadMessage);
+          typingSubscription =
+              typingStatusesManager.isTypingStream.listen(onTypingMessage);
+        }
+      });
+    }
   }
 }

@@ -1,8 +1,10 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:device_id/device_id.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'package:chat_sample/src/utils/pref_util.dart';
@@ -24,14 +26,16 @@ class PushNotificationsManager {
 
   static PushNotificationsManager get instance => _instance;
 
+  Future<dynamic> Function(String payload) onNotificationClicked;
+
   init() async {
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('ic_launcher_foreground');
     final IOSInitializationSettings initializationSettingsIOS =
         IOSInitializationSettings(
-      requestSoundPermission: false,
-      requestBadgePermission: false,
-      requestAlertPermission: false,
+      requestSoundPermission: true,
+      requestBadgePermission: true,
+      requestAlertPermission: true,
       onDidReceiveLocalNotification: onDidReceiveLocalNotification,
     );
 
@@ -48,7 +52,12 @@ class PushNotificationsManager {
 
     String token;
     if (Platform.isAndroid) {
-      token = await firebaseMessaging.getToken();
+      firebaseMessaging.getToken().then((token) {
+        log('[getToken] token: $token', TAG);
+        subscribe(token);
+      }).catchError((onError) {
+        log('[getToken] onError: $onError', TAG);
+      });
     } else if (Platform.isIOS) {
       token = await firebaseMessaging.getAPNSToken();
     }
@@ -67,6 +76,10 @@ class PushNotificationsManager {
     });
 
     FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
+    FirebaseMessaging.onMessageOpenedApp.listen((remoteMessage) {
+      log('[onMessageOpenedApp] remoteMessage: $remoteMessage', TAG);
+      showNotification(remoteMessage);
+    });
   }
 
   subscribe(String token) async {
@@ -104,7 +117,7 @@ class PushNotificationsManager {
       log('[subscribe] subscription SUCCESS', PushNotificationsManager.TAG);
       sharedPrefs.saveSubscriptionToken(token);
       cubeSubscription.forEach((subscription) {
-        if (subscription.token.clientIdentificationSequence == token) {
+        if (subscription.device.clientIdentificationSequence == token) {
           sharedPrefs.saveSubscriptionId(subscription.id);
         }
       });
@@ -127,23 +140,27 @@ class PushNotificationsManager {
       log('[unsubscribe] ERROR: $onError', PushNotificationsManager.TAG);
     });
   }
-}
 
-Future<dynamic> onDidReceiveLocalNotification(
-    int id, String title, String body, String payload) {
-  log('[onDidReceiveLocalNotification] id: $id , title: $title, body: $body, payload: $payload',
-      PushNotificationsManager.TAG);
-  return Future.value();
-}
+  Future<dynamic> onDidReceiveLocalNotification(
+      int id, String title, String body, String payload) {
+    log('[onDidReceiveLocalNotification] id: $id , title: $title, body: $body, payload: $payload',
+        PushNotificationsManager.TAG);
+    return Future.value();
+  }
 
-Future<dynamic> onSelectNotification(String payload) {
-  log('[onSelectNotification] payload: $payload', PushNotificationsManager.TAG);
-  return Future.value();
+  Future<dynamic> onSelectNotification(String payload) {
+    log('[onSelectNotification] payload: $payload',
+        PushNotificationsManager.TAG);
+    if (onNotificationClicked != null) {
+      onNotificationClicked(payload);
+    }
+    return Future.value();
+  }
 }
 
 showNotification(RemoteMessage message) async {
   log('[showNotification] message: $message', PushNotificationsManager.TAG);
-  Map<String, String> data = message.data;
+  Map<String, dynamic> data = message.data;
 
   const AndroidNotificationDetails androidPlatformChannelSpecifics =
       AndroidNotificationDetails(
@@ -153,6 +170,7 @@ showNotification(RemoteMessage message) async {
     importance: Importance.max,
     priority: Priority.high,
     showWhen: true,
+    color: Colors.green,
   );
   const NotificationDetails platformChannelSpecifics =
       NotificationDetails(android: androidPlatformChannelSpecifics);
@@ -161,7 +179,7 @@ showNotification(RemoteMessage message) async {
     "Chat sample",
     data['message'].toString(),
     platformChannelSpecifics,
-    payload: 'item x',
+    payload: jsonEncode(data),
   );
 }
 

@@ -252,18 +252,19 @@ class _BodyLayoutState extends State<BodyLayout> {
               onPressed: () {
                 signOut().then(
                   (voidValue) {
-                    CubeChatConnection.instance.destroy();
-                    PushNotificationsManager.instance.unsubscribe();
-                    SharedPrefs.instance.deleteUser();
                     Navigator.pop(context); // cancel current Dialog
-                    Navigator.pop(context); // cancel current screen
-                    _navigateToLoginScreen(context);
                   },
                 ).catchError(
                   (onError) {
                     Navigator.pop(context); // cancel current Dialog
                   },
-                );
+                ).whenComplete(() {
+                  CubeChatConnection.instance.destroy();
+                  PushNotificationsManager.instance.unsubscribe();
+                  SharedPrefs.instance.deleteUser();
+                  Navigator.pop(context); // cancel current screen
+                  _navigateToLoginScreen(context);
+                });
               },
             ),
           ],
@@ -273,7 +274,12 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   _navigateToLoginScreen(BuildContext context) {
-    Navigator.pop(context, true);
+    if(Navigator.of(context).canPop()){
+      Navigator.popAndPushNamed(context, 'login');
+    } else {
+      Navigator.pushNamed(context, 'login');
+    }
+    // Navigator.popAndPushNamed(context, 'login');
   }
 
   void _processUpdateUserError(exception) {
