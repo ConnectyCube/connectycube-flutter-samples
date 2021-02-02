@@ -605,8 +605,8 @@ class GroupScreenState extends ScreenState {
     print('_exitDialog');
     deleteDialog(_cubeDialog.dialogId).then((onValue) {
       Fluttertoast.showToast(msg: 'Success');
-      Navigator.of(context)
-          .popUntil(ModalRoute.withName("/SelectDialogScreen"));
+      Navigator.pushReplacementNamed(context, 'select_dialog',
+          arguments: {USER_ARG_NAME: _cubeUser});
     }).catchError(_processUpdateError);
   }
 

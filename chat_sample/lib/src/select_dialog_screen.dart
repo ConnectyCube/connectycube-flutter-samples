@@ -1,17 +1,15 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
-import '../src/settings_screen.dart';
-import '../src/utils/api_utils.dart';
-import '../src/utils/consts.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import 'chat_dialog_screen.dart';
 import 'new_dialog_screen.dart';
+import '../src/utils/api_utils.dart';
+import '../src/utils/consts.dart';
 
 class SelectDialogScreen extends StatelessWidget {
   static const String TAG = "SelectDialogScreen";
@@ -49,12 +47,8 @@ class SelectDialogScreen extends StatelessWidget {
   }
 
   _openSettings(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SettingsScreen(currentUser),
-      ),
-    );
+    Navigator.pushNamed(context, 'settings',
+        arguments: {USER_ARG_NAME: currentUser});
   }
 }
 
@@ -72,7 +66,6 @@ class BodyLayout extends StatefulWidget {
 class _BodyLayoutState extends State<BodyLayout> {
   static const String TAG = "_BodyLayoutState";
 
-  Set<int> _selectedDialogs = {};
   final CubeUser currentUser;
   List<ListItem<CubeDialog>> dialogList = [];
   var _isDialogContinues = true;
@@ -296,13 +289,8 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   void _openDialog(BuildContext context, CubeDialog dialog) async {
-    log("_openDialog= $dialog");
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ChatDialogScreen(currentUser, dialog),
-      ),
-    ).then((value) => refresh());
+    Navigator.pushNamed(context, 'chat_dialog',
+        arguments: {USER_ARG_NAME: currentUser, DIALOG_ARG_NAME: dialog});
   }
 
   void refresh() {
@@ -315,13 +303,14 @@ class _BodyLayoutState extends State<BodyLayout> {
   void initState() {
     super.initState();
     msgSubscription =
-        chatMessagesManager.chatMessagesStream.listen(onReceiveMessage);
+        chatMessagesManager.chatMessagesStream?.listen(onReceiveMessage);
   }
 
   @override
   void dispose() {
     super.dispose();
-    msgSubscription.cancel();
+    log("dispose", TAG);
+    msgSubscription?.cancel();
   }
 
   void onReceiveMessage(CubeMessage message) {

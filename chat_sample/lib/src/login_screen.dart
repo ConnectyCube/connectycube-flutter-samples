@@ -1,10 +1,14 @@
-import '../src/utils/pref_util.dart';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import 'select_dialog_screen.dart';
+import 'push_notifications_manager.dart';
 import 'utils/api_utils.dart';
+import 'utils/consts.dart';
+import 'utils/pref_util.dart';
 
 class LoginScreen extends StatelessWidget {
   static const String TAG = "LoginScreen";
@@ -127,8 +131,8 @@ class LoginPageState extends State<LoginPage> {
 
   Future<Widget> getFilterChipsWidgets() async {
     if (_isLoginContinues) return SizedBox.shrink();
-    await SharedPrefs.instance.init();
-    CubeUser user = SharedPrefs.instance.getUser();
+    SharedPrefs sharedPrefs = await SharedPrefs.instance.init();
+    CubeUser user = sharedPrefs.getUser();
     if (user != null) {
       _loginToCC(context, user);
       return SizedBox.shrink();
@@ -273,13 +277,20 @@ class LoginPageState extends State<LoginPage> {
     createSession(user).then((cubeSession) async {
       var tempUser = user;
       user = cubeSession.user..password = tempUser.password;
-      if (saveUser) SharedPrefs.instance.saveNewUser(user);
+      if (saveUser)
+        SharedPrefs.instance.init().then((sharedPrefs) {
+          sharedPrefs.saveNewUser(user);
+        });
+
+      PushNotificationsManager.instance.init();
+
       _loginToCubeChat(context, user);
     }).catchError(_processLoginError);
   }
 
   _loginToCubeChat(BuildContext context, CubeUser user) {
     print("_loginToCubeChat user $user");
+    CubeChatConnectionSettings.instance.totalReconnections = 0;
     CubeChatConnection.instance.login(user).then((cubeUser) {
       _isLoginContinues = false;
       _goDialogScreen(context, cubeUser);
@@ -303,17 +314,70 @@ class LoginPageState extends State<LoginPage> {
   }
 
   void _goDialogScreen(BuildContext context, CubeUser cubeUser) async {
-    bool refresh = await Navigator.push(
-      context,
-      MaterialPageRoute(
-        settings: RouteSettings(name: "/SelectDialogScreen"),
-        builder: (context) => SelectDialogScreen(cubeUser),
-      ),
-    );
-    setState(() {
-      if (refresh) {
-        _clear();
+    log("_goDialogScreen");
+
+    // TODO replace with code below after fix https://github.com/FirebaseExtended/flutterfire/issues/4898
+    // FirebaseMessaging.instance.getInitialMessage().then((remoteMessage) {
+    //   log("getInitialMessage, remoteMessage: $remoteMessage");
+    //
+    //   if (remoteMessage == null || remoteMessage.data == null) {
+    //     Navigator.pushReplacementNamed(
+    //       context,
+    //       'select_dialog',
+    //       arguments: {USER_ARG_NAME: cubeUser},
+    //     );
+    //   } else {
+    //     Map<String, dynamic> payloadObject = remoteMessage.data;
+    //     String dialogId = payloadObject['dialog_id'];
+    //
+    //     log("getNotificationAppLaunchDetails, dialog_id: $dialogId");
+    //
+    //     getDialogs({'id': dialogId}).then((dialogs) {
+    //       if (dialogs?.items != null && dialogs.items.isNotEmpty ?? false) {
+    //         CubeDialog dialog = dialogs.items.first;
+    //         Navigator.pushReplacementNamed(context, 'chat_dialog',
+    //             arguments: {USER_ARG_NAME: cubeUser, DIALOG_ARG_NAME: dialog});
+    //       }
+    //     });
+    //   }
+    // }).catchError((onError) {
+    //   log("getNotificationAppLaunchDetails, error: $onError");
+    //   Navigator.pushReplacementNamed(
+    //     context,
+    //     'select_dialog',
+    //     arguments: {USER_ARG_NAME: cubeUser},
+    //   );
+    // });
+
+    FlutterLocalNotificationsPlugin()
+        .getNotificationAppLaunchDetails()
+        .then((details) {
+      String payload = details.payload;
+
+      if (payload == null) {
+        Navigator.pushReplacementNamed(
+          context,
+          'select_dialog',
+          arguments: {USER_ARG_NAME: cubeUser},
+        );
+      } else {
+        Map<String, dynamic> payloadObject = jsonDecode(payload);
+        String dialogId = payloadObject['dialog_id'];
+
+        getDialogs({'id': dialogId}).then((dialogs) {
+          if (dialogs?.items != null && dialogs.items.isNotEmpty ?? false) {
+            CubeDialog dialog = dialogs.items.first;
+            Navigator.pushReplacementNamed(context, 'chat_dialog',
+                arguments: {USER_ARG_NAME: cubeUser, DIALOG_ARG_NAME: dialog});
+          }
+        });
       }
+    }).catchError((onError) {
+      Navigator.pushReplacementNamed(
+        context,
+        'select_dialog',
+        arguments: {USER_ARG_NAME: cubeUser},
+      );
     });
   }
 }

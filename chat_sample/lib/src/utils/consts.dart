@@ -9,3 +9,6 @@ final blueColor = Color(0xff0080ff);
 
 final String SORT_ASC = "asc";
 final String SORT_DESC = "desc";
+
+final String USER_ARG_NAME = "user";
+final String DIALOG_ARG_NAME = "dialog";
