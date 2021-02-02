@@ -13,12 +13,12 @@ PODS:
   - Firebase/Messaging (7.3.0):
     - Firebase/CoreOnly
     - FirebaseMessaging (~> 7.3.0)
-  - firebase_core (0.6.0):
+  - firebase_core (0.7.0):
     - Firebase/CoreOnly (= 7.3.0)
     - Flutter
   - firebase_core_web (0.1.0):
     - Flutter
-  - firebase_messaging (8.0.0-dev.12):
+  - firebase_messaging (8.0.0-dev.14):
     - Firebase/Messaging (= 7.3.0)
     - firebase_core
     - Flutter
@@ -28,17 +28,17 @@ PODS:
     - FirebaseCoreDiagnostics (~> 7.0)
     - GoogleUtilities/Environment (~> 7.0)
     - GoogleUtilities/Logger (~> 7.0)
-  - FirebaseCoreDiagnostics (7.4.0):
+  - FirebaseCoreDiagnostics (7.5.0):
     - GoogleDataTransport (~> 8.0)
     - GoogleUtilities/Environment (~> 7.0)
     - GoogleUtilities/Logger (~> 7.0)
     - nanopb (~> 2.30907.0)
-  - FirebaseInstallations (7.4.0):
+  - FirebaseInstallations (7.5.0):
     - FirebaseCore (~> 7.0)
     - GoogleUtilities/Environment (~> 7.0)
     - GoogleUtilities/UserDefaults (~> 7.0)
     - PromisesObjC (~> 1.2)
-  - FirebaseInstanceID (7.4.0):
+  - FirebaseInstanceID (7.5.0):
     - FirebaseCore (~> 7.0)
     - FirebaseInstallations (~> 7.0)
     - GoogleUtilities/Environment (~> 7.0)
@@ -220,14 +220,14 @@ SPEC CHECKSUMS:
   connectivity_macos: e2e9731b6b22dda39eb1b128f6969d574460e191
   device_id: 4a0bf078741a3eec6ba0e6cc72e786395d5991b0
   Firebase: 26223c695fe322633274198cb19dca8cb7e54416
-  firebase_core: 8613bc5de3449d9d068be5b234a7c97a7f08af81
+  firebase_core: 91b27774a52f41f8b58484a75edf71197ac01c59
   firebase_core_web: 2223a33d6da33b048d7fd598f2ead160af0b6020
-  firebase_messaging: 0298c94a66b1f14fa02638da592a03bbe82ff5a6
+  firebase_messaging: d039d8279704fc1e3d05e0a2bb2ce7dc29ee6be8
   firebase_messaging_web: 40d490d4507fcf5519de8b42af0d653dcc74ac0f
   FirebaseCore: 4d3c72622ce0e2106aaa07bb4b2935ba2c370972
-  FirebaseCoreDiagnostics: 3770093ac4f2be4590fa03cfa1d3a6e5602d4557
-  FirebaseInstallations: 30646fc9a61c6f4ee3cd7a8b7231721842b40c95
-  FirebaseInstanceID: 46d93d287108246fabbd85371ca27141d2c21ff9
+  FirebaseCoreDiagnostics: 35685db68b11fe7d19d2d8b557fd7e3a56ac81cc
+  FirebaseInstallations: a46ae59915f0931e18814164849cd0354bea24ed
+  FirebaseInstanceID: 47fcb3b70d6349cfd471f430b01bbd01a7698e8f
   FirebaseMessaging: 68d1bcb14880189558a8ae57167abe0b7e417232
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743

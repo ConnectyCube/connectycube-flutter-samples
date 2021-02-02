@@ -1,14 +1,14 @@
 import 'dart:io';
-import '../src/utils/api_utils.dart';
-import '../src/utils/consts.dart';
-import '../src/widgets/common.dart';
-import 'package:connectycube_sdk/connectycube_chat.dart';
-import 'package:connectycube_sdk/connectycube_storage.dart';
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'package:connectycube_sdk/connectycube_sdk.dart';
+
 import 'chat_dialog_screen.dart';
+import '../src/utils/api_utils.dart';
+import '../src/utils/consts.dart';
+import '../src/widgets/common.dart';
 
 class NewGroupDialogScreen extends StatelessWidget {
   final CubeUser currentUser;
@@ -225,7 +225,7 @@ class NewChatScreenState extends State<NewChatScreen> {
       showDialogMsg("Enter more than 4 character", context);
     } else {
       createDialog(_cubeDialog).then((createdDialog) {
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => ChatDialogScreen(currentUser, createdDialog),

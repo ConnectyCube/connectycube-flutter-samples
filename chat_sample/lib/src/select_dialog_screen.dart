@@ -1,17 +1,15 @@
 import 'dart:async';
 
-import 'package:connectivity/connectivity.dart';
-import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import 'package:cached_network_image/cached_network_image.dart';
+import 'new_dialog_screen.dart';
 import '../src/utils/api_utils.dart';
 import '../src/utils/consts.dart';
-
-import 'new_dialog_screen.dart';
 
 class SelectDialogScreen extends StatelessWidget {
   static const String TAG = "SelectDialogScreen";
@@ -49,15 +47,8 @@ class SelectDialogScreen extends StatelessWidget {
   }
 
   _openSettings(BuildContext context) {
-    Navigator.popAndPushNamed(context, 'settings',
+    Navigator.pushNamed(context, 'settings',
         arguments: {USER_ARG_NAME: currentUser});
-
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => SettingsScreen(currentUser),
-    //   ),
-    // );
   }
 }
 
@@ -75,13 +66,11 @@ class BodyLayout extends StatefulWidget {
 class _BodyLayoutState extends State<BodyLayout> {
   static const String TAG = "_BodyLayoutState";
 
-  Set<int> _selectedDialogs = {};
   final CubeUser currentUser;
   List<ListItem<CubeDialog>> dialogList = [];
   var _isDialogContinues = true;
 
   StreamSubscription<CubeMessage> msgSubscription;
-  StreamSubscription<ConnectivityResult> connectivityStateSubscription;
   final ChatMessagesManager chatMessagesManager =
       CubeChatConnection.instance.chatMessagesManager;
 
@@ -300,15 +289,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   void _openDialog(BuildContext context, CubeDialog dialog) async {
-    log("_openDialog= $dialog");
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(
-    //     builder: (context) => ChatDialogScreen(currentUser, dialog),
-    //   ),
-    // ).then((value) => refresh());
-
-    Navigator.popAndPushNamed(context, 'chat_dialog',
+    Navigator.pushNamed(context, 'chat_dialog',
         arguments: {USER_ARG_NAME: currentUser, DIALOG_ARG_NAME: dialog});
   }
 
@@ -322,34 +303,14 @@ class _BodyLayoutState extends State<BodyLayout> {
   void initState() {
     super.initState();
     msgSubscription =
-        chatMessagesManager.chatMessagesStream.listen(onReceiveMessage);
-
-    connectivityStateSubscription =
-        Connectivity().onConnectivityChanged.listen((connectivityType) {
-      log("connectivityType = $connectivityType");
-
-      if (connectivityType != ConnectivityResult.none) {
-        log("chatConnectionState = ${CubeChatConnection.instance.chatConnectionState}");
-        bool isChatDisconnected =
-            CubeChatConnection.instance.chatConnectionState ==
-                    CubeChatConnectionState.Closed ||
-                CubeChatConnection.instance.chatConnectionState ==
-                    CubeChatConnectionState.ForceClosed;
-
-        if (isChatDisconnected &&
-            CubeChatConnection.instance.currentUser != null) {
-          CubeChatConnection.instance.relogin();
-        }
-      }
-    });
+        chatMessagesManager.chatMessagesStream?.listen(onReceiveMessage);
   }
 
   @override
   void dispose() {
     super.dispose();
     log("dispose", TAG);
-    msgSubscription.cancel();
-    connectivityStateSubscription.cancel();
+    msgSubscription?.cancel();
   }
 
   void onReceiveMessage(CubeMessage message) {

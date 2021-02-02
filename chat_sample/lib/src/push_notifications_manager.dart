@@ -7,9 +7,10 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-import 'package:chat_sample/src/utils/pref_util.dart';
-
 import 'package:connectycube_sdk/connectycube_sdk.dart';
+
+import 'utils/consts.dart';
+import 'utils/pref_util.dart';
 
 class PushNotificationsManager {
   static const TAG = "PushNotificationsManager";
@@ -24,11 +25,18 @@ class PushNotificationsManager {
     flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   }
 
+  BuildContext applicationContext;
+
   static PushNotificationsManager get instance => _instance;
 
   Future<dynamic> Function(String payload) onNotificationClicked;
 
   init() async {
+    FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
+
+    await firebaseMessaging.requestPermission(
+        alert: true, badge: true, sound: true);
+
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('ic_launcher_foreground');
     final IOSInitializationSettings initializationSettingsIOS =
@@ -45,10 +53,6 @@ class PushNotificationsManager {
             iOS: initializationSettingsIOS);
     await flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: onSelectNotification);
-
-    FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
-
-    firebaseMessaging.requestPermission(alert: true, badge: true, sound: true);
 
     String token;
     if (Platform.isAndroid) {
@@ -70,15 +74,18 @@ class PushNotificationsManager {
       subscribe(newToken);
     });
 
-    FirebaseMessaging.onMessage.listen((message) {
-      log('[onMessage] message: $message', TAG);
-      showNotification(message);
+    FirebaseMessaging.onMessage.listen((remoteMessage) {
+      log('[onMessage] message: $remoteMessage', TAG);
     });
 
     FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
+
+    // TODO test after fix https://github.com/FirebaseExtended/flutterfire/issues/4898
     FirebaseMessaging.onMessageOpenedApp.listen((remoteMessage) {
       log('[onMessageOpenedApp] remoteMessage: $remoteMessage', TAG);
-      showNotification(remoteMessage);
+      if (remoteMessage.data != null && onNotificationClicked != null) {
+        onNotificationClicked.call(jsonEncode(remoteMessage.data));
+      }
     });
   }
 
@@ -152,7 +159,7 @@ class PushNotificationsManager {
     log('[onSelectNotification] payload: $payload',
         PushNotificationsManager.TAG);
     if (onNotificationClicked != null) {
-      onNotificationClicked(payload);
+      onNotificationClicked.call(payload);
     }
     return Future.value();
   }
@@ -183,8 +190,42 @@ showNotification(RemoteMessage message) async {
   );
 }
 
-Future<void> onBackgroundMessage(RemoteMessage message) {
+Future<void> onBackgroundMessage(RemoteMessage message) async {
+  await Firebase.initializeApp();
   log('[onBackgroundMessage] message: $message', PushNotificationsManager.TAG);
   showNotification(message);
   return Future.value();
+}
+
+Future<dynamic> onNotificationSelected(String payload, BuildContext context) {
+  log('[onSelectNotification] payload: $payload', PushNotificationsManager.TAG);
+
+  if (context == null) return Future.value();
+
+  log('[onSelectNotification] context != null', PushNotificationsManager.TAG);
+
+  if (payload != null) {
+    return SharedPrefs.instance.init().then((sharedPrefs) {
+      CubeUser user = sharedPrefs.getUser();
+
+      if (user != null && !CubeChatConnection.instance.isAuthenticated()) {
+        Map<String, dynamic> payloadObject = jsonDecode(payload);
+        String dialogId = payloadObject['dialog_id'];
+
+        log("getNotificationAppLaunchDetails, dialog_id: $dialogId",
+            PushNotificationsManager.TAG);
+
+        getDialogs({'id': dialogId}).then((dialogs) {
+          if (dialogs?.items != null && dialogs.items.isNotEmpty ?? false) {
+            CubeDialog dialog = dialogs.items.first;
+
+            Navigator.pushReplacementNamed(context, 'chat_dialog',
+                arguments: {USER_ARG_NAME: user, DIALOG_ARG_NAME: dialog});
+          }
+        });
+      }
+    });
+  } else {
+    return Future.value();
+  }
 }

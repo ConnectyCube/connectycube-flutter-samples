@@ -1,12 +1,12 @@
+import 'package:flutter/material.dart';
+
+import 'package:connectycube_sdk/connectycube_chat.dart';
+
+import 'chat_dialog_screen.dart';
 import '../src/new_group_dialog_screen.dart';
 import '../src/utils/api_utils.dart';
 import '../src/utils/consts.dart';
 import '../src/widgets/common.dart';
-import 'package:connectycube_sdk/connectycube_chat.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-
-import 'chat_dialog_screen.dart';
 
 class CreateChatScreen extends StatefulWidget {
   final CubeUser _cubeUser;
@@ -391,7 +391,7 @@ class _BodyLayoutState extends State<BodyLayout> {
       CubeDialog newDialog =
           CubeDialog(CubeDialogType.PRIVATE, occupantsIds: users.toList());
       createDialog(newDialog).then((createdDialog) {
-        Navigator.push(
+        Navigator.pushReplacement(
           context,
           MaterialPageRoute(
             builder: (context) => ChatDialogScreen(currentUser, createdDialog),

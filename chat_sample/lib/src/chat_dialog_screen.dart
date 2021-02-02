@@ -1,24 +1,25 @@
 import 'dart:async';
 import 'dart:io';
+
 import 'package:cached_network_image/cached_network_image.dart';
-import '../src/utils/consts.dart';
-import '../src/widgets/common.dart';
-import '../src/widgets/full_photo.dart';
-import '../src/widgets/loading.dart';
-import 'package:connectycube_sdk/connectycube_chat.dart';
-import 'package:connectycube_sdk/connectycube_storage.dart';
-import 'package:connectycube_sdk/src/chat/models/message_status_model.dart';
-import 'package:connectycube_sdk/src/chat/models/typing_status_model.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
+import 'package:connectycube_sdk/connectycube_sdk.dart';
+import 'package:connectycube_sdk/src/chat/models/message_status_model.dart';
+import 'package:connectycube_sdk/src/chat/models/typing_status_model.dart';
+
 import 'chat_details_screen.dart';
+import '../src/utils/consts.dart';
+import '../src/widgets/common.dart';
+import '../src/widgets/full_photo.dart';
+import '../src/widgets/loading.dart';
 
 class ChatDialogScreen extends StatelessWidget {
   final CubeUser _cubeUser;
-  CubeDialog _cubeDialog;
+  final CubeDialog _cubeDialog;
 
   ChatDialogScreen(this._cubeUser, this._cubeDialog);
 
@@ -82,29 +83,21 @@ class ChatScreenState extends State<ChatScreen> {
 
   final TextEditingController textEditingController = TextEditingController();
   final ScrollController listScrollController = ScrollController();
-  final FocusNode focusNode = FocusNode();
-  final ChatMessagesManager chatMessagesManager =
-      CubeChatConnection.instance.chatMessagesManager;
-
-  final MessagesStatusesManager statusesManager =
-      CubeChatConnection.instance.messagesStatusesManager;
-
-  final TypingStatusesManager typingStatusesManager =
-      CubeChatConnection.instance.typingStatusesManager;
 
   StreamSubscription<CubeMessage> msgSubscription;
   StreamSubscription<MessageStatus> deliveredSubscription;
   StreamSubscription<MessageStatus> readSubscription;
   StreamSubscription<TypingStatus> typingSubscription;
 
+  List<CubeMessage> _unreadMessages = [];
+  List<CubeMessage> _unsentMessages = [];
+
   ChatScreenState(this._cubeUser, this._cubeDialog);
 
   @override
   void initState() {
     super.initState();
-    focusNode.addListener(onFocusChange);
-
-    initCubeChat();
+    _initCubeChat();
 
     isLoading = false;
     imageUrl = '';
@@ -112,16 +105,12 @@ class ChatScreenState extends State<ChatScreen> {
 
   @override
   void dispose() {
-    msgSubscription.cancel();
-    deliveredSubscription.cancel();
-    readSubscription.cancel();
-    typingSubscription.cancel();
-    textEditingController.dispose();
+    msgSubscription?.cancel();
+    deliveredSubscription?.cancel();
+    readSubscription?.cancel();
+    typingSubscription?.cancel();
+    textEditingController?.dispose();
     super.dispose();
-  }
-
-  void onFocusChange() {
-    if (focusNode.hasFocus) {}
   }
 
   void openGallery() async {
@@ -152,6 +141,7 @@ class ChatScreenState extends State<ChatScreen> {
     log("onReceiveMessage message= $message");
     if (message.dialogId != _cubeDialog.dialogId ||
         message.senderId == _cubeUser.id) return;
+
     _cubeDialog.readMessage(message);
     addMessageToListView(message);
   }
@@ -253,10 +243,19 @@ class ChatScreenState extends State<ChatScreen> {
     setState(() {});
   }
 
-  addMessageToListView(message) {
+  addMessageToListView(CubeMessage message) {
     setState(() {
       isLoading = false;
-      listMessage.insert(0, message);
+      int existMessageIndex = listMessage.indexWhere((cubeMessage) {
+        return cubeMessage.messageId == message.messageId;
+      });
+
+      if (existMessageIndex != -1) {
+        listMessage
+            .replaceRange(existMessageIndex, existMessageIndex + 1, [message]);
+      } else {
+        listMessage.insert(0, message);
+      }
     });
   }
 
@@ -291,11 +290,18 @@ class ChatScreenState extends State<ChatScreen> {
       print(
           "markAsReadIfNeed message= ${message}, isOpponentMsgRead= $isOpponentMsgRead");
       if (message.senderId != _cubeUser.id && !isOpponentMsgRead) {
-        if (message.readIds == null)
+        if (message.readIds == null) {
           message.readIds = [_cubeUser.id];
-        else
+        } else {
           message.readIds.add(_cubeUser.id);
-        _cubeDialog.readMessage(message);
+        }
+
+        if (CubeChatConnection.instance.chatConnectionState ==
+            CubeChatConnectionState.Ready) {
+          _cubeDialog.readMessage(message);
+        } else {
+          _unreadMessages.add(message);
+        }
       }
     }
 
@@ -710,7 +716,6 @@ class ChatScreenState extends State<ChatScreen> {
                   hintText: 'Type your message...',
                   hintStyle: TextStyle(color: greyColor),
                 ),
-                focusNode: focusNode,
                 onChanged: (text) {
                   _cubeDialog.sendIsTypingStatus();
                 },
@@ -793,29 +798,48 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   Future<bool> onBackPress() {
-    Navigator.pushReplacementNamed(context, 'select_dialog', arguments: {USER_ARG_NAME: _cubeUser});
-    return Future.value(false);
+    return Navigator.pushNamedAndRemoveUntil(
+        context, 'select_dialog', (r) => false,
+        arguments: {USER_ARG_NAME: _cubeUser});
   }
 
-  void initCubeChat() {
-    if (CubeChatConnection.instance.isAuthenticated()){
-      msgSubscription =
-          chatMessagesManager.chatMessagesStream.listen(onReceiveMessage);
-      deliveredSubscription =
-          statusesManager.deliveredStream.listen(onDeliveredMessage);
-      readSubscription = statusesManager.readStream.listen(onReadMessage);
-      typingSubscription =
-          typingStatusesManager.isTypingStream.listen(onTypingMessage);
+  _initChatListeners() {
+    msgSubscription = CubeChatConnection
+        .instance.chatMessagesManager.chatMessagesStream
+        .listen(onReceiveMessage);
+    deliveredSubscription = CubeChatConnection
+        .instance.messagesStatusesManager.deliveredStream
+        .listen(onDeliveredMessage);
+    readSubscription = CubeChatConnection
+        .instance.messagesStatusesManager.readStream
+        .listen(onReadMessage);
+    typingSubscription = CubeChatConnection
+        .instance.typingStatusesManager.isTypingStream
+        .listen(onTypingMessage);
+  }
+
+  void _initCubeChat() {
+    if (CubeChatConnection.instance.isAuthenticated()) {
+      _initChatListeners();
     } else {
       CubeChatConnection.instance.connectionStateStream.listen((state) {
-        if(CubeChatConnectionState.Ready == state){
-          msgSubscription =
-              chatMessagesManager.chatMessagesStream.listen(onReceiveMessage);
-          deliveredSubscription =
-              statusesManager.deliveredStream.listen(onDeliveredMessage);
-          readSubscription = statusesManager.readStream.listen(onReadMessage);
-          typingSubscription =
-              typingStatusesManager.isTypingStream.listen(onTypingMessage);
+        if (CubeChatConnectionState.Ready == state) {
+          _initChatListeners();
+
+          if (_unreadMessages.isNotEmpty) {
+            _unreadMessages.forEach((cubeMessage) {
+              _cubeDialog.readMessage(cubeMessage);
+            });
+            _unreadMessages.clear();
+          }
+
+          if (_unsentMessages.isNotEmpty) {
+            _unsentMessages.forEach((cubeMessage) {
+              _cubeDialog.sendMessage(cubeMessage);
+            });
+
+            _unsentMessages.clear();
+          }
         }
       });
     }
