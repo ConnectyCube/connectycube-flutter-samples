@@ -11,6 +11,7 @@ Project contains the following features implemented:
 - Group messaging
 - ‘Is typing’ statuses
 - Group chat: edit group name, photo; list of participants, add/remove participants; leave group
+- Push notification: subscribe/unsubscribe, show local notification, navigate to the app click on local notification
 
 ## Documentation
 
@@ -54,6 +55,7 @@ App will automatically run on selected iOS device or simulator.
     - for iOS - file `GoogleService-Info.plist` by path `chat_sample/ios/Runner/` (if you have build problems on this step, try add this file via Xcode);
 6. Configure file `chat_sample/lib/src/utils/configs.dart` with your endpoints from the 1st. point of this guide;
 7. Build and run the app as usual;
+
 ## Can't build yourself?
 
 Got troubles with building Flutter code sample? Just create an issue at [Issues page](https://github.com/ConnectyCube/connectycube-flutter-samples/issues) - we will create the sample for you. For FREE!
