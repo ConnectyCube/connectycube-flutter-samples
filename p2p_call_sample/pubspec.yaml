@@ -10,7 +10,17 @@ dependencies:
   flutter:
     sdk: flutter
 
-  connectycube_sdk: ^1.0.0
+  connectycube_sdk: ^1.1.2
+  connectivity: ^2.0.2
+  firebase_core: ^0.7.0
+  firebase_messaging: 8.0.0-dev.14
+  flutter_local_notifications: ^4.0.0
+  shared_preferences: ^0.5.12+4
+  flutter_voip_push_notification: ^0.0.3
+  flutter_call_kit:
+    git:
+      url: git://github.com/peerwaya/flutter_call_kit.git
+      ref: master
 
 
 dev_dependencies:
