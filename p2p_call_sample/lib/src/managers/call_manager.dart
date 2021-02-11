@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_call_kit/flutter_call_kit.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
@@ -9,6 +8,7 @@ import 'call_kit_manager.dart';
 import '../conversation_screen.dart';
 import '../incoming_call_screen.dart';
 import '../utils/configs.dart';
+import '../utils/consts.dart';
 
 class CallManager {
   static String TAG = "CallManager";
@@ -77,8 +77,10 @@ class CallManager {
       } else if (_pendingAccept.contains(_currentCall.sessionId)) {
         acceptCall(_currentCall.sessionId);
         _pendingAccept.remove(_currentCall.sessionId);
-      } else if (Platform.isAndroid) { // for iOS will be shown CallKit's notification
-        _showIncomingCallScreen(_currentCall);
+      } else if (Platform.isAndroid) {
+        // for iOS will be shown CallKit's notification
+        // _showIncomingCallScreen(_currentCall);
+        // _showCallNotification(_currentCall);
       }
     };
 
@@ -87,8 +89,7 @@ class CallManager {
       if (_currentCall != null &&
           _currentCall.sessionId == callSession.sessionId) {
         _currentCall = null;
-        CallKitManager.instance.reportEndCallWithUUID(
-            callSession.sessionId, EndReason.remoteEnded);
+        CallKitManager.instance.reportEndCallWithUUID(callSession.sessionId);
       }
     };
   }
@@ -105,7 +106,7 @@ class CallManager {
       ),
     );
 
-    _sendNotificationForOffliners(_currentCall);
+    _sendStartCallSignalForOffliners(_currentCall);
   }
 
   void _showIncomingCallScreen(P2PSession callSession) {
@@ -158,11 +159,12 @@ class CallManager {
     if (_currentCall != null) {
       log("[hungUp] _currentCall != null", CallManager.TAG);
       CallKitManager.instance.endCall(_currentCall.sessionId);
+      _sendEndCallSignalForOffliners(_currentCall);
       _currentCall.hungUp();
     }
   }
 
-  void _sendNotificationForOffliners(P2PSession currentCall) {
+  CreateEventParams _getCallEventParameters(P2PSession currentCall) {
     bool isProduction = bool.fromEnvironment('dart.vm.product');
     String callerName = users
         .where((cubeUser) => cubeUser.id == currentCall.callerId)
@@ -173,18 +175,39 @@ class CallManager {
     params.parameters = {
       'message':
           "Incoming ${currentCall.callType == CallType.VIDEO_CALL ? "Video" : "Audio"} call",
-      'call_type': currentCall.callType,
-      'session_id': currentCall.sessionId,
-      'caller_id': currentCall.callerId,
-      'caller_name': callerName,
-      'ios_voip': 1,
+      PARAM_CALL_TYPE: currentCall.callType,
+      PARAM_SESSION_ID: currentCall.sessionId,
+      PARAM_CALLER_ID: currentCall.callerId,
+      PARAM_CALLER_NAME: callerName,
+      PARAM_IOS_VOIP: 1,
     };
 
     params.notificationType = NotificationType.PUSH;
-    params.environment = CubeEnvironment.DEVELOPMENT;
+    params.environment = CubeEnvironment.DEVELOPMENT; // TODO for sample we use DEVELOPMENT environment
     // params.environment =
     //     isProduction ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
     params.usersIds = currentCall.opponentsIds.toList();
+    
+    return params;
+  }
+
+  void _sendStartCallSignalForOffliners(P2PSession currentCall) {
+    CreateEventParams params = _getCallEventParameters(currentCall);
+    params.parameters[PARAM_SIGNAL_TYPE] = SIGNAL_TYPE_START_CALL;
+
+    createEvent(params.getEventForRequest()).then((cubeEvent) {
+      log("Event for offliners created");
+    }).catchError((error) {
+      log("ERROR occurs during create event");
+    });
+  }
+
+  void _sendEndCallSignalForOffliners(P2PSession currentCall) {
+    CubeUser currentUser = CubeChatConnection.instance.currentUser;
+    if (currentUser == null || currentUser.id != currentCall.callerId) return;
+
+    CreateEventParams params = _getCallEventParameters(currentCall);
+    params.parameters[PARAM_SIGNAL_TYPE] = SIGNAL_TYPE_END_CALL;
 
     createEvent(params.getEventForRequest()).then((cubeEvent) {
       log("Event for offliners created");

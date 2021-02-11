@@ -22,6 +22,9 @@ dependencies:
       url: git://github.com/peerwaya/flutter_call_kit.git
       ref: master
 
+  connectycube_flutter_call_kit:
+    path: /Users/tereha/StudioProjects/connectycube-flutter-call-kit/connectycube_flutter_call_kit/
+
 
 dev_dependencies:
   flutter_test:

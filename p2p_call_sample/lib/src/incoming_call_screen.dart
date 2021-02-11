@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import 'conversation_screen.dart';
 import 'managers/call_manager.dart';
 
 class IncomingCallScreen extends StatelessWidget {

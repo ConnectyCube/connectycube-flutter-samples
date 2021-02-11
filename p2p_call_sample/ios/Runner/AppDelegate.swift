@@ -24,9 +24,10 @@ import flutter_call_kit
                              for type: PKPushType,
                              completion: @escaping () -> Swift.Void){
         
-        print(payload)
-        
-        FlutterVoipPushNotificationPlugin.didReceiveIncomingPush(with: payload, forType: type.rawValue)
+        let signalType = payload.dictionaryPayload["signal_type"] as! String
+        if(signalType == "endCall"){
+            return
+        }
         
         let uuid = payload.dictionaryPayload["session_id"] as! String
         let uID = payload.dictionaryPayload["caller_id"] as! Int

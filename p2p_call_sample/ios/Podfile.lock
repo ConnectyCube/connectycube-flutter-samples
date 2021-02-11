@@ -6,6 +6,8 @@ PODS:
     - Flutter
   - connectivity_macos (0.0.1):
     - Flutter
+  - connectycube_flutter_call_kit (0.0.1):
+    - Flutter
   - device_id (0.0.1):
     - Flutter
   - Firebase/CoreOnly (7.3.0):
@@ -110,6 +112,7 @@ DEPENDENCIES:
   - connectivity (from `.symlinks/plugins/connectivity/ios`)
   - connectivity_for_web (from `.symlinks/plugins/connectivity_for_web/ios`)
   - connectivity_macos (from `.symlinks/plugins/connectivity_macos/ios`)
+  - connectycube_flutter_call_kit (from `.symlinks/plugins/connectycube_flutter_call_kit/ios`)
   - device_id (from `.symlinks/plugins/device_id/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
   - firebase_core_web (from `.symlinks/plugins/firebase_core_web/ios`)
@@ -152,6 +155,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/connectivity_for_web/ios"
   connectivity_macos:
     :path: ".symlinks/plugins/connectivity_macos/ios"
+  connectycube_flutter_call_kit:
+    :path: ".symlinks/plugins/connectycube_flutter_call_kit/ios"
   device_id:
     :path: ".symlinks/plugins/device_id/ios"
   firebase_core:
@@ -193,6 +198,7 @@ SPEC CHECKSUMS:
   connectivity: c4130b2985d4ef6fd26f9702e886bd5260681467
   connectivity_for_web: 2b8584556930d4bd490d82b836bcf45067ce345b
   connectivity_macos: e2e9731b6b22dda39eb1b128f6969d574460e191
+  connectycube_flutter_call_kit: 3f5730ee17df32194fe1072f197bb1f87fb18955
   device_id: 4a0bf078741a3eec6ba0e6cc72e786395d5991b0
   Firebase: 26223c695fe322633274198cb19dca8cb7e54416
   firebase_core: 91b27774a52f41f8b58484a75edf71197ac01c59

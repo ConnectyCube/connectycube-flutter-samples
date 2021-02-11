@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_call_kit/flutter_call_kit.dart';
 
+import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
 import 'package:connectycube_sdk/connectycube_core.dart';
 
 class CallKitManager {
@@ -59,30 +62,41 @@ class CallKitManager {
       didToggleHoldAction: _didToggleHoldAction,
       handleStartCallNotification: _handleStartCallNotification,
     );
+
+    ConnectycubeFlutterCallKit().init(
+      onCallAccepted: _performAnswerCallAction,
+      onCallRejected: _performEndCallAction,
+    );
   }
 
   // call when opponent(s) end call
-  Future<void> reportEndCallWithUUID(String uuid, EndReason reason) async {
-    log('[reportEndCallWithUUID] uuid: $uuid, reason: $reason',
+  Future<void> reportEndCallWithUUID(String uuid) async {
+    log('[reportEndCallWithUUID] uuid: $uuid',
         CallKitManager.TAG);
-    await _callKit.reportEndCallWithUUID(uuid, reason);
-  }
-
-  // call when call started
-  Future<void> reportConnectedOutgoingCallWithUUID(String uuid) async {
-    log('[reportConnectedOutgoingCallWithUUID] uuid: $uuid',
-        CallKitManager.TAG);
-    await _callKit.reportConnectedOutgoingCallWithUUID(uuid);
+    if (Platform.isAndroid) {
+      ConnectycubeFlutterCallKit.reportCallEnded(sessionId: uuid);
+    } else {
+      await _callKit.reportEndCallWithUUID(uuid, EndReason.remoteEnded);
+    }
   }
 
   Future<void> endCall(String uuid) async {
     log('[endCall] uuid: $uuid', CallKitManager.TAG);
-    await _callKit.endCall(uuid);
+    if (Platform.isAndroid) {
+      ConnectycubeFlutterCallKit.reportCallEnded(sessionId: uuid);
+    } else {
+      await _callKit.endCall(uuid);
+    }
   }
 
   Future<void> rejectCall(String uuid) async {
     log('[rejectCall] uuid: $uuid', CallKitManager.TAG);
-    await _callKit.rejectCall(uuid);
+
+    if (Platform.isAndroid) {
+      ConnectycubeFlutterCallKit.reportCallEnded(sessionId: uuid);
+    } else {
+      await _callKit.rejectCall(uuid);
+    }
   }
 
   /// Event Listener Callbacks
