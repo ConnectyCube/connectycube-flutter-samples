@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:developer' as dart_developer;
 
 import 'package:device_id/device_id.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -9,8 +10,10 @@ import 'package:flutter_voip_push_notification/flutter_voip_push_notification.da
 import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
+import '../managers/call_manager.dart';
 import '../utils/consts.dart';
 import '../utils/pref_util.dart';
+import '../utils/configs.dart' as config;
 
 class PushNotificationsManager {
   static const TAG = "PushNotificationsManager";
@@ -36,15 +39,7 @@ class PushNotificationsManager {
     }
 
     FirebaseMessaging.onMessage.listen((remoteMessage) async {
-      log('[onMessage] message: $remoteMessage', TAG);
-      Map<String, dynamic> data = remoteMessage.data;
-
-      ConnectycubeFlutterCallKit.showCallNotification(
-        sessionId: data['session_id'],
-        callType: int.parse(data['call_type']),
-        callerId: int.parse(data['caller_id']),
-        callerName: data['caller_name'],
-      );
+      processCallNotification(remoteMessage.data);
     });
 
     FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
@@ -56,6 +51,9 @@ class PushNotificationsManager {
   }
 
   _initIosVoIP() async {
+    await _voipPush.requestNotificationPermissions();
+    _voipPush.configure(onMessage: onMessage, onResume: onResume);
+
     _voipPush.onTokenRefresh.listen((token) {
       log('[onTokenRefresh] VoIP token: $token', TAG);
       subscribe(token);
@@ -91,10 +89,11 @@ class PushNotificationsManager {
       return;
     }
 
-    bool isProduction = bool.fromEnvironment('dart.vm.product');
 
     CreateSubscriptionParameters parameters = CreateSubscriptionParameters();
-    parameters.environment = CubeEnvironment.DEVELOPMENT; // TODO for sample we use DEVELOPMENT environment
+    parameters.environment = CubeEnvironment
+        .DEVELOPMENT; // TODO for sample we use DEVELOPMENT environment
+    // bool isProduction = bool.fromEnvironment('dart.vm.product');
     // parameters.environment =
     //     isProduction ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
 
@@ -144,30 +143,101 @@ class PushNotificationsManager {
   }
 }
 
-processCallNotification(RemoteMessage message) async {
-  log('[processCallNotification] message: ${message.data}',
+Future<dynamic> onMessage(bool isLocal, Map<String, dynamic> payload) {
+  log("[onMessage] received on foreground payload: $payload, isLocal=$isLocal",
       PushNotificationsManager.TAG);
 
-  Map<String, dynamic> data = message.data;
+  processCallNotification(payload);
+
+  return null;
+}
+
+Future<dynamic> onResume(bool isLocal, Map<String, dynamic> payload) {
+  log("[onResume] received on background payload: $payload, isLocal=$isLocal",
+      PushNotificationsManager.TAG);
+
+  return null;
+}
+
+processCallNotification(Map<String, dynamic> data) async {
+  log('[processCallNotification] message: $data', PushNotificationsManager.TAG);
+
   String signalType = data[PARAM_SIGNAL_TYPE];
+  String sessionId = data[PARAM_SESSION_ID];
+  Set<int> opponentsIds = (data[PARAM_CALL_OPPONENTS] as String)
+      .split(',')
+      .map((e) => int.parse(e))
+      .toSet();
 
   if (signalType == SIGNAL_TYPE_START_CALL) {
     ConnectycubeFlutterCallKit.showCallNotification(
-      sessionId: data[PARAM_SESSION_ID],
-      callType: int.parse(data[PARAM_CALL_TYPE]),
-      callerId: int.parse(data[PARAM_CALLER_ID]),
-      callerName: data[PARAM_CALLER_NAME],
-    );
+        sessionId: sessionId,
+        callType: int.parse(data[PARAM_CALL_TYPE]),
+        callerId: int.parse(data[PARAM_CALLER_ID]),
+        callerName: data[PARAM_CALLER_NAME],
+        opponentsIds: opponentsIds);
   } else if (signalType == SIGNAL_TYPE_END_CALL) {
     ConnectycubeFlutterCallKit.reportCallEnded(
         sessionId: data[PARAM_SESSION_ID]);
+  } else if (signalType == SIGNAL_TYPE_REJECT_CALL) {
+    if (opponentsIds.length == 1) {
+      CallManager.instance.hungUp();
+    }
   }
 }
 
 Future<void> onBackgroundMessage(RemoteMessage message) async {
   await Firebase.initializeApp();
-  log('[onBackgroundMessage] message.data: ${message.data}',
-      PushNotificationsManager.TAG);
-  processCallNotification(message);
+
+  ConnectycubeFlutterCallKit.onCallAcceptedWhenTerminated = (
+    sessionId,
+    callType,
+    callerId,
+    callerName,
+    opponentsIds,
+  ) {
+    return sendPushAboutRejectFromKilledState({
+      PARAM_CALL_TYPE: callType,
+      PARAM_SESSION_ID: sessionId,
+      PARAM_CALLER_ID: callerId,
+      PARAM_CALLER_NAME: callerName,
+      PARAM_CALL_OPPONENTS: opponentsIds.join(','),
+    }, callerId);
+  };
+  ConnectycubeFlutterCallKit.initMessagesHandler();
+
+  processCallNotification(message.data);
+
   return Future.value();
+}
+
+Future<void> sendPushAboutRejectFromKilledState(
+  Map<String, dynamic> parameters,
+  int callerId,
+) {
+  CubeSettings.instance.applicationId = config.APP_ID;
+  CubeSettings.instance.authorizationKey = config.AUTH_KEY;
+  CubeSettings.instance.authorizationSecret = config.AUTH_SECRET;
+  CubeSettings.instance.accountKey = config.ACCOUNT_ID;
+  CubeSettings.instance.onSessionRestore = () {
+    return SharedPrefs.instance.init().then((preferences) {
+      return createSession(preferences.getUser());
+    });
+  };
+
+  CreateEventParams params = CreateEventParams();
+  params.parameters = parameters;
+  params.parameters['message'] = "Reject call";
+  params.parameters[PARAM_SIGNAL_TYPE] = SIGNAL_TYPE_REJECT_CALL;
+  params.parameters[PARAM_IOS_VOIP] = 1;
+
+  params.notificationType = NotificationType.PUSH;
+  params.environment = CubeEnvironment
+      .DEVELOPMENT; // TODO for sample we use DEVELOPMENT environment
+  // bool isProduction = bool.fromEnvironment('dart.vm.product');
+  // params.environment =
+  //     isProduction ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
+  params.usersIds = [callerId];
+
+  return createEvent(params.getEventForRequest());
 }

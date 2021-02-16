@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
-import 'package:p2p_call_sample/src/managers/push_notifications_manager.dart';
-import 'package:p2p_call_sample/src/utils/pref_util.dart';
 
-import 'incoming_call_screen.dart';
 import 'managers/call_manager.dart';
+import 'managers/push_notifications_manager.dart';
 import 'utils/configs.dart' as utils;
+import 'utils/pref_util.dart';
 
 class SelectOpponentsScreen extends StatelessWidget {
   final CubeUser currentUser;
@@ -57,7 +56,7 @@ class SelectOpponentsScreen extends StatelessWidget {
             FlatButton(
               child: Text("OK"),
               onPressed: () async {
-                P2PClient.instance.destroy();
+                CallManager.instance.destroy();
                 CubeChatConnection.instance.destroy();
                 await PushNotificationsManager.instance.unsubscribe();
                 await SharedPrefs.instance
@@ -187,7 +186,6 @@ class _BodyLayoutState extends State<BodyLayout> {
 
     _selectedUsers = {};
 
-    CallManager.instance.init(context);
     PushNotificationsManager.instance.init();
   }
 }

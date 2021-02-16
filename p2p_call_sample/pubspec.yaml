@@ -10,7 +10,8 @@ dependencies:
   flutter:
     sdk: flutter
 
-  connectycube_sdk: ^1.1.2
+  connectycube_sdk:
+    path: /Users/tereha/StudioProjects/flutter-sdk/
   connectivity: ^2.0.2
   firebase_core: ^0.7.0
   firebase_messaging: 8.0.0-dev.14

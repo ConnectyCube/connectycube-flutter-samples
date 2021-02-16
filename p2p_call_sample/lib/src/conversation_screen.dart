@@ -1,6 +1,7 @@
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'package:flutter/material.dart';
 
+import 'login_screen.dart';
 import 'managers/call_manager.dart';
 
 class ConversationCallScreen extends StatefulWidget {
@@ -80,7 +81,12 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     log("_onSessionClosed", TAG);
     _callSession.removeSessionCallbacksListener();
 
-    Navigator.pop(context);
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LoginScreen(),
+      ),
+    );
   }
 
   void _onStreamAdd(int opponentId, MediaStream stream) async {

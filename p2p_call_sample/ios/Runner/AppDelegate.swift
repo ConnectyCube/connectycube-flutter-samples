@@ -24,8 +24,10 @@ import flutter_call_kit
                              for type: PKPushType,
                              completion: @escaping () -> Swift.Void){
         
+        FlutterVoipPushNotificationPlugin.didReceiveIncomingPush(with: payload, forType: type.rawValue)
+        
         let signalType = payload.dictionaryPayload["signal_type"] as! String
-        if(signalType == "endCall"){
+        if(signalType == "endCall" || signalType == "rejectCall"){
             return
         }
         

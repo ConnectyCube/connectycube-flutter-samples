@@ -10,6 +10,7 @@ Project contains the following features implemented:
 - Switch cameras
 - Disable/enable video stream
 - Switch speaker phone and earpiece
+- Background calls (via push notifications)
 
 ## Documentation
 
@@ -24,7 +25,6 @@ ConnectyCube P2P Calls API documentation - [https://developers.connectycube.com/
 ## Roadmap
 
 - Members call statuses
-- Push notifications on incoming call
 
 ## Quick start and develop
 

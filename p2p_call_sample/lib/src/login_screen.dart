@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
-import 'package:p2p_call_sample/src/utils/pref_util.dart';
 
 import 'select_opponents_screen.dart';
 import 'utils/configs.dart' as utils;
+import 'utils/pref_util.dart';
 
 class LoginScreen extends StatelessWidget {
   static const String TAG = "LoginScreen";
@@ -53,7 +53,6 @@ class BodyState extends State<BodyLayout> {
     );
   }
 
-
   @override
   void initState() {
     super.initState();
@@ -61,7 +60,7 @@ class BodyState extends State<BodyLayout> {
     SharedPrefs.instance.init().then((preferences) {
       CubeUser loggedUser = preferences.getUser();
 
-      if(loggedUser != null){
+      if (loggedUser != null) {
         _loginToCC(context, loggedUser);
       }
     });
@@ -122,7 +121,15 @@ class BodyState extends State<BodyLayout> {
 
     if (CubeSessionManager.instance.isActiveSessionValid() &&
         CubeSessionManager.instance.activeSession.user != null) {
-      _loginToCubeChat(context, user);
+      if (CubeChatConnection.instance.isAuthenticated()) {
+        setState(() {
+          _isLoginContinues = false;
+          _selectedUserId = 0;
+        });
+        _goSelectOpponentsScreen(context, user);
+      } else {
+        _loginToCubeChat(context, user);
+      }
     } else {
       createSession(user).then((cubeSession) {
         _loginToCubeChat(context, user);
