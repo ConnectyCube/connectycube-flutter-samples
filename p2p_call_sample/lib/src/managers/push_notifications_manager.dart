@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:developer' as dart_developer;
 
 import 'package:device_id/device_id.dart';
 import 'package:firebase_core/firebase_core.dart';

@@ -1,7 +1,7 @@
 name: p2p_call_sample
 description: P2P Calls Sample
 
-version: 0.1.0
+version: 1.0.0
 
 environment:
   sdk: ">=2.2.0 <3.0.0"
@@ -12,10 +12,8 @@ dependencies:
 
   connectycube_sdk:
     path: /Users/tereha/StudioProjects/flutter-sdk/
-  connectivity: ^2.0.2
   firebase_core: ^0.7.0
   firebase_messaging: 8.0.0-dev.14
-  flutter_local_notifications: ^4.0.0
   shared_preferences: ^0.5.12+4
   flutter_voip_push_notification: ^0.0.3
   flutter_call_kit:
@@ -23,8 +21,7 @@ dependencies:
       url: git://github.com/peerwaya/flutter_call_kit.git
       ref: master
 
-  connectycube_flutter_call_kit:
-    path: /Users/tereha/StudioProjects/connectycube-flutter-call-kit/connectycube_flutter_call_kit/
+  connectycube_flutter_call_kit: ^0.0.1-dev.1
 
 
 dev_dependencies:
