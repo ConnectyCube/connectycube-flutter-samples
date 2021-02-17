@@ -1,11 +1,4 @@
 PODS:
-  - connectivity (0.0.1):
-    - Flutter
-    - Reachability
-  - connectivity_for_web (0.1.0):
-    - Flutter
-  - connectivity_macos (0.0.1):
-    - Flutter
   - connectycube_flutter_call_kit (0.0.1):
     - Flutter
   - device_id (0.0.1):
@@ -55,8 +48,6 @@ PODS:
   - Flutter (1.0.0)
   - flutter_call_kit (0.0.1):
     - Flutter
-  - flutter_local_notifications (0.0.1):
-    - Flutter
   - flutter_voip_push_notification (0.0.1):
     - Flutter
   - flutter_webrtc (0.2.2):
@@ -96,7 +87,6 @@ PODS:
   - path_provider_windows (0.0.1):
     - Flutter
   - PromisesObjC (1.2.12)
-  - Reachability (3.2)
   - shared_preferences (0.0.1):
     - Flutter
   - shared_preferences_linux (0.0.1):
@@ -109,9 +99,6 @@ PODS:
     - Flutter
 
 DEPENDENCIES:
-  - connectivity (from `.symlinks/plugins/connectivity/ios`)
-  - connectivity_for_web (from `.symlinks/plugins/connectivity_for_web/ios`)
-  - connectivity_macos (from `.symlinks/plugins/connectivity_macos/ios`)
   - connectycube_flutter_call_kit (from `.symlinks/plugins/connectycube_flutter_call_kit/ios`)
   - device_id (from `.symlinks/plugins/device_id/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
@@ -120,7 +107,6 @@ DEPENDENCIES:
   - firebase_messaging_web (from `.symlinks/plugins/firebase_messaging_web/ios`)
   - Flutter (from `Flutter`)
   - flutter_call_kit (from `.symlinks/plugins/flutter_call_kit/ios`)
-  - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
   - flutter_voip_push_notification (from `.symlinks/plugins/flutter_voip_push_notification/ios`)
   - flutter_webrtc (from `.symlinks/plugins/flutter_webrtc/ios`)
   - package_info (from `.symlinks/plugins/package_info/ios`)
@@ -146,15 +132,8 @@ SPEC REPOS:
     - Libyuv
     - nanopb
     - PromisesObjC
-    - Reachability
 
 EXTERNAL SOURCES:
-  connectivity:
-    :path: ".symlinks/plugins/connectivity/ios"
-  connectivity_for_web:
-    :path: ".symlinks/plugins/connectivity_for_web/ios"
-  connectivity_macos:
-    :path: ".symlinks/plugins/connectivity_macos/ios"
   connectycube_flutter_call_kit:
     :path: ".symlinks/plugins/connectycube_flutter_call_kit/ios"
   device_id:
@@ -171,8 +150,6 @@ EXTERNAL SOURCES:
     :path: Flutter
   flutter_call_kit:
     :path: ".symlinks/plugins/flutter_call_kit/ios"
-  flutter_local_notifications:
-    :path: ".symlinks/plugins/flutter_local_notifications/ios"
   flutter_voip_push_notification:
     :path: ".symlinks/plugins/flutter_voip_push_notification/ios"
   flutter_webrtc:
@@ -195,9 +172,6 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences_windows/ios"
 
 SPEC CHECKSUMS:
-  connectivity: c4130b2985d4ef6fd26f9702e886bd5260681467
-  connectivity_for_web: 2b8584556930d4bd490d82b836bcf45067ce345b
-  connectivity_macos: e2e9731b6b22dda39eb1b128f6969d574460e191
   connectycube_flutter_call_kit: 3f5730ee17df32194fe1072f197bb1f87fb18955
   device_id: 4a0bf078741a3eec6ba0e6cc72e786395d5991b0
   Firebase: 26223c695fe322633274198cb19dca8cb7e54416
@@ -212,7 +186,6 @@ SPEC CHECKSUMS:
   FirebaseMessaging: 68d1bcb14880189558a8ae57167abe0b7e417232
   Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
   flutter_call_kit: 0598f2eec54579aa00b53fb68a622ccdb08fe4fe
-  flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
   flutter_voip_push_notification: f28f3ce1c6b835a3fa9e833f37f33dc1291ab888
   flutter_webrtc: 39898454258b54ba51996850d5da8d5d53bf1524
   GoogleDataTransport: 1024b1a4dfbd7a0e92cb20d7e0a6f1fb66b449a4
@@ -224,7 +197,6 @@ SPEC CHECKSUMS:
   path_provider_linux: 4d630dc393e1f20364f3e3b4a2ff41d9674a84e4
   path_provider_windows: a2b81600c677ac1959367280991971cb9a1edb3b
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
-  Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
   shared_preferences_linux: afefbfe8d921e207f01ede8b60373d9e3b566b78
   shared_preferences_macos: f3f29b71ccbb56bf40c9dd6396c9acf15e214087
