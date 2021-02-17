@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import 'call_screen.dart';
+import 'managers/call_manager.dart';
+import 'managers/push_notifications_manager.dart';
 import 'utils/configs.dart' as utils;
+import 'utils/pref_util.dart';
 
 class SelectOpponentsScreen extends StatelessWidget {
+  final CubeUser currentUser;
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -26,7 +30,7 @@ class SelectOpponentsScreen extends StatelessWidget {
             ),
           ],
         ),
-        body: BodyLayout(),
+        body: BodyLayout(currentUser),
       ),
     );
   }
@@ -51,21 +55,17 @@ class SelectOpponentsScreen extends StatelessWidget {
             ),
             FlatButton(
               child: Text("OK"),
-              onPressed: () {
-                signOut().then(
-                  (voidValue) {
-                    CubeChatConnection.instance.destroy();
-                    P2PClient.instance.destroy();
-                    Navigator.pop(context); // cancel current Dialog
-                    _navigateToLoginScreen(context);
-                  },
-                ).catchError(
-                  (onError) {
-                    P2PClient.instance.destroy();
-                    Navigator.pop(context); // cancel current Dialog
-                    _navigateToLoginScreen(context);
-                  },
-                );
+              onPressed: () async {
+                CallManager.instance.destroy();
+                CubeChatConnection.instance.destroy();
+                await PushNotificationsManager.instance.unsubscribe();
+                await SharedPrefs.instance
+                    .init()
+                    .then((value) => value.deleteUserData());
+                await signOut();
+
+                Navigator.pop(context); // cancel current Dialog
+                _navigateToLoginScreen(context);
               },
             ),
           ],
@@ -77,19 +77,29 @@ class SelectOpponentsScreen extends StatelessWidget {
   _navigateToLoginScreen(BuildContext context) {
     Navigator.pop(context);
   }
+
+  SelectOpponentsScreen(this.currentUser);
 }
 
 class BodyLayout extends StatefulWidget {
+  final CubeUser currentUser;
+
+
+
   @override
   State<StatefulWidget> createState() {
-    return _BodyLayoutState();
+    return _BodyLayoutState(currentUser);
   }
+
+  BodyLayout(this.currentUser);
 }
 
 class _BodyLayoutState extends State<BodyLayout> {
+  final CubeUser currentUser;
   Set<int> _selectedUsers;
-  P2PClient _callClient;
-  P2PSession _currentCall;
+
+
+  _BodyLayoutState(this.currentUser);
 
   @override
   Widget build(BuildContext context) {
@@ -116,8 +126,8 @@ class _BodyLayoutState extends State<BodyLayout> {
                       color: Colors.white,
                     ),
                     backgroundColor: Colors.blue,
-                    onPressed: () =>
-                        _startCall(CallType.VIDEO_CALL, _selectedUsers),
+                    onPressed: () => CallManager.instance.startNewCall(
+                        context, CallType.VIDEO_CALL, _selectedUsers),
                   ),
                 ),
                 Padding(
@@ -129,8 +139,8 @@ class _BodyLayoutState extends State<BodyLayout> {
                       color: Colors.white,
                     ),
                     backgroundColor: Colors.green,
-                    onPressed: () =>
-                        _startCall(CallType.AUDIO_CALL, _selectedUsers),
+                    onPressed: () => CallManager.instance.startNewCall(
+                        context, CallType.AUDIO_CALL, _selectedUsers),
                   ),
                 ),
               ],
@@ -175,59 +185,7 @@ class _BodyLayoutState extends State<BodyLayout> {
     super.initState();
 
     _selectedUsers = {};
-    _initCustomMediaConfigs();
-    _initCalls();
-  }
 
-  void _initCalls() {
-    _callClient = P2PClient.instance;
-
-    _callClient.init();
-
-    _callClient.onReceiveNewSession = (callSession) {
-      if (_currentCall != null &&
-          _currentCall.sessionId != callSession.sessionId) {
-        callSession.reject();
-        return;
-      }
-
-      _showIncomingCallScreen(callSession);
-    };
-
-    _callClient.onSessionClosed = (callSession) {
-      if (_currentCall != null &&
-          _currentCall.sessionId == callSession.sessionId) {
-        _currentCall = null;
-      }
-    };
-  }
-
-  void _startCall(int callType, Set<int> opponents) {
-    if (opponents.isEmpty) return;
-
-    P2PSession callSession = _callClient.createCallSession(callType, opponents);
-    _currentCall = callSession;
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ConversationCallScreen(callSession, false),
-      ),
-    );
-  }
-
-  void _showIncomingCallScreen(P2PSession callSession) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => IncomingCallScreen(callSession),
-      ),
-    );
-  }
-
-  void _initCustomMediaConfigs() {
-    RTCMediaConfig mediaConfig = RTCMediaConfig.instance;
-    mediaConfig.minHeight = 720;
-    mediaConfig.minWidth = 1280;
-    mediaConfig.minFrameRate = 30;
+    PushNotificationsManager.instance.init();
   }
 }

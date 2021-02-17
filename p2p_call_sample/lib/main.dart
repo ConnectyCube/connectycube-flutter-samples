@@ -1,9 +1,12 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import 'src//utils/configs.dart' as config;
 import 'src/login_screen.dart';
+import 'src/managers/call_manager.dart';
+import 'src/utils/configs.dart' as config;
+import 'src/utils/pref_util.dart';
 
 void main() => runApp(App());
 
@@ -21,17 +24,34 @@ class _AppState extends State<App> {
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
-      home: LoginScreen(),
+      home: Builder(
+        builder: (context) {
+          CallManager.instance.init(context);
+
+          return LoginScreen();
+        },
+      ),
     );
   }
 
   @override
   void initState() {
     super.initState();
-    init(
-      config.APP_ID,
-      config.AUTH_KEY,
-      config.AUTH_SECRET,
-    );
+    Firebase.initializeApp();
+
+    initConnectycube();
   }
+}
+
+initConnectycube(){
+  init(
+    config.APP_ID,
+    config.AUTH_KEY,
+    config.AUTH_SECRET,
+    onSessionRestore: () {
+      return SharedPrefs.instance.init().then((preferences) {
+        return createSession(preferences.getUser());
+      });
+    },
+  );
 }

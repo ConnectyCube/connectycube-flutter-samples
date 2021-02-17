@@ -4,6 +4,7 @@ import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 import 'select_opponents_screen.dart';
 import 'utils/configs.dart' as utils;
+import 'utils/pref_util.dart';
 
 class LoginScreen extends StatelessWidget {
   static const String TAG = "LoginScreen";
@@ -50,6 +51,19 @@ class BodyState extends State<BodyLayout> {
         ],
       ),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    SharedPrefs.instance.init().then((preferences) {
+      CubeUser loggedUser = preferences.getUser();
+
+      if (loggedUser != null) {
+        _loginToCC(context, loggedUser);
+      }
+    });
   }
 
   Widget _getUsersList(BuildContext context) {
@@ -105,8 +119,17 @@ class BodyState extends State<BodyLayout> {
       _selectedUserId = user.id;
     });
 
-    if (CubeSessionManager.instance.isActiveSessionValid()) {
-      _loginToCubeChat(context, user);
+    if (CubeSessionManager.instance.isActiveSessionValid() &&
+        CubeSessionManager.instance.activeSession.user != null) {
+      if (CubeChatConnection.instance.isAuthenticated()) {
+        setState(() {
+          _isLoginContinues = false;
+          _selectedUserId = 0;
+        });
+        _goSelectOpponentsScreen(context, user);
+      } else {
+        _loginToCubeChat(context, user);
+      }
     } else {
       createSession(user).then((cubeSession) {
         _loginToCubeChat(context, user);
@@ -116,6 +139,9 @@ class BodyState extends State<BodyLayout> {
 
   void _loginToCubeChat(BuildContext context, CubeUser user) {
     CubeChatConnection.instance.login(user).then((cubeUser) {
+      SharedPrefs.instance.init().then((prefs) {
+        prefs.saveNewUser(user);
+      });
       setState(() {
         _isLoginContinues = false;
         _selectedUserId = 0;
@@ -152,7 +178,7 @@ class BodyState extends State<BodyLayout> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SelectOpponentsScreen(),
+        builder: (context) => SelectOpponentsScreen(cubeUser),
       ),
     );
   }

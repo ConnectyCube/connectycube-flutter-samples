@@ -30,5 +30,5 @@ List<CubeUser> users = [
     login: "call_user_4",
     fullName: "User 4",
     password: DEFAULT_PASS,
-  ),
+  )
 ];
