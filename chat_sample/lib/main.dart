@@ -117,6 +117,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
       }
     });
 
+    appState = WidgetsBinding.instance.lifecycleState;
     WidgetsBinding.instance.addObserver(this);
   }
 
