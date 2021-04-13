@@ -45,13 +45,13 @@ class ChatDetailsScreen extends StatelessWidget {
 
 class DetailScreen extends StatefulWidget {
   static const String TAG = "DetailScreen";
-  final CubeUser _cubeUser;
-  final CubeDialog _cubeDialog;
+  final CubeUser? _cubeUser;
+  final CubeDialog? _cubeDialog;
 
   DetailScreen(this._cubeUser, this._cubeDialog);
 
   @override
-  State createState() => _cubeDialog.type == CubeDialogType.PRIVATE
+  State createState() => _cubeDialog!.type == CubeDialogType.PRIVATE
       ? ContactScreenState(_cubeUser, _cubeDialog)
       : GroupScreenState(_cubeUser, _cubeDialog);
 }
@@ -74,7 +74,14 @@ abstract class ScreenState extends State<DetailScreen> {
 
   initUsers() async {
     _isProgressContinues = true;
-    var result = await getUsersByIds(_cubeDialog.occupantsIds.toSet());
+    if(_cubeDialog.occupantsIds == null || _cubeDialog.occupantsIds!.isEmpty){
+      setState(() {
+        _isProgressContinues = false;
+      });
+      return;
+    }
+
+    var result = await getUsersByIds(_cubeDialog.occupantsIds!.toSet());
     _occupants.clear();
     _occupants.addAll(result);
     _occupants.remove(_cubeUser.id);
@@ -85,7 +92,7 @@ abstract class ScreenState extends State<DetailScreen> {
 }
 
 class ContactScreenState extends ScreenState {
-  CubeUser contactUser;
+  CubeUser? contactUser;
 
   initUser() {
     contactUser = _occupants.values.isNotEmpty
@@ -132,15 +139,15 @@ class ContactScreenState extends ScreenState {
       children: <Widget>[
         CircleAvatar(
           backgroundImage:
-              contactUser.avatar != null && contactUser.avatar.isNotEmpty
-                  ? NetworkImage(contactUser.avatar)
+              contactUser!.avatar != null && contactUser!.avatar!.isNotEmpty
+                  ? NetworkImage(contactUser!.avatar!)
                   : null,
           backgroundColor: greyColor2,
           radius: 50,
           child: ClipRRect(
             borderRadius: BorderRadius.circular(55),
             child: Text(
-              contactUser.fullName.substring(0, 2).toUpperCase(),
+              contactUser!.fullName!.substring(0, 2).toUpperCase(),
               style: TextStyle(fontSize: 40),
             ),
           ),
@@ -169,7 +176,7 @@ class ContactScreenState extends ScreenState {
               width: 1.0, // Underline width
             ))),
             child: Text(
-              contactUser.fullName,
+              contactUser!.fullName!,
               style: TextStyle(
                 color: primaryColor,
                 fontSize: 20, // Text colour here
@@ -188,10 +195,7 @@ class ContactScreenState extends ScreenState {
     return new Container(
       child: new Column(
         children: <Widget>[
-          new RaisedButton(
-            shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(18.0),
-                side: BorderSide(color: blueColor)),
+          new ElevatedButton(
             child: Text(
               'Start dialog',
               style: TextStyle(
@@ -200,7 +204,6 @@ class ContactScreenState extends ScreenState {
               ),
             ),
             onPressed: () => Navigator.pop(context),
-            color: blueColor,
           ),
         ],
       ),
@@ -211,10 +214,10 @@ class ContactScreenState extends ScreenState {
 class GroupScreenState extends ScreenState {
   final picker = ImagePicker();
   final TextEditingController _nameFilter = new TextEditingController();
-  String _photoUrl = "";
+  String? _photoUrl = "";
   String _name = "";
-  Set<int> _usersToRemove = {};
-  List<int> _usersToAdd;
+  Set<int?> _usersToRemove = {};
+  List<int>? _usersToAdd;
 
   GroupScreenState(_cubeUser, _cubeDialog) : super(_cubeUser, _cubeDialog) {
     _nameFilter.addListener(_nameListen);
@@ -274,14 +277,14 @@ class GroupScreenState extends ScreenState {
       return SizedBox.shrink();
     }
     Widget avatarCircle = CircleAvatar(
-      backgroundImage: _cubeDialog.photo != null && _cubeDialog.photo.isNotEmpty
-          ? NetworkImage(_cubeDialog.photo)
+      backgroundImage: _cubeDialog.photo != null && _cubeDialog.photo!.isNotEmpty
+          ? NetworkImage(_cubeDialog.photo!)
           : null,
       backgroundColor: greyColor2,
       radius: 50,
       child: getAvatarTextWidget(
-          _cubeDialog.photo != null && _cubeDialog.photo.isNotEmpty,
-          _cubeDialog.name.substring(0, 2).toUpperCase()),
+          _cubeDialog.photo != null && _cubeDialog.photo!.isNotEmpty,
+          _cubeDialog.name!.substring(0, 2).toUpperCase()),
     );
 
     return new Stack(
@@ -317,12 +320,14 @@ class GroupScreenState extends ScreenState {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
     if (pickedFile == null) return;
     var image = File(pickedFile.path);
-    uploadFile(image, true).then((cubeFile) {
+    uploadFile(image, isPublic: true).then((cubeFile) {
       _photoUrl = cubeFile.getPublicUrl();
       setState(() {
         _cubeDialog.photo = _photoUrl;
       });
-    }).catchError(_processUpdateError);
+    }).catchError((error) {
+      _processUpdateError(error);
+    });
   }
 
   Widget _buildTextFields() {
@@ -463,9 +468,9 @@ class GroupScreenState extends ScreenState {
   Widget _getListItemTile(BuildContext context, int index) {
     final user = _occupants.values.elementAt(index);
     Widget getUserAvatar() {
-      if (user.avatar != null && user.avatar.isNotEmpty) {
+      if (user.avatar != null && user.avatar!.isNotEmpty) {
         return CircleAvatar(
-          backgroundImage: NetworkImage(user.avatar),
+          backgroundImage: NetworkImage(user.avatar!),
           backgroundColor: greyColor2,
           radius: 25.0,
           child: ClipRRect(
@@ -486,7 +491,7 @@ class GroupScreenState extends ScreenState {
     }
 
     return Container(
-      child: FlatButton(
+      child: TextButton(
         child: Row(
           children: <Widget>[
             getUserAvatar(),
@@ -513,7 +518,7 @@ class GroupScreenState extends ScreenState {
                     .contains(_occupants.values.elementAt(index).id),
                 onChanged: ((checked) {
                   setState(() {
-                    if (checked) {
+                    if (checked!) {
                       _usersToRemove.add(_occupants.values.elementAt(index).id);
                     } else {
                       _usersToRemove
@@ -528,10 +533,6 @@ class GroupScreenState extends ScreenState {
         onPressed: () {
           log("user onPressed");
         },
-        color: Colors.transparent,
-        padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 0.0),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       ),
       margin: EdgeInsets.only(bottom: 10.0),
     );
@@ -590,56 +591,60 @@ class GroupScreenState extends ScreenState {
     _usersToAdd = await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => AddOccupantScreen(_cubeUser, _cubeDialog),
+        builder: (context) => AddOccupantScreen(_cubeUser),
       ),
     );
-    if (_usersToAdd != null && _usersToAdd.isNotEmpty) _updateDialog();
+    if (_usersToAdd != null && _usersToAdd!.isNotEmpty) _updateDialog();
   }
 
   _removeOpponent() async {
     print('_removeOpponent');
-    if (_usersToRemove != null && _usersToRemove.isNotEmpty) _updateDialog();
+    if (_usersToRemove.isNotEmpty) _updateDialog();
   }
 
   _exitDialog() {
     print('_exitDialog');
-    deleteDialog(_cubeDialog.dialogId).then((onValue) {
+    deleteDialog(_cubeDialog.dialogId!).then((onValue) {
       Fluttertoast.showToast(msg: 'Success');
       Navigator.pushReplacementNamed(context, 'select_dialog',
           arguments: {USER_ARG_NAME: _cubeUser});
-    }).catchError(_processUpdateError);
+    }).catchError((error) {
+      _processUpdateError(error);
+    });
   }
 
   void _updateDialog() {
     print('_updateDialog $_name');
     if (_name.isEmpty &&
-        _photoUrl.isEmpty &&
+        _photoUrl!.isEmpty &&
         (_usersToAdd?.isEmpty ?? true) &&
-        (_usersToRemove?.isEmpty ?? true)) {
+        (_usersToRemove.isEmpty)) {
       Fluttertoast.showToast(msg: 'Nothing to save');
       return;
     }
     Map<String, dynamic> params = {};
     if (_name.isNotEmpty) params['name'] = _name;
-    if (_photoUrl.isNotEmpty) params['photo'] = _photoUrl;
+    if (_photoUrl!.isNotEmpty) params['photo'] = _photoUrl;
     if (_usersToAdd?.isNotEmpty ?? false)
-      params['push_all'] = {'occupants_ids': List.of(_usersToAdd)};
-    if (_usersToRemove?.isNotEmpty ?? false)
+      params['push_all'] = {'occupants_ids': List.of(_usersToAdd!)};
+    if (_usersToRemove.isNotEmpty)
       params['pull_all'] = {'occupants_ids': List.of(_usersToRemove)};
 
     setState(() {
       _isProgressContinues = true;
     });
-    updateDialog(_cubeDialog.dialogId, params).then((dialog) {
+    updateDialog(_cubeDialog.dialogId!, params).then((dialog) {
       _cubeDialog = dialog;
       Fluttertoast.showToast(msg: 'Success');
       setState(() {
         if ((_usersToAdd?.isNotEmpty ?? false) ||
-            (_usersToRemove?.isNotEmpty ?? false)) initUsers();
+            (_usersToRemove.isNotEmpty)) initUsers();
         _isProgressContinues = false;
         clearFields();
       });
-    }).catchError(_processUpdateError);
+    }).catchError((error) {
+      _processUpdateError(error);
+    });
   }
 
   clearFields() {
