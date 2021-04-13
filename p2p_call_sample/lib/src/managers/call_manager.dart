@@ -63,9 +63,11 @@ class CallManager {
   }
 
   void _initCalls() {
-    _callClient = P2PClient.instance;
+    if(_callClient == null) {
+      _callClient = P2PClient.instance;
 
-    _callClient.init();
+      _callClient.init();
+    }
 
     _callClient.onReceiveNewSession = (callSession) async {
       if (_currentCall != null &&
