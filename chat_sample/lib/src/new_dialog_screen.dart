@@ -71,10 +71,8 @@ class _BodyLayoutState extends State<BodyLayout> {
   Set<int> _selectedUsers = {};
   var _isUsersContinues = false;
   var _isPrivateDialog = true;
-  String userToSearch;
+  String? userToSearch;
   String userMsg = " ";
-
-  bool _isDialogContinues = false;
 
   _BodyLayoutState(this.currentUser);
 
@@ -164,7 +162,7 @@ class _BodyLayoutState extends State<BodyLayout> {
 
     return new Container(
       alignment: Alignment.centerLeft,
-      child: FlatButton.icon(
+      child: TextButton.icon(
         icon: Icon(
           getIcon(),
           size: 25.0,
@@ -189,12 +187,12 @@ class _BodyLayoutState extends State<BodyLayout> {
     }
 
     if (_isUsersContinues) {
-      if (userToSearch != null && userToSearch.isNotEmpty) {
-        getUsersByFullName(userToSearch).then((users) {
+      if (userToSearch != null && userToSearch!.isNotEmpty) {
+        getUsersByFullName(userToSearch!).then((users) {
           log("getusers: $users", TAG);
           setState(() {
             clearValues();
-            userList.addAll(users.items);
+            userList.addAll(users!.items);
           });
         }).catchError((onError) {
           log("getusers catchError: $onError", TAG);
@@ -220,7 +218,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   Widget _getListItemTile(BuildContext context, int index) {
     getPrivateWidget() {
       return Container(
-        child: FlatButton(
+        child: TextButton(
           child: Row(
             children: <Widget>[
               Material(
@@ -229,14 +227,14 @@ class _BodyLayoutState extends State<BodyLayout> {
                   backgroundColor: Colors.white,
                   child: CircleAvatar(
                     backgroundImage: userList[index].avatar != null &&
-                            userList[index].avatar.isNotEmpty
-                        ? NetworkImage(userList[index].avatar)
+                            userList[index].avatar!.isNotEmpty
+                        ? NetworkImage(userList[index].avatar!)
                         : null,
                     radius: 25,
                     child: getAvatarTextWidget(
                         userList[index].avatar != null &&
-                            userList[index].avatar.isNotEmpty,
-                        userList[index].fullName.substring(0, 2).toUpperCase()),
+                            userList[index].avatar!.isNotEmpty,
+                        userList[index].fullName!.substring(0, 2).toUpperCase()),
                   ),
                 ),
                 borderRadius: BorderRadius.all(
@@ -271,12 +269,8 @@ class _BodyLayoutState extends State<BodyLayout> {
             ],
           ),
           onPressed: () {
-            _createDialog(context, {userList[index].id}, false);
+            _createDialog(context, {userList[index].id!}, false);
           },
-          color: greyColor2,
-          padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
         ),
         margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
       );
@@ -284,7 +278,7 @@ class _BodyLayoutState extends State<BodyLayout> {
 
     getGroupWidget() {
       return Container(
-        child: FlatButton(
+        child: TextButton(
           child: Row(
             children: <Widget>[
               Material(
@@ -293,14 +287,14 @@ class _BodyLayoutState extends State<BodyLayout> {
                   backgroundColor: Colors.white,
                   child: CircleAvatar(
                     backgroundImage: userList[index].avatar != null &&
-                            userList[index].avatar.isNotEmpty
-                        ? NetworkImage(userList[index].avatar)
+                            userList[index].avatar!.isNotEmpty
+                        ? NetworkImage(userList[index].avatar!)
                         : null,
                     radius: 25,
                     child: getAvatarTextWidget(
                         userList[index].avatar != null &&
-                            userList[index].avatar.isNotEmpty,
-                        userList[index].fullName.substring(0, 2).toUpperCase()),
+                            userList[index].avatar!.isNotEmpty,
+                        userList[index].fullName!.substring(0, 2).toUpperCase()),
                   ),
                 ),
                 borderRadius: BorderRadius.all(
@@ -330,8 +324,8 @@ class _BodyLayoutState extends State<BodyLayout> {
                   value: _selectedUsers.contains(userList[index].id),
                   onChanged: ((checked) {
                     setState(() {
-                      if (checked) {
-                        _selectedUsers.add(userList[index].id);
+                      if (checked!) {
+                        _selectedUsers.add(userList[index].id!);
                       } else {
                         _selectedUsers.remove(userList[index].id);
                       }
@@ -346,14 +340,10 @@ class _BodyLayoutState extends State<BodyLayout> {
               if (_selectedUsers.contains(userList[index].id)) {
                 _selectedUsers.remove(userList[index].id);
               } else {
-                _selectedUsers.add(userList[index].id);
+                _selectedUsers.add(userList[index].id!);
               }
             });
           },
-          color: greyColor2,
-          padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
         ),
         margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
       );
@@ -377,7 +367,7 @@ class _BodyLayoutState extends State<BodyLayout> {
           CubeDialog(CubeDialogType.GROUP, occupantsIds: users.toList());
       List<CubeUser> usersToAdd = users
           .map((id) =>
-              userList.firstWhere((user) => user.id == id, orElse: () => null))
+              userList.firstWhere((user) => user.id == id))
           .toList();
       Navigator.push(
         context,
@@ -387,7 +377,6 @@ class _BodyLayoutState extends State<BodyLayout> {
         ),
       );
     } else {
-      _isDialogContinues = true;
       CubeDialog newDialog =
           CubeDialog(CubeDialogType.PRIVATE, occupantsIds: users.toList());
       createDialog(newDialog).then((createdDialog) {
@@ -397,15 +386,14 @@ class _BodyLayoutState extends State<BodyLayout> {
             builder: (context) => ChatDialogScreen(currentUser, createdDialog),
           ),
         );
-      }).catchError(_processCreateDialogError);
+      }).catchError((error) {
+        _processCreateDialogError(error);
+      });
     }
   }
 
   void _processCreateDialogError(exception) {
     log("Login error $exception", TAG);
-    setState(() {
-      _isDialogContinues = false;
-    });
     showDialogError(exception, context);
   }
 

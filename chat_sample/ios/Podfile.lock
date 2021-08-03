@@ -2,43 +2,35 @@ PODS:
   - connectivity (0.0.1):
     - Flutter
     - Reachability
-  - connectivity_for_web (0.1.0):
-    - Flutter
-  - connectivity_macos (0.0.1):
-    - Flutter
-  - device_id (0.0.1):
+  - device_info (0.0.1):
     - Flutter
   - Firebase/CoreOnly (7.3.0):
     - FirebaseCore (= 7.3.0)
   - Firebase/Messaging (7.3.0):
     - Firebase/CoreOnly
     - FirebaseMessaging (~> 7.3.0)
-  - firebase_core (0.7.0):
+  - firebase_core (1.0.3):
     - Firebase/CoreOnly (= 7.3.0)
     - Flutter
-  - firebase_core_web (0.1.0):
-    - Flutter
-  - firebase_messaging (8.0.0-dev.14):
+  - firebase_messaging (9.1.1):
     - Firebase/Messaging (= 7.3.0)
     - firebase_core
-    - Flutter
-  - firebase_messaging_web (0.1.0):
     - Flutter
   - FirebaseCore (7.3.0):
     - FirebaseCoreDiagnostics (~> 7.0)
     - GoogleUtilities/Environment (~> 7.0)
     - GoogleUtilities/Logger (~> 7.0)
-  - FirebaseCoreDiagnostics (7.5.0):
-    - GoogleDataTransport (~> 8.0)
+  - FirebaseCoreDiagnostics (7.10.0):
+    - GoogleDataTransport (~> 8.4)
     - GoogleUtilities/Environment (~> 7.0)
     - GoogleUtilities/Logger (~> 7.0)
-    - nanopb (~> 2.30907.0)
-  - FirebaseInstallations (7.5.0):
+    - nanopb (~> 2.30908.0)
+  - FirebaseInstallations (7.10.0):
     - FirebaseCore (~> 7.0)
     - GoogleUtilities/Environment (~> 7.0)
     - GoogleUtilities/UserDefaults (~> 7.0)
     - PromisesObjC (~> 1.2)
-  - FirebaseInstanceID (7.5.0):
+  - FirebaseInstanceID (7.10.0):
     - FirebaseCore (~> 7.0)
     - FirebaseInstallations (~> 7.0)
     - GoogleUtilities/Environment (~> 7.0)
@@ -53,96 +45,75 @@ PODS:
   - Flutter (1.0.0)
   - flutter_local_notifications (0.0.1):
     - Flutter
-  - flutter_plugin_android_lifecycle (0.0.1):
-    - Flutter
   - flutter_webrtc (0.2.2):
     - Flutter
     - GoogleWebRTC (= 1.1.31999)
     - Libyuv (= 1703)
   - fluttertoast (0.0.2):
     - Flutter
+    - Toast
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
-  - GoogleDataTransport (8.2.0):
-    - nanopb (~> 2.30907.0)
-  - GoogleUtilities/AppDelegateSwizzler (7.2.0):
+  - GoogleDataTransport (8.4.0):
+    - GoogleUtilities/Environment (~> 7.2)
+    - nanopb (~> 2.30908.0)
+    - PromisesObjC (~> 1.2)
+  - GoogleUtilities/AppDelegateSwizzler (7.3.1):
     - GoogleUtilities/Environment
     - GoogleUtilities/Logger
     - GoogleUtilities/Network
-  - GoogleUtilities/Environment (7.2.0):
+  - GoogleUtilities/Environment (7.3.1):
     - PromisesObjC (~> 1.2)
-  - GoogleUtilities/Logger (7.2.0):
+  - GoogleUtilities/Logger (7.3.1):
     - GoogleUtilities/Environment
-  - GoogleUtilities/Network (7.2.0):
+  - GoogleUtilities/Network (7.3.1):
     - GoogleUtilities/Logger
     - "GoogleUtilities/NSData+zlib"
     - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (7.2.0)"
-  - GoogleUtilities/Reachability (7.2.0):
+  - "GoogleUtilities/NSData+zlib (7.3.1)"
+  - GoogleUtilities/Reachability (7.3.1):
     - GoogleUtilities/Logger
-  - GoogleUtilities/UserDefaults (7.2.0):
+  - GoogleUtilities/UserDefaults (7.3.1):
     - GoogleUtilities/Logger
   - GoogleWebRTC (1.1.31999)
   - image_picker (0.0.1):
     - Flutter
   - Libyuv (1703)
-  - nanopb (2.30907.0):
-    - nanopb/decode (= 2.30907.0)
-    - nanopb/encode (= 2.30907.0)
-  - nanopb/decode (2.30907.0)
-  - nanopb/encode (2.30907.0)
+  - nanopb (2.30908.0):
+    - nanopb/decode (= 2.30908.0)
+    - nanopb/encode (= 2.30908.0)
+  - nanopb/decode (2.30908.0)
+  - nanopb/encode (2.30908.0)
   - package_info (0.0.1):
     - Flutter
   - path_provider (0.0.1):
     - Flutter
-  - path_provider_linux (0.0.1):
-    - Flutter
-  - path_provider_macos (0.0.1):
-    - Flutter
-  - path_provider_windows (0.0.1):
+  - platform_device_id (0.0.1):
     - Flutter
   - PromisesObjC (1.2.12)
   - Reachability (3.2)
   - shared_preferences (0.0.1):
     - Flutter
-  - shared_preferences_linux (0.0.1):
+  - sqflite (0.0.2):
     - Flutter
-  - shared_preferences_macos (0.0.1):
-    - Flutter
-  - shared_preferences_web (0.0.1):
-    - Flutter
-  - shared_preferences_windows (0.0.1):
-    - Flutter
-  - sqflite (0.0.1):
-    - Flutter
-    - FMDB (~> 2.7.2)
+    - FMDB (>= 2.7.5)
+  - Toast (4.0.0)
 
 DEPENDENCIES:
   - connectivity (from `.symlinks/plugins/connectivity/ios`)
-  - connectivity_for_web (from `.symlinks/plugins/connectivity_for_web/ios`)
-  - connectivity_macos (from `.symlinks/plugins/connectivity_macos/ios`)
-  - device_id (from `.symlinks/plugins/device_id/ios`)
+  - device_info (from `.symlinks/plugins/device_info/ios`)
   - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
-  - firebase_core_web (from `.symlinks/plugins/firebase_core_web/ios`)
   - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
-  - firebase_messaging_web (from `.symlinks/plugins/firebase_messaging_web/ios`)
   - Flutter (from `Flutter`)
   - flutter_local_notifications (from `.symlinks/plugins/flutter_local_notifications/ios`)
-  - flutter_plugin_android_lifecycle (from `.symlinks/plugins/flutter_plugin_android_lifecycle/ios`)
   - flutter_webrtc (from `.symlinks/plugins/flutter_webrtc/ios`)
   - fluttertoast (from `.symlinks/plugins/fluttertoast/ios`)
   - image_picker (from `.symlinks/plugins/image_picker/ios`)
   - package_info (from `.symlinks/plugins/package_info/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
-  - path_provider_linux (from `.symlinks/plugins/path_provider_linux/ios`)
-  - path_provider_macos (from `.symlinks/plugins/path_provider_macos/ios`)
-  - path_provider_windows (from `.symlinks/plugins/path_provider_windows/ios`)
+  - platform_device_id (from `.symlinks/plugins/platform_device_id/ios`)
   - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
-  - shared_preferences_linux (from `.symlinks/plugins/shared_preferences_linux/ios`)
-  - shared_preferences_macos (from `.symlinks/plugins/shared_preferences_macos/ios`)
-  - shared_preferences_web (from `.symlinks/plugins/shared_preferences_web/ios`)
-  - shared_preferences_windows (from `.symlinks/plugins/shared_preferences_windows/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
 
 SPEC REPOS:
@@ -161,30 +132,21 @@ SPEC REPOS:
     - nanopb
     - PromisesObjC
     - Reachability
+    - Toast
 
 EXTERNAL SOURCES:
   connectivity:
     :path: ".symlinks/plugins/connectivity/ios"
-  connectivity_for_web:
-    :path: ".symlinks/plugins/connectivity_for_web/ios"
-  connectivity_macos:
-    :path: ".symlinks/plugins/connectivity_macos/ios"
-  device_id:
-    :path: ".symlinks/plugins/device_id/ios"
+  device_info:
+    :path: ".symlinks/plugins/device_info/ios"
   firebase_core:
     :path: ".symlinks/plugins/firebase_core/ios"
-  firebase_core_web:
-    :path: ".symlinks/plugins/firebase_core_web/ios"
   firebase_messaging:
     :path: ".symlinks/plugins/firebase_messaging/ios"
-  firebase_messaging_web:
-    :path: ".symlinks/plugins/firebase_messaging_web/ios"
   Flutter:
     :path: Flutter
   flutter_local_notifications:
     :path: ".symlinks/plugins/flutter_local_notifications/ios"
-  flutter_plugin_android_lifecycle:
-    :path: ".symlinks/plugins/flutter_plugin_android_lifecycle/ios"
   flutter_webrtc:
     :path: ".symlinks/plugins/flutter_webrtc/ios"
   fluttertoast:
@@ -195,66 +157,44 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/package_info/ios"
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
-  path_provider_linux:
-    :path: ".symlinks/plugins/path_provider_linux/ios"
-  path_provider_macos:
-    :path: ".symlinks/plugins/path_provider_macos/ios"
-  path_provider_windows:
-    :path: ".symlinks/plugins/path_provider_windows/ios"
+  platform_device_id:
+    :path: ".symlinks/plugins/platform_device_id/ios"
   shared_preferences:
     :path: ".symlinks/plugins/shared_preferences/ios"
-  shared_preferences_linux:
-    :path: ".symlinks/plugins/shared_preferences_linux/ios"
-  shared_preferences_macos:
-    :path: ".symlinks/plugins/shared_preferences_macos/ios"
-  shared_preferences_web:
-    :path: ".symlinks/plugins/shared_preferences_web/ios"
-  shared_preferences_windows:
-    :path: ".symlinks/plugins/shared_preferences_windows/ios"
   sqflite:
     :path: ".symlinks/plugins/sqflite/ios"
 
 SPEC CHECKSUMS:
   connectivity: c4130b2985d4ef6fd26f9702e886bd5260681467
-  connectivity_for_web: 2b8584556930d4bd490d82b836bcf45067ce345b
-  connectivity_macos: e2e9731b6b22dda39eb1b128f6969d574460e191
-  device_id: 4a0bf078741a3eec6ba0e6cc72e786395d5991b0
+  device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   Firebase: 26223c695fe322633274198cb19dca8cb7e54416
-  firebase_core: 91b27774a52f41f8b58484a75edf71197ac01c59
-  firebase_core_web: 2223a33d6da33b048d7fd598f2ead160af0b6020
-  firebase_messaging: d039d8279704fc1e3d05e0a2bb2ce7dc29ee6be8
-  firebase_messaging_web: 40d490d4507fcf5519de8b42af0d653dcc74ac0f
+  firebase_core: b5d81dfd4fb2d6f700e67de34d9a633ae325c4e9
+  firebase_messaging: 7547c99f31466371f9cfcb733d5a1bf32a819872
   FirebaseCore: 4d3c72622ce0e2106aaa07bb4b2935ba2c370972
-  FirebaseCoreDiagnostics: 35685db68b11fe7d19d2d8b557fd7e3a56ac81cc
-  FirebaseInstallations: a46ae59915f0931e18814164849cd0354bea24ed
-  FirebaseInstanceID: 47fcb3b70d6349cfd471f430b01bbd01a7698e8f
+  FirebaseCoreDiagnostics: 5662a3823ffcc0acbaa9a21ba5ed302fac634705
+  FirebaseInstallations: bf2ec8dbf36ff4c91af6b9a003d15855757680c1
+  FirebaseInstanceID: 5ad92c898e1328b66e8dd58811964d6fe4d334c3
   FirebaseMessaging: 68d1bcb14880189558a8ae57167abe0b7e417232
-  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
   flutter_local_notifications: 0c0b1ae97e741e1521e4c1629a459d04b9aec743
-  flutter_plugin_android_lifecycle: dc0b544e129eebb77a6bfb1239d4d1c673a60a35
   flutter_webrtc: 39898454258b54ba51996850d5da8d5d53bf1524
-  fluttertoast: b644586ef3b16f67fae9a1f8754cef6b2d6b634b
+  fluttertoast: 6122fa75143e992b1d3470f61000f591a798cc58
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
-  GoogleDataTransport: 1024b1a4dfbd7a0e92cb20d7e0a6f1fb66b449a4
-  GoogleUtilities: d866834472f1324d080496bc67ab3ce5d0d46027
+  GoogleDataTransport: cd9db2180fcecd8da1b561aea31e3e56cf834aa7
+  GoogleUtilities: e1d9ed4e544fc32a93e00e721400cbc3f377200d
   GoogleWebRTC: b39a78c4f5cc6b0323415b9233db03a2faa7b0f0
-  image_picker: 9c3312491f862b28d21ecd8fdf0ee14e601b3f09
+  image_picker: 50e7c7ff960e5f58faa4d1f4af84a771c671bc4a
   Libyuv: 5f79ced0ee66e60a612ca97de1e6ccacd187a437
-  nanopb: 59221d7f958fb711001e6a449489542d92ae113e
+  nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   package_info: 873975fc26034f0b863a300ad47e7f1ac6c7ec62
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
-  path_provider_linux: 4d630dc393e1f20364f3e3b4a2ff41d9674a84e4
-  path_provider_macos: f760a3c5b04357c380e2fddb6f9db6f3015897e0
-  path_provider_windows: a2b81600c677ac1959367280991971cb9a1edb3b
+  platform_device_id: 81b3e2993881f87d0c82ef151dc274df4869aef5
   PromisesObjC: 3113f7f76903778cf4a0586bd1ab89329a0b7b97
   Reachability: 33e18b67625424e47b6cde6d202dce689ad7af96
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
-  shared_preferences_linux: afefbfe8d921e207f01ede8b60373d9e3b566b78
-  shared_preferences_macos: f3f29b71ccbb56bf40c9dd6396c9acf15e214087
-  shared_preferences_web: 141cce0c3ed1a1c5bf2a0e44f52d31eeb66e5ea9
-  shared_preferences_windows: 36b76d6f54e76ead957e60b49e2f124b4cd3e6ae
-  sqflite: 4001a31ff81d210346b500c55b17f4d6c7589dd0
+  sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
+  Toast: 91b396c56ee72a5790816f40d3a94dd357abc196
 
-PODFILE CHECKSUM: 0ba44ad07df4ab62269dc769727cf0f12b1e453d
+PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
 
 COCOAPODS: 1.10.0

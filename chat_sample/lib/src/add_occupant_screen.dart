@@ -1,27 +1,24 @@
 import '../src/utils/consts.dart';
 import '../src/widgets/common.dart';
 import 'package:connectycube_sdk/connectycube_chat.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 class AddOccupantScreen extends StatefulWidget {
-  final CubeUser _cubeUser;
-  final CubeDialog _cubeDialog;
+  final CubeUser? _cubeUser;
 
   @override
   State<StatefulWidget> createState() {
-    return _AddOccupantScreenState(_cubeUser, _cubeDialog);
+    return _AddOccupantScreenState(_cubeUser);
   }
 
-  AddOccupantScreen(this._cubeUser, this._cubeDialog);
+  AddOccupantScreen(this._cubeUser);
 }
 
 class _AddOccupantScreenState extends State<AddOccupantScreen> {
   static const String TAG = "_AddOccupantScreenState";
-  final CubeUser currentUser;
-  final CubeDialog _cubeDialog;
+  final CubeUser? currentUser;
 
-  _AddOccupantScreenState(this.currentUser, this._cubeDialog);
+  _AddOccupantScreenState(this.currentUser);
 
   @override
   void initState() {
@@ -39,7 +36,7 @@ class _AddOccupantScreenState extends State<AddOccupantScreen> {
             'Contacts',
           ),
         ),
-        body: BodyLayout(currentUser, _cubeDialog),
+        body: BodyLayout(currentUser),
       ),
     );
   }
@@ -51,10 +48,9 @@ class _AddOccupantScreenState extends State<AddOccupantScreen> {
 }
 
 class BodyLayout extends StatefulWidget {
-  final CubeUser currentUser;
-  final CubeDialog _cubeDialog;
+  final CubeUser? currentUser;
 
-  BodyLayout(this.currentUser, this._cubeDialog);
+  BodyLayout(this.currentUser);
 
   @override
   State<StatefulWidget> createState() {
@@ -65,11 +61,11 @@ class BodyLayout extends StatefulWidget {
 class _BodyLayoutState extends State<BodyLayout> {
   static const String TAG = "_BodyLayoutState";
 
-  final CubeUser currentUser;
+  final CubeUser? currentUser;
   List<CubeUser> userList = [];
   Set<int> _selectedUsers = {};
   var _isUsersContinues = false;
-  String userToSearch;
+  String? userToSearch;
   String userMsg = " ";
 
   _BodyLayoutState(this.currentUser);
@@ -149,12 +145,12 @@ class _BodyLayoutState extends State<BodyLayout> {
     }
 
     if (_isUsersContinues) {
-      if (userToSearch != null && userToSearch.isNotEmpty) {
-        getUsersByFullName(userToSearch).then((users) {
+      if (userToSearch != null && userToSearch!.isNotEmpty) {
+        getUsersByFullName(userToSearch!).then((users) {
           log("getusers: $users", TAG);
           setState(() {
             clearValues();
-            userList.addAll(users.items);
+            userList.addAll(users!.items);
           });
         }).catchError((onError) {
           log("getusers catchError: $onError", TAG);
@@ -179,7 +175,7 @@ class _BodyLayoutState extends State<BodyLayout> {
 
   Widget _getListItemTile(BuildContext context, int index) {
     return Container(
-      child: FlatButton(
+      child: TextButton(
         child: Row(
           children: <Widget>[
             Material(
@@ -188,14 +184,14 @@ class _BodyLayoutState extends State<BodyLayout> {
                 backgroundColor: Colors.white,
                 child: CircleAvatar(
                   backgroundImage: userList[index].avatar != null &&
-                          userList[index].avatar.isNotEmpty
-                      ? NetworkImage(userList[index].avatar)
+                          userList[index].avatar!.isNotEmpty
+                      ? NetworkImage(userList[index].avatar!)
                       : null,
                   radius: 25,
                   child: getAvatarTextWidget(
                       userList[index].avatar != null &&
-                          userList[index].avatar.isNotEmpty,
-                      userList[index].fullName.substring(0, 2).toUpperCase()),
+                          userList[index].avatar!.isNotEmpty,
+                      userList[index].fullName!.substring(0, 2).toUpperCase()),
                 ),
               ),
               borderRadius: BorderRadius.all(
@@ -225,8 +221,8 @@ class _BodyLayoutState extends State<BodyLayout> {
                 value: _selectedUsers.contains(userList[index].id),
                 onChanged: ((checked) {
                   setState(() {
-                    if (checked) {
-                      _selectedUsers.add(userList[index].id);
+                    if (checked!) {
+                      _selectedUsers.add(userList[index].id!);
                     } else {
                       _selectedUsers.remove(userList[index].id);
                     }
@@ -241,14 +237,14 @@ class _BodyLayoutState extends State<BodyLayout> {
             if (_selectedUsers.contains(userList[index].id)) {
               _selectedUsers.remove(userList[index].id);
             } else {
-              _selectedUsers.add(userList[index].id);
+              _selectedUsers.add(userList[index].id!);
             }
           });
         },
-        color: greyColor2,
-        padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+        // color: greyColor2,
+        // padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
+        // shape:
+        //     RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       ),
       margin: EdgeInsets.only(bottom: 10.0, left: 5.0, right: 5.0),
     );

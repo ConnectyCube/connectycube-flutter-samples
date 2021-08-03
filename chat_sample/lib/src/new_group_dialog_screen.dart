@@ -36,7 +36,7 @@ class NewChatScreen extends StatefulWidget {
   static const String TAG = "_CreateChatScreenState";
   final CubeUser currentUser;
   final CubeDialog _cubeDialog;
-  final List<CubeUser> users;
+  final List<CubeUser?> users;
 
   NewChatScreen(this.currentUser, this._cubeDialog, this.users);
 
@@ -48,10 +48,10 @@ class NewChatScreenState extends State<NewChatScreen> {
   static const String TAG = "NewChatScreenState";
   final CubeUser currentUser;
   final CubeDialog _cubeDialog;
-  final List<CubeUser> users;
+  final List<CubeUser?> users;
   final TextEditingController _nameFilter = new TextEditingController();
 
-  File _image;
+  File? _image;
   final picker = ImagePicker();
 
   NewChatScreenState(this.currentUser, this._cubeDialog, this.users);
@@ -101,7 +101,7 @@ class NewChatScreenState extends State<NewChatScreen> {
           color: blueColor,
         );
       } else {
-        return Image.file(_image, width: 45.0, height: 45.0);
+        return Image.file(_image!, width: 45.0, height: 45.0);
       }
     }
 
@@ -141,14 +141,16 @@ class NewChatScreenState extends State<NewChatScreen> {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
     if (pickedFile == null) return;
     var image = File(pickedFile.path);
-    uploadFile(image, true).then((cubeFile) {
+    uploadFile(image, isPublic: true).then((cubeFile) {
       _image = image;
       var url = cubeFile.getPublicUrl();
       log("_createDialogImage url= $url");
       setState(() {
         _cubeDialog.photo = url;
       });
-    }).catchError(_processDialogError);
+    }).catchError((exception) {
+      _processDialogError(exception);
+    });
   }
 
   _buildDialogOccupants() {
@@ -158,15 +160,15 @@ class NewChatScreenState extends State<NewChatScreen> {
           children: <Widget>[
             Material(
               child: CircleAvatar(
-                backgroundImage: users[index].avatar != null &&
-                        users[index].avatar.isNotEmpty
-                    ? NetworkImage(users[index].avatar)
+                backgroundImage: users[index]!.avatar != null &&
+                        users[index]!.avatar!.isNotEmpty
+                    ? NetworkImage(users[index]!.avatar!)
                     : null,
                 radius: 25,
                 child: getAvatarTextWidget(
-                    users[index].avatar != null &&
-                        users[index].avatar.isNotEmpty,
-                    users[index].fullName.substring(0, 2).toUpperCase()),
+                    users[index]!.avatar != null &&
+                        users[index]!.avatar!.isNotEmpty,
+                    users[index]!.fullName!.substring(0, 2).toUpperCase()),
               ),
               borderRadius: BorderRadius.all(Radius.circular(25.0)),
               clipBehavior: Clip.hardEdge,
@@ -176,7 +178,7 @@ class NewChatScreenState extends State<NewChatScreen> {
                 children: <Widget>[
                   Container(
                     child: Text(
-                      users[index].fullName,
+                      users[index]!.fullName!,
                       style: TextStyle(color: primaryColor),
                     ),
                     width: MediaQuery.of(context).size.width / 4,
@@ -197,7 +199,7 @@ class NewChatScreenState extends State<NewChatScreen> {
         shrinkWrap: true,
         padding: EdgeInsets.symmetric(vertical: 20.0),
         scrollDirection: Axis.horizontal,
-        itemCount: _cubeDialog.occupantsIds.length,
+        itemCount: _cubeDialog.occupantsIds!.length,
         itemBuilder: _getListItemTile,
       );
     }
@@ -221,7 +223,7 @@ class NewChatScreenState extends State<NewChatScreen> {
 
   _createDialog() {
     log("_createDialog _cubeDialog= $_cubeDialog");
-    if (_cubeDialog.name == null || _cubeDialog.name.length < 5) {
+    if (_cubeDialog.name == null || _cubeDialog.name!.length < 5) {
       showDialogMsg("Enter more than 4 character", context);
     } else {
       createDialog(_cubeDialog).then((createdDialog) {
@@ -231,7 +233,9 @@ class NewChatScreenState extends State<NewChatScreen> {
             builder: (context) => ChatDialogScreen(currentUser, createdDialog),
           ),
         );
-      }).catchError(_processDialogError);
+      }).catchError((exception) {
+        _processDialogError(exception);
+      });
     }
   }
 }

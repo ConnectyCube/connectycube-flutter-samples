@@ -123,7 +123,7 @@ class LoginPageState extends State<LoginPage> {
         future: getFilterChipsWidgets(),
         builder: (BuildContext context, AsyncSnapshot<Widget> snapshot) {
           if (snapshot.hasData) {
-            return snapshot.data;
+            return snapshot.data!;
           }
           return SizedBox.shrink();
         });
@@ -132,7 +132,7 @@ class LoginPageState extends State<LoginPage> {
   Future<Widget> getFilterChipsWidgets() async {
     if (_isLoginContinues) return SizedBox.shrink();
     SharedPrefs sharedPrefs = await SharedPrefs.instance.init();
-    CubeUser user = sharedPrefs.getUser();
+    CubeUser? user = sharedPrefs.getUser();
     if (user != null) {
       _loginToCC(context, user);
       return SizedBox.shrink();
@@ -172,17 +172,17 @@ class LoginPageState extends State<LoginPage> {
       return new Container(
         child: new Column(
           children: <Widget>[
-            new RaisedButton(
+            new ElevatedButton(
               child: new Text('Login'),
               onPressed: _loginPressed,
             ),
-            new FlatButton(
+            new TextButton(
               child: new Text('Don\'t have an account? Tap here to register.'),
               onPressed: _formChange,
             ),
-            new FlatButton(
+            new TextButton(
               child: new Text('Delete user?'),
-              onPressed: _delete_user_pressed,
+              onPressed: _deleteUserPressed,
             )
           ],
         ),
@@ -191,11 +191,11 @@ class LoginPageState extends State<LoginPage> {
       return new Container(
         child: new Column(
           children: <Widget>[
-            new RaisedButton(
+            new ElevatedButton(
               child: new Text('Create an Account'),
               onPressed: _createAccountPressed,
             ),
-            new FlatButton(
+            new TextButton(
               child: new Text('Have an account? Click here to login.'),
               onPressed: _formChange,
             )
@@ -217,15 +217,15 @@ class LoginPageState extends State<LoginPage> {
         CubeUser(login: _login, password: _password, fullName: _login));
   }
 
-  void _delete_user_pressed() {
-    print('_delete_user_pressed $_login and $_password');
+  void _deleteUserPressed() {
+    print('_deleteUserPressed $_login and $_password');
     _userDelete();
   }
 
   void _userDelete() {
     createSession(CubeUser(login: _login, password: _password))
         .then((cubeSession) {
-      deleteUser(cubeSession.userId).then((_) {
+      deleteUser(cubeSession.userId!).then((_) {
         print("signOut success");
         showDialog(
             context: context,
@@ -234,7 +234,7 @@ class LoginPageState extends State<LoginPage> {
                 title: Text("Delete user"),
                 content: Text("succeeded"),
                 actions: <Widget>[
-                  FlatButton(
+                  TextButton(
                     child: Text("OK"),
                     onPressed: () => Navigator.of(context).pop(),
                   )
@@ -242,7 +242,9 @@ class LoginPageState extends State<LoginPage> {
               );
             });
       });
-    }).catchError(_processLoginError);
+    }).catchError((exception) {
+      _processLoginError(exception);
+    });
   }
 
   _signInCC(BuildContext context, CubeUser user) async {
@@ -265,18 +267,22 @@ class LoginPageState extends State<LoginPage> {
       signIn(user).then((result) {
         _loginToCubeChat(context, user);
       });
-    }).catchError(_processLoginError);
+    }).catchError((exception) {
+      _processLoginError(exception);
+    });
   }
 
   _loginToCC(BuildContext context, CubeUser user, {bool saveUser = false}) {
+    print("_loginToCC user: $user");
     if (_isLoginContinues) return;
     setState(() {
       _isLoginContinues = true;
     });
 
     createSession(user).then((cubeSession) async {
+      print("createSession cubeSession: $cubeSession");
       var tempUser = user;
-      user = cubeSession.user..password = tempUser.password;
+      user = cubeSession.user!..password = tempUser.password;
       if (saveUser)
         SharedPrefs.instance.init().then((sharedPrefs) {
           sharedPrefs.saveNewUser(user);
@@ -285,7 +291,9 @@ class LoginPageState extends State<LoginPage> {
       PushNotificationsManager.instance.init();
 
       _loginToCubeChat(context, user);
-    }).catchError(_processLoginError);
+    }).catchError((error) {
+      _processLoginError(error);
+    });
   }
 
   _loginToCubeChat(BuildContext context, CubeUser user) {
@@ -294,7 +302,9 @@ class LoginPageState extends State<LoginPage> {
     CubeChatConnection.instance.login(user).then((cubeUser) {
       _isLoginContinues = false;
       _goDialogScreen(context, cubeUser);
-    }).catchError(_processLoginError);
+    }).catchError((error) {
+      _processLoginError(error);
+    });
   }
 
   void _processLoginError(exception) {
@@ -303,14 +313,6 @@ class LoginPageState extends State<LoginPage> {
       _isLoginContinues = false;
     });
     showDialogError(exception, context);
-  }
-
-  void _clear() {
-    _isLoginContinues = false;
-    _login = "";
-    _password = "";
-    _loginFilter.clear();
-    _passwordFilter.clear();
   }
 
   void _goDialogScreen(BuildContext context, CubeUser cubeUser) async {
@@ -352,7 +354,7 @@ class LoginPageState extends State<LoginPage> {
     FlutterLocalNotificationsPlugin()
         .getNotificationAppLaunchDetails()
         .then((details) {
-      String payload = details.payload;
+      String? payload = details!.payload;
 
       if (payload == null) {
         Navigator.pushReplacementNamed(
@@ -362,10 +364,10 @@ class LoginPageState extends State<LoginPage> {
         );
       } else {
         Map<String, dynamic> payloadObject = jsonDecode(payload);
-        String dialogId = payloadObject['dialog_id'];
+        String? dialogId = payloadObject['dialog_id'];
 
         getDialogs({'id': dialogId}).then((dialogs) {
-          if (dialogs?.items != null && dialogs.items.isNotEmpty ?? false) {
+          if (dialogs?.items != null && dialogs!.items.isNotEmpty) {
             CubeDialog dialog = dialogs.items.first;
             Navigator.pushReplacementNamed(context, 'chat_dialog',
                 arguments: {USER_ARG_NAME: cubeUser, DIALOG_ARG_NAME: dialog});

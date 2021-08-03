@@ -14,7 +14,7 @@ import '../src/utils/pref_util.dart';
 import '../src/widgets/common.dart';
 
 class SettingsScreen extends StatelessWidget {
-  final CubeUser currentUser;
+  final CubeUser? currentUser;
 
   SettingsScreen(this.currentUser);
 
@@ -34,7 +34,7 @@ class SettingsScreen extends StatelessWidget {
 }
 
 class BodyLayout extends StatefulWidget {
-  final CubeUser currentUser;
+  final CubeUser? currentUser;
 
   BodyLayout(this.currentUser);
 
@@ -47,9 +47,9 @@ class BodyLayout extends StatefulWidget {
 class _BodyLayoutState extends State<BodyLayout> {
   static const String TAG = "_BodyLayoutState";
 
-  final CubeUser currentUser;
+  final CubeUser? currentUser;
   var _isUsersContinues = false;
-  String _avatarUrl = "";
+  String? _avatarUrl = "";
   final picker = ImagePicker();
   final TextEditingController _loginFilter = new TextEditingController();
   final TextEditingController _nameFilter = new TextEditingController();
@@ -59,8 +59,8 @@ class _BodyLayoutState extends State<BodyLayout> {
   _BodyLayoutState(this.currentUser) {
     _loginFilter.addListener(_loginListen);
     _nameFilter.addListener(_nameListen);
-    _nameFilter.text = currentUser.fullName;
-    _loginFilter.text = currentUser.login;
+    _nameFilter.text = currentUser!.fullName!;
+    _loginFilter.text = currentUser!.login!;
   }
 
   _searchUser(value) {
@@ -120,14 +120,14 @@ class _BodyLayoutState extends State<BodyLayout> {
   Widget _buildAvatarFields() {
     Widget avatarCircle = CircleAvatar(
       backgroundImage:
-          currentUser.avatar != null && currentUser.avatar.isNotEmpty
-              ? NetworkImage(currentUser.avatar)
+          currentUser!.avatar != null && currentUser!.avatar!.isNotEmpty
+              ? NetworkImage(currentUser!.avatar!)
               : null,
       backgroundColor: greyColor2,
       radius: 50,
       child: getAvatarTextWidget(
-        currentUser.avatar != null && currentUser.avatar.isNotEmpty,
-        currentUser.fullName.substring(0, 2).toUpperCase(),
+        currentUser!.avatar != null && currentUser!.avatar!.isNotEmpty,
+        currentUser!.fullName!.substring(0, 2).toUpperCase(),
       ),
     );
 
@@ -164,12 +164,14 @@ class _BodyLayoutState extends State<BodyLayout> {
     final pickedFile = await picker.getImage(source: ImageSource.gallery);
     if (pickedFile == null) return;
     var image = File(pickedFile.path);
-    uploadFile(image, true).then((cubeFile) {
+    uploadFile(image, isPublic: true).then((cubeFile) {
       _avatarUrl = cubeFile.getPublicUrl();
       setState(() {
-        currentUser.avatar = _avatarUrl;
+        currentUser!.avatar = _avatarUrl;
       });
-    }).catchError(_processUpdateUserError);
+    }).catchError((exception) {
+        _processUpdateUserError(exception);
+    });
   }
 
   Widget _buildTextFields() {
@@ -197,11 +199,11 @@ class _BodyLayoutState extends State<BodyLayout> {
     return new Container(
       child: new Column(
         children: <Widget>[
-          new FlatButton(
+          new TextButton(
             child: new Text('Save'),
             onPressed: _updateUser,
           ),
-          new RaisedButton(
+          new TextButton(
             child: new Text('Logout'),
             onPressed: _logout,
           )
@@ -212,15 +214,15 @@ class _BodyLayoutState extends State<BodyLayout> {
 
   void _updateUser() {
     print('_updateUser user with $_login and $_name');
-    if (_login.isEmpty && _name.isEmpty && _avatarUrl.isEmpty) {
+    if (_login.isEmpty && _name.isEmpty && _avatarUrl!.isEmpty) {
       Fluttertoast.showToast(msg: 'Nothing to save');
       return;
     }
-    var userToUpdate = CubeUser()..id = currentUser.id;
+    var userToUpdate = CubeUser()..id = currentUser!.id;
 
     if (_name.isNotEmpty) userToUpdate.fullName = _name;
     if (_login.isNotEmpty) userToUpdate.login = _login;
-    if (_avatarUrl.isNotEmpty) userToUpdate.avatar = _avatarUrl;
+    if (_avatarUrl!.isNotEmpty) userToUpdate.avatar = _avatarUrl;
     setState(() {
       _isUsersContinues = true;
     });
@@ -230,7 +232,9 @@ class _BodyLayoutState extends State<BodyLayout> {
       setState(() {
         _isUsersContinues = false;
       });
-    }).catchError(_processUpdateUserError);
+    }).catchError((exception) {
+      _processUpdateUserError(exception);
+    });
   }
 
   void _logout() {
@@ -242,13 +246,13 @@ class _BodyLayoutState extends State<BodyLayout> {
           title: Text("Logout"),
           content: Text("Are you sure you want logout current user"),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text("CANCEL"),
               onPressed: () {
                 Navigator.pop(context);
               },
             ),
-            FlatButton(
+            TextButton(
               child: Text("OK"),
               onPressed: () {
                 signOut().then(
