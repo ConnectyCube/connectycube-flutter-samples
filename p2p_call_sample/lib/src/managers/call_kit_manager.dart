@@ -114,14 +114,13 @@ class CallKitManager {
   /// Event Listener Callbacks for 'connectycube_flutter_call_kit'
 
   Future<void> _onCallAccepted(String sessionId, int callType, int callerId,
-      String callerName, Set<int> opponentsIds) async {
+      String callerName, Set<int> opponentsIds, Map<String, String> userInfo) async {
 
     onCallAccepted.call(sessionId);
   }
 
   Future<void> _onCallRejected(String sessionId, int callType, int callerId,
-      String callerName, Set<int> opponentsIds) async {
-
+      String callerName, Set<int> opponentsIds, Map<String, String> userInfo) async {
     onCallEnded.call(sessionId);
   }
 }

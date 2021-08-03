@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:device_id/device_id.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +7,7 @@ import 'package:flutter_voip_push_notification/flutter_voip_push_notification.da
 
 import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
 import 'package:connectycube_sdk/connectycube_sdk.dart';
+import 'package:platform_device_id/platform_device_id.dart';
 
 import '../managers/call_manager.dart';
 import '../utils/consts.dart';
@@ -88,7 +88,6 @@ class PushNotificationsManager {
       return;
     }
 
-
     CreateSubscriptionParameters parameters = CreateSubscriptionParameters();
     parameters.environment = CubeEnvironment
         .DEVELOPMENT; // TODO for sample we use DEVELOPMENT environment
@@ -106,7 +105,7 @@ class PushNotificationsManager {
       parameters.bundleIdentifier = "com.connectycube.flutter.p2p-call-sample";
     }
 
-    String deviceId = await DeviceId.getID;
+    String deviceId = await PlatformDeviceId.getDeviceId;
     parameters.udid = deviceId;
     parameters.pushToken = token;
 
@@ -170,11 +169,12 @@ processCallNotification(Map<String, dynamic> data) async {
 
   if (signalType == SIGNAL_TYPE_START_CALL) {
     ConnectycubeFlutterCallKit.showCallNotification(
-        sessionId: sessionId,
-        callType: int.parse(data[PARAM_CALL_TYPE]),
-        callerId: int.parse(data[PARAM_CALLER_ID]),
-        callerName: data[PARAM_CALLER_NAME],
-        opponentsIds: opponentsIds);
+      sessionId: sessionId,
+      callType: int.parse(data[PARAM_CALL_TYPE]),
+      callerId: int.parse(data[PARAM_CALLER_ID]),
+      callerName: data[PARAM_CALLER_NAME],
+      opponentsIds: opponentsIds,
+    );
   } else if (signalType == SIGNAL_TYPE_END_CALL) {
     ConnectycubeFlutterCallKit.reportCallEnded(
         sessionId: data[PARAM_SESSION_ID]);
@@ -188,12 +188,13 @@ processCallNotification(Map<String, dynamic> data) async {
 Future<void> onBackgroundMessage(RemoteMessage message) async {
   await Firebase.initializeApp();
 
-  ConnectycubeFlutterCallKit.onCallAcceptedWhenTerminated = (
+  ConnectycubeFlutterCallKit.onCallRejectedWhenTerminated = (
     sessionId,
     callType,
     callerId,
     callerName,
     opponentsIds,
+    userInfo,
   ) {
     return sendPushAboutRejectFromKilledState({
       PARAM_CALL_TYPE: callType,
