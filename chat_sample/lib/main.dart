@@ -95,7 +95,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
       SharedPrefs sharedPrefs = await SharedPrefs.instance.init();
       CubeUser? user = sharedPrefs.getUser();
 
-      return createSession(user) as FutureOr<CubeSession>;
+      return createSession(user);
     });
 
     connectivityStateSubscription =

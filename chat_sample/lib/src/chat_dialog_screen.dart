@@ -113,7 +113,7 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   void openGallery() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile == null) return;
     setState(() {
       isLoading = true;
@@ -466,7 +466,7 @@ class ChatScreenState extends State<ChatScreen> {
                               context,
                               MaterialPageRoute(
                                   builder: (context) => FullPhoto(
-                                      url: message.attachments!.first.url)));
+                                      url: message.attachments!.first.url!)));
                         },
                       ),
                       margin: EdgeInsets.only(
@@ -601,7 +601,7 @@ class ChatScreenState extends State<ChatScreen> {
                                 context,
                                 MaterialPageRoute(
                                     builder: (context) => FullPhoto(
-                                        url: message.attachments!.first.url)));
+                                        url: message.attachments!.first.url!)));
                           },
                         ),
                         margin: EdgeInsets.only(left: 10.0),

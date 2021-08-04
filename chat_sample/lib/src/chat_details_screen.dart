@@ -1,16 +1,17 @@
 import 'dart:async';
 import 'dart:io';
 
-import '../src/utils/api_utils.dart';
-import '../src/utils/consts.dart';
-import '../src/widgets/common.dart';
-import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 
+import 'package:connectycube_sdk/connectycube_sdk.dart';
+
 import 'add_occupant_screen.dart';
+import '../src/utils/api_utils.dart';
+import '../src/utils/consts.dart';
+import '../src/widgets/common.dart';
 
 class ChatDetailsScreen extends StatelessWidget {
   final CubeUser _cubeUser;
@@ -45,13 +46,13 @@ class ChatDetailsScreen extends StatelessWidget {
 
 class DetailScreen extends StatefulWidget {
   static const String TAG = "DetailScreen";
-  final CubeUser? _cubeUser;
-  final CubeDialog? _cubeDialog;
+  final CubeUser _cubeUser;
+  final CubeDialog _cubeDialog;
 
   DetailScreen(this._cubeUser, this._cubeDialog);
 
   @override
-  State createState() => _cubeDialog!.type == CubeDialogType.PRIVATE
+  State createState() => _cubeDialog.type == CubeDialogType.PRIVATE
       ? ContactScreenState(_cubeUser, _cubeDialog)
       : GroupScreenState(_cubeUser, _cubeDialog);
 }
@@ -74,7 +75,7 @@ abstract class ScreenState extends State<DetailScreen> {
 
   initUsers() async {
     _isProgressContinues = true;
-    if(_cubeDialog.occupantsIds == null || _cubeDialog.occupantsIds!.isEmpty){
+    if (_cubeDialog.occupantsIds == null || _cubeDialog.occupantsIds!.isEmpty) {
       setState(() {
         _isProgressContinues = false;
       });
@@ -277,9 +278,10 @@ class GroupScreenState extends ScreenState {
       return SizedBox.shrink();
     }
     Widget avatarCircle = CircleAvatar(
-      backgroundImage: _cubeDialog.photo != null && _cubeDialog.photo!.isNotEmpty
-          ? NetworkImage(_cubeDialog.photo!)
-          : null,
+      backgroundImage:
+          _cubeDialog.photo != null && _cubeDialog.photo!.isNotEmpty
+              ? NetworkImage(_cubeDialog.photo!)
+              : null,
       backgroundColor: greyColor2,
       radius: 50,
       child: getAvatarTextWidget(
@@ -317,7 +319,7 @@ class GroupScreenState extends ScreenState {
   }
 
   _chooseUserImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile == null) return;
     var image = File(pickedFile.path);
     uploadFile(image, isPublic: true).then((cubeFile) {
@@ -637,8 +639,8 @@ class GroupScreenState extends ScreenState {
       _cubeDialog = dialog;
       Fluttertoast.showToast(msg: 'Success');
       setState(() {
-        if ((_usersToAdd?.isNotEmpty ?? false) ||
-            (_usersToRemove.isNotEmpty)) initUsers();
+        if ((_usersToAdd?.isNotEmpty ?? false) || (_usersToRemove.isNotEmpty))
+          initUsers();
         _isProgressContinues = false;
         clearFields();
       });

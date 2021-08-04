@@ -138,7 +138,7 @@ class NewChatScreenState extends State<NewChatScreen> {
   }
 
   _createDialogImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile == null) return;
     var image = File(pickedFile.path);
     uploadFile(image, isPublic: true).then((cubeFile) {

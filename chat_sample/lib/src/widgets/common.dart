@@ -8,7 +8,7 @@ Widget getAvatarTextWidget(bool condition, String? text) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(55),
       child: Text(
-        isEmpty(text)? '?' : text!,
+        isEmpty(text) ? '?' : text!,
         style: TextStyle(fontSize: 30),
       ),
     );

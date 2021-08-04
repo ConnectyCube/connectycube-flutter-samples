@@ -4,7 +4,7 @@ import 'package:connectycube_sdk/connectycube_chat.dart';
 import 'package:flutter/material.dart';
 
 class AddOccupantScreen extends StatefulWidget {
-  final CubeUser? _cubeUser;
+  final CubeUser _cubeUser;
 
   @override
   State<StatefulWidget> createState() {
@@ -16,7 +16,7 @@ class AddOccupantScreen extends StatefulWidget {
 
 class _AddOccupantScreenState extends State<AddOccupantScreen> {
   static const String TAG = "_AddOccupantScreenState";
-  final CubeUser? currentUser;
+  final CubeUser currentUser;
 
   _AddOccupantScreenState(this.currentUser);
 
@@ -48,7 +48,7 @@ class _AddOccupantScreenState extends State<AddOccupantScreen> {
 }
 
 class BodyLayout extends StatefulWidget {
-  final CubeUser? currentUser;
+  final CubeUser currentUser;
 
   BodyLayout(this.currentUser);
 
@@ -61,7 +61,7 @@ class BodyLayout extends StatefulWidget {
 class _BodyLayoutState extends State<BodyLayout> {
   static const String TAG = "_BodyLayoutState";
 
-  final CubeUser? currentUser;
+  final CubeUser currentUser;
   List<CubeUser> userList = [];
   Set<int> _selectedUsers = {};
   var _isUsersContinues = false;
