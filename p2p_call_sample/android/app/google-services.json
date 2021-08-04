@@ -1,0 +1,91 @@
+{
+  "project_info": {
+    "project_number": "786049777770",
+    "firebase_url": "https://flutter-chat-sample-b6156.firebaseio.com",
+    "project_id": "flutter-chat-sample-b6156",
+    "storage_bucket": "flutter-chat-sample-b6156.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:786049777770:android:9a15bc2f398ff87121ca13",
+        "android_client_info": {
+          "package_name": "com.connectycube.flutter.chat_sample"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "786049777770-r77dnt4cjtfoq7sv17emp0gd35hfvuf1.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.connectycube.flutter.chat_sample",
+            "certificate_hash": "bb874325d6fe287be4c0fb25fef374d31b816cdd"
+          }
+        },
+        {
+          "client_id": "786049777770-4fncsuvhreutchjqfrjnvlc9rtn87nvl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUqotNn5W5q-DuuCiDYMJxgIkWdiVMsUE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "786049777770-4fncsuvhreutchjqfrjnvlc9rtn87nvl.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "786049777770-c1fdglcfdvqj19d6ql98fa3j8otrp2tc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.connectycube.flutter.p2p-call-sample"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:786049777770:android:dda8b901ae89a50521ca13",
+        "android_client_info": {
+          "package_name": "com.connectycube.flutter.p2p_call_sample"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "786049777770-4fncsuvhreutchjqfrjnvlc9rtn87nvl.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUqotNn5W5q-DuuCiDYMJxgIkWdiVMsUE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "786049777770-4fncsuvhreutchjqfrjnvlc9rtn87nvl.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "786049777770-c1fdglcfdvqj19d6ql98fa3j8otrp2tc.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.connectycube.flutter.p2p-call-sample"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
