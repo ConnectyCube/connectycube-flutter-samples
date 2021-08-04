@@ -105,7 +105,9 @@ class BodyState extends State<BodyLayout> {
       _selectedUserId = user.id;
     });
 
-    if (CubeSessionManager.instance.isActiveSessionValid()) {
+    if (CubeSessionManager.instance.isActiveSessionValid() &&
+        CubeSessionManager.instance.activeSession?.userId != null &&
+        CubeSessionManager.instance.activeSession?.userId == user.id) {
       _loginToCubeChat(context, user);
     } else {
       createSession(user).then((cubeSession) {
@@ -156,7 +158,7 @@ class BodyState extends State<BodyLayout> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SelectDialogScreen(cubeUser),
+        builder: (context) => SelectOpponentsScreen(cubeUser),
       ),
     );
   }
