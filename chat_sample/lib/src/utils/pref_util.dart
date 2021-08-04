@@ -22,7 +22,7 @@ class SharedPrefs {
   static SharedPrefs get instance => _instance;
 
   Future<SharedPrefs> init() async {
-    Completer completer = Completer<SharedPrefs>();
+    Completer<SharedPrefs> completer = Completer();
     if (inited) {
       completer.complete(_instance);
     } else {
@@ -30,7 +30,7 @@ class SharedPrefs {
       inited = true;
       completer.complete(_instance);
     }
-    return completer.future as FutureOr<SharedPrefs>;
+    return completer.future;
   }
 
   saveNewUser(CubeUser cubeUser) {

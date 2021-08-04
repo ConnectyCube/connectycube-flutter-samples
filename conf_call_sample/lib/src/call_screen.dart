@@ -180,9 +180,9 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     _onStreamAdd(ConferenceClient.instance.currentUserId, stream);
   }
 
-  void _addRemoteMediaStream(session, int? userId, MediaStream stream) {
+  void _addRemoteMediaStream(session, int userId, MediaStream stream) {
     log("_addRemoteMediaStream for user $userId", TAG);
-    _onStreamAdd(userId!, stream);
+    _onStreamAdd(userId, stream);
   }
 
   void _removeMediaStream(callSession, int userId) {
