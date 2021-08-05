@@ -22,7 +22,7 @@ dependencies:
       ref: master
   flutter_call_kit:
     git:
-      url: git://github.com/blackdragon0603/flutter_call_kit.git
+      url: git://github.com/raj457036/flutter_call_kit.git
       ref: master
 
   connectycube_flutter_call_kit: ^0.1.0-dev.1
