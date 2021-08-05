@@ -49,8 +49,8 @@ initConnectycube(){
     config.AUTH_KEY,
     config.AUTH_SECRET,
     onSessionRestore: () {
-      return SharedPrefs.instance.init().then((preferences) {
-        return createSession(preferences.getUser());
+      return SharedPrefs.getUser().then((savedUser) {
+        return createSession(savedUser);
       });
     },
   );

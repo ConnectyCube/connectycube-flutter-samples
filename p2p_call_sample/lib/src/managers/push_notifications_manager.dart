@@ -17,16 +17,22 @@ import '../utils/configs.dart' as config;
 class PushNotificationsManager {
   static const TAG = "PushNotificationsManager";
 
-  static final PushNotificationsManager _instance =
-      PushNotificationsManager._internal();
+  static PushNotificationsManager? _instance;
 
   PushNotificationsManager._internal() {
     Firebase.initializeApp();
   }
 
-  BuildContext applicationContext;
+  static PushNotificationsManager _getInstance() {
+    return _instance ??= PushNotificationsManager._internal();
+  }
 
-  static PushNotificationsManager get instance => _instance;
+  factory PushNotificationsManager() => _getInstance();
+
+
+  BuildContext? applicationContext;
+
+  static PushNotificationsManager get instance => _getInstance();
 
   FlutterVoipPushNotification _voipPush = FlutterVoipPushNotification();
 
@@ -67,7 +73,9 @@ class PushNotificationsManager {
 
     firebaseMessaging.getToken().then((token) {
       log('[getToken] FCM token: $token', TAG);
-      subscribe(token);
+      if(!isEmpty(token)){
+        subscribe(token!);
+      }
     }).catchError((onError) {
       log('[getToken] onError: $onError', TAG);
     });
@@ -81,8 +89,8 @@ class PushNotificationsManager {
   subscribe(String token) async {
     log('[subscribe] token: $token', PushNotificationsManager.TAG);
 
-    SharedPrefs sharedPrefs = await SharedPrefs.instance.init();
-    if (sharedPrefs.getSubscriptionToken() == token) {
+    var savedToken = await SharedPrefs.getSubscriptionToken();
+    if (token == savedToken) {
       log('[subscribe] skip subscription for same token',
           PushNotificationsManager.TAG);
       return;
@@ -105,17 +113,17 @@ class PushNotificationsManager {
       parameters.bundleIdentifier = "com.connectycube.flutter.p2p-call-sample";
     }
 
-    String deviceId = await PlatformDeviceId.getDeviceId;
+    String? deviceId = await PlatformDeviceId.getDeviceId;
     parameters.udid = deviceId;
     parameters.pushToken = token;
 
     createSubscription(parameters.getRequestParameters())
-        .then((cubeSubscription) {
+        .then((cubeSubscriptions) {
       log('[subscribe] subscription SUCCESS', PushNotificationsManager.TAG);
-      sharedPrefs.saveSubscriptionToken(token);
-      cubeSubscription.forEach((subscription) {
-        if (subscription.device.clientIdentificationSequence == token) {
-          sharedPrefs.saveSubscriptionId(subscription.id);
+      SharedPrefs.saveSubscriptionToken(token);
+      cubeSubscriptions.forEach((subscription) {
+        if (subscription.device!.clientIdentificationSequence == token) {
+          SharedPrefs.saveSubscriptionId(subscription.id!);
         }
       });
     }).catchError((error) {
@@ -125,12 +133,11 @@ class PushNotificationsManager {
   }
 
   Future<void> unsubscribe() {
-    return SharedPrefs.instance.init().then((sharedPrefs) async {
-      int subscriptionId = sharedPrefs.getSubscriptionId();
+    return SharedPrefs.getSubscriptionId().then((subscriptionId) async {
       if (subscriptionId != 0) {
         return deleteSubscription(subscriptionId).then((voidResult) {
           FirebaseMessaging.instance.deleteToken();
-          sharedPrefs.saveSubscriptionId(0);
+          SharedPrefs.saveSubscriptionId(0);
         });
       } else {
         return Future.value();
@@ -147,21 +154,21 @@ Future<dynamic> onMessage(bool isLocal, Map<String, dynamic> payload) {
 
   processCallNotification(payload);
 
-  return null;
+  return Future.value();
 }
 
 Future<dynamic> onResume(bool isLocal, Map<String, dynamic> payload) {
   log("[onResume] received on background payload: $payload, isLocal=$isLocal",
       PushNotificationsManager.TAG);
 
-  return null;
+  return Future.value();
 }
 
 processCallNotification(Map<String, dynamic> data) async {
   log('[processCallNotification] message: $data', PushNotificationsManager.TAG);
 
-  String signalType = data[PARAM_SIGNAL_TYPE];
-  String sessionId = data[PARAM_SESSION_ID];
+  String? signalType = data[PARAM_SIGNAL_TYPE];
+  String? sessionId = data[PARAM_SESSION_ID];
   Set<int> opponentsIds = (data[PARAM_CALL_OPPONENTS] as String)
       .split(',')
       .map((e) => int.parse(e))
@@ -220,8 +227,8 @@ Future<void> sendPushAboutRejectFromKilledState(
   CubeSettings.instance.authorizationSecret = config.AUTH_SECRET;
   CubeSettings.instance.accountKey = config.ACCOUNT_ID;
   CubeSettings.instance.onSessionRestore = () {
-    return SharedPrefs.instance.init().then((preferences) {
-      return createSession(preferences.getUser());
+    return SharedPrefs.getUser().then((savedUser) {
+      return createSession(savedUser);
     });
   };
 

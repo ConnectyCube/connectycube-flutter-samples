@@ -15,26 +15,22 @@ class CallManager {
   static String TAG = "CallManager";
 
   // collect pending calls in case when it was accepted/ended before establish chat connection
-  Map<String, String> _callsMap = {};
+  Map<String?, String> _callsMap = {};
 
   static CallManager get instance => _getInstance();
-  static CallManager _instance;
+  static CallManager? _instance;
 
   static CallManager _getInstance() {
-    if (_instance == null) {
-      _instance = CallManager._internal();
-    }
-    return _instance;
+    return _instance ??= CallManager._internal();
   }
 
   factory CallManager() => _getInstance();
 
   CallManager._internal();
 
-  P2PClient _callClient;
-  P2PSession _currentCall;
-
-  BuildContext context;
+  P2PClient? _callClient;
+  P2PSession? _currentCall;
+  BuildContext? context;
 
   init(BuildContext context) {
     this.context = context;
@@ -66,32 +62,32 @@ class CallManager {
     if(_callClient == null) {
       _callClient = P2PClient.instance;
 
-      _callClient.init();
+      _callClient!.init();
     }
 
-    _callClient.onReceiveNewSession = (callSession) async {
+    _callClient!.onReceiveNewSession = (callSession) async {
       if (_currentCall != null &&
-          _currentCall.sessionId != callSession.sessionId) {
+          _currentCall!.sessionId != callSession.sessionId) {
         callSession.reject();
         return;
       }
       _currentCall = callSession;
 
-      var callState = await _getCallState(_currentCall.sessionId);
+      var callState = await _getCallState(_currentCall!.sessionId);
 
       if (callState == CallState.REJECTED) {
-        reject(_currentCall.sessionId);
+        reject(_currentCall!.sessionId);
       } else if (callState == CallState.ACCEPTED) {
-        acceptCall(_currentCall.sessionId);
+        acceptCall(_currentCall!.sessionId);
       } else if (callState == CallState.UNKNOWN) {
         // ConnectycubeFlutterCallKit.setCallState(sessionId: _currentCall.sessionId, callState: CallState.PENDING);
         // _showIncomingCallScreen(_currentCall);
       }
     };
 
-    _callClient.onSessionClosed = (callSession) {
+    _callClient!.onSessionClosed = (callSession) {
       if (_currentCall != null &&
-          _currentCall.sessionId == callSession.sessionId) {
+          _currentCall!.sessionId == callSession.sessionId) {
         _currentCall = null;
         CallKitManager.instance.reportEndCallWithUUID(callSession.sessionId);
       }
@@ -101,7 +97,7 @@ class CallManager {
   void startNewCall(BuildContext context, int callType, Set<int> opponents) {
     if (opponents.isEmpty) return;
 
-    P2PSession callSession = _callClient.createCallSession(callType, opponents);
+    P2PSession callSession = _callClient!.createCallSession(callType, opponents);
     _currentCall = callSession;
     Navigator.push(
       context,
@@ -110,13 +106,13 @@ class CallManager {
       ),
     );
 
-    _sendStartCallSignalForOffliners(_currentCall);
+    _sendStartCallSignalForOffliners(_currentCall!);
   }
 
   void _showIncomingCallScreen(P2PSession callSession) {
     if (context != null) {
       Navigator.push(
-        context,
+        context!,
         MaterialPageRoute(
           builder: (context) => IncomingCallScreen(callSession),
         ),
@@ -133,9 +129,9 @@ class CallManager {
     if (_currentCall != null) {
       if (context != null) {
         Navigator.pushReplacement(
-          context,
+          context!,
           MaterialPageRoute(
-            builder: (context) => ConversationCallScreen(_currentCall, true),
+            builder: (context) => ConversationCallScreen(_currentCall!, true),
           ),
         );
       }
@@ -146,8 +142,8 @@ class CallManager {
 
   void reject(String sessionId) {
     if (_currentCall != null) {
-      CallKitManager.instance.rejectCall(_currentCall.sessionId);
-      _currentCall.reject();
+      CallKitManager.instance.rejectCall(_currentCall!.sessionId);
+      _currentCall!.reject();
     } else {
       _callsMap[sessionId] = CallState.REJECTED;
     }
@@ -155,14 +151,14 @@ class CallManager {
 
   void hungUp() {
     if (_currentCall != null) {
-      CallKitManager.instance.endCall(_currentCall.sessionId);
-      _sendEndCallSignalForOffliners(_currentCall);
-      _currentCall.hungUp();
+      CallKitManager.instance.endCall(_currentCall!.sessionId);
+      _sendEndCallSignalForOffliners(_currentCall!);
+      _currentCall!.hungUp();
     }
   }
 
   CreateEventParams _getCallEventParameters(P2PSession currentCall) {
-    String callerName = users
+    String? callerName = users
         .where((cubeUser) => cubeUser.id == currentCall.callerId)
         .first
         .fullName;
@@ -202,7 +198,7 @@ class CallManager {
   }
 
   void _sendEndCallSignalForOffliners(P2PSession currentCall) {
-    CubeUser currentUser = CubeChatConnection.instance.currentUser;
+    CubeUser? currentUser = CubeChatConnection.instance.currentUser;
     if (currentUser == null || currentUser.id != currentCall.callerId) return;
 
     CreateEventParams params = _getCallEventParameters(currentCall);

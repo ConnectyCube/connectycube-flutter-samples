@@ -4,20 +4,25 @@ description: P2P Calls Sample
 version: 1.0.1
 
 environment:
-  sdk: ">=2.2.0 <3.0.0"
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
 
-  connectycube_sdk: ^2.0.0
-  firebase_core: ^1.0.3
-  firebase_messaging: 9.1.1
-  shared_preferences: ^2.0.5
-  flutter_voip_push_notification: ^0.0.3
+#  connectycube_sdk: ^2.0.0
+  connectycube_sdk:
+    path: ../../flutter-sdk
+  firebase_core: ^1.4.0
+  firebase_messaging: ^10.0.4
+  shared_preferences: ^2.0.6
+  flutter_voip_push_notification:
+    git:
+      url: git://github.com/blackdragon0603/flutter_voip_push_notification.git
+      ref: master
   flutter_call_kit:
     git:
-      url: git://github.com/peerwaya/flutter_call_kit.git
+      url: git://github.com/blackdragon0603/flutter_call_kit.git
       ref: master
 
   connectycube_flutter_call_kit: ^0.1.0-dev.1
