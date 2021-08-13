@@ -20,7 +20,7 @@ dependencies:
   firebase_core: ^1.4.0
   firebase_messaging: ^10.0.4
   flutter_local_notifications: ^8.0.0
-  connectivity: ^3.0.6
+  connectivity_plus: ^1.0.6
   logging: ^1.0.1
   collection: ^1.15.0
 
