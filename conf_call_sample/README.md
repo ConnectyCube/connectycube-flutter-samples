@@ -19,7 +19,9 @@ ConnectyCube Conference Calls API documentation - [https://developers.connectycu
 
 ## Screenshots
 
-<kbd><img alt="Flutter Conference Calls code sample, select users" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/select_opponents_screen.png" height="440" /></kbd> <kbd><img alt="Flutter Conference Calls code sample, video chat" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen.png" height="440" /></kbd>
+<kbd><img alt="Flutter Conference Calls code sample, select users" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/select_opponents_screen.png" height="440" /></kbd> 
+<kbd><img alt="Flutter Conference Calls code sample, video chat" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen.png" height="440" /></kbd></kbd> 
+<kbd><img alt="Flutter Conference Calls code sample, video chat (macOS)" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen_macos.png" height="440" /></kbd>
 
 ## Quick start and develop
 
@@ -43,6 +45,10 @@ App will automatically run on your Android device.
 
 App will automatically run on selected iOS device or simulator.
 
+### Run on macOS
+- Run command from the  Teminal `flutter run -d macos`;
+### Run on Windows
+- Run command from the  Teminal `flutter run -d windows`;
 ## Can't build yourself?
 
 Got troubles with building Flutter code sample? Just create an issue at [Issues page](https://github.com/ConnectyCube/connectycube-flutter-samples/issues) - we will create the sample for you. For FREE!
