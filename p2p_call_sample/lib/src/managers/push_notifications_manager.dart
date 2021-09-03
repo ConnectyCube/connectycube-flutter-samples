@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:device_id/device_id.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +7,7 @@ import 'package:flutter_voip_push_notification/flutter_voip_push_notification.da
 
 import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
 import 'package:connectycube_sdk/connectycube_sdk.dart';
+import 'package:platform_device_id/platform_device_id.dart';
 
 import '../managers/call_manager.dart';
 import '../utils/consts.dart';
@@ -17,16 +17,22 @@ import '../utils/configs.dart' as config;
 class PushNotificationsManager {
   static const TAG = "PushNotificationsManager";
 
-  static final PushNotificationsManager _instance =
-      PushNotificationsManager._internal();
+  static PushNotificationsManager? _instance;
 
   PushNotificationsManager._internal() {
     Firebase.initializeApp();
   }
 
-  BuildContext applicationContext;
+  static PushNotificationsManager _getInstance() {
+    return _instance ??= PushNotificationsManager._internal();
+  }
 
-  static PushNotificationsManager get instance => _instance;
+  factory PushNotificationsManager() => _getInstance();
+
+
+  BuildContext? applicationContext;
+
+  static PushNotificationsManager get instance => _getInstance();
 
   FlutterVoipPushNotification _voipPush = FlutterVoipPushNotification();
 
@@ -57,6 +63,13 @@ class PushNotificationsManager {
       log('[onTokenRefresh] VoIP token: $token', TAG);
       subscribe(token);
     });
+
+    _voipPush.getToken().then((token) {
+      log('[getToken] VoIP token: $token', TAG);
+      if(token != null){
+        subscribe(token);
+      }
+    });
   }
 
   _initFcm() async {
@@ -67,7 +80,9 @@ class PushNotificationsManager {
 
     firebaseMessaging.getToken().then((token) {
       log('[getToken] FCM token: $token', TAG);
-      subscribe(token);
+      if(!isEmpty(token)){
+        subscribe(token!);
+      }
     }).catchError((onError) {
       log('[getToken] onError: $onError', TAG);
     });
@@ -81,13 +96,12 @@ class PushNotificationsManager {
   subscribe(String token) async {
     log('[subscribe] token: $token', PushNotificationsManager.TAG);
 
-    SharedPrefs sharedPrefs = await SharedPrefs.instance.init();
-    if (sharedPrefs.getSubscriptionToken() == token) {
+    var savedToken = await SharedPrefs.getSubscriptionToken();
+    if (token == savedToken) {
       log('[subscribe] skip subscription for same token',
           PushNotificationsManager.TAG);
       return;
     }
-
 
     CreateSubscriptionParameters parameters = CreateSubscriptionParameters();
     parameters.environment = CubeEnvironment
@@ -103,20 +117,20 @@ class PushNotificationsManager {
     } else if (Platform.isIOS) {
       parameters.channel = NotificationsChannels.APNS_VOIP;
       parameters.platform = CubePlatform.IOS;
-      parameters.bundleIdentifier = "com.connectycube.flutter.p2p-call-sample";
+      parameters.bundleIdentifier = "com.connectycube.flutter.p2p-call-sample.app";
     }
 
-    String deviceId = await DeviceId.getID;
+    String? deviceId = await PlatformDeviceId.getDeviceId;
     parameters.udid = deviceId;
     parameters.pushToken = token;
 
     createSubscription(parameters.getRequestParameters())
-        .then((cubeSubscription) {
+        .then((cubeSubscriptions) {
       log('[subscribe] subscription SUCCESS', PushNotificationsManager.TAG);
-      sharedPrefs.saveSubscriptionToken(token);
-      cubeSubscription.forEach((subscription) {
-        if (subscription.device.clientIdentificationSequence == token) {
-          sharedPrefs.saveSubscriptionId(subscription.id);
+      SharedPrefs.saveSubscriptionToken(token);
+      cubeSubscriptions.forEach((subscription) {
+        if (subscription.device!.clientIdentificationSequence == token) {
+          SharedPrefs.saveSubscriptionId(subscription.id!);
         }
       });
     }).catchError((error) {
@@ -126,12 +140,11 @@ class PushNotificationsManager {
   }
 
   Future<void> unsubscribe() {
-    return SharedPrefs.instance.init().then((sharedPrefs) async {
-      int subscriptionId = sharedPrefs.getSubscriptionId();
+    return SharedPrefs.getSubscriptionId().then((subscriptionId) async {
       if (subscriptionId != 0) {
         return deleteSubscription(subscriptionId).then((voidResult) {
           FirebaseMessaging.instance.deleteToken();
-          sharedPrefs.saveSubscriptionId(0);
+          SharedPrefs.saveSubscriptionId(0);
         });
       } else {
         return Future.value();
@@ -148,21 +161,21 @@ Future<dynamic> onMessage(bool isLocal, Map<String, dynamic> payload) {
 
   processCallNotification(payload);
 
-  return null;
+  return Future.value();
 }
 
 Future<dynamic> onResume(bool isLocal, Map<String, dynamic> payload) {
   log("[onResume] received on background payload: $payload, isLocal=$isLocal",
       PushNotificationsManager.TAG);
 
-  return null;
+  return Future.value();
 }
 
 processCallNotification(Map<String, dynamic> data) async {
   log('[processCallNotification] message: $data', PushNotificationsManager.TAG);
 
-  String signalType = data[PARAM_SIGNAL_TYPE];
-  String sessionId = data[PARAM_SESSION_ID];
+  String? signalType = data[PARAM_SIGNAL_TYPE];
+  String? sessionId = data[PARAM_SESSION_ID];
   Set<int> opponentsIds = (data[PARAM_CALL_OPPONENTS] as String)
       .split(',')
       .map((e) => int.parse(e))
@@ -170,11 +183,12 @@ processCallNotification(Map<String, dynamic> data) async {
 
   if (signalType == SIGNAL_TYPE_START_CALL) {
     ConnectycubeFlutterCallKit.showCallNotification(
-        sessionId: sessionId,
-        callType: int.parse(data[PARAM_CALL_TYPE]),
-        callerId: int.parse(data[PARAM_CALLER_ID]),
-        callerName: data[PARAM_CALLER_NAME],
-        opponentsIds: opponentsIds);
+      sessionId: sessionId,
+      callType: int.parse(data[PARAM_CALL_TYPE]),
+      callerId: int.parse(data[PARAM_CALLER_ID]),
+      callerName: data[PARAM_CALLER_NAME],
+      opponentsIds: opponentsIds,
+    );
   } else if (signalType == SIGNAL_TYPE_END_CALL) {
     ConnectycubeFlutterCallKit.reportCallEnded(
         sessionId: data[PARAM_SESSION_ID]);
@@ -188,12 +202,13 @@ processCallNotification(Map<String, dynamic> data) async {
 Future<void> onBackgroundMessage(RemoteMessage message) async {
   await Firebase.initializeApp();
 
-  ConnectycubeFlutterCallKit.onCallAcceptedWhenTerminated = (
+  ConnectycubeFlutterCallKit.onCallRejectedWhenTerminated = (
     sessionId,
     callType,
     callerId,
     callerName,
     opponentsIds,
+    userInfo,
   ) {
     return sendPushAboutRejectFromKilledState({
       PARAM_CALL_TYPE: callType,
@@ -219,8 +234,8 @@ Future<void> sendPushAboutRejectFromKilledState(
   CubeSettings.instance.authorizationSecret = config.AUTH_SECRET;
   CubeSettings.instance.accountKey = config.ACCOUNT_ID;
   CubeSettings.instance.onSessionRestore = () {
-    return SharedPrefs.instance.init().then((preferences) {
-      return createSession(preferences.getUser());
+    return SharedPrefs.getUser().then((savedUser) {
+      return createSession(savedUser);
     });
   };
 

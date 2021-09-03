@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
@@ -70,8 +71,8 @@ class _BodyLayoutState extends State<BodyLayout> {
   List<ListItem<CubeDialog>> dialogList = [];
   var _isDialogContinues = true;
 
-  StreamSubscription<CubeMessage> msgSubscription;
-  final ChatMessagesManager chatMessagesManager =
+  StreamSubscription<CubeMessage>? msgSubscription;
+  final ChatMessagesManager? chatMessagesManager =
       CubeChatConnection.instance.chatMessagesManager;
 
   _BodyLayoutState(this.currentUser);
@@ -136,9 +137,11 @@ class _BodyLayoutState extends State<BodyLayout> {
         setState(() {
           dialogList.clear();
           dialogList
-              .addAll(dialogs.items.map((dialog) => ListItem(dialog)).toList());
+              .addAll(dialogs!.items.map((dialog) => ListItem(dialog)).toList());
         });
-      }).catchError(_processGetDialogError);
+      }).catchError((exception) {
+          _processGetDialogError(exception);
+      });
     }
     if (_isDialogContinues && dialogList.isEmpty)
       return SizedBox.shrink();
@@ -196,7 +199,7 @@ class _BodyLayoutState extends State<BodyLayout> {
               ),
             ),
           ),
-          imageUrl: dialogList[index].data.photo,
+          imageUrl: dialogList[index].data.photo!,
           width: 45.0,
           height: 45.0,
           fit: BoxFit.cover,
@@ -205,7 +208,7 @@ class _BodyLayoutState extends State<BodyLayout> {
     }
 
     return Container(
-      child: FlatButton(
+      child: TextButton(
         child: Row(
           children: <Widget>[
             Material(
@@ -259,7 +262,7 @@ class _BodyLayoutState extends State<BodyLayout> {
             ),
             Container(
               child: Text(
-                '${dialogList[index].data.lastMessageDateSent != null ? DateFormat('MMM dd').format(DateTime.fromMillisecondsSinceEpoch(dialogList[index].data.lastMessageDateSent * 1000)) : 'Not available'}',
+                '${dialogList[index].data.lastMessageDateSent != null ? DateFormat('MMM dd').format(DateTime.fromMillisecondsSinceEpoch(dialogList[index].data.lastMessageDateSent! * 1000)) : 'Not available'}',
                 style: TextStyle(color: primaryColor),
               ),
             ),
@@ -273,11 +276,6 @@ class _BodyLayoutState extends State<BodyLayout> {
         onPressed: () {
           _openDialog(context, dialogList[index].data);
         },
-        color:
-            dialogList[index].isSelected ? Colors.black54 : Colors.transparent,
-        padding: EdgeInsets.fromLTRB(25.0, 10.0, 25.0, 10.0),
-        shape:
-            RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
       ),
       margin: EdgeInsets.only(left: 5.0, right: 5.0),
     );
@@ -303,7 +301,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   void initState() {
     super.initState();
     msgSubscription =
-        chatMessagesManager.chatMessagesStream?.listen(onReceiveMessage);
+        chatMessagesManager!.chatMessagesStream.listen(onReceiveMessage);
   }
 
   @override
@@ -319,9 +317,8 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   updateDialog(CubeMessage msg) {
-    ListItem<CubeDialog> dialogItem = dialogList.firstWhere(
-        (dlg) => dlg.data.dialogId == msg.dialogId,
-        orElse: () => null);
+    ListItem<CubeDialog>? dialogItem = dialogList.firstWhereOrNull(
+        (dlg) => dlg.data.dialogId == msg.dialogId);
     if (dialogItem == null) return;
     dialogItem.data.lastMessage = msg.body;
     setState(() {

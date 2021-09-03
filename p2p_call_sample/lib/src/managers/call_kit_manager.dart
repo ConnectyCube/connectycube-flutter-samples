@@ -1,20 +1,16 @@
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_call_kit/flutter_call_kit.dart';
 
 import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
 
 class CallKitManager {
   static CallKitManager get instance => _getInstance();
-  static CallKitManager _instance;
+  static CallKitManager? _instance;
   static String TAG = "CallKitManager";
 
   static CallKitManager _getInstance() {
-    if (_instance == null) {
-      _instance = CallKitManager._internal();
-    }
-    return _instance;
+    return _instance ??= CallKitManager._internal();
   }
 
   factory CallKitManager() => _getInstance();
@@ -23,19 +19,19 @@ class CallKitManager {
     this._callKit = FlutterCallKit();
   }
 
-  FlutterCallKit _callKit;
+  late FlutterCallKit _callKit;
 
-  Function(String uuid) onCallAccepted;
-  Function(String uuid) onCallEnded;
-  Function(String error, String uuid, String handle, String localizedCallerName,
+  late Function(String uuid) onCallAccepted;
+  late Function(String uuid) onCallEnded;
+  late Function(String error, String uuid, String handle, String localizedCallerName,
       bool fromPushKit) onNewCallShown;
-  Function(bool mute, String uuid) onMuteCall;
+  late Function(bool mute, String uuid) onMuteCall;
 
   init({
-    @required onCallAccepted(uuid),
-    @required onCallEnded(uuid),
-    @required onNewCallShown(error, uuid, handle, callerName, fromPushKit),
-    @required onMuteCall(mute, uuid),
+    required onCallAccepted(uuid),
+    required onCallEnded(uuid),
+    required onNewCallShown(error, uuid, handle, callerName, fromPushKit),
+    required onMuteCall(mute, uuid),
   }) {
     this.onCallAccepted = onCallAccepted;
     this.onCallEnded = onCallEnded;
@@ -114,14 +110,13 @@ class CallKitManager {
   /// Event Listener Callbacks for 'connectycube_flutter_call_kit'
 
   Future<void> _onCallAccepted(String sessionId, int callType, int callerId,
-      String callerName, Set<int> opponentsIds) async {
+      String callerName, Set<int> opponentsIds, Map<String, String>? userInfo) async {
 
     onCallAccepted.call(sessionId);
   }
 
   Future<void> _onCallRejected(String sessionId, int callType, int callerId,
-      String callerName, Set<int> opponentsIds) async {
-
+      String callerName, Set<int> opponentsIds, Map<String, String>? userInfo) async {
     onCallEnded.call(sessionId);
   }
 }

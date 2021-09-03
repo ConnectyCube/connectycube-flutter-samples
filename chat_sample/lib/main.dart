@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:connectivity/connectivity.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
@@ -26,8 +26,8 @@ class App extends StatefulWidget {
 }
 
 class _AppState extends State<App> with WidgetsBindingObserver {
-  StreamSubscription<ConnectivityResult> connectivityStateSubscription;
-  AppLifecycleState appState;
+  late StreamSubscription<ConnectivityResult> connectivityStateSubscription;
+  AppLifecycleState? appState;
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +37,8 @@ class _AppState extends State<App> with WidgetsBindingObserver {
       ),
       home: LoginScreen(),
       onGenerateRoute: (settings) {
-        String name = settings.name;
-        Map<String, dynamic> args = settings.arguments;
+        String? name = settings.name;
+        Map<String, dynamic>? args = settings.arguments as Map<String, dynamic>?;
 
         MaterialPageRoute pageRout;
 
@@ -46,17 +46,17 @@ class _AppState extends State<App> with WidgetsBindingObserver {
           case 'chat_dialog':
             pageRout = MaterialPageRoute(
                 builder: (context) => ChatDialogScreen(
-                    args[USER_ARG_NAME], args[DIALOG_ARG_NAME]));
+                    args![USER_ARG_NAME], args[DIALOG_ARG_NAME]));
             break;
           case 'chat_details':
             pageRout = MaterialPageRoute(
                 builder: (context) => ChatDetailsScreen(
-                    args[USER_ARG_NAME], args[DIALOG_ARG_NAME]));
+                    args![USER_ARG_NAME], args[DIALOG_ARG_NAME]));
             break;
 
           case 'select_dialog':
             pageRout = MaterialPageRoute<bool>(
-                builder: (context) => SelectDialogScreen(args[USER_ARG_NAME]));
+                builder: (context) => SelectDialogScreen(args![USER_ARG_NAME]));
 
             break;
 
@@ -66,7 +66,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
 
           case 'settings':
             pageRout = MaterialPageRoute(
-                builder: (context) => SettingsScreen(args[USER_ARG_NAME]));
+                builder: (context) => SettingsScreen(args![USER_ARG_NAME]));
             break;
 
           default:
@@ -93,7 +93,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
     init(config.APP_ID, config.AUTH_KEY, config.AUTH_SECRET,
         onSessionRestore: () async {
       SharedPrefs sharedPrefs = await SharedPrefs.instance.init();
-      CubeUser user = sharedPrefs.getUser();
+      CubeUser? user = sharedPrefs.getUser();
 
       return createSession(user);
     });
@@ -117,15 +117,15 @@ class _AppState extends State<App> with WidgetsBindingObserver {
       }
     });
 
-    appState = WidgetsBinding.instance.lifecycleState;
-    WidgetsBinding.instance.addObserver(this);
+    appState = WidgetsBinding.instance!.lifecycleState;
+    WidgetsBinding.instance!.addObserver(this);
   }
 
   @override
   void dispose() {
     connectivityStateSubscription.cancel();
 
-    WidgetsBinding.instance.removeObserver(this);
+    WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
   }
 
@@ -140,7 +140,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
       }
     } else if (AppLifecycleState.resumed == state) {
       SharedPrefs.instance.init().then((sharedPrefs) {
-        CubeUser user = sharedPrefs.getUser();
+        CubeUser? user = sharedPrefs.getUser();
 
         if (user != null && !CubeChatConnection.instance.isAuthenticated()) {
           CubeChatConnection.instance.login(user);

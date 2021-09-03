@@ -72,7 +72,7 @@ class IncomingCallScreen extends StatelessWidget {
   }
 
   _getCallTitle() {
-    String callType;
+    var callType;
 
     switch (_callSession.callType) {
       case CallType.VIDEO_CALL:

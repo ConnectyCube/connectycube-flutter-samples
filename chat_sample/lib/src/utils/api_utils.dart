@@ -12,7 +12,7 @@ void showDialogError(exception, context) {
           title: Text("Error"),
           content: Text("Something went wrong $exception"),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text("OK"),
               onPressed: () => Navigator.of(context).pop(),
             )
@@ -29,7 +29,7 @@ void showDialogMsg(msg, context) {
           title: Text("Alert"),
           content: Text(msg),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text("OK"),
               onPressed: () => Navigator.of(context).pop(),
             )
@@ -48,7 +48,8 @@ Future<Map<int, CubeUser>> getUsersByIds(Set<int> ids) async {
   Completer<Map<int, CubeUser>> completer = Completer();
   Map<int, CubeUser> users = HashMap();
   try {
-    var result = await getAllUsersByIds(ids);
+    var result = await (getAllUsersByIds(ids)
+        as FutureOr<PagedResult<CubeUser>>);
     users.addAll(Map.fromIterable(result.items,
         key: (item) => item.id, value: (item) => item));
   } catch (ex) {

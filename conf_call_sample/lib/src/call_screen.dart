@@ -6,10 +6,10 @@ import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 class IncomingCallScreen extends StatelessWidget {
   static const String TAG = "IncomingCallScreen";
-  String _roomId;
-  List<int> _participantIds;
+  final String _meetingId;
+  final List<int> _participantIds;
 
-  IncomingCallScreen(this._roomId, this._participantIds);
+  IncomingCallScreen(this._meetingId, this._participantIds);
 
   @override
   Widget build(BuildContext context) {
@@ -79,18 +79,18 @@ class IncomingCallScreen extends StatelessWidget {
 
   void _acceptCall(BuildContext context) async {
     ConferenceSession callSession = await ConferenceClient.instance
-        .createCallSession(CubeChatConnection.instance.currentUser.id);
+        .createCallSession(CubeChatConnection.instance.currentUser!.id!);
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) =>
-            ConversationCallScreen(callSession, _roomId, _participantIds, true),
+            ConversationCallScreen(callSession, _meetingId, _participantIds, true),
       ),
     );
   }
 
   void _rejectCall(BuildContext context) {
-    CallManager.instance.reject(_roomId, false);
+    CallManager.instance.reject(_meetingId, false);
     Navigator.pop(context);
   }
 
@@ -101,36 +101,36 @@ class IncomingCallScreen extends StatelessWidget {
 
 class ConversationCallScreen extends StatefulWidget {
   final ConferenceSession _callSession;
-  final String roomId;
+  final String _meetingId;
   final List<int> opponents;
   final bool _isIncoming;
 
   @override
   State<StatefulWidget> createState() {
     return _ConversationCallScreenState(
-        _callSession, roomId, opponents, _isIncoming);
+        _callSession, _meetingId, opponents, _isIncoming);
   }
 
   ConversationCallScreen(
-      this._callSession, this.roomId, this.opponents, this._isIncoming);
+      this._callSession, this._meetingId, this.opponents, this._isIncoming);
 }
 
 class _ConversationCallScreenState extends State<ConversationCallScreen>
     implements RTCSessionStateCallback<ConferenceSession> {
   static const String TAG = "_ConversationCallScreenState";
-  ConferenceSession _callSession;
+  final ConferenceSession _callSession;
   CallManager _callManager = CallManager.instance;
-  bool _isIncoming;
-  String roomId;
-  final List<int> opponents;
+  final bool _isIncoming;
+  final String _meetingId;
+  final List<int> _opponents;
   bool _isCameraEnabled = true;
   bool _isSpeakerEnabled = true;
   bool _isMicMute = false;
 
-  Map<int, RTCVideoRenderer> streams = {};
+  Map<int, RTCVideoRenderer> _streams = {};
 
   _ConversationCallScreenState(
-      this._callSession, this.roomId, this.opponents, this._isIncoming);
+      this._callSession, this._meetingId, this._opponents, this._isIncoming);
 
   @override
   void initState() {
@@ -148,11 +148,11 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
     _callSession.setSessionCallbacksListener(this);
 
-    _callSession.joinDialog(roomId, ((publishers) {
+    _callSession.joinDialog(_meetingId, ((publishers) {
       log("join session= $publishers", TAG);
 
       if (!_isIncoming) {
-        _callManager.startCall(roomId, opponents, _callSession.currentUserId);
+        _callManager.startCall(_meetingId, _opponents, _callSession.currentUserId);
       }
     }));
   }
@@ -160,7 +160,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   @override
   void dispose() {
     super.dispose();
-    streams.forEach((opponentId, stream) async {
+    _streams.forEach((opponentId, stream) async {
       log("[dispose] dispose renderer for $opponentId", TAG);
       await stream.dispose();
     });
@@ -171,7 +171,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     _callSession.leave();
   }
 
-  void _onReceiveRejectCall(String roomId, int participantId, bool isBusy) {
+  void _onReceiveRejectCall(String meetingId, int participantId, bool isBusy) {
     log("_onReceiveRejectCall got reject from user $participantId", TAG);
   }
 
@@ -187,14 +187,14 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
   void _removeMediaStream(callSession, int userId) {
     log("_removeMediaStream for user $userId", TAG);
-    RTCVideoRenderer videoRenderer = streams[userId];
+    RTCVideoRenderer? videoRenderer = _streams[userId];
     if (videoRenderer == null) return;
 
     videoRenderer.srcObject = null;
     videoRenderer.dispose();
 
     setState(() {
-      streams.remove(userId);
+      _streams.remove(userId);
     });
   }
 
@@ -233,23 +233,27 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     RTCVideoRenderer streamRender = RTCVideoRenderer();
     await streamRender.initialize();
     streamRender.srcObject = stream;
-    setState(() => streams[opponentId] = streamRender);
+    setState(() => _streams[opponentId] = streamRender);
   }
 
-  void subscribeToPublishers(List<int> publishers) {
-    for (int publisher in publishers) {
+  void subscribeToPublishers(List<int?> publishers) {
+    publishers.forEach((publisher) {
       _callSession.subscribeToPublisher(publisher);
-    }
+    });
   }
 
-  void handlePublisherReceived(List<int> publishers) {
+  void handlePublisherReceived(List<int?> publishers) {
     if (!_isIncoming) {
-      publishers.forEach((id) => _callManager.handleAcceptCall(id));
+      publishers.forEach((id){
+        if(id != null) {
+          _callManager.handleAcceptCall(id);
+        }
+      });
     }
   }
 
   List<Widget> renderStreamsGrid(Orientation orientation) {
-    List<Widget> streamsExpanded = streams.entries
+    List<Widget> streamsExpanded = _streams.entries
         .map(
           (entry) => Expanded(
             child: RTCVideoView(
@@ -260,7 +264,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
           ),
         )
         .toList();
-    if (streams.length > 2) {
+    if (_streams.length > 2) {
       List<Widget> rows = [];
 
       for (var i = 0; i < streamsExpanded.length; i += 2) {
@@ -484,10 +488,10 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
   void _initCustomMediaConfigs() {
     RTCMediaConfig mediaConfig = RTCMediaConfig.instance;
-    if (opponents.length == 1) {
+    if (_opponents.length == 1) {
       mediaConfig.minHeight = HD_VIDEO.height;
       mediaConfig.minWidth = HD_VIDEO.width;
-    } else if (opponents.length <= 3) {
+    } else if (_opponents.length <= 3) {
       mediaConfig.minHeight = VGA_VIDEO.height;
       mediaConfig.minWidth = VGA_VIDEO.width;
     } else {
@@ -498,19 +502,19 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   }
 
   @override
-  void onConnectedToUser(ConferenceSession session, int userId) {
+  void onConnectedToUser(ConferenceSession session, int? userId) {
     log("onConnectedToUser userId= $userId");
   }
 
   @override
-  void onConnectionClosedForUser(ConferenceSession session, int userId) {
+  void onConnectionClosedForUser(ConferenceSession session, int? userId) {
     log("onConnectionClosedForUser userId= $userId");
-    _removeMediaStream(session, userId);
+    _removeMediaStream(session, userId!);
     _closeSessionIfLast();
   }
 
   @override
-  void onDisconnectedFromUser(ConferenceSession session, int userId) {
+  void onDisconnectedFromUser(ConferenceSession session, int? userId) {
     log("onDisconnectedFromUser userId= $userId");
   }
 }

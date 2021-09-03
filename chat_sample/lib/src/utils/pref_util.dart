@@ -13,7 +13,7 @@ const String prefSubscriptionId = "pref_subscription_id";
 
 class SharedPrefs {
   static final SharedPrefs _instance = SharedPrefs._internal();
-  SharedPreferences prefs;
+  late SharedPreferences prefs;
 
   SharedPrefs._internal();
 
@@ -22,7 +22,7 @@ class SharedPrefs {
   static SharedPrefs get instance => _instance;
 
   Future<SharedPrefs> init() async {
-    Completer completer = Completer<SharedPrefs>();
+    Completer<SharedPrefs> completer = Completer();
     if (inited) {
       completer.complete(_instance);
     } else {
@@ -35,32 +35,32 @@ class SharedPrefs {
 
   saveNewUser(CubeUser cubeUser) {
     prefs.clear();
-    prefs.setString(prefUserLogin, cubeUser.login);
-    prefs.setString(prefUserPsw, cubeUser.password);
-    prefs.setString(prefUserName, cubeUser.fullName);
-    prefs.setInt(prefUserId, cubeUser.id);
+    prefs.setString(prefUserLogin, cubeUser.login!);
+    prefs.setString(prefUserPsw, cubeUser.password!);
+    prefs.setString(prefUserName, cubeUser.fullName!);
+    prefs.setInt(prefUserId, cubeUser.id!);
     if (cubeUser.avatar != null)
-      prefs.setString(prefUserAvatar, cubeUser.avatar);
+      prefs.setString(prefUserAvatar, cubeUser.avatar!);
   }
 
   updateUser(CubeUser cubeUser) {
     if (cubeUser.password != null)
-      prefs.setString(prefUserPsw, cubeUser.password);
-    if (cubeUser.login != null) prefs.setString(prefUserLogin, cubeUser.login);
+      prefs.setString(prefUserPsw, cubeUser.password!);
+    if (cubeUser.login != null) prefs.setString(prefUserLogin, cubeUser.login!);
     if (cubeUser.fullName != null)
-      prefs.setString(prefUserName, cubeUser.fullName);
+      prefs.setString(prefUserName, cubeUser.fullName!);
     if (cubeUser.avatar != null)
-      prefs.setString(prefUserAvatar, cubeUser.avatar);
+      prefs.setString(prefUserAvatar, cubeUser.avatar!);
   }
 
-  CubeUser getUser() {
+  CubeUser? getUser() {
     if (prefs.get(prefUserLogin) == null) return null;
     var user = CubeUser();
-    user.login = prefs.get(prefUserLogin);
-    user.password = prefs.get(prefUserPsw);
-    user.fullName = prefs.get(prefUserName);
-    user.id = prefs.get(prefUserId);
-    user.avatar = prefs.get(prefUserAvatar);
+    user.login = prefs.getString(prefUserLogin);
+    user.password = prefs.getString(prefUserPsw);
+    user.fullName = prefs.getString(prefUserName);
+    user.id = prefs.getInt(prefUserId);
+    user.avatar = prefs.getString(prefUserAvatar);
     return user;
   }
 
@@ -69,18 +69,18 @@ class SharedPrefs {
   }
 
   saveSubscriptionToken(String token) {
-    prefs?.setString(prefSubscriptionToken, token);
+    prefs.setString(prefSubscriptionToken, token);
   }
 
   String getSubscriptionToken() {
-    return prefs?.getString(prefSubscriptionToken) ?? "";
+    return prefs.getString(prefSubscriptionToken) ?? "";
   }
 
   saveSubscriptionId(int id) {
-    prefs?.setInt(prefSubscriptionId, id);
+    prefs.setInt(prefSubscriptionId, id);
   }
 
   int getSubscriptionId() {
-    return prefs?.getInt(prefSubscriptionId) ?? 0;
+    return prefs.getInt(prefSubscriptionId) ?? 0;
   }
 }

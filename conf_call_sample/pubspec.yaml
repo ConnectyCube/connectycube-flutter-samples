@@ -1,17 +1,18 @@
 name: conf_call_sample
 description: Conf Calls Sample
 
-version: 0.0.1
+version: 0.1.1
 
 environment:
-  sdk: ">=2.2.0 <3.0.0"
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
 
-  connectycube_sdk: ^1.1.3
-
+  connectycube_sdk: ^2.0.3
+#  connectycube_sdk:
+#    path: ../../flutter-sdk
 
 dev_dependencies:
   flutter_test:

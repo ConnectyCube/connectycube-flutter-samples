@@ -19,13 +19,13 @@ class ConversationCallScreen extends StatefulWidget {
 class _ConversationCallScreenState extends State<ConversationCallScreen>
     implements RTCSessionStateCallback<P2PSession> {
   static const String TAG = "_ConversationCallScreenState";
-  P2PSession _callSession;
-  bool _isIncoming;
+  final P2PSession _callSession;
+  final bool _isIncoming;
   bool _isCameraEnabled = true;
   bool _isSpeakerEnabled = true;
   bool _isMicMute = false;
 
-  Map<int, RTCVideoRenderer> streams = {};
+  Map<int?, RTCVideoRenderer> streams = {};
 
   _ConversationCallScreenState(this._callSession, this._isIncoming);
 
@@ -56,7 +56,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
   void _addLocalMediaStream(MediaStream stream) {
     log("_addLocalMediaStream", TAG);
-    _onStreamAdd(CubeChatConnection.instance.currentUser.id, stream);
+    _onStreamAdd(CubeChatConnection.instance.currentUser!.id!, stream);
   }
 
   void _addRemoteMediaStream(session, int userId, MediaStream stream) {
@@ -66,7 +66,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
   void _removeMediaStream(callSession, int userId) {
     log("_removeMediaStream for user $userId", TAG);
-    RTCVideoRenderer videoRenderer = streams[userId];
+    RTCVideoRenderer? videoRenderer = streams[userId];
     if (videoRenderer == null) return;
 
     videoRenderer.srcObject = null;

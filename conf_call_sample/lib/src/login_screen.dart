@@ -11,8 +11,8 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          AppBar(automaticallyImplyLeading: false, title: Text('Conference calls')),
+      appBar: AppBar(
+          automaticallyImplyLeading: false, title: Text('Conference calls')),
       body: BodyLayout(),
     );
   }
@@ -29,7 +29,7 @@ class BodyState extends State<BodyLayout> {
   static const String TAG = "LoginScreen.BodyState";
 
   bool _isLoginContinues = false;
-  int _selectedUserId;
+  int? _selectedUserId;
 
   @override
   Widget build(BuildContext context) {
@@ -66,7 +66,7 @@ class BodyState extends State<BodyLayout> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    users[index].fullName,
+                    users[index].fullName!,
                     style: TextStyle(
                         color: _isLoginContinues
                             ? Colors.black26
@@ -105,12 +105,16 @@ class BodyState extends State<BodyLayout> {
       _selectedUserId = user.id;
     });
 
-    if (CubeSessionManager.instance.isActiveSessionValid()) {
+    if (CubeSessionManager.instance.isActiveSessionValid() &&
+        CubeSessionManager.instance.activeSession?.userId != null &&
+        CubeSessionManager.instance.activeSession?.userId == user.id) {
       _loginToCubeChat(context, user);
     } else {
       createSession(user).then((cubeSession) {
         _loginToCubeChat(context, user);
-      }).catchError(_processLoginError);
+      }).catchError((onError) {
+        _processLoginError(onError);
+      });
     }
   }
 
@@ -121,7 +125,9 @@ class BodyState extends State<BodyLayout> {
         _selectedUserId = 0;
       });
       _goSelectOpponentsScreen(context, cubeUser);
-    }).catchError(_processLoginError);
+    }).catchError((onError) {
+      _processLoginError(onError);
+    });
   }
 
   void _processLoginError(exception) {
@@ -139,7 +145,7 @@ class BodyState extends State<BodyLayout> {
             title: Text("Login Error"),
             content: Text("Something went wrong during login to ConnectyCube"),
             actions: <Widget>[
-              FlatButton(
+              TextButton(
                 child: Text("OK"),
                 onPressed: () => Navigator.of(context).pop(),
               )
@@ -152,7 +158,7 @@ class BodyState extends State<BodyLayout> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => SelectDialogScreen(cubeUser),
+        builder: (context) => SelectOpponentsScreen(cubeUser),
       ),
     );
   }

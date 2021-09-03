@@ -18,7 +18,7 @@ class SelectOpponentsScreen extends StatelessWidget {
         appBar: AppBar(
           automaticallyImplyLeading: false,
           title: Text(
-            'Logged in as ${CubeChatConnection.instance.currentUser.fullName}',
+            'Logged in as ${CubeChatConnection.instance.currentUser!.fullName}',
           ),
           actions: <Widget>[
             IconButton(
@@ -47,21 +47,19 @@ class SelectOpponentsScreen extends StatelessWidget {
           title: Text("Logout"),
           content: Text("Are you sure you want logout current user"),
           actions: <Widget>[
-            FlatButton(
+            TextButton(
               child: Text("CANCEL"),
               onPressed: () {
                 Navigator.pop(context);
               },
             ),
-            FlatButton(
+            TextButton(
               child: Text("OK"),
               onPressed: () async {
                 CallManager.instance.destroy();
                 CubeChatConnection.instance.destroy();
                 await PushNotificationsManager.instance.unsubscribe();
-                await SharedPrefs.instance
-                    .init()
-                    .then((value) => value.deleteUserData());
+                await SharedPrefs.deleteUserData();
                 await signOut();
 
                 Navigator.pop(context); // cancel current Dialog
@@ -96,7 +94,7 @@ class BodyLayout extends StatefulWidget {
 
 class _BodyLayoutState extends State<BodyLayout> {
   final CubeUser currentUser;
-  Set<int> _selectedUsers;
+  late Set<int> _selectedUsers;
 
 
   _BodyLayoutState(this.currentUser);
@@ -150,9 +148,9 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   Widget _getOpponentsList(BuildContext context) {
-    CubeUser currentUser = CubeChatConnection.instance.currentUser;
+    CubeUser? currentUser = CubeChatConnection.instance.currentUser;
     final users =
-        utils.users.where((user) => user.id != currentUser.id).toList();
+        utils.users.where((user) => user.id != currentUser!.id).toList();
 
     return ListView.builder(
       itemCount: users.length,
@@ -161,14 +159,14 @@ class _BodyLayoutState extends State<BodyLayout> {
           child: CheckboxListTile(
             title: Center(
               child: Text(
-                users[index].fullName,
+                users[index].fullName!,
               ),
             ),
             value: _selectedUsers.contains(users[index].id),
             onChanged: ((checked) {
               setState(() {
-                if (checked) {
-                  _selectedUsers.add(users[index].id);
+                if (checked!) {
+                  _selectedUsers.add(users[index].id!);
                 } else {
                   _selectedUsers.remove(users[index].id);
                 }
