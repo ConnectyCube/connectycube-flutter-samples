@@ -82,6 +82,9 @@ class CallManager {
       } else if (callState == CallState.UNKNOWN) {
         // ConnectycubeFlutterCallKit.setCallState(sessionId: _currentCall.sessionId, callState: CallState.PENDING);
         // _showIncomingCallScreen(_currentCall);
+        if(Platform.isWindows || Platform.isMacOS){
+          _showIncomingCallScreen(_currentCall!);
+        }
       }
     };
 

@@ -12,7 +12,7 @@ dependencies:
 
   connectycube_sdk: ^2.0.3
   shared_preferences: ^2.0.6
-  image_picker: ^0.8.2
+  file_picker: ^4.0.1
   fluttertoast: ^8.0.8
   cached_network_image: 3.1.0
   photo_view: ^0.12.0

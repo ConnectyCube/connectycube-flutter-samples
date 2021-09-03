@@ -3,9 +3,9 @@ import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
@@ -72,7 +72,6 @@ class ChatScreenState extends State<ChatScreen> {
   final Map<int?, CubeUser?> _occupants = Map();
 
   late File imageFile;
-  final picker = ImagePicker();
   late bool isLoading;
   String? imageUrl;
   List<CubeMessage>? listMessage = [];
@@ -113,12 +112,16 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   void openGallery() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile == null) return;
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+
+    if (result == null) return;
+
     setState(() {
       isLoading = true;
     });
-    imageFile = File(pickedFile.path);
+    imageFile = File(result.files.single.path);
     uploadImageFile();
   }
 
