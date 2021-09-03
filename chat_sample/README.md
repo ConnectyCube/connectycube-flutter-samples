@@ -21,7 +21,9 @@ ConnectyCube Chat API documentation - [https://developers.connectycube.com/flutt
 
 ## Screenshots
 
-<kbd><img alt="Flutter Chat sample, select dialogs" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/dialogs_screen.png" height="440" /></kbd> <kbd><img alt="Flutter Chat code sample, chat" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/chat_screen.png" height="440" /></kbd>
+<kbd><img alt="Flutter Chat sample, select dialogs" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/dialogs_screen.png" height="440" />
+</kbd> <kbd><img alt="Flutter Chat code sample, chat" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/chat_screen.png" height="440" /></kbd>
+</kbd> <kbd><img alt="Flutter Chat code sample, chat (Windows)" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/chat_screen_windows.png" height="440" /></kbd>
 
 ## Quick start and develop
 
@@ -44,6 +46,11 @@ App will automatically run on your Android device.
 - Press 'Build' button to start project building.
 
 App will automatically run on selected iOS device or simulator.
+
+### Run on macOS
+- Run command from the  Teminal `flutter run -d macos`;
+### Run on Windows
+- Run command from the  Teminal `flutter run -d windows`;
 
 ### Configure Push notifications:
 1. Create an own app in the ConnectyCube admin panel (if not created yet);

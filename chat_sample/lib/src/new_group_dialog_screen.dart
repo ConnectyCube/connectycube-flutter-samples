@@ -1,7 +1,7 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
@@ -52,7 +52,6 @@ class NewChatScreenState extends State<NewChatScreen> {
   final TextEditingController _nameFilter = new TextEditingController();
 
   File? _image;
-  final picker = ImagePicker();
 
   NewChatScreenState(this.currentUser, this._cubeDialog, this.users);
 
@@ -138,9 +137,13 @@ class NewChatScreenState extends State<NewChatScreen> {
   }
 
   _createDialogImage() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile == null) return;
-    var image = File(pickedFile.path);
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+
+    if (result == null) return;
+
+    var image = File(result.files.single.path);
     uploadFile(image, isPublic: true).then((cubeFile) {
       _image = image;
       var url = cubeFile.getPublicUrl();

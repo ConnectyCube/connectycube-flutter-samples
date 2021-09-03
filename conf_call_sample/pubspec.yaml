@@ -10,7 +10,9 @@ dependencies:
   flutter:
     sdk: flutter
 
-  connectycube_sdk: ^2.0.1
+  connectycube_sdk: ^2.0.3
+#  connectycube_sdk:
+#    path: ../../flutter-sdk
 
 dev_dependencies:
   flutter_test:

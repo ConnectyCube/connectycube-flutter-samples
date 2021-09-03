@@ -1,10 +1,10 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:image_picker/image_picker.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
@@ -213,7 +213,6 @@ class ContactScreenState extends ScreenState {
 }
 
 class GroupScreenState extends ScreenState {
-  final picker = ImagePicker();
   final TextEditingController _nameFilter = new TextEditingController();
   String? _photoUrl = "";
   String _name = "";
@@ -319,9 +318,13 @@ class GroupScreenState extends ScreenState {
   }
 
   _chooseUserImage() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile == null) return;
-    var image = File(pickedFile.path);
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+
+    if (result == null) return;
+
+    var image = File(result.files.single.path);
     uploadFile(image, isPublic: true).then((cubeFile) {
       _photoUrl = cubeFile.getPublicUrl();
       setState(() {

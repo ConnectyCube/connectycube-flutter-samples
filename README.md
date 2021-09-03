@@ -8,18 +8,20 @@ The following code samples are available:
 
 <kbd><img alt="Flutter Chat sample, select dialogs" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/dialogs_screen.png" height="440" /></kbd>
 <kbd><img alt="Flutter Chat code sample, chat" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/chat_screen.png" height="440" /></kbd>
+</kbd> <kbd><img alt="Flutter Chat code sample, chat (Windows)" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/chat_screen_windows.png" height="440" /></kbd>
 
 - [P2P Calls code sample](https://github.com/ConnectyCube/connectycube-flutter-samples/tree/master/p2p_call_sample)
 
 <kbd><img alt="Flutter P2P Calls code sample, login" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/login_screen.png" height="440" /></kbd>
 <kbd><img alt="Flutter P2P Calls code sample, select users" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/select_opponents_screen.png" height="440" /></kbd>
 <kbd><img alt="Flutter P2P Calls code sample, video chat" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen.png" height="440" /></kbd>
+</kbd> <kbd><img alt="Flutter P2P Calls code sample, video chat (macOS)" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen_macos.png" height="440" /></kbd>
 
 - [Conference Calls code sample](https://github.com/ConnectyCube/connectycube-flutter-samples/tree/master/conf_call_sample)
 
 <kbd><img alt="Flutter Conference Calls code sample, select users" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/select_opponents_screen.png" height="440" /></kbd>
 <kbd><img alt="Flutter Conference Calls code sample, video chat" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen.png" height="440" /></kbd>
-
+</kbd> <kbd><img alt="Flutter Conference Calls code sample, video chat (macOS)" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen_macos.png" height="440" /></kbd>
 ## Documentation
 
 All the samples use ConnectyCube SDK. The following tech integration documentation is available:

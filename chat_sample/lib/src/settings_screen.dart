@@ -1,9 +1,9 @@
 import 'dart:io';
 
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:image_picker/image_picker.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
@@ -50,7 +50,6 @@ class _BodyLayoutState extends State<BodyLayout> {
   final CubeUser? currentUser;
   var _isUsersContinues = false;
   String? _avatarUrl = "";
-  final picker = ImagePicker();
   final TextEditingController _loginFilter = new TextEditingController();
   final TextEditingController _nameFilter = new TextEditingController();
   String _login = "";
@@ -161,9 +160,13 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   _chooseUserImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
-    if (pickedFile == null) return;
-    var image = File(pickedFile.path);
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+
+    if (result == null) return;
+
+    var image = File(result.files.single.path);
     uploadFile(image, isPublic: true).then((cubeFile) {
       _avatarUrl = cubeFile.getPublicUrl();
       setState(() {

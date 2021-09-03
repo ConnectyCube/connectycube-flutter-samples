@@ -63,6 +63,13 @@ class PushNotificationsManager {
       log('[onTokenRefresh] VoIP token: $token', TAG);
       subscribe(token);
     });
+
+    _voipPush.getToken().then((token) {
+      log('[getToken] VoIP token: $token', TAG);
+      if(token != null){
+        subscribe(token);
+      }
+    });
   }
 
   _initFcm() async {
@@ -110,7 +117,7 @@ class PushNotificationsManager {
     } else if (Platform.isIOS) {
       parameters.channel = NotificationsChannels.APNS_VOIP;
       parameters.platform = CubePlatform.IOS;
-      parameters.bundleIdentifier = "com.connectycube.flutter.p2p-call-sample";
+      parameters.bundleIdentifier = "com.connectycube.flutter.p2p-call-sample.app";
     }
 
     String? deviceId = await PlatformDeviceId.getDeviceId;

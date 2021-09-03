@@ -82,6 +82,9 @@ class CallManager {
       } else if (callState == CallState.UNKNOWN) {
         // ConnectycubeFlutterCallKit.setCallState(sessionId: _currentCall.sessionId, callState: CallState.PENDING);
         // _showIncomingCallScreen(_currentCall);
+        if(Platform.isWindows || Platform.isMacOS){
+          _showIncomingCallScreen(_currentCall!);
+        }
       }
     };
 
@@ -191,7 +194,7 @@ class CallManager {
     params.parameters[PARAM_SIGNAL_TYPE] = SIGNAL_TYPE_START_CALL;
 
     createEvent(params.getEventForRequest()).then((cubeEvent) {
-      log("Event for offliners created");
+      log("Event for offliners created: $cubeEvent");
     }).catchError((error) {
       log("ERROR occurs during create event");
     });

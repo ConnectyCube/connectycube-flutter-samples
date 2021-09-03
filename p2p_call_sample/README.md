@@ -21,6 +21,7 @@ ConnectyCube P2P Calls API documentation - [https://developers.connectycube.com/
 ## Screenshots
 
 <kbd><img alt="Flutter P2P Calls code sample, login" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/login_screen.png" height="440" /></kbd> <kbd><img alt="Flutter P2P Calls code sample, select users" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/select_opponents_screen.png" height="440" /></kbd> <kbd><img alt="Flutter P2P Calls code sample, video chat" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen.png" height="440" /></kbd>
+</kbd> <kbd><img alt="Flutter P2P Calls code sample, video chat (macOS)" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen_macos.png" height="440" /></kbd>
 
 ## Roadmap
 
@@ -47,6 +48,11 @@ App will automatically run on your Android device.
 - Press 'Build' button to start project building.
 
 App will automatically run on selected iOS device or simulator.
+
+### Run on macOS
+- Run command from the  Teminal `flutter run -d macos`;
+### Run on Windows
+- Run command from the  Teminal `flutter run -d windows`;
 
 ## Background calls
 
