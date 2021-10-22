@@ -1,4 +1,7 @@
-import 'dart:io';
+import 'dart:typed_data';
+
+import 'package:flutter/foundation.dart';
+import 'package:universal_io/io.dart';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
@@ -51,7 +54,7 @@ class NewChatScreenState extends State<NewChatScreen> {
   final List<CubeUser?> users;
   final TextEditingController _nameFilter = new TextEditingController();
 
-  File? _image;
+  Uint8List? _image;
 
   NewChatScreenState(this.currentUser, this._cubeDialog, this.users);
 
@@ -100,7 +103,7 @@ class NewChatScreenState extends State<NewChatScreen> {
           color: blueColor,
         );
       } else {
-        return Image.file(_image!, width: 45.0, height: 45.0);
+        return Image.memory(_image!, width: 45.0, height: 45.0);
       }
     }
 
@@ -143,8 +146,17 @@ class NewChatScreenState extends State<NewChatScreen> {
 
     if (result == null) return;
 
-    var image = File(result.files.single.path);
-    uploadFile(image, isPublic: true).then((cubeFile) {
+    var image;
+
+    if(kIsWeb){
+      image = result.files.single.bytes;
+    } else {
+      image = File(result.files.single.path).readAsBytesSync();
+    }
+
+    var uploadImageFuture = getUploadingImageFuture(result);
+
+    uploadImageFuture.then((cubeFile) {
       _image = image;
       var url = cubeFile.getPublicUrl();
       log("_createDialogImage url= $url");
