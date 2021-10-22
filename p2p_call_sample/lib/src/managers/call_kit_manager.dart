@@ -1,6 +1,5 @@
-import 'dart:io';
-
 import 'package:flutter_call_kit/flutter_call_kit.dart';
+import 'package:universal_io/io.dart';
 
 import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
 
@@ -23,8 +22,8 @@ class CallKitManager {
 
   late Function(String uuid) onCallAccepted;
   late Function(String uuid) onCallEnded;
-  late Function(String error, String uuid, String handle, String localizedCallerName,
-      bool fromPushKit) onNewCallShown;
+  late Function(String error, String uuid, String handle,
+      String localizedCallerName, bool fromPushKit) onNewCallShown;
   late Function(bool mute, String uuid) onMuteCall;
 
   init({
@@ -39,23 +38,25 @@ class CallKitManager {
     this.onMuteCall = onMuteCall;
 
     // TODO temporary used 'flutter_call_kit' for iOS
-    _callKit.configure(
-      IOSOptions("P2P Call Sample",
-          imageName: 'sim_icon',
-          supportsVideo: true,
-          maximumCallGroups: 1,
-          maximumCallsPerCallGroup: 1,
-          includesCallsInRecents: false),
-      performAnswerCallAction: _performAnswerCallAction,
-      performEndCallAction: _performEndCallAction,
-      didDisplayIncomingCall: _didDisplayIncomingCall,
-      didPerformSetMutedCallAction: _didPerformSetMutedCallAction,
-    );
-
-    ConnectycubeFlutterCallKit.instance.init(
-      onCallAccepted: _onCallAccepted,
-      onCallRejected: _onCallRejected,
-    );
+    if (Platform.isIOS) {
+      _callKit.configure(
+        IOSOptions("P2P Call Sample",
+            imageName: 'sim_icon',
+            supportsVideo: true,
+            maximumCallGroups: 1,
+            maximumCallsPerCallGroup: 1,
+            includesCallsInRecents: false),
+        performAnswerCallAction: _performAnswerCallAction,
+        performEndCallAction: _performEndCallAction,
+        didDisplayIncomingCall: _didDisplayIncomingCall,
+        didPerformSetMutedCallAction: _didPerformSetMutedCallAction,
+      );
+    } else if (Platform.isAndroid) {
+      ConnectycubeFlutterCallKit.instance.init(
+        onCallAccepted: _onCallAccepted,
+        onCallRejected: _onCallRejected,
+      );
+    }
   }
 
   // call when opponent(s) end call
@@ -63,7 +64,7 @@ class CallKitManager {
     if (Platform.isAndroid) {
       ConnectycubeFlutterCallKit.reportCallEnded(sessionId: uuid);
       ConnectycubeFlutterCallKit.setOnLockScreenVisibility(isVisible: false);
-    } else {
+    } else if (Platform.isIOS) {
       await _callKit.reportEndCallWithUUID(uuid, EndReason.remoteEnded);
     }
   }
@@ -72,7 +73,7 @@ class CallKitManager {
     if (Platform.isAndroid) {
       ConnectycubeFlutterCallKit.reportCallEnded(sessionId: uuid);
       ConnectycubeFlutterCallKit.setOnLockScreenVisibility(isVisible: false);
-    } else {
+    } else if (Platform.isIOS) {
       await _callKit.endCall(uuid);
     }
   }
@@ -81,7 +82,7 @@ class CallKitManager {
     if (Platform.isAndroid) {
       ConnectycubeFlutterCallKit.reportCallEnded(sessionId: uuid);
       ConnectycubeFlutterCallKit.setOnLockScreenVisibility(isVisible: false);
-    } else {
+    } else if (Platform.isIOS) {
       await _callKit.rejectCall(uuid);
     }
   }
@@ -109,14 +110,23 @@ class CallKitManager {
 
   /// Event Listener Callbacks for 'connectycube_flutter_call_kit'
 
-  Future<void> _onCallAccepted(String sessionId, int callType, int callerId,
-      String callerName, Set<int> opponentsIds, Map<String, String>? userInfo) async {
-
+  Future<void> _onCallAccepted(
+      String sessionId,
+      int callType,
+      int callerId,
+      String callerName,
+      Set<int> opponentsIds,
+      Map<String, String>? userInfo) async {
     onCallAccepted.call(sessionId);
   }
 
-  Future<void> _onCallRejected(String sessionId, int callType, int callerId,
-      String callerName, Set<int> opponentsIds, Map<String, String>? userInfo) async {
+  Future<void> _onCallRejected(
+      String sessionId,
+      int callType,
+      int callerId,
+      String callerName,
+      Set<int> opponentsIds,
+      Map<String, String>? userInfo) async {
     onCallEnded.call(sessionId);
   }
 }
