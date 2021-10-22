@@ -1,5 +1,7 @@
 import 'dart:async';
-import 'dart:io';
+import 'package:chat_sample/src/utils/api_utils.dart';
+import 'package:flutter/foundation.dart';
+import 'package:universal_io/io.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart' show IterableExtension;
@@ -71,7 +73,6 @@ class ChatScreenState extends State<ChatScreen> {
   final CubeDialog _cubeDialog;
   final Map<int?, CubeUser?> _occupants = Map();
 
-  late File imageFile;
   late bool isLoading;
   String? imageUrl;
   List<CubeMessage>? listMessage = [];
@@ -121,16 +122,24 @@ class ChatScreenState extends State<ChatScreen> {
     setState(() {
       isLoading = true;
     });
-    imageFile = File(result.files.single.path);
-    uploadImageFile();
+
+    var uploadImageFuture = getUploadingImageFuture(result);
+    var imageData;
+
+    if(kIsWeb){
+      imageData = result.files.single.bytes!;
+    } else {
+      imageData = File(result.files.single.path).readAsBytesSync();
+    }
+
+    var decodedImage = await decodeImageFromList(imageData);
+
+    uploadImageFile(uploadImageFuture, decodedImage);
   }
 
-  Future uploadImageFile() async {
-    uploadFile(imageFile, isPublic: true, onProgress: (progress) {
-      log("uploadImageFile progress= $progress");
-    }).then((cubeFile) {
-      var url = cubeFile.getPublicUrl();
-      onSendChatAttachment(url);
+  Future uploadImageFile(Future<CubeFile> uploadAction, imageData) async {
+    uploadAction.then((cubeFile) {
+      onSendChatAttachment(cubeFile, imageData);
     }).catchError((ex) {
       setState(() {
         isLoading = false;
@@ -196,15 +205,13 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void onSendChatAttachment(String? url) async {
-    var decodedImage = await decodeImageFromList(imageFile.readAsBytesSync());
-
+  void onSendChatAttachment(CubeFile cubeFile, imageData) async {
     final attachment = CubeAttachment();
-    attachment.id = imageFile.hashCode.toString();
+    attachment.id = cubeFile.uid;
     attachment.type = CubeAttachmentType.IMAGE_TYPE;
-    attachment.url = url;
-    attachment.height = decodedImage.height;
-    attachment.width = decodedImage.width;
+    attachment.url = cubeFile.getPublicUrl();
+    attachment.height = imageData.height;
+    attachment.width = imageData.width;
     final message = createCubeMsg();
     message.body = "Attachment";
     message.attachments = [attachment];

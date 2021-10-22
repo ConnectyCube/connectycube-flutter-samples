@@ -48,9 +48,12 @@ App will automatically run on your Android device.
 App will automatically run on selected iOS device or simulator.
 
 ### Run on macOS
-- Run command from the  Teminal `flutter run -d macos`;
+- Run command from the  Terminal `flutter run -d macos`;
 ### Run on Windows
-- Run command from the  Teminal `flutter run -d windows`;
+- Run command from the  Terminal `flutter run -d windows`;
+### Run on Web
+- Add own `firebaseConfig` to the file `chat_sample/web/index.html`;
+- Run command from the  Terminal `flutter run -d chrome`;
 
 ### Configure Push notifications:
 1. Create an own app in the ConnectyCube admin panel (if not created yet);

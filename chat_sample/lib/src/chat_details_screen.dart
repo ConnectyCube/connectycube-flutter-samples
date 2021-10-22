@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
@@ -324,8 +323,9 @@ class GroupScreenState extends ScreenState {
 
     if (result == null) return;
 
-    var image = File(result.files.single.path);
-    uploadFile(image, isPublic: true).then((cubeFile) {
+    var uploadImageFuture = getUploadingImageFuture(result);
+
+    uploadImageFuture.then((cubeFile) {
       _photoUrl = cubeFile.getPublicUrl();
       setState(() {
         _cubeDialog.photo = _photoUrl;
