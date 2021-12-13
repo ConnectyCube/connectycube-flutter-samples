@@ -1,4 +1,4 @@
-# Chat and Video Chat code samples for Flutte and ConnectyCube
+# Chat and Video Chat code samples for Flutter and ConnectyCube
 
 This project contains chat and video chat code samples for Flutter platform based on [ConnectyCube](https://connectycube.com/) communication platform.
 
