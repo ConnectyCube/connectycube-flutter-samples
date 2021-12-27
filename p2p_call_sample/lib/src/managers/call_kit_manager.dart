@@ -1,4 +1,4 @@
-import 'package:flutter_call_kit/flutter_call_kit.dart';
+// import 'package:flutter_call_kit/flutter_call_kit.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
@@ -15,10 +15,10 @@ class CallKitManager {
   factory CallKitManager() => _getInstance();
 
   CallKitManager._internal() {
-    this._callKit = FlutterCallKit();
+    // this._callKit = FlutterCallKit();
   }
 
-  late FlutterCallKit _callKit;
+  // late FlutterCallKit _callKit;
 
   late Function(String uuid) onCallAccepted;
   late Function(String uuid) onCallEnded;
@@ -37,54 +37,55 @@ class CallKitManager {
     this.onNewCallShown = onNewCallShown;
     this.onMuteCall = onMuteCall;
 
-    // TODO temporary used 'flutter_call_kit' for iOS
+    ConnectycubeFlutterCallKit.instance.init(
+      onCallAccepted: _onCallAccepted,
+      onCallRejected: _onCallRejected,
+    );
+
     if (Platform.isIOS) {
-      _callKit.configure(
-        IOSOptions("P2P Call Sample",
-            imageName: 'sim_icon',
-            supportsVideo: true,
-            maximumCallGroups: 1,
-            maximumCallsPerCallGroup: 1,
-            includesCallsInRecents: false),
-        performAnswerCallAction: _performAnswerCallAction,
-        performEndCallAction: _performEndCallAction,
-        didDisplayIncomingCall: _didDisplayIncomingCall,
-        didPerformSetMutedCallAction: _didPerformSetMutedCallAction,
-      );
+      ConnectycubeFlutterCallKit.onCallMuted = _didPerformSetMutedCallAction;
+
+      // _callKit.configure(
+      //   IOSOptions("P2P Call Sample",
+      //       imageName: 'sim_icon',
+      //       supportsVideo: true,
+      //       maximumCallGroups: 1,
+      //       maximumCallsPerCallGroup: 1,
+      //       includesCallsInRecents: false),
+      //   performEndCallAction: _performEndCallAction,
+      //   didDisplayIncomingCall: _didDisplayIncomingCall,
+      // );
     } else if (Platform.isAndroid) {
-      ConnectycubeFlutterCallKit.instance.init(
-        onCallAccepted: _onCallAccepted,
-        onCallRejected: _onCallRejected,
-      );
+
     }
   }
 
   // call when opponent(s) end call
   Future<void> reportEndCallWithUUID(String uuid) async {
-    if (Platform.isAndroid) {
+    // if (Platform.isAndroid) {
       ConnectycubeFlutterCallKit.reportCallEnded(sessionId: uuid);
       ConnectycubeFlutterCallKit.setOnLockScreenVisibility(isVisible: false);
-    } else if (Platform.isIOS) {
-      await _callKit.reportEndCallWithUUID(uuid, EndReason.remoteEnded);
-    }
+    // } else if (Platform.isIOS) {
+    //   await _callKit.reportEndCallWithUUID(uuid, EndReason.remoteEnded);
+    // }
   }
 
   Future<void> endCall(String uuid) async {
-    if (Platform.isAndroid) {
+    // if (Platform.isAndroid) {
       ConnectycubeFlutterCallKit.reportCallEnded(sessionId: uuid);
       ConnectycubeFlutterCallKit.setOnLockScreenVisibility(isVisible: false);
-    } else if (Platform.isIOS) {
-      await _callKit.endCall(uuid);
-    }
+    // } else if (Platform.isIOS) {
+    //   await _callKit.endCall(uuid);
+    // }
   }
 
   Future<void> rejectCall(String uuid) async {
-    if (Platform.isAndroid) {
+    // if (Platform.isAndroid) {
       ConnectycubeFlutterCallKit.reportCallEnded(sessionId: uuid);
       ConnectycubeFlutterCallKit.setOnLockScreenVisibility(isVisible: false);
-    } else if (Platform.isIOS) {
-      await _callKit.rejectCall(uuid);
-    }
+    // } else if (Platform.isIOS) {
+      // await _callKit.rejectCall(uuid);
+    // }
   }
 
   /// Event Listener Callbacks for 'flutter_call_kit'
@@ -95,7 +96,7 @@ class CallKitManager {
   }
 
   Future<void> _performEndCallAction(String uuid) async {
-    await _callKit.endCall(uuid);
+    // await _callKit.endCall(uuid);
     onCallEnded.call(uuid);
   }
 

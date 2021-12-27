@@ -10,26 +10,29 @@ dependencies:
   flutter:
     sdk: flutter
 
-  connectycube_sdk: ^2.0.6
-#  connectycube_sdk:
-#    path: ../../flutter-sdk
+#  connectycube_sdk: 2.0.5
+  connectycube_sdk:
+    path: ../../flutter-sdk
   firebase_core: ^1.4.0
   firebase_messaging: ^10.0.4
   shared_preferences: ^2.0.6
-  flutter_voip_push_notification:
-    git:
-      url: git://github.com/blackdragon0603/flutter_voip_push_notification.git
-      ref: master
-  flutter_call_kit:
-    git:
-      url: git://github.com/raj457036/flutter_call_kit.git
-      ref: master
+#  flutter_voip_push_notification:
+#    git:
+#      url: git://github.com/blackdragon0603/flutter_voip_push_notification.git
+#      ref: master
+#  flutter_call_kit:
+#    git:
+#      url: git://github.com/raj457036/flutter_call_kit.git
+#      ref: master
 
-  connectycube_flutter_call_kit: ^0.1.0-dev.2
-#  connectycube_flutter_call_kit:
-#    path: ../../connectycube-flutter-call-kit/connectycube_flutter_call_kit
+#  connectycube_flutter_call_kit: ^0.1.0-dev.2
+  connectycube_flutter_call_kit:
+    path: ../../connectycube-flutter-call-kit/connectycube_flutter_call_kit
   platform_device_id: ^1.0.1
   universal_io: ^2.0.4
+
+#dependency_overrides:
+#  flutter_webrtc: 0.6.10+hotfix.1
 
 
 dev_dependencies:

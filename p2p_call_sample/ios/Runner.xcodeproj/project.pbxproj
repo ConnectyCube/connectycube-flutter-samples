@@ -15,7 +15,31 @@
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
 		A558A6F725CAE77A007E898E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A558A6F625CAE77A007E898E /* GoogleService-Info.plist */; };
+		A5C81CF927722EE3009691D9 /* ReplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5C81CF827722EE3009691D9 /* ReplayKit.framework */; };
+		A5C81CFC27722EE3009691D9 /* SampleHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C81CFB27722EE3009691D9 /* SampleHandler.swift */; };
+		A5C81D0327722EE3009691D9 /* ReplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5C81CF827722EE3009691D9 /* ReplayKit.framework */; };
+		A5C81D0527722EE3009691D9 /* UIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5C81D0427722EE3009691D9 /* UIKit.framework */; };
+		A5C81D0827722EE3009691D9 /* BroadcastSetupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C81D0727722EE3009691D9 /* BroadcastSetupViewController.swift */; };
+		A5C81D0C27722EE3009691D9 /* com.connectycube.flutter.p2p-screensharingSetupUI.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = A5C81D0227722EE3009691D9 /* com.connectycube.flutter.p2p-screensharingSetupUI.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A5C81D0F27722EE3009691D9 /* com.connectycube.flutter.p2p-screensharing.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = A5C81CF727722EE3009691D9 /* com.connectycube.flutter.p2p-screensharing.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A5C81D0A27722EE3009691D9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A5C81D0127722EE3009691D9;
+			remoteInfo = "com.connectycube.flutter.p2p-screensharingSetupUI";
+		};
+		A5C81D0D27722EE3009691D9 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A5C81CF627722EE3009691D9;
+			remoteInfo = "com.connectycube.flutter.p2p-screensharing";
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		9705A1C41CF9048500538489 /* Embed Frameworks */ = {
@@ -26,6 +50,18 @@
 			files = (
 			);
 			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A5C81D1027722EE3009691D9 /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A5C81D0F27722EE3009691D9 /* com.connectycube.flutter.p2p-screensharing.appex in Embed App Extensions */,
+				A5C81D0C27722EE3009691D9 /* com.connectycube.flutter.p2p-screensharingSetupUI.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -51,6 +87,14 @@
 		A534E2CB26BC07DA0072CB0E /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		A558A6F625CAE77A007E898E /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		A588C0A025C9B9A5005025C4 /* P2PCallsSample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = P2PCallsSample.entitlements; sourceTree = "<group>"; };
+		A5C81CF727722EE3009691D9 /* com.connectycube.flutter.p2p-screensharing.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "com.connectycube.flutter.p2p-screensharing.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A5C81CF827722EE3009691D9 /* ReplayKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ReplayKit.framework; path = System/Library/Frameworks/ReplayKit.framework; sourceTree = SDKROOT; };
+		A5C81CFB27722EE3009691D9 /* SampleHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleHandler.swift; sourceTree = "<group>"; };
+		A5C81CFD27722EE3009691D9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A5C81D0227722EE3009691D9 /* com.connectycube.flutter.p2p-screensharingSetupUI.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "com.connectycube.flutter.p2p-screensharingSetupUI.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A5C81D0427722EE3009691D9 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
+		A5C81D0727722EE3009691D9 /* BroadcastSetupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastSetupViewController.swift; sourceTree = "<group>"; };
+		A5C81D0927722EE3009691D9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -62,6 +106,23 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A5C81CF427722EE3009691D9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A5C81CF927722EE3009691D9 /* ReplayKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A5C81CFF27722EE3009691D9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A5C81D0327722EE3009691D9 /* ReplayKit.framework in Frameworks */,
+				A5C81D0527722EE3009691D9 /* UIKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -70,6 +131,8 @@
 			children = (
 				A534E2CB26BC07DA0072CB0E /* AVFoundation.framework */,
 				245B3438F9416C97F960DF6B /* Pods_Runner.framework */,
+				A5C81CF827722EE3009691D9 /* ReplayKit.framework */,
+				A5C81D0427722EE3009691D9 /* UIKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -100,6 +163,8 @@
 			children = (
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
+				A5C81CFA27722EE3009691D9 /* com.connectycube.flutter.p2p-screensharing */,
+				A5C81D0627722EE3009691D9 /* com.connectycube.flutter.p2p-screensharingSetupUI */,
 				97C146EF1CF9000F007C117D /* Products */,
 				952C1D8B0C33AAED7389397D /* Pods */,
 				4B3410D39048F58FC0A28E78 /* Frameworks */,
@@ -110,6 +175,8 @@
 			isa = PBXGroup;
 			children = (
 				97C146EE1CF9000F007C117D /* P2PCallsSample.app */,
+				A5C81CF727722EE3009691D9 /* com.connectycube.flutter.p2p-screensharing.appex */,
+				A5C81D0227722EE3009691D9 /* com.connectycube.flutter.p2p-screensharingSetupUI.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -139,6 +206,24 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		A5C81CFA27722EE3009691D9 /* com.connectycube.flutter.p2p-screensharing */ = {
+			isa = PBXGroup;
+			children = (
+				A5C81CFB27722EE3009691D9 /* SampleHandler.swift */,
+				A5C81CFD27722EE3009691D9 /* Info.plist */,
+			);
+			path = "com.connectycube.flutter.p2p-screensharing";
+			sourceTree = "<group>";
+		};
+		A5C81D0627722EE3009691D9 /* com.connectycube.flutter.p2p-screensharingSetupUI */ = {
+			isa = PBXGroup;
+			children = (
+				A5C81D0727722EE3009691D9 /* BroadcastSetupViewController.swift */,
+				A5C81D0927722EE3009691D9 /* Info.plist */,
+			);
+			path = "com.connectycube.flutter.p2p-screensharingSetupUI";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -154,15 +239,52 @@
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				1AE56D3ABC8CEF5A17179F06 /* [CP] Embed Pods Frameworks */,
+				A5C81D1027722EE3009691D9 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				A5C81D0B27722EE3009691D9 /* PBXTargetDependency */,
+				A5C81D0E27722EE3009691D9 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;
 			productReference = 97C146EE1CF9000F007C117D /* P2PCallsSample.app */;
 			productType = "com.apple.product-type.application";
+		};
+		A5C81CF627722EE3009691D9 /* com.connectycube.flutter.p2p-screensharing */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A5C81D1827722EE4009691D9 /* Build configuration list for PBXNativeTarget "com.connectycube.flutter.p2p-screensharing" */;
+			buildPhases = (
+				A5C81CF327722EE3009691D9 /* Sources */,
+				A5C81CF427722EE3009691D9 /* Frameworks */,
+				A5C81CF527722EE3009691D9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "com.connectycube.flutter.p2p-screensharing";
+			productName = "com.connectycube.flutter.p2p-screensharing";
+			productReference = A5C81CF727722EE3009691D9 /* com.connectycube.flutter.p2p-screensharing.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		A5C81D0127722EE3009691D9 /* com.connectycube.flutter.p2p-screensharingSetupUI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A5C81D1727722EE4009691D9 /* Build configuration list for PBXNativeTarget "com.connectycube.flutter.p2p-screensharingSetupUI" */;
+			buildPhases = (
+				A5C81CFE27722EE3009691D9 /* Sources */,
+				A5C81CFF27722EE3009691D9 /* Frameworks */,
+				A5C81D0027722EE3009691D9 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "com.connectycube.flutter.p2p-screensharingSetupUI";
+			productName = "com.connectycube.flutter.p2p-screensharingSetupUI";
+			productReference = A5C81D0227722EE3009691D9 /* com.connectycube.flutter.p2p-screensharingSetupUI.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -170,12 +292,21 @@
 		97C146E61CF9000F007C117D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
+				LastSwiftUpdateCheck = 1320;
 				LastUpgradeCheck = 1020;
 				ORGANIZATIONNAME = "The Chromium Authors";
 				TargetAttributes = {
 					97C146ED1CF9000F007C117D = {
 						CreatedOnToolsVersion = 7.3.1;
 						LastSwiftMigration = 1100;
+						ProvisioningStyle = Automatic;
+					};
+					A5C81CF627722EE3009691D9 = {
+						CreatedOnToolsVersion = 13.2;
+						ProvisioningStyle = Automatic;
+					};
+					A5C81D0127722EE3009691D9 = {
+						CreatedOnToolsVersion = 13.2;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -194,6 +325,8 @@
 			projectRoot = "";
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
+				A5C81CF627722EE3009691D9 /* com.connectycube.flutter.p2p-screensharing */,
+				A5C81D0127722EE3009691D9 /* com.connectycube.flutter.p2p-screensharingSetupUI */,
 			);
 		};
 /* End PBXProject section */
@@ -208,6 +341,20 @@
 				A558A6F725CAE77A007E898E /* GoogleService-Info.plist in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A5C81CF527722EE3009691D9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A5C81D0027722EE3009691D9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -249,16 +396,15 @@
 				"${BUILT_PRODUCTS_DIR}/FirebaseMessaging/FirebaseMessaging.framework",
 				"${BUILT_PRODUCTS_DIR}/GoogleDataTransport/GoogleDataTransport.framework",
 				"${BUILT_PRODUCTS_DIR}/GoogleUtilities/GoogleUtilities.framework",
-				"${PODS_ROOT}/GoogleWebRTC/Frameworks/frameworks/WebRTC.framework",
 				"${BUILT_PRODUCTS_DIR}/PromisesObjC/FBLPromises.framework",
 				"${BUILT_PRODUCTS_DIR}/connectycube_flutter_call_kit/connectycube_flutter_call_kit.framework",
 				"${BUILT_PRODUCTS_DIR}/device_info/device_info.framework",
-				"${BUILT_PRODUCTS_DIR}/flutter_call_kit/flutter_call_kit.framework",
-				"${BUILT_PRODUCTS_DIR}/flutter_voip_push_notification/flutter_voip_push_notification.framework",
 				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
 				"${BUILT_PRODUCTS_DIR}/path_provider/path_provider.framework",
 				"${BUILT_PRODUCTS_DIR}/platform_device_id/platform_device_id.framework",
+				"${BUILT_PRODUCTS_DIR}/replay_kit_launcher/replay_kit_launcher.framework",
 				"${BUILT_PRODUCTS_DIR}/shared_preferences/shared_preferences.framework",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/WebRTC/WebRTC.framework/WebRTC",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
@@ -268,16 +414,15 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FirebaseMessaging.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleDataTransport.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/GoogleUtilities.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/WebRTC.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/FBLPromises.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/connectycube_flutter_call_kit.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/device_info.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/flutter_call_kit.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/flutter_voip_push_notification.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/path_provider.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/platform_device_id.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/replay_kit_launcher.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/shared_preferences.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/WebRTC.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -324,7 +469,36 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A5C81CF327722EE3009691D9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A5C81CFC27722EE3009691D9 /* SampleHandler.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A5C81CFE27722EE3009691D9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A5C81D0827722EE3009691D9 /* BroadcastSetupViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A5C81D0B27722EE3009691D9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A5C81D0127722EE3009691D9 /* com.connectycube.flutter.p2p-screensharingSetupUI */;
+			targetProxy = A5C81D0A27722EE3009691D9 /* PBXContainerItemProxy */;
+		};
+		A5C81D0E27722EE3009691D9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A5C81CF627722EE3009691D9 /* com.connectycube.flutter.p2p-screensharing */;
+			targetProxy = A5C81D0D27722EE3009691D9 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		97C146FA1CF9000F007C117D /* Main.storyboard */ = {
@@ -400,6 +574,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/P2PCallsSample.entitlements;
@@ -539,6 +714,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/P2PCallsSample.entitlements;
@@ -573,6 +749,7 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/P2PCallsSample.entitlements;
@@ -602,6 +779,204 @@
 			};
 			name = Release;
 		};
+		A5C81D1127722EE3009691D9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 92G479T7LY;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "com.connectycube.flutter.p2p-screensharing/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "com.connectycube.flutter.p2p-screensharing";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2021 The Chromium Authors. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app.screensharing";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A5C81D1227722EE3009691D9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 92G479T7LY;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "com.connectycube.flutter.p2p-screensharing/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "com.connectycube.flutter.p2p-screensharing";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2021 The Chromium Authors. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app.screensharing";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		A5C81D1327722EE3009691D9 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 92G479T7LY;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "com.connectycube.flutter.p2p-screensharing/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "com.connectycube.flutter.p2p-screensharing";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2021 The Chromium Authors. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app.screensharing";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Profile;
+		};
+		A5C81D1427722EE3009691D9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 92G479T7LY;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "com.connectycube.flutter.p2p-screensharingSetupUI/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "com.connectycube.flutter.p2p-screensharingSetupUI";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2021 The Chromium Authors. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app.screensharingSetupUI";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A5C81D1527722EE3009691D9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 92G479T7LY;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "com.connectycube.flutter.p2p-screensharingSetupUI/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "com.connectycube.flutter.p2p-screensharingSetupUI";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2021 The Chromium Authors. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app.screensharingSetupUI";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		A5C81D1627722EE3009691D9 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 92G479T7LY;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "com.connectycube.flutter.p2p-screensharingSetupUI/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "com.connectycube.flutter.p2p-screensharingSetupUI";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2021 The Chromium Authors. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.2;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.0;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app.screensharingSetupUI";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Profile;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -621,6 +996,26 @@
 				97C147061CF9000F007C117D /* Debug */,
 				97C147071CF9000F007C117D /* Release */,
 				249021D4217E4FDB00AE95B9 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A5C81D1727722EE4009691D9 /* Build configuration list for PBXNativeTarget "com.connectycube.flutter.p2p-screensharingSetupUI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A5C81D1427722EE3009691D9 /* Debug */,
+				A5C81D1527722EE3009691D9 /* Release */,
+				A5C81D1627722EE3009691D9 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A5C81D1827722EE4009691D9 /* Build configuration list for PBXNativeTarget "com.connectycube.flutter.p2p-screensharing" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A5C81D1127722EE3009691D9 /* Debug */,
+				A5C81D1227722EE3009691D9 /* Release */,
+				A5C81D1327722EE3009691D9 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

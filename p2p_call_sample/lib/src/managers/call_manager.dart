@@ -97,10 +97,10 @@ class CallManager {
     };
   }
 
-  void startNewCall(BuildContext context, int callType, Set<int> opponents) {
+  void startNewCall(BuildContext context, int callType, Set<int> opponents, {bool startScreenSharing = false}) {
     if (opponents.isEmpty) return;
 
-    P2PSession callSession = _callClient!.createCallSession(callType, opponents);
+    P2PSession callSession = _callClient!.createCallSession(callType, opponents, startScreenSharing: startScreenSharing);
     _currentCall = callSession;
     Navigator.push(
       context,
@@ -175,7 +175,6 @@ class CallManager {
       PARAM_CALLER_ID: currentCall.callerId,
       PARAM_CALLER_NAME: callerName,
       PARAM_CALL_OPPONENTS: currentCall.opponentsIds.join(','),
-      PARAM_IOS_VOIP: 1,
     };
 
     params.notificationType = NotificationType.PUSH;
@@ -192,6 +191,7 @@ class CallManager {
   void _sendStartCallSignalForOffliners(P2PSession currentCall) {
     CreateEventParams params = _getCallEventParameters(currentCall);
     params.parameters[PARAM_SIGNAL_TYPE] = SIGNAL_TYPE_START_CALL;
+    params.parameters[PARAM_IOS_VOIP] = 1;
 
     createEvent(params.getEventForRequest()).then((cubeEvent) {
       log("Event for offliners created: $cubeEvent");

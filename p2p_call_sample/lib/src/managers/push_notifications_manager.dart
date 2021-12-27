@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_voip_push_notification/flutter_voip_push_notification.dart';
+// import 'package:flutter_voip_push_notification/flutter_voip_push_notification.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
@@ -33,9 +33,11 @@ class PushNotificationsManager {
 
   static PushNotificationsManager get instance => _getInstance();
 
-  FlutterVoipPushNotification _voipPush = FlutterVoipPushNotification();
+  // FlutterVoipPushNotification _voipPush = FlutterVoipPushNotification();
 
   init() async {
+    ConnectycubeFlutterCallKit.initEventsHandler();
+
     if (Platform.isAndroid) {
       _initFcm();
     } else if (Platform.isIOS) {
@@ -55,15 +57,15 @@ class PushNotificationsManager {
   }
 
   _initIosVoIP() async {
-    await _voipPush.requestNotificationPermissions();
-    _voipPush.configure(onMessage: onMessage, onResume: onResume);
+    // await _voipPush.requestNotificationPermissions();
+    // _voipPush.configure(onMessage: onMessage, onResume: onResume);
 
-    _voipPush.onTokenRefresh.listen((token) {
+    ConnectycubeFlutterCallKit.onVoipTokenReceived = (token) {
       log('[onTokenRefresh] VoIP token: $token', TAG);
       subscribe(token);
-    });
+    };
 
-    _voipPush.getToken().then((token) {
+    ConnectycubeFlutterCallKit.getVoipToken().then((token) {
       log('[getToken] VoIP token: $token', TAG);
       if(token != null){
         subscribe(token);
@@ -242,7 +244,7 @@ Future<void> sendPushAboutRejectFromKilledState(
   params.parameters = parameters;
   params.parameters['message'] = "Reject call";
   params.parameters[PARAM_SIGNAL_TYPE] = SIGNAL_TYPE_REJECT_CALL;
-  params.parameters[PARAM_IOS_VOIP] = 1;
+  // params.parameters[PARAM_IOS_VOIP] = 1;
 
   params.notificationType = NotificationType.PUSH;
   params.environment = CubeEnvironment
