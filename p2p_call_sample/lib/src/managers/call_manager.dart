@@ -97,10 +97,10 @@ class CallManager {
     };
   }
 
-  void startNewCall(BuildContext context, int callType, Set<int> opponents) {
+  void startNewCall(BuildContext context, int callType, Set<int> opponents, {bool startScreenSharing = false}) {
     if (opponents.isEmpty) return;
 
-    P2PSession callSession = _callClient!.createCallSession(callType, opponents);
+    P2PSession callSession = _callClient!.createCallSession(callType, opponents, startScreenSharing: startScreenSharing);
     _currentCall = callSession;
     Navigator.push(
       context,

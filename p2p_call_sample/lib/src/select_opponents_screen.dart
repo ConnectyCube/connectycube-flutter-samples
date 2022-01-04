@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
@@ -82,8 +85,6 @@ class SelectOpponentsScreen extends StatelessWidget {
 class BodyLayout extends StatefulWidget {
   final CubeUser currentUser;
 
-
-
   @override
   State<StatefulWidget> createState() {
     return _BodyLayoutState(currentUser);
@@ -96,13 +97,12 @@ class _BodyLayoutState extends State<BodyLayout> {
   final CubeUser currentUser;
   late Set<int> _selectedUsers;
 
-
   _BodyLayoutState(this.currentUser);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: EdgeInsets.all(48),
+        padding: EdgeInsets.only(top: 48, left: 48, right: 48, bottom: 12),
         child: Column(
           children: [
             Text(
@@ -115,8 +115,25 @@ class _BodyLayoutState extends State<BodyLayout> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
+                Visibility(
+                  visible: kIsWeb || Platform.isIOS || Platform.isAndroid,
+                  child: Padding(
+                    padding: EdgeInsets.all(12),
+                    child: FloatingActionButton(
+                      heroTag: "ScreenSharing",
+                      child: Icon(
+                        Icons.screen_share,
+                        color: Colors.white,
+                      ),
+                      backgroundColor: Colors.teal,
+                      onPressed: () => CallManager.instance.startNewCall(
+                          context, CallType.VIDEO_CALL, _selectedUsers,
+                          startScreenSharing: true),
+                    ),
+                  ),
+                ),
                 Padding(
-                  padding: EdgeInsets.only(right: 24),
+                  padding: EdgeInsets.all(12),
                   child: FloatingActionButton(
                     heroTag: "VideoCall",
                     child: Icon(
@@ -129,7 +146,7 @@ class _BodyLayoutState extends State<BodyLayout> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.only(left: 24),
+                  padding: EdgeInsets.all(12),
                   child: FloatingActionButton(
                     heroTag: "AudioCall",
                     child: Icon(
