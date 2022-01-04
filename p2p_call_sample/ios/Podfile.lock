@@ -19,15 +19,15 @@ PODS:
     - FirebaseCoreDiagnostics (~> 8.0)
     - GoogleUtilities/Environment (~> 7.4)
     - GoogleUtilities/Logger (~> 7.4)
-  - FirebaseCoreDiagnostics (8.8.0):
-    - GoogleDataTransport (~> 9.0)
-    - GoogleUtilities/Environment (~> 7.4)
-    - GoogleUtilities/Logger (~> 7.4)
+  - FirebaseCoreDiagnostics (8.10.0):
+    - GoogleDataTransport (~> 9.1)
+    - GoogleUtilities/Environment (~> 7.6)
+    - GoogleUtilities/Logger (~> 7.6)
     - nanopb (~> 2.30908.0)
-  - FirebaseInstallations (8.8.0):
+  - FirebaseInstallations (8.10.0):
     - FirebaseCore (~> 8.0)
-    - GoogleUtilities/Environment (~> 7.4)
-    - GoogleUtilities/UserDefaults (~> 7.4)
+    - GoogleUtilities/Environment (~> 7.6)
+    - GoogleUtilities/UserDefaults (~> 7.6)
     - PromisesObjC (< 3.0, >= 1.2)
   - FirebaseMessaging (8.3.0):
     - FirebaseCore (~> 8.0)
@@ -41,10 +41,10 @@ PODS:
     - Flutter
   - flutter_voip_push_notification (0.0.1):
     - Flutter
-  - flutter_webrtc (0.2.2):
+  - flutter_webrtc (0.7.1):
     - Flutter
-    - GoogleWebRTC (= 1.1.31999)
     - Libyuv (= 1703)
+    - WebRTC-SDK (= 93.4577.01)
   - GoogleDataTransport (9.1.2):
     - GoogleUtilities/Environment (~> 7.2)
     - nanopb (~> 2.30908.0)
@@ -66,7 +66,6 @@ PODS:
     - GoogleUtilities/Logger
   - GoogleUtilities/UserDefaults (7.6.0):
     - GoogleUtilities/Logger
-  - GoogleWebRTC (1.1.31999)
   - Libyuv (1703)
   - nanopb (2.30908.0):
     - nanopb/decode (= 2.30908.0)
@@ -80,6 +79,7 @@ PODS:
   - PromisesObjC (2.0.0)
   - shared_preferences (0.0.1):
     - Flutter
+  - WebRTC-SDK (93.4577.01)
 
 DEPENDENCIES:
   - connectycube_flutter_call_kit (from `.symlinks/plugins/connectycube_flutter_call_kit/ios`)
@@ -103,10 +103,10 @@ SPEC REPOS:
     - FirebaseMessaging
     - GoogleDataTransport
     - GoogleUtilities
-    - GoogleWebRTC
     - Libyuv
     - nanopb
     - PromisesObjC
+    - WebRTC-SDK
 
 EXTERNAL SOURCES:
   connectycube_flutter_call_kit:
@@ -139,22 +139,22 @@ SPEC CHECKSUMS:
   firebase_core: 72374607c8c6f5a0adc0559e5c5bf57deda975e3
   firebase_messaging: 55c5b8184efd330b9d1f1765b55c4ae57e015c5e
   FirebaseCore: a6dba751680d7033b9d3831e1cfc95ead0605118
-  FirebaseCoreDiagnostics: fe77f42da6329d6d83d21fd9d621a6b704413bfc
-  FirebaseInstallations: 2563cb18a723ef9c6ef18318a49519b75dce613c
+  FirebaseCoreDiagnostics: 56fb7216d87e0e6ec2feddefa9d8a392fe8b2c18
+  FirebaseInstallations: 830327b45345ffc859eaa9c17bcd5ae893fd5425
   FirebaseMessaging: 42252b79b860482021483748669ec32e22196462
-  Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
+  Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
   flutter_call_kit: 1024bd6c98b866857990bc0f7e7f9e751261270e
   flutter_voip_push_notification: f28f3ce1c6b835a3fa9e833f37f33dc1291ab888
-  flutter_webrtc: 39898454258b54ba51996850d5da8d5d53bf1524
+  flutter_webrtc: 611cab01a48b1d20e2b2409783c182134b8729e5
   GoogleDataTransport: 629c20a4d363167143f30ea78320d5a7eb8bd940
   GoogleUtilities: 684ee790a24f73ebb2d1d966e9711c203f2a4237
-  GoogleWebRTC: b39a78c4f5cc6b0323415b9233db03a2faa7b0f0
   Libyuv: 5f79ced0ee66e60a612ca97de1e6ccacd187a437
   nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   platform_device_id: 81b3e2993881f87d0c82ef151dc274df4869aef5
   PromisesObjC: 68159ce6952d93e17b2dfe273b8c40907db5ba58
   shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
+  WebRTC-SDK: 166b0e161d93d4b961f410bf7966a634f42aa17d
 
 PODFILE CHECKSUM: fe0e1ee7f3d1f7d00b11b474b62dd62134535aea
 
