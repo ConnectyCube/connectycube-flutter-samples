@@ -98,4 +98,3 @@ class IncomingCallScreen extends StatelessWidget {
     return Future.value(false);
   }
 }
-

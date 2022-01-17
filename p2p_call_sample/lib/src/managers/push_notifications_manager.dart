@@ -1,14 +1,12 @@
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
+
 import 'package:flutter/material.dart';
-// import 'package:flutter_voip_push_notification/flutter_voip_push_notification.dart';
+
 import 'package:universal_io/io.dart';
 
-import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'package:platform_device_id/platform_device_id.dart';
 
-import '../managers/call_manager.dart';
 import '../utils/consts.dart';
 import '../utils/pref_util.dart';
 import '../utils/configs.dart' as config;
@@ -18,9 +16,7 @@ class PushNotificationsManager {
 
   static PushNotificationsManager? _instance;
 
-  PushNotificationsManager._internal() {
-    Firebase.initializeApp();
-  }
+  PushNotificationsManager._internal();
 
   static PushNotificationsManager _getInstance() {
     return _instance ??= PushNotificationsManager._internal();
@@ -28,69 +24,23 @@ class PushNotificationsManager {
 
   factory PushNotificationsManager() => _getInstance();
 
-
   BuildContext? applicationContext;
 
   static PushNotificationsManager get instance => _getInstance();
 
-  // FlutterVoipPushNotification _voipPush = FlutterVoipPushNotification();
-
   init() async {
     ConnectycubeFlutterCallKit.initEventsHandler();
 
-    if (Platform.isAndroid) {
-      _initFcm();
-    } else if (Platform.isIOS) {
-      _initIosVoIP();
-    }
-
-    FirebaseMessaging.onMessage.listen((remoteMessage) async {
-      processCallNotification(remoteMessage.data);
-    });
-
-    FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
-
-    // TODO test after fix https://github.com/FirebaseExtended/flutterfire/issues/4898
-    FirebaseMessaging.onMessageOpenedApp.listen((remoteMessage) {
-      log('[onMessageOpenedApp] remoteMessage: $remoteMessage', TAG);
-    });
-  }
-
-  _initIosVoIP() async {
-    // await _voipPush.requestNotificationPermissions();
-    // _voipPush.configure(onMessage: onMessage, onResume: onResume);
-
-    ConnectycubeFlutterCallKit.onVoipTokenReceived = (token) {
+    ConnectycubeFlutterCallKit.onTokenReceived = (token) {
       log('[onTokenRefresh] VoIP token: $token', TAG);
       subscribe(token);
     };
 
-    ConnectycubeFlutterCallKit.getVoipToken().then((token) {
+    ConnectycubeFlutterCallKit.getToken().then((token) {
       log('[getToken] VoIP token: $token', TAG);
-      if(token != null){
+      if (token != null) {
         subscribe(token);
       }
-    });
-  }
-
-  _initFcm() async {
-    FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
-
-    await firebaseMessaging.requestPermission(
-        alert: true, badge: true, sound: true);
-
-    firebaseMessaging.getToken().then((token) {
-      log('[getToken] FCM token: $token', TAG);
-      if(!isEmpty(token)){
-        subscribe(token!);
-      }
-    }).catchError((onError) {
-      log('[getToken] onError: $onError', TAG);
-    });
-
-    firebaseMessaging.onTokenRefresh.listen((newToken) {
-      log('[onTokenRefresh] FCM token: $newToken', TAG);
-      subscribe(newToken);
     });
   }
 
@@ -118,7 +68,8 @@ class PushNotificationsManager {
     } else if (Platform.isIOS) {
       parameters.channel = NotificationsChannels.APNS_VOIP;
       parameters.platform = CubePlatform.IOS;
-      parameters.bundleIdentifier = "com.connectycube.flutter.p2p-call-sample.app";
+      parameters.bundleIdentifier =
+          "com.connectycube.flutter.p2p-call-sample.app";
     }
 
     String? deviceId = await PlatformDeviceId.getDeviceId;
@@ -144,7 +95,6 @@ class PushNotificationsManager {
     return SharedPrefs.getSubscriptionId().then((subscriptionId) async {
       if (subscriptionId != 0) {
         return deleteSubscription(subscriptionId).then((voidResult) {
-          FirebaseMessaging.instance.deleteToken();
           SharedPrefs.saveSubscriptionId(0);
         });
       } else {
@@ -156,74 +106,16 @@ class PushNotificationsManager {
   }
 }
 
-Future<dynamic> onMessage(bool isLocal, Map<String, dynamic> payload) {
-  log("[onMessage] received on foreground payload: $payload, isLocal=$isLocal",
-      PushNotificationsManager.TAG);
-
-  processCallNotification(payload);
-
-  return Future.value();
-}
-
-Future<dynamic> onResume(bool isLocal, Map<String, dynamic> payload) {
-  log("[onResume] received on background payload: $payload, isLocal=$isLocal",
-      PushNotificationsManager.TAG);
-
-  return Future.value();
-}
-
-processCallNotification(Map<String, dynamic> data) async {
-  log('[processCallNotification] message: $data', PushNotificationsManager.TAG);
-
-  String? signalType = data[PARAM_SIGNAL_TYPE];
-  String? sessionId = data[PARAM_SESSION_ID];
-  Set<int> opponentsIds = (data[PARAM_CALL_OPPONENTS] as String)
-      .split(',')
-      .map((e) => int.parse(e))
-      .toSet();
-
-  if (signalType == SIGNAL_TYPE_START_CALL) {
-    ConnectycubeFlutterCallKit.showCallNotification(
-      sessionId: sessionId,
-      callType: int.parse(data[PARAM_CALL_TYPE]),
-      callerId: int.parse(data[PARAM_CALLER_ID]),
-      callerName: data[PARAM_CALLER_NAME],
-      opponentsIds: opponentsIds,
-    );
-  } else if (signalType == SIGNAL_TYPE_END_CALL) {
-    ConnectycubeFlutterCallKit.reportCallEnded(
-        sessionId: data[PARAM_SESSION_ID]);
-  } else if (signalType == SIGNAL_TYPE_REJECT_CALL) {
-    if (opponentsIds.length == 1) {
-      CallManager.instance.hungUp();
-    }
-  }
-}
-
-Future<void> onBackgroundMessage(RemoteMessage message) async {
-  await Firebase.initializeApp();
-
-  ConnectycubeFlutterCallKit.onCallRejectedWhenTerminated = (
-    sessionId,
-    callType,
-    callerId,
-    callerName,
-    opponentsIds,
-    userInfo,
-  ) {
-    return sendPushAboutRejectFromKilledState({
-      PARAM_CALL_TYPE: callType,
-      PARAM_SESSION_ID: sessionId,
-      PARAM_CALLER_ID: callerId,
-      PARAM_CALLER_NAME: callerName,
-      PARAM_CALL_OPPONENTS: opponentsIds.join(','),
-    }, callerId);
-  };
-  ConnectycubeFlutterCallKit.initMessagesHandler();
-
-  processCallNotification(message.data);
-
-  return Future.value();
+Future<void> onCallRejectedWhenTerminated(CallEvent callEvent) async {
+  print(
+      '[PushNotificationsManager][onCallRejectedWhenTerminated] callEvent: $callEvent');
+  return sendPushAboutRejectFromKilledState({
+    PARAM_CALL_TYPE: callEvent.callType,
+    PARAM_SESSION_ID: callEvent.sessionId,
+    PARAM_CALLER_ID: callEvent.callerId,
+    PARAM_CALLER_NAME: callEvent.callerName,
+    PARAM_CALL_OPPONENTS: callEvent.opponentsIds.join(','),
+  }, callEvent.callerId);
 }
 
 Future<void> sendPushAboutRejectFromKilledState(

@@ -82,8 +82,6 @@ class SelectOpponentsScreen extends StatelessWidget {
 class BodyLayout extends StatefulWidget {
   final CubeUser currentUser;
 
-
-
   @override
   State<StatefulWidget> createState() {
     return _BodyLayoutState(currentUser);
@@ -95,7 +93,6 @@ class BodyLayout extends StatefulWidget {
 class _BodyLayoutState extends State<BodyLayout> {
   final CubeUser currentUser;
   late Set<int> _selectedUsers;
-
 
   _BodyLayoutState(this.currentUser);
 

@@ -59,7 +59,7 @@ class CallManager {
   }
 
   void _initCalls() {
-    if(_callClient == null) {
+    if (_callClient == null) {
       _callClient = P2PClient.instance;
 
       _callClient!.init();
@@ -82,7 +82,7 @@ class CallManager {
       } else if (callState == CallState.UNKNOWN) {
         // ConnectycubeFlutterCallKit.setCallState(sessionId: _currentCall.sessionId, callState: CallState.PENDING);
         // _showIncomingCallScreen(_currentCall);
-        if(Platform.isWindows || Platform.isMacOS || kIsWeb){
+        if (Platform.isWindows || Platform.isMacOS || kIsWeb) {
           _showIncomingCallScreen(_currentCall!);
         }
       }
@@ -92,15 +92,17 @@ class CallManager {
       if (_currentCall != null &&
           _currentCall!.sessionId == callSession.sessionId) {
         _currentCall = null;
-        CallKitManager.instance.reportEndCallWithUUID(callSession.sessionId);
+        CallKitManager.instance.processCallFinished(callSession.sessionId);
       }
     };
   }
 
-  void startNewCall(BuildContext context, int callType, Set<int> opponents, {bool startScreenSharing = false}) {
+  void startNewCall(BuildContext context, int callType, Set<int> opponents,
+      {bool startScreenSharing = false}) {
     if (opponents.isEmpty) return;
 
-    P2PSession callSession = _callClient!.createCallSession(callType, opponents, startScreenSharing: startScreenSharing);
+    P2PSession callSession = _callClient!.createCallSession(callType, opponents,
+        startScreenSharing: startScreenSharing);
     _currentCall = callSession;
     Navigator.push(
       context,
@@ -145,7 +147,7 @@ class CallManager {
 
   void reject(String sessionId) {
     if (_currentCall != null) {
-      CallKitManager.instance.rejectCall(_currentCall!.sessionId);
+      CallKitManager.instance.processCallFinished(_currentCall!.sessionId);
       _currentCall!.reject();
     } else {
       _callsMap[sessionId] = CallState.REJECTED;
@@ -154,7 +156,7 @@ class CallManager {
 
   void hungUp() {
     if (_currentCall != null) {
-      CallKitManager.instance.endCall(_currentCall!.sessionId);
+      CallKitManager.instance.processCallFinished(_currentCall!.sessionId);
       _sendEndCallSignalForOffliners(_currentCall!);
       _currentCall!.hungUp();
     }
@@ -221,9 +223,6 @@ class CallManager {
       },
       onCallEnded: (uuid) {
         hungUp();
-      },
-      onNewCallShown: (error, uuid, handle, callerName, fromPushKit) {
-        _savePendingCall(uuid);
       },
       onMuteCall: (mute, uuid) {
         _currentCall?.setMicrophoneMute(mute);
