@@ -120,6 +120,19 @@ class _BodyLayoutState extends State<BodyLayout> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 FloatingActionButton(
+                  heroTag: "ScreenSharing",
+                  child: Icon(
+                    Icons.screen_share,
+                    color: Colors.white,
+                  ),
+                  backgroundColor: Colors.teal,
+                  onPressed: () =>
+                      _startCall(_selectedUsers, startScreenSharing: true),
+                ),
+                Container(
+                  width: 24,
+                ),
+                FloatingActionButton(
                   heroTag: "VideoCall",
                   child: Icon(
                     Icons.videocam,
@@ -187,7 +200,7 @@ class _BodyLayoutState extends State<BodyLayout> {
     };
   }
 
-  void _startCall(Set<int> opponents) async {
+  void _startCall(Set<int> opponents, {bool startScreenSharing = false}) async {
     if (opponents.isEmpty) return;
 
     var attendees = opponents.map((entry) {
@@ -204,8 +217,8 @@ class _BodyLayoutState extends State<BodyLayout> {
       attendees: attendees,
     );
     createMeeting(meeting).then((createdMeeting) async {
-      _currentCall =
-          await _callClient.createCallSession(createdMeeting.hostId!);
+      _currentCall = await _callClient.createCallSession(
+          createdMeeting.hostId!, CallType.VIDEO_CALL, startScreenSharing);
 
       Navigator.push(
         context,

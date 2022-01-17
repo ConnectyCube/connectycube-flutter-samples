@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:conf_call_sample/src/utils/call_manager.dart';
 import 'package:conf_call_sample/src/utils/video_config.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
@@ -83,8 +86,8 @@ class IncomingCallScreen extends StatelessWidget {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            ConversationCallScreen(callSession, _meetingId, _participantIds, true),
+        builder: (context) => ConversationCallScreen(
+            callSession, _meetingId, _participantIds, true),
       ),
     );
   }
@@ -127,10 +130,14 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   bool _isSpeakerEnabled = true;
   bool _isMicMute = false;
 
-  Map<int, RTCVideoRenderer> _streams = {};
+  RTCVideoRenderer? localRenderer;
+  Map<int?, RTCVideoRenderer> remoteRenderers = {};
+
+  bool _enableScreenSharing;
 
   _ConversationCallScreenState(
-      this._callSession, this._meetingId, this._opponents, this._isIncoming);
+      this._callSession, this._meetingId, this._opponents, this._isIncoming)
+      : _enableScreenSharing = !_callSession.startScreenSharing;
 
   @override
   void initState() {
@@ -152,7 +159,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
       log("join session= $publishers", TAG);
 
       if (!_isIncoming) {
-        _callManager.startCall(_meetingId, _opponents, _callSession.currentUserId);
+        _callManager.startCall(
+            _meetingId, _opponents, _callSession.currentUserId);
       }
     }));
   }
@@ -160,9 +168,18 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   @override
   void dispose() {
     super.dispose();
-    _streams.forEach((opponentId, stream) async {
+
+    localRenderer?.srcObject = null;
+    localRenderer?.dispose();
+
+    remoteRenderers.forEach((opponentId, renderer) {
       log("[dispose] dispose renderer for $opponentId", TAG);
-      await stream.dispose();
+      try {
+        renderer.srcObject = null;
+        renderer.dispose();
+      } catch (e) {
+        log('Error $e');
+      }
     });
   }
 
@@ -175,26 +192,33 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     log("_onReceiveRejectCall got reject from user $participantId", TAG);
   }
 
-  void _addLocalMediaStream(MediaStream stream) {
+  Future<void> _addLocalMediaStream(MediaStream stream) async {
     log("_addLocalMediaStream", TAG);
-    _onStreamAdd(ConferenceClient.instance.currentUserId, stream);
+    if (localRenderer == null) {
+      localRenderer = RTCVideoRenderer();
+      await localRenderer!.initialize();
+    }
+
+    setState(() {
+      localRenderer!.srcObject = stream;
+    });
   }
 
   void _addRemoteMediaStream(session, int userId, MediaStream stream) {
     log("_addRemoteMediaStream for user $userId", TAG);
-    _onStreamAdd(userId, stream);
+    _onRemoteStreamAdd(userId, stream);
   }
 
   void _removeMediaStream(callSession, int userId) {
     log("_removeMediaStream for user $userId", TAG);
-    RTCVideoRenderer? videoRenderer = _streams[userId];
+    RTCVideoRenderer? videoRenderer = remoteRenderers[userId];
     if (videoRenderer == null) return;
 
     videoRenderer.srcObject = null;
     videoRenderer.dispose();
 
     setState(() {
-      _streams.remove(userId);
+      remoteRenderers.remove(userId);
     });
   }
 
@@ -227,13 +251,13 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     log("onError $ex", TAG);
   }
 
-  void _onStreamAdd(int opponentId, MediaStream stream) async {
+  void _onRemoteStreamAdd(int opponentId, MediaStream stream) async {
     log("_onStreamAdd for user $opponentId", TAG);
 
     RTCVideoRenderer streamRender = RTCVideoRenderer();
     await streamRender.initialize();
     streamRender.srcObject = stream;
-    setState(() => _streams[opponentId] = streamRender);
+    setState(() => remoteRenderers[opponentId] = streamRender);
   }
 
   void subscribeToPublishers(List<int?> publishers) {
@@ -244,8 +268,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
   void handlePublisherReceived(List<int?> publishers) {
     if (!_isIncoming) {
-      publishers.forEach((id){
-        if(id != null) {
+      publishers.forEach((id) {
+        if (id != null) {
           _callManager.handleAcceptCall(id);
         }
       });
@@ -253,18 +277,30 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   }
 
   List<Widget> renderStreamsGrid(Orientation orientation) {
-    List<Widget> streamsExpanded = _streams.entries
+    List<Widget> streamsExpanded = [];
+
+    if (localRenderer != null) {
+      streamsExpanded.add(Expanded(
+          child: RTCVideoView(
+        localRenderer!,
+        objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+        mirror: true,
+      )));
+    }
+
+    streamsExpanded.addAll(remoteRenderers.entries
         .map(
           (entry) => Expanded(
             child: RTCVideoView(
               entry.value,
-              mirror: true,
               objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+              mirror: false,
             ),
           ),
         )
-        .toList();
-    if (_streams.length > 2) {
+        .toList());
+
+    if (streamsExpanded.length > 2) {
       List<Widget> rows = [];
 
       for (var i = 0; i < streamsExpanded.length; i += 2) {
@@ -392,30 +428,54 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
                   backgroundColor: Colors.black38,
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.only(right: 4),
-                child: FloatingActionButton(
-                  elevation: 0,
-                  heroTag: "SwitchCamera",
-                  child: Icon(
-                    Icons.switch_video,
-                    color: _isVideoEnabled() ? Colors.white : Colors.grey,
+              Visibility(
+                visible: kIsWeb || Platform.isIOS || Platform.isAndroid,
+                child: Padding(
+                  padding: EdgeInsets.only(right: 4),
+                  child: FloatingActionButton(
+                    elevation: 0,
+                    heroTag: "ToggleScreenSharing",
+                    child: Icon(
+                      _enableScreenSharing
+                          ? Icons.screen_share
+                          : Icons.stop_screen_share,
+                      color: Colors.white,
+                    ),
+                    onPressed: () => _toggleScreenSharing(),
+                    backgroundColor: Colors.black38,
                   ),
-                  onPressed: () => _switchCamera(),
-                  backgroundColor: Colors.black38,
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.only(right: 4),
-                child: FloatingActionButton(
-                  elevation: 0,
-                  heroTag: "ToggleCamera",
-                  child: Icon(
-                    Icons.videocam,
-                    color: _isVideoEnabled() ? Colors.white : Colors.grey,
+              Visibility(
+                visible: _enableScreenSharing,
+                child: Padding(
+                  padding: EdgeInsets.only(right: 4),
+                  child: FloatingActionButton(
+                    elevation: 0,
+                    heroTag: "SwitchCamera",
+                    child: Icon(
+                      Icons.switch_video,
+                      color: _isVideoEnabled() ? Colors.white : Colors.grey,
+                    ),
+                    onPressed: () => _switchCamera(),
+                    backgroundColor: Colors.black38,
                   ),
-                  onPressed: () => _toggleCamera(),
-                  backgroundColor: Colors.black38,
+                ),
+              ),
+              Visibility(
+                visible: _enableScreenSharing,
+                child: Padding(
+                  padding: EdgeInsets.only(right: 4),
+                  child: FloatingActionButton(
+                    elevation: 0,
+                    heroTag: "ToggleCamera",
+                    child: Icon(
+                      Icons.videocam,
+                      color: _isVideoEnabled() ? Colors.white : Colors.grey,
+                    ),
+                    onPressed: () => _toggleCamera(),
+                    backgroundColor: Colors.black38,
+                  ),
                 ),
               ),
               Expanded(
@@ -468,6 +528,14 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     setState(() {
       _isCameraEnabled = !_isCameraEnabled;
       _callSession.setVideoEnabled(_isCameraEnabled);
+    });
+  }
+
+  _toggleScreenSharing() {
+    _callSession.enableScreenSharing(_enableScreenSharing).then((voidResult) {
+      setState(() {
+        _enableScreenSharing = !_enableScreenSharing;
+      });
     });
   }
 
