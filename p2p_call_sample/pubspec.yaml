@@ -12,9 +12,9 @@ dependencies:
 
   connectycube_sdk: 2.0.9
   shared_preferences: ^2.0.6
-#  connectycube_flutter_call_kit: ^0.1.0-dev.2
-  connectycube_flutter_call_kit:
-    path: ../../connectycube-flutter-call-kit/connectycube_flutter_call_kit
+  connectycube_flutter_call_kit: ^2.0.1
+#  connectycube_flutter_call_kit:
+#    path: ../../connectycube-flutter-call-kit/connectycube_flutter_call_kit
   platform_device_id: ^1.0.1
   universal_io: ^2.0.4
 

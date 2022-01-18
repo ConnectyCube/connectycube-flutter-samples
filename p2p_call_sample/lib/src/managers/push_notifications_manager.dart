@@ -31,7 +31,7 @@ class PushNotificationsManager {
   init() async {
     ConnectycubeFlutterCallKit.initEventsHandler();
 
-    ConnectycubeFlutterCallKit.onTokenReceived = (token) {
+    ConnectycubeFlutterCallKit.onTokenRefreshed = (token) {
       log('[onTokenRefresh] VoIP token: $token', TAG);
       subscribe(token);
     };
@@ -42,6 +42,8 @@ class PushNotificationsManager {
         subscribe(token);
       }
     });
+
+    ConnectycubeFlutterCallKit.onCallRejectedWhenTerminated = onCallRejectedWhenTerminated;
   }
 
   subscribe(String token) async {

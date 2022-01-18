@@ -1,5 +1,5 @@
 PODS:
-  - connectycube_flutter_call_kit (0.1.0):
+  - connectycube_flutter_call_kit (2.0.1):
     - Flutter
   - device_info (0.0.1):
     - Flutter
@@ -48,7 +48,7 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences/ios"
 
 SPEC CHECKSUMS:
-  connectycube_flutter_call_kit: f473baf521399c0f1263c32ecaebe8545a1c541c
+  connectycube_flutter_call_kit: 5330ccb3f8ce53241a2e0cf4f2d9a65de2b1424c
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
   Flutter: 50d75fe2f02b26cc09d224853bb45737f8b3214a
   flutter_webrtc: 611cab01a48b1d20e2b2409783c182134b8729e5
