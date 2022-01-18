@@ -62,12 +62,6 @@
 		A534E2CB26BC07DA0072CB0E /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		A558A6F625CAE77A007E898E /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		A588C0A025C9B9A5005025C4 /* P2PCallsSample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = P2PCallsSample.entitlements; sourceTree = "<group>"; };
-		A5C81CF827722EE3009691D9 /* ReplayKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ReplayKit.framework; path = System/Library/Frameworks/ReplayKit.framework; sourceTree = SDKROOT; };
-		A5C81CFB27722EE3009691D9 /* SampleHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleHandler.swift; sourceTree = "<group>"; };
-		A5C81CFD27722EE3009691D9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		A5C81D0427722EE3009691D9 /* UIKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = UIKit.framework; path = System/Library/Frameworks/UIKit.framework; sourceTree = SDKROOT; };
-		A5C81D0727722EE3009691D9 /* BroadcastSetupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastSetupViewController.swift; sourceTree = "<group>"; };
-		A5C81D0927722EE3009691D9 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A5D8473D27959B7B0053FF43 /* custom_ringtone.caf */ = {isa = PBXFileReference; lastKnownFileType = file; name = custom_ringtone.caf; path = Resources/ringtones/custom_ringtone.caf; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -88,8 +82,6 @@
 			children = (
 				A534E2CB26BC07DA0072CB0E /* AVFoundation.framework */,
 				245B3438F9416C97F960DF6B /* Pods_Runner.framework */,
-				A5C81CF827722EE3009691D9 /* ReplayKit.framework */,
-				A5C81D0427722EE3009691D9 /* UIKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -120,8 +112,6 @@
 			children = (
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
-				A5C81CFA27722EE3009691D9 /* com.connectycube.flutter.p2p-screensharing */,
-				A5C81D0627722EE3009691D9 /* com.connectycube.flutter.p2p-screensharingSetupUI */,
 				97C146EF1CF9000F007C117D /* Products */,
 				952C1D8B0C33AAED7389397D /* Pods */,
 				4B3410D39048F58FC0A28E78 /* Frameworks */,
@@ -160,24 +150,6 @@
 			children = (
 			);
 			name = "Supporting Files";
-			sourceTree = "<group>";
-		};
-		A5C81CFA27722EE3009691D9 /* com.connectycube.flutter.p2p-screensharing */ = {
-			isa = PBXGroup;
-			children = (
-				A5C81CFB27722EE3009691D9 /* SampleHandler.swift */,
-				A5C81CFD27722EE3009691D9 /* Info.plist */,
-			);
-			path = "com.connectycube.flutter.p2p-screensharing";
-			sourceTree = "<group>";
-		};
-		A5C81D0627722EE3009691D9 /* com.connectycube.flutter.p2p-screensharingSetupUI */ = {
-			isa = PBXGroup;
-			children = (
-				A5C81D0727722EE3009691D9 /* BroadcastSetupViewController.swift */,
-				A5C81D0927722EE3009691D9 /* Info.plist */,
-			);
-			path = "com.connectycube.flutter.p2p-screensharingSetupUI";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
