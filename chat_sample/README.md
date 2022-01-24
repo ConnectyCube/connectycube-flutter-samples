@@ -52,7 +52,6 @@ The app will automatically run on a selected iOS device or simulator.
 ### Run on Windows
 - Run command from the  Terminal `flutter run -d windows`;
 ### Run on Web
-- Add own `firebaseConfig` to the file `chat_sample/web/index.html`;
 - Run command from the  Terminal `flutter run -d chrome`;
 
 ### Configure Push notifications:
