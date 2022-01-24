@@ -71,7 +71,7 @@ Future<CubeFile> getUploadingImageFuture(FilePickerResult result) async {
       log("uploadImageFile progress= $progress");
     });
   } else {
-    return uploadFile(File(result.files.single.path), isPublic: true, onProgress: (progress) {
+    return uploadFile(File(result.files.single.path!), isPublic: true, onProgress: (progress) {
       log("uploadImageFile progress= $progress");
     });
   }

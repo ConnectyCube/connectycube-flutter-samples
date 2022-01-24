@@ -151,7 +151,7 @@ class NewChatScreenState extends State<NewChatScreen> {
     if(kIsWeb){
       image = result.files.single.bytes;
     } else {
-      image = File(result.files.single.path).readAsBytesSync();
+      image = File(result.files.single.path!).readAsBytesSync();
     }
 
     var uploadImageFuture = getUploadingImageFuture(result);

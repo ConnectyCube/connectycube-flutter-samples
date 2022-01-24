@@ -129,7 +129,7 @@ class ChatScreenState extends State<ChatScreen> {
     if(kIsWeb){
       imageData = result.files.single.bytes!;
     } else {
-      imageData = File(result.files.single.path).readAsBytesSync();
+      imageData = File(result.files.single.path!).readAsBytesSync();
     }
 
     var decodedImage = await decodeImageFromList(imageData);
