@@ -10,23 +10,23 @@ dependencies:
   flutter:
     sdk: flutter
 
-  connectycube_sdk: ^2.0.6
+  connectycube_sdk: ^2.0.9
 #  connectycube_sdk:
 #    path: ../../flutter-sdk
-  shared_preferences: ^2.0.6
-  file_picker: ^4.0.1
+  shared_preferences: ^2.0.12
+  file_picker: ^4.3.2
   fluttertoast: ^8.0.8
-  cached_network_image: 3.1.0
-  photo_view: ^0.12.0
+  cached_network_image: ^3.2.0
+  photo_view: ^0.13.0
   platform_device_id: ^1.0.1
-  firebase_core: ^1.7.0
-  firebase_messaging: ^10.0.8
-  flutter_local_notifications: ^8.0.0
-  connectivity_plus: ^1.0.6
-  logging: ^1.0.1
+  firebase_messaging: ^11.2.5
+  flutter_local_notifications: ^9.2.0
+  connectivity_plus: ^2.2.0
+  logging: ^1.0.2
   collection: ^1.15.0
   universal_io: ^2.0.4
-  path_provider: ^2.0.4
+  path_provider: ^2.0.8
+  firebase_core: ^1.11.0
 
 dev_dependencies:
   flutter_test:
