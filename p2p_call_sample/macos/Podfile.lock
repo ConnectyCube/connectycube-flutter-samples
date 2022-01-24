@@ -35,7 +35,7 @@ PODS:
     - GoogleUtilities/UserDefaults (~> 7.4)
   - flutter_webrtc (0.7.1):
     - FlutterMacOS
-    - WebRTC-SDK (= 93.4577.01)
+    - WebRTC-SDK (= 92.4515.11)
   - FlutterMacOS (1.0.0)
   - GoogleDataTransport (9.1.2):
     - GoogleUtilities/Environment (~> 7.2)
@@ -72,7 +72,7 @@ PODS:
   - PromisesObjC (2.0.0)
   - shared_preferences_macos (0.0.1):
     - FlutterMacOS
-  - WebRTC-SDK (93.4577.01)
+  - WebRTC-SDK (92.4515.11)
 
 DEPENDENCIES:
   - firebase_core (from `Flutter/ephemeral/.symlinks/plugins/firebase_core/macos`)
@@ -123,7 +123,7 @@ SPEC CHECKSUMS:
   FirebaseCoreDiagnostics: 56fb7216d87e0e6ec2feddefa9d8a392fe8b2c18
   FirebaseInstallations: 830327b45345ffc859eaa9c17bcd5ae893fd5425
   FirebaseMessaging: 42252b79b860482021483748669ec32e22196462
-  flutter_webrtc: b1fc5b59e3d8bce4b3740d78a1a14c4ee4326557
+  flutter_webrtc: 2f93a72c583d7f70b97adb01e2dfc9183f8c0c20
   FlutterMacOS: 57701585bf7de1b3fc2bb61f6378d73bbdea8424
   GoogleDataTransport: 629c20a4d363167143f30ea78320d5a7eb8bd940
   GoogleUtilities: 684ee790a24f73ebb2d1d966e9711c203f2a4237
@@ -133,7 +133,7 @@ SPEC CHECKSUMS:
   platform_device_id_macos: f763bb55f088be804d61b96eb4710b8ab6598e94
   PromisesObjC: 68159ce6952d93e17b2dfe273b8c40907db5ba58
   shared_preferences_macos: 480ce071d0666e37cef23fe6c702293a3d21799e
-  WebRTC-SDK: 166b0e161d93d4b961f410bf7966a634f42aa17d
+  WebRTC-SDK: 21dbc6028a68f3a89718057a2caa970a4da8ebb7
 
 PODFILE CHECKSUM: c7161fcf45d4fd9025dc0f48a76d6e64e52f8176
 

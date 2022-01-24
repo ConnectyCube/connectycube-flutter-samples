@@ -1,4 +1,3 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
@@ -37,7 +36,6 @@ class _AppState extends State<App> {
   @override
   void initState() {
     super.initState();
-    Firebase.initializeApp();
 
     initConnectycube();
   }
