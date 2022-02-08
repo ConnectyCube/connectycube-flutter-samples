@@ -57,12 +57,14 @@ class PushNotificationsManager {
     }
 
     CreateSubscriptionParameters parameters = CreateSubscriptionParameters();
-    parameters.environment = CubeEnvironment
-        .DEVELOPMENT; // TODO for sample we use DEVELOPMENT environment
-    // bool isProduction = bool.fromEnvironment('dart.vm.product');
-    // parameters.environment =
-    //     isProduction ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
-
+    try {
+      bool isProduction = bool.fromEnvironment('dart.vm.product');
+      parameters.environment =
+      isProduction ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
+    } catch (e){
+      parameters.environment = CubeEnvironment
+          .PRODUCTION;
+    }
     if (Platform.isAndroid) {
       parameters.channel = NotificationsChannels.GCM;
       parameters.platform = CubePlatform.ANDROID;

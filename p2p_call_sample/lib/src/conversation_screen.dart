@@ -1,7 +1,12 @@
+import 'dart:typed_data';
+
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:universal_io/io.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'login_screen.dart';
 import 'managers/call_manager.dart';
@@ -26,9 +31,10 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   bool _isCameraEnabled = true;
   bool _isSpeakerEnabled = true;
   bool _isMicMute = false;
+  bool _isTorchEnabled = false;
 
   RTCVideoRenderer? localRenderer;
-  Map<int?, RTCVideoRenderer> remoteRenderers = {};
+  Map<int, RTCVideoRenderer> remoteRenderers = {};
 
   bool _enableScreenSharing;
 
@@ -38,6 +44,9 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   @override
   void initState() {
     super.initState();
+
+    // localRenderer = RTCVideoRenderer();
+    // localRenderer!.initialize();
 
     _callSession.onLocalStreamReceived = _addLocalMediaStream;
     _callSession.onRemoteStreamReceived = _addRemoteMediaStream;
@@ -75,6 +84,15 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
       localRenderer = RTCVideoRenderer();
       await localRenderer!.initialize();
     }
+
+    log('localStream getAudioTracks ${stream.getAudioTracks().length}');
+    log('localStream getVideoTracks ${stream.getVideoTracks().length}');
+    log('localStream id ${stream.getVideoTracks()[0].id}');
+    log('localStream kind ${stream.getVideoTracks()[0].kind}');
+    log('localStream label ${stream.getVideoTracks()[0].label}');
+    log('localStream enabled ${stream.getVideoTracks()[0].enabled}');
+    log('localStream muted ${stream.getVideoTracks()[0].muted}');
+
 
     setState(() {
       localRenderer!.srcObject = stream;
@@ -124,24 +142,12 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     List<Widget> streamsExpanded = [];
 
     if (localRenderer != null) {
-      streamsExpanded.add(Expanded(
-          child: RTCVideoView(
-        localRenderer!,
-        objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-        mirror: true,
-      )));
+      streamsExpanded.add(_buildUserVideoItem(
+          CubeChatConnection.instance.currentUser!.id!, localRenderer!, true));
     }
 
     streamsExpanded.addAll(remoteRenderers.entries
-        .map(
-          (entry) => Expanded(
-            child: RTCVideoView(
-              entry.value,
-              objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-              mirror: false,
-            ),
-          ),
-        )
+        .map((entry) => _buildUserVideoItem(entry.key, entry.value, false))
         .toList());
 
     if (streamsExpanded.length > 2) {
@@ -229,6 +235,101 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
         ],
       ),
     );
+  }
+
+  Widget _buildUserVideoItem(
+      int userId, RTCVideoRenderer renderer, bool isLocalStream) {
+    return Expanded(
+        child: Stack(
+      children: [
+        RTCVideoView(
+          renderer,
+          objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+          mirror: isLocalStream,
+        ),
+        Align(
+            alignment: Alignment.centerLeft,
+            child: ClipRRect(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(32),
+                ),
+                child: Container(
+                    padding: EdgeInsets.all(4),
+                    color: Colors.black26,
+                    child: Column(mainAxisSize: MainAxisSize.min, children: <
+                        Widget>[
+                      SizedBox(
+                          width: 48.0,
+                          height: 48.0,
+                          child: FloatingActionButton(
+                            elevation: 0,
+                            heroTag: "CaptureFrame",
+                            child: Icon(
+                              Icons.enhance_photo_translate_rounded,
+                              color: Colors.white,
+                            ),
+                            onPressed: () async {
+                              final frame =
+                                  await captureFrame(renderer.srcObject!);
+                              _showImageDialog(frame.asUint8List());
+                            },
+                            backgroundColor: Colors.black38,
+                          )),
+                      SizedBox(
+                        width: 48.0,
+                        height: 48.0,
+                        child: FloatingActionButton(
+                          elevation: 0,
+                          heroTag: "RecordVideo",
+                          child: Icon(
+                            CubeMediaRecorder.instance.isRecordingNow(userId)
+                                ? Icons.stop_rounded
+                                : Icons.circle,
+                            color: Colors.white,
+                          ),
+                          onPressed: () async {
+                            if (CubeMediaRecorder.instance
+                                .isRecordingNow(userId)) {
+                              setState(() {
+                                _stopRecording(userId);
+                              });
+                            } else {
+                              setState(() {
+                                _startRecording(userId, renderer.srcObject!);
+                              });
+                            }
+                          },
+                          backgroundColor: Colors.black38,
+                        ),
+                      ),
+                      if (isLocalStream && (Platform.isAndroid || Platform.isIOS))
+                        SizedBox(
+                          width: 48.0,
+                          height: 48.0,
+                          child: FloatingActionButton(
+                            elevation: 0,
+                            heroTag: "ToggleTorch",
+                            child: Icon(
+                              _isTorchEnabled
+                                  ? Icons.flash_off
+                                  : Icons.flash_on,
+                              color: Colors.white,
+                            ),
+                            onPressed: () async {
+                              _callSession
+                                  .setTorchEnabled(!_isTorchEnabled)
+                                  .then((_) {
+                                setState(() {
+                                  _isTorchEnabled = !_isTorchEnabled;
+                                });
+                              });
+                            },
+                            backgroundColor: Colors.black38,
+                          ),
+                        ),
+                    ]))))
+      ],
+    ));
   }
 
   Widget _getActionsPanel() {
@@ -342,6 +443,55 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
         ),
       ),
     );
+  }
+
+  /// currently supported only Android and Web platforms
+  _startRecording(int userId, MediaStream stream) async {
+    var recordingPath;
+
+    if (Platform.isAndroid) {
+      var status = await Permission.manageExternalStorage.status;
+      if (!status.isGranted) {
+        await Permission.manageExternalStorage.request();
+      }
+
+      log('Permission.manageExternalStorage = ${await Permission.manageExternalStorage.status}');
+
+      var storagePath = (await getExternalStorageDirectories(
+                  type: StorageDirectory.movies))?[0]
+              .path ??
+          '';
+
+      log('storagePath = $storagePath');
+
+      recordingPath = storagePath + '${Platform.pathSeparator}' + '${userId}_${_callSession.sessionId}_${DateTime.now().toIso8601String()}.mp4';
+    }
+
+    CubeMediaRecorder.instance
+        .startRecording(userId, stream, filePath: recordingPath);
+  }
+
+  _stopRecording(int userId) {
+    CubeMediaRecorder.instance.stopRecording(userId).then((recordingResult) {
+      log('recording result = $recordingResult');
+      if (kIsWeb && recordingResult is String) {
+        launch(recordingResult);
+      }
+    });
+  }
+
+  _showImageDialog(Uint8List imageBytes) async {
+    await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              content: Image.memory(imageBytes, height: 480, width: 480),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: Navigator.of(context, rootNavigator: true).pop,
+                  child: Text('OK'),
+                )
+              ],
+            ));
   }
 
   _endCall() {

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:universal_io/io.dart';
@@ -53,9 +55,9 @@ class CallManager {
 
   void _initCustomMediaConfigs() {
     RTCMediaConfig mediaConfig = RTCMediaConfig.instance;
-    mediaConfig.minHeight = 720;
-    mediaConfig.minWidth = 1280;
-    mediaConfig.minFrameRate = 30;
+    mediaConfig.minHeight = Platform.isIOS || Platform.isAndroid ? 1280 : 720;
+    mediaConfig.minWidth = Platform.isIOS || Platform.isAndroid ? 720 : 1280;
+    mediaConfig.minFrameRate = 25;
   }
 
   void _initCalls() {
@@ -177,6 +179,7 @@ class CallManager {
       PARAM_CALLER_ID: currentCall.callerId,
       PARAM_CALLER_NAME: callerName,
       PARAM_CALL_OPPONENTS: currentCall.opponentsIds.join(','),
+      // PARAM_CALL_USER_INFO: jsonEncode({'custom1':'custom value1'}),
     };
 
     params.notificationType = NotificationType.PUSH;
