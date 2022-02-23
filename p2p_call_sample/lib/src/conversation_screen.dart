@@ -2,6 +2,7 @@ import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:universal_io/io.dart';
+import 'package:web_browser_detect/web_browser_detect.dart';
 
 import 'login_screen.dart';
 import 'managers/call_manager.dart';
@@ -32,12 +33,24 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
   bool _enableScreenSharing;
 
+  MediaStream? _localMediaStream;
+
+  bool _isSafari = false;
+
+  Widget? _localVideoView;
+
+  bool _needRebuildLocalVideoView = true;
+
+  bool _customMediaStream = false;
+
   _ConversationCallScreenState(this._callSession, this._isIncoming)
       : _enableScreenSharing = !_callSession.startScreenSharing;
 
   @override
   void initState() {
     super.initState();
+
+    _isSafari = kIsWeb && Browser().browserAgent == BrowserAgent.Safari;
 
     _callSession.onLocalStreamReceived = _addLocalMediaStream;
     _callSession.onRemoteStreamReceived = _addRemoteMediaStream;
@@ -71,14 +84,34 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
   Future<void> _addLocalMediaStream(MediaStream stream) async {
     log("_addLocalMediaStream", TAG);
-    if (localRenderer == null) {
-      localRenderer = RTCVideoRenderer();
-      await localRenderer!.initialize();
-    }
+
+    _localMediaStream = stream;
+
+    if (!mounted) return;
 
     setState(() {
-      localRenderer!.srcObject = stream;
+      _needRebuildLocalVideoView = _isSafari || localRenderer == null;
     });
+
+    /// workaround for updating localVideo in Safari browser
+    if (_isSafari) {
+      if (!_customMediaStream) {
+        _customMediaStream = true;
+
+        var customMediaStream = _enableScreenSharing
+            ? await navigator.mediaDevices
+                .getUserMedia({'audio': true, 'video': true})
+            : await navigator.mediaDevices
+                .getDisplayMedia({'audio': true, 'video': true});
+
+        _callSession.replaceMediaStream(customMediaStream);
+        setState(() {
+          _needRebuildLocalVideoView = true;
+        });
+      }
+    } else {
+      localRenderer?.srcObject = _localMediaStream;
+    }
   }
 
   void _addRemoteMediaStream(session, int userId, MediaStream stream) {
@@ -117,19 +150,51 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     RTCVideoRenderer streamRender = RTCVideoRenderer();
     await streamRender.initialize();
     streamRender.srcObject = stream;
-    setState(() => remoteRenderers[opponentId] = streamRender);
+    setState(() {
+      remoteRenderers[opponentId] = streamRender;
+      _needRebuildLocalVideoView = _isSafari;
+    });
+  }
+
+  Future<Widget> _buildLocalVideoItem() async {
+    log("buildLocalVideoStreamItem", TAG);
+    if (localRenderer == null || _isSafari) {
+      localRenderer = RTCVideoRenderer();
+      await localRenderer!.initialize();
+    }
+
+    localRenderer?.srcObject = _localMediaStream;
+
+    _localVideoView = Expanded(
+        child: RTCVideoView(
+      localRenderer!,
+      objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+      mirror: true,
+    ));
+    _needRebuildLocalVideoView = false;
+
+    return _localVideoView!;
   }
 
   List<Widget> renderStreamsGrid(Orientation orientation) {
     List<Widget> streamsExpanded = [];
 
-    if (localRenderer != null) {
-      streamsExpanded.add(Expanded(
-          child: RTCVideoView(
-        localRenderer!,
-        objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-        mirror: true,
-      )));
+    if (_localMediaStream != null) {
+      streamsExpanded.add(_isSafari || _localVideoView == null
+          ? FutureBuilder<Widget>(
+              future: _needRebuildLocalVideoView
+                  ? _buildLocalVideoItem()
+                  : Future.value(_localVideoView),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return snapshot.data!;
+                } else {
+                  return Expanded(child: Container());
+                }
+              })
+          : _localVideoView != null
+              ? _localVideoView!
+              : Expanded(child: Container()));
     }
 
     streamsExpanded.addAll(remoteRenderers.entries
@@ -175,58 +240,57 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () => _onBackPressed(context),
-      child: Stack(
-        children: [
-          Scaffold(
-              body: _isVideoCall()
-                  ? OrientationBuilder(
-                      builder: (context, orientation) {
-                        return Center(
-                          child: Container(
-                            child: orientation == Orientation.portrait
-                                ? Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: renderStreamsGrid(orientation))
-                                : Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: renderStreamsGrid(orientation)),
-                          ),
-                        );
-                      },
-                    )
-                  : Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 24),
-                            child: Text(
-                              "Audio call",
-                              style: TextStyle(fontSize: 28),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 12),
-                            child: Text(
-                              "Members:",
-                              style: TextStyle(
-                                  fontSize: 20, fontStyle: FontStyle.italic),
-                            ),
-                          ),
-                          Text(
-                            _callSession.opponentsIds.join(", "),
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        ],
+      child: Scaffold(
+        body: Stack(fit: StackFit.loose, clipBehavior: Clip.none, children: [
+          _isVideoCall()
+              ? OrientationBuilder(
+                  builder: (context, orientation) {
+                    return Center(
+                      child: Container(
+                        child: orientation == Orientation.portrait
+                            ? Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: renderStreamsGrid(orientation))
+                            : Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: renderStreamsGrid(orientation)),
                       ),
-                    )),
+                    );
+                  },
+                )
+              : Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 24),
+                        child: Text(
+                          "Audio call",
+                          style: TextStyle(fontSize: 28),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 12),
+                        child: Text(
+                          "Members:",
+                          style: TextStyle(
+                              fontSize: 20, fontStyle: FontStyle.italic),
+                        ),
+                      ),
+                      Text(
+                        _callSession.opponentsIds.join(", "),
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    ],
+                  ),
+                ),
           Align(
             alignment: Alignment.bottomCenter,
             child: _getActionsPanel(),
           ),
-        ],
+        ]),
       ),
     );
   }
