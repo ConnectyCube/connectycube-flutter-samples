@@ -1,82 +1,19 @@
 PODS:
-  - Firebase/CoreOnly (8.3.0):
-    - FirebaseCore (= 8.3.0)
-  - Firebase/Messaging (8.3.0):
-    - Firebase/CoreOnly
-    - FirebaseMessaging (~> 8.3.0)
-  - firebase_core (1.4.0):
-    - Firebase/CoreOnly (~> 8.3.0)
-    - FlutterMacOS
-  - firebase_messaging (10.0.4):
-    - Firebase/CoreOnly (~> 8.3.0)
-    - Firebase/Messaging (~> 8.3.0)
-    - firebase_core
-    - FlutterMacOS
-  - FirebaseCore (8.3.0):
-    - FirebaseCoreDiagnostics (~> 8.0)
-    - GoogleUtilities/Environment (~> 7.4)
-    - GoogleUtilities/Logger (~> 7.4)
-  - FirebaseCoreDiagnostics (8.10.0):
-    - GoogleDataTransport (~> 9.1)
-    - GoogleUtilities/Environment (~> 7.6)
-    - GoogleUtilities/Logger (~> 7.6)
-    - nanopb (~> 2.30908.0)
-  - FirebaseInstallations (8.10.0):
-    - FirebaseCore (~> 8.0)
-    - GoogleUtilities/Environment (~> 7.6)
-    - GoogleUtilities/UserDefaults (~> 7.6)
-    - PromisesObjC (< 3.0, >= 1.2)
-  - FirebaseMessaging (8.3.0):
-    - FirebaseCore (~> 8.0)
-    - FirebaseInstallations (~> 8.0)
-    - GoogleUtilities/AppDelegateSwizzler (~> 7.4)
-    - GoogleUtilities/Environment (~> 7.4)
-    - GoogleUtilities/Reachability (~> 7.4)
-    - GoogleUtilities/UserDefaults (~> 7.4)
   - flutter_webrtc (0.7.1):
     - FlutterMacOS
-    - WebRTC-SDK (= 92.4515.11)
+    - WebRTC-SDK (= 97.4692.02)
   - FlutterMacOS (1.0.0)
-  - GoogleDataTransport (9.1.2):
-    - GoogleUtilities/Environment (~> 7.2)
-    - nanopb (~> 2.30908.0)
-    - PromisesObjC (< 3.0, >= 1.2)
-  - GoogleUtilities/AppDelegateSwizzler (7.6.0):
-    - GoogleUtilities/Environment
-    - GoogleUtilities/Logger
-    - GoogleUtilities/Network
-  - GoogleUtilities/Environment (7.6.0):
-    - PromisesObjC (< 3.0, >= 1.2)
-  - GoogleUtilities/Logger (7.6.0):
-    - GoogleUtilities/Environment
-  - GoogleUtilities/Network (7.6.0):
-    - GoogleUtilities/Logger
-    - "GoogleUtilities/NSData+zlib"
-    - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (7.6.0)"
-  - GoogleUtilities/Reachability (7.6.0):
-    - GoogleUtilities/Logger
-  - GoogleUtilities/UserDefaults (7.6.0):
-    - GoogleUtilities/Logger
-  - nanopb (2.30908.0):
-    - nanopb/decode (= 2.30908.0)
-    - nanopb/encode (= 2.30908.0)
-  - nanopb/decode (2.30908.0)
-  - nanopb/encode (2.30908.0)
   - path_provider_macos (0.0.1):
     - FlutterMacOS
   - platform_device_id (0.0.1):
     - FlutterMacOS
   - platform_device_id_macos (0.0.1):
     - FlutterMacOS
-  - PromisesObjC (2.0.0)
   - shared_preferences_macos (0.0.1):
     - FlutterMacOS
-  - WebRTC-SDK (92.4515.11)
+  - WebRTC-SDK (97.4692.02)
 
 DEPENDENCIES:
-  - firebase_core (from `Flutter/ephemeral/.symlinks/plugins/firebase_core/macos`)
-  - firebase_messaging (from `Flutter/ephemeral/.symlinks/plugins/firebase_messaging/macos`)
   - flutter_webrtc (from `Flutter/ephemeral/.symlinks/plugins/flutter_webrtc/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - path_provider_macos (from `Flutter/ephemeral/.symlinks/plugins/path_provider_macos/macos`)
@@ -86,22 +23,9 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
-    - Firebase
-    - FirebaseCore
-    - FirebaseCoreDiagnostics
-    - FirebaseInstallations
-    - FirebaseMessaging
-    - GoogleDataTransport
-    - GoogleUtilities
-    - nanopb
-    - PromisesObjC
     - WebRTC-SDK
 
 EXTERNAL SOURCES:
-  firebase_core:
-    :path: Flutter/ephemeral/.symlinks/plugins/firebase_core/macos
-  firebase_messaging:
-    :path: Flutter/ephemeral/.symlinks/plugins/firebase_messaging/macos
   flutter_webrtc:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_webrtc/macos
   FlutterMacOS:
@@ -116,24 +40,13 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/shared_preferences_macos/macos
 
 SPEC CHECKSUMS:
-  Firebase: 817b9171d0d51dccc458b94a5e8edff6b1dd323d
-  firebase_core: ad49755f79b4072b73270a1806b09d744d504869
-  firebase_messaging: e5ffc669b751cbac92fd10ab54e7b4997f9a4c48
-  FirebaseCore: a6dba751680d7033b9d3831e1cfc95ead0605118
-  FirebaseCoreDiagnostics: 56fb7216d87e0e6ec2feddefa9d8a392fe8b2c18
-  FirebaseInstallations: 830327b45345ffc859eaa9c17bcd5ae893fd5425
-  FirebaseMessaging: 42252b79b860482021483748669ec32e22196462
-  flutter_webrtc: 2f93a72c583d7f70b97adb01e2dfc9183f8c0c20
+  flutter_webrtc: 1173e289b11aeb73adb44cdb5ea7b395f896790a
   FlutterMacOS: 57701585bf7de1b3fc2bb61f6378d73bbdea8424
-  GoogleDataTransport: 629c20a4d363167143f30ea78320d5a7eb8bd940
-  GoogleUtilities: 684ee790a24f73ebb2d1d966e9711c203f2a4237
-  nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
   path_provider_macos: 160cab0d5461f0c0e02995469a98f24bdb9a3f1f
   platform_device_id: 3e414428f45df149bbbfb623e2c0ca27c545b763
   platform_device_id_macos: f763bb55f088be804d61b96eb4710b8ab6598e94
-  PromisesObjC: 68159ce6952d93e17b2dfe273b8c40907db5ba58
   shared_preferences_macos: 480ce071d0666e37cef23fe6c702293a3d21799e
-  WebRTC-SDK: 21dbc6028a68f3a89718057a2caa970a4da8ebb7
+  WebRTC-SDK: dda4e50186f9eed672dc6bcf4faafb30c6ce48e3
 
 PODFILE CHECKSUM: c7161fcf45d4fd9025dc0f48a76d6e64e52f8176
 

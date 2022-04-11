@@ -8,6 +8,7 @@ import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'managers/call_manager.dart';
 import 'managers/push_notifications_manager.dart';
 import 'utils/configs.dart' as utils;
+import 'utils/platform_utils.dart';
 import 'utils/pref_util.dart';
 
 class SelectOpponentsScreen extends StatelessWidget {
@@ -126,9 +127,13 @@ class _BodyLayoutState extends State<BodyLayout> {
                         color: Colors.white,
                       ),
                       backgroundColor: Colors.teal,
-                      onPressed: () => CallManager.instance.startNewCall(
-                          context, CallType.VIDEO_CALL, _selectedUsers,
-                          startScreenSharing: true),
+                      onPressed: () async {
+                        startBackgroundExecution().then((_) {
+                          CallManager.instance.startNewCall(
+                              context, CallType.VIDEO_CALL, _selectedUsers,
+                              startScreenSharing: true);
+                        });
+                      },
                     ),
                   ),
                 ),
@@ -198,6 +203,8 @@ class _BodyLayoutState extends State<BodyLayout> {
   @override
   void initState() {
     super.initState();
+
+    initForegroundService();
 
     _selectedUsers = {};
 

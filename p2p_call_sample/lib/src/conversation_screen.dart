@@ -6,6 +6,7 @@ import 'package:web_browser_detect/web_browser_detect.dart';
 
 import 'login_screen.dart';
 import 'managers/call_manager.dart';
+import 'utils/platform_utils.dart';
 
 class ConversationCallScreen extends StatefulWidget {
   final P2PSession _callSession;
@@ -57,6 +58,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     _callSession.onSessionClosed = _onSessionClosed;
 
     _callSession.setSessionCallbacksListener(this);
+
     if (_isIncoming) {
       _callSession.acceptCall();
     } else {
@@ -67,6 +69,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   @override
   Future<void> dispose() async {
     super.dispose();
+
+    stopBackgroundExecution();
 
     localRenderer?.srcObject = null;
     localRenderer?.dispose();
@@ -100,7 +104,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
         var customMediaStream = _enableScreenSharing
             ? await navigator.mediaDevices
-                .getUserMedia({'audio': true, 'video': true})
+                .getUserMedia({'audio': true, 'video': _isVideoCall()})
             : await navigator.mediaDevices
                 .getDisplayMedia({'audio': true, 'video': true});
 
@@ -438,10 +442,22 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     });
   }
 
-  _toggleScreenSharing() {
-    _callSession.enableScreenSharing(_enableScreenSharing).then((voidResult) {
-      setState(() {
-        _enableScreenSharing = !_enableScreenSharing;
+  _toggleScreenSharing() async {
+    var foregroundServiceFuture = _enableScreenSharing
+        ? startBackgroundExecution()
+        : stopBackgroundExecution();
+
+    var hasPermissions = await hasBackgroundExecutionPermissions();
+
+    if (!hasPermissions) {
+      await initForegroundService();
+    }
+
+    foregroundServiceFuture.then((_) {
+      _callSession.enableScreenSharing(_enableScreenSharing).then((voidResult) {
+        setState(() {
+          _enableScreenSharing = !_enableScreenSharing;
+        });
       });
     });
   }

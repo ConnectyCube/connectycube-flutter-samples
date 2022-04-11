@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:conf_call_sample/src/utils/call_manager.dart';
+import 'package:conf_call_sample/src/utils/platform_utils.dart';
 import 'package:conf_call_sample/src/utils/video_config.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -168,6 +169,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   @override
   void dispose() {
     super.dispose();
+
+    stopBackgroundExecution();
 
     localRenderer?.srcObject = null;
     localRenderer?.dispose();
@@ -531,10 +534,22 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     });
   }
 
-  _toggleScreenSharing() {
-    _callSession.enableScreenSharing(_enableScreenSharing).then((voidResult) {
-      setState(() {
-        _enableScreenSharing = !_enableScreenSharing;
+  _toggleScreenSharing() async {
+    var foregroundServiceFuture = _enableScreenSharing
+        ? startBackgroundExecution()
+        : stopBackgroundExecution();
+
+    var hasPermissions = await hasBackgroundExecutionPermissions();
+
+    if (!hasPermissions) {
+      await initForegroundService();
+    }
+
+    foregroundServiceFuture.then((_) {
+      _callSession.enableScreenSharing(_enableScreenSharing).then((voidResult) {
+        setState(() {
+          _enableScreenSharing = !_enableScreenSharing;
+        });
       });
     });
   }
