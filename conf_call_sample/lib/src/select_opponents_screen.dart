@@ -1,11 +1,11 @@
-import 'package:conf_call_sample/src/utils/call_manager.dart';
-import 'package:connectycube_sdk/connectycube_meetings.dart';
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 import 'call_screen.dart';
 import 'utils/configs.dart' as utils;
+import 'utils/call_manager.dart';
+import 'utils/platform_utils.dart';
 
 class SelectOpponentsScreen extends StatelessWidget {
   final CubeUser currentUser;
@@ -126,8 +126,11 @@ class _BodyLayoutState extends State<BodyLayout> {
                     color: Colors.white,
                   ),
                   backgroundColor: Colors.teal,
-                  onPressed: () =>
-                      _startCall(_selectedUsers, startScreenSharing: true),
+                  onPressed: () async {
+                    startBackgroundExecution().then((_) {
+                      _startCall(_selectedUsers, startScreenSharing: true);
+                    });
+                  },
                 ),
                 Container(
                   width: 24,
@@ -180,6 +183,9 @@ class _BodyLayoutState extends State<BodyLayout> {
   @override
   void initState() {
     super.initState();
+
+    initForegroundService();
+
     CubeSettings.instance.onSessionRestore = () {
       return createSession(_currentUser);
     };
