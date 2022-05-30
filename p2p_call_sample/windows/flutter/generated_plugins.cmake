@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   flutter_webrtc
+  permission_handler_windows
   platform_device_id_windows
 )
 

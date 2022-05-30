@@ -41,7 +41,7 @@ class _AppState extends State<App> {
   }
 }
 
-initConnectycube(){
+initConnectycube() {
   init(
     config.APP_ID,
     config.AUTH_KEY,
