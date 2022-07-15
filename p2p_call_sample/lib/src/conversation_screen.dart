@@ -25,6 +25,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   static const String TAG = "_ConversationCallScreenState";
   final P2PSession _callSession;
   final bool _isIncoming;
+  final CubeStatsReportsManager _statsReportsManager = CubeStatsReportsManager();
   bool _isCameraEnabled = true;
   bool _isSpeakerEnabled = true;
   bool _isMicMute = false;
@@ -56,7 +57,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     _callSession.onLocalStreamReceived = _addLocalMediaStream;
     _callSession.onRemoteStreamReceived = _addRemoteMediaStream;
     _callSession.onSessionClosed = _onSessionClosed;
-
+    _statsReportsManager.init(_callSession);
     _callSession.setSessionCallbacksListener(this);
 
     if (_isIncoming) {
@@ -67,8 +68,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   }
 
   @override
-  Future<void> dispose() async {
-    super.dispose();
+  void deactivate() {
+    super.deactivate();
 
     stopBackgroundExecution();
 
@@ -140,6 +141,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     log("_onSessionClosed", TAG);
     _callSession.removeSessionCallbacksListener();
 
+    _statsReportsManager.dispose();
+
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
@@ -204,10 +207,70 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     streamsExpanded.addAll(remoteRenderers.entries
         .map(
           (entry) => Expanded(
-            child: RTCVideoView(
-              entry.value,
-              objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-              mirror: false,
+            child: Stack(
+              children: [
+                RTCVideoView(
+                  entry.value,
+                  objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                  mirror: false,
+                ),
+                Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      margin: EdgeInsets.all(8),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: 10,
+                        ),
+                        child: RotatedBox(
+                          quarterTurns: -1,
+                          child: StreamBuilder<CubeMicLevelEvent>(
+                            stream: _statsReportsManager.micLevelStream
+                                .where((event) => event.userId == entry.key),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return LinearProgressIndicator(value: 0);
+                              } else {
+                                var micLevelForUser = snapshot.data!;
+                                return LinearProgressIndicator(
+                                    value: micLevelForUser.micLevel);
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    )),
+                Align(
+                    alignment: Alignment.topCenter,
+                    child: Container(
+                      margin: EdgeInsets.only(top: 8),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                        child: Container(
+                          padding: EdgeInsets.all(8),
+                          color: Colors.black26,
+                          child: StreamBuilder<CubeVideoBitrateEvent>(
+                            stream: _statsReportsManager.videoBitrateStream
+                                .where((event) => event.userId == entry.key),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return Text(
+                                  '0 kbits/sec',
+                                  style: TextStyle(color: Colors.white),
+                                );
+                              } else {
+                                var videoBitrateForUser = snapshot.data!;
+                                return Text(
+                                  '${videoBitrateForUser.bitRate} kbits/sec',
+                                  style: TextStyle(color: Colors.white),
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ))
+              ],
             ),
           ),
         )

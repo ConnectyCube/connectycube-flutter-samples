@@ -1,7 +1,7 @@
 name: p2p_call_sample
 description: P2P Calls Sample
 
-version: 1.4.1
+version: 1.5.0
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
@@ -10,11 +10,11 @@ dependencies:
   flutter:
     sdk: flutter
 
-  connectycube_sdk: ^2.1.1
+  connectycube_sdk: ^2.1.2
 #  connectycube_sdk:
 #    path: ../../flutter-sdk
   shared_preferences: ^2.0.6
-  connectycube_flutter_call_kit: ^2.0.3
+  connectycube_flutter_call_kit: ^2.0.5
 #  connectycube_flutter_call_kit:
 #    path: ../../connectycube-flutter-call-kit/connectycube_flutter_call_kit
   platform_device_id: ^1.0.1

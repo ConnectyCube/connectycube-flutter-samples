@@ -11,6 +11,8 @@ The project contains the following features implemented:
 - Switch cameras
 - Disable/enable the video stream
 - Switch speakerphone and earpiece
+- Opponents' Mic level monitoring
+- Opponents' Video bitrate monitoring
 - Background calls (via push notifications)
 
 ## Documentation
