@@ -1,6 +1,10 @@
+import 'dart:convert';
+
 import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
+import 'package:flutter/foundation.dart';
 
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 import 'package:universal_io/io.dart';
 
@@ -43,7 +47,8 @@ class PushNotificationsManager {
       }
     });
 
-    ConnectycubeFlutterCallKit.onCallRejectedWhenTerminated = onCallRejectedWhenTerminated;
+    ConnectycubeFlutterCallKit.onCallRejectedWhenTerminated =
+        onCallRejectedWhenTerminated;
   }
 
   subscribe(String token) async {
@@ -57,26 +62,30 @@ class PushNotificationsManager {
     }
 
     CreateSubscriptionParameters parameters = CreateSubscriptionParameters();
-    parameters.environment = CubeEnvironment
-        .DEVELOPMENT; // TODO for sample we use DEVELOPMENT environment
-    // bool isProduction = bool.fromEnvironment('dart.vm.product');
-    // parameters.environment =
-    //     isProduction ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
+    parameters.pushToken = token;
+
+    bool isProduction = bool.fromEnvironment('dart.vm.product');
+    parameters.environment =
+        isProduction ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
 
     if (Platform.isAndroid) {
       parameters.channel = NotificationsChannels.GCM;
       parameters.platform = CubePlatform.ANDROID;
-      parameters.bundleIdentifier = "com.connectycube.flutter.p2p_call_sample";
     } else if (Platform.isIOS) {
       parameters.channel = NotificationsChannels.APNS_VOIP;
       parameters.platform = CubePlatform.IOS;
-      parameters.bundleIdentifier =
-          "com.connectycube.flutter.p2p-call-sample.app";
     }
 
     String? deviceId = await PlatformDeviceId.getDeviceId;
-    parameters.udid = deviceId;
-    parameters.pushToken = token;
+
+    if (kIsWeb) {
+      parameters.udid = base64Encode(utf8.encode(deviceId ?? ''));
+    } else {
+      parameters.udid = deviceId;
+    }
+
+    var packageInfo = await PackageInfo.fromPlatform();
+    parameters.bundleIdentifier = packageInfo.packageName;
 
     createSubscription(parameters.getRequestParameters())
         .then((cubeSubscriptions) {

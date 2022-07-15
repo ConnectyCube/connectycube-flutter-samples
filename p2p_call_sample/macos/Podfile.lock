@@ -5,6 +5,8 @@ PODS:
     - FlutterMacOS
     - WebRTC-SDK (= 97.4692.06)
   - FlutterMacOS (1.0.0)
+  - package_info_plus_macos (0.0.1):
+    - FlutterMacOS
   - path_provider_macos (0.0.1):
     - FlutterMacOS
   - platform_device_id (0.0.1):
@@ -19,6 +21,7 @@ DEPENDENCIES:
   - device_info_plus_macos (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus_macos/macos`)
   - flutter_webrtc (from `Flutter/ephemeral/.symlinks/plugins/flutter_webrtc/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
+  - package_info_plus_macos (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus_macos/macos`)
   - path_provider_macos (from `Flutter/ephemeral/.symlinks/plugins/path_provider_macos/macos`)
   - platform_device_id (from `Flutter/ephemeral/.symlinks/plugins/platform_device_id/macos`)
   - platform_device_id_macos (from `Flutter/ephemeral/.symlinks/plugins/platform_device_id_macos/macos`)
@@ -35,6 +38,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_webrtc/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
+  package_info_plus_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/package_info_plus_macos/macos
   path_provider_macos:
     :path: Flutter/ephemeral/.symlinks/plugins/path_provider_macos/macos
   platform_device_id:
@@ -48,6 +53,7 @@ SPEC CHECKSUMS:
   device_info_plus_macos: 1ad388a1ef433505c4038e7dd9605aadd1e2e9c7
   flutter_webrtc: a019f551482678a0341c79deacbf8d14ab241ceb
   FlutterMacOS: 57701585bf7de1b3fc2bb61f6378d73bbdea8424
+  package_info_plus_macos: f010621b07802a241d96d01876d6705f15e77c1c
   path_provider_macos: 3c0c3b4b0d4a76d2bf989a913c2de869c5641a19
   platform_device_id: 3e414428f45df149bbbfb623e2c0ca27c545b763
   platform_device_id_macos: f763bb55f088be804d61b96eb4710b8ab6598e94
