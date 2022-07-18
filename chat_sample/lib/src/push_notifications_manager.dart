@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -102,30 +103,37 @@ class PushNotificationsManager {
     }
 
     CreateSubscriptionParameters parameters = CreateSubscriptionParameters();
-    parameters.environment = CubeEnvironment.DEVELOPMENT; // doesn't matter, server will send to both environments
+    parameters.pushToken = token;
+
+    bool isProduction = kIsWeb ? true : bool.fromEnvironment('dart.vm.product');
+    parameters.environment =
+        isProduction ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
 
     if (Platform.isAndroid || kIsWeb) {
       parameters.channel = NotificationsChannels.GCM;
       parameters.platform = CubePlatform.ANDROID;
-      parameters.bundleIdentifier = "com.connectycube.flutter.chat_sample";
     } else if (Platform.isIOS || Platform.isMacOS) {
       parameters.channel = NotificationsChannels.APNS;
       parameters.platform = CubePlatform.IOS;
-      parameters.bundleIdentifier = Platform.isIOS
-          ? "com.connectycube.flutter.chatSample.app"
-          : "com.connectycube.flutter.chatSample.macOS";
     }
 
-    String? deviceId = await PlatformDeviceId.getDeviceId;
-    parameters.udid = deviceId;
-    parameters.pushToken = token;
+    var deviceId = await PlatformDeviceId.getDeviceId;
+
+    if (kIsWeb) {
+      parameters.udid = base64Encode(utf8.encode(deviceId ?? ''));
+    } else {
+      parameters.udid = deviceId;
+    }
+
+    var packageInfo = await PackageInfo.fromPlatform();
+    parameters.bundleIdentifier = packageInfo.packageName;
 
     createSubscription(parameters.getRequestParameters())
         .then((cubeSubscription) {
       log('[subscribe] subscription SUCCESS', PushNotificationsManager.TAG);
       sharedPrefs.saveSubscriptionToken(token!);
       cubeSubscription.forEach((subscription) {
-        if (subscription.device!.clientIdentificationSequence == token) {
+        if (subscription.clientIdentificationSequence == token) {
           sharedPrefs.saveSubscriptionId(subscription.id!);
         }
       });
@@ -193,7 +201,8 @@ showNotification(RemoteMessage message) async {
 }
 
 Future<void> onBackgroundMessage(RemoteMessage message) async {
-  log('[onBackgroundMessage] message: ${message.data}', PushNotificationsManager.TAG);
+  log('[onBackgroundMessage] message: ${message.data}',
+      PushNotificationsManager.TAG);
   showNotification(message);
   return Future.value();
 }

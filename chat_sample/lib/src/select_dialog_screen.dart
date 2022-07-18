@@ -44,7 +44,7 @@ class SelectDialogScreen extends StatelessWidget {
   }
 
   Future<bool> _onBackPressed() {
-    return Future.value(false);
+    return Future.value(true);
   }
 
   _openSettings(BuildContext context) {

@@ -105,6 +105,8 @@ class _AppState extends State<App> with WidgetsBindingObserver {
       return createSession(user);
     });
 
+    // setEndpoints("", ""); // set custom API and Char server domains
+
     connectivityStateSubscription =
         Connectivity().onConnectivityChanged.listen((connectivityType) {
       if (AppLifecycleState.resumed != appState) return;
@@ -124,15 +126,15 @@ class _AppState extends State<App> with WidgetsBindingObserver {
       }
     });
 
-    appState = WidgetsBinding.instance!.lifecycleState;
-    WidgetsBinding.instance!.addObserver(this);
+    appState = WidgetsBinding.instance.lifecycleState;
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
     connectivityStateSubscription.cancel();
 
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -143,14 +145,19 @@ class _AppState extends State<App> with WidgetsBindingObserver {
 
     if (AppLifecycleState.paused == state) {
       if (CubeChatConnection.instance.isAuthenticated()) {
-        CubeChatConnection.instance.logout();
+        CubeChatConnection.instance.markInactive();
       }
     } else if (AppLifecycleState.resumed == state) {
+      // just for an example user was saved in the local storage
       SharedPrefs.instance.init().then((sharedPrefs) {
         CubeUser? user = sharedPrefs.getUser();
 
-        if (user != null && !CubeChatConnection.instance.isAuthenticated()) {
-          CubeChatConnection.instance.login(user);
+        if (user != null) {
+          if(!CubeChatConnection.instance.isAuthenticated()) {
+            CubeChatConnection.instance.login(user);
+          } else {
+            CubeChatConnection.instance.markActive();
+          }
         }
       });
     }
