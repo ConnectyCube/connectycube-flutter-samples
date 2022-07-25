@@ -14,9 +14,27 @@
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		A5197DE7288977B5009BE202 /* ReplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A5197DE6288977B5009BE202 /* ReplayKit.framework */; };
+		A5197DEE288977B5009BE202 /* Broadcast Extension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = A5197DE5288977B5009BE202 /* Broadcast Extension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A5197DF528897980009BE202 /* Atomic.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5197DF428897980009BE202 /* Atomic.swift */; };
+		A5197DF72889798C009BE202 /* DarwinNotificationCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5197DF62889798C009BE202 /* DarwinNotificationCenter.swift */; };
+		A5197DFD288979B1009BE202 /* SampleHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5197DFA288979B1009BE202 /* SampleHandler.swift */; };
+		A5197DFE288979B1009BE202 /* SampleUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5197DFB288979B1009BE202 /* SampleUploader.swift */; };
+		A5197DFF288979B1009BE202 /* SocketConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5197DFC288979B1009BE202 /* SocketConnection.swift */; };
+		A534AF4328899859003E435B /* Broadcast Extension.entitlements in Resources */ = {isa = PBXBuildFile; fileRef = A534AF4228899859003E435B /* Broadcast Extension.entitlements */; };
 		A558A6F725CAE77A007E898E /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = A558A6F625CAE77A007E898E /* GoogleService-Info.plist */; };
 		A5D8473E27959B7B0053FF43 /* custom_ringtone.caf in Resources */ = {isa = PBXBuildFile; fileRef = A5D8473D27959B7B0053FF43 /* custom_ringtone.caf */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		A5197DEC288977B5009BE202 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A5197DE4288977B5009BE202;
+			remoteInfo = "Broadcast Extension";
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		9705A1C41CF9048500538489 /* Embed Frameworks */ = {
@@ -35,6 +53,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
+				A5197DEE288977B5009BE202 /* Broadcast Extension.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -59,6 +78,15 @@
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A5197DE5288977B5009BE202 /* Broadcast Extension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "Broadcast Extension.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		A5197DE6288977B5009BE202 /* ReplayKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ReplayKit.framework; path = System/Library/Frameworks/ReplayKit.framework; sourceTree = SDKROOT; };
+		A5197DF428897980009BE202 /* Atomic.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Atomic.swift; sourceTree = "<group>"; };
+		A5197DF62889798C009BE202 /* DarwinNotificationCenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DarwinNotificationCenter.swift; sourceTree = "<group>"; };
+		A5197DF82889799F009BE202 /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A5197DFA288979B1009BE202 /* SampleHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleHandler.swift; sourceTree = "<group>"; };
+		A5197DFB288979B1009BE202 /* SampleUploader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SampleUploader.swift; sourceTree = "<group>"; };
+		A5197DFC288979B1009BE202 /* SocketConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SocketConnection.swift; sourceTree = "<group>"; };
+		A534AF4228899859003E435B /* Broadcast Extension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Broadcast Extension.entitlements"; sourceTree = "<group>"; };
 		A534E2CB26BC07DA0072CB0E /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = System/Library/Frameworks/AVFoundation.framework; sourceTree = SDKROOT; };
 		A558A6F625CAE77A007E898E /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		A588C0A025C9B9A5005025C4 /* P2PCallsSample.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = P2PCallsSample.entitlements; sourceTree = "<group>"; };
@@ -74,6 +102,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A5197DE2288977B5009BE202 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A5197DE7288977B5009BE202 /* ReplayKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -82,6 +118,7 @@
 			children = (
 				A534E2CB26BC07DA0072CB0E /* AVFoundation.framework */,
 				245B3438F9416C97F960DF6B /* Pods_Runner.framework */,
+				A5197DE6288977B5009BE202 /* ReplayKit.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -112,6 +149,7 @@
 			children = (
 				9740EEB11CF90186004384FC /* Flutter */,
 				97C146F01CF9000F007C117D /* Runner */,
+				A5197DE8288977B5009BE202 /* Broadcast Extension */,
 				97C146EF1CF9000F007C117D /* Products */,
 				952C1D8B0C33AAED7389397D /* Pods */,
 				4B3410D39048F58FC0A28E78 /* Frameworks */,
@@ -122,6 +160,7 @@
 			isa = PBXGroup;
 			children = (
 				97C146EE1CF9000F007C117D /* P2PCallsSample.app */,
+				A5197DE5288977B5009BE202 /* Broadcast Extension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -152,6 +191,20 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		A5197DE8288977B5009BE202 /* Broadcast Extension */ = {
+			isa = PBXGroup;
+			children = (
+				A5197DFA288979B1009BE202 /* SampleHandler.swift */,
+				A5197DFB288979B1009BE202 /* SampleUploader.swift */,
+				A5197DFC288979B1009BE202 /* SocketConnection.swift */,
+				A5197DF82889799F009BE202 /* Info.plist */,
+				A5197DF62889798C009BE202 /* DarwinNotificationCenter.swift */,
+				A5197DF428897980009BE202 /* Atomic.swift */,
+				A534AF4228899859003E435B /* Broadcast Extension.entitlements */,
+			);
+			path = "Broadcast Extension";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -172,11 +225,29 @@
 			buildRules = (
 			);
 			dependencies = (
+				A5197DED288977B5009BE202 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;
 			productReference = 97C146EE1CF9000F007C117D /* P2PCallsSample.app */;
 			productType = "com.apple.product-type.application";
+		};
+		A5197DE4288977B5009BE202 /* Broadcast Extension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A5197DF2288977B5009BE202 /* Build configuration list for PBXNativeTarget "Broadcast Extension" */;
+			buildPhases = (
+				A5197DE1288977B5009BE202 /* Sources */,
+				A5197DE2288977B5009BE202 /* Frameworks */,
+				A5197DE3288977B5009BE202 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "Broadcast Extension";
+			productName = "Broadcast Extension";
+			productReference = A5197DE5288977B5009BE202 /* Broadcast Extension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -184,13 +255,17 @@
 		97C146E61CF9000F007C117D /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 1320;
-				LastUpgradeCheck = 1300;
+				LastSwiftUpdateCheck = 1340;
+				LastUpgradeCheck = 1340;
 				ORGANIZATIONNAME = "The Chromium Authors";
 				TargetAttributes = {
 					97C146ED1CF9000F007C117D = {
 						CreatedOnToolsVersion = 7.3.1;
 						LastSwiftMigration = 1100;
+						ProvisioningStyle = Automatic;
+					};
+					A5197DE4288977B5009BE202 = {
+						CreatedOnToolsVersion = 13.4.1;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -209,6 +284,7 @@
 			projectRoot = "";
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
+				A5197DE4288977B5009BE202 /* Broadcast Extension */,
 			);
 		};
 /* End PBXProject section */
@@ -224,6 +300,14 @@
 				A5D8473E27959B7B0053FF43 /* custom_ringtone.caf in Resources */,
 				97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */,
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A5197DE3288977B5009BE202 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A534AF4328899859003E435B /* Broadcast Extension.entitlements in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -324,7 +408,27 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A5197DE1288977B5009BE202 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A5197DF528897980009BE202 /* Atomic.swift in Sources */,
+				A5197DF72889798C009BE202 /* DarwinNotificationCenter.swift in Sources */,
+				A5197DFD288979B1009BE202 /* SampleHandler.swift in Sources */,
+				A5197DFE288979B1009BE202 /* SampleUploader.swift in Sources */,
+				A5197DFF288979B1009BE202 /* SocketConnection.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		A5197DED288977B5009BE202 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A5197DE4288977B5009BE202 /* Broadcast Extension */;
+			targetProxy = A5197DEC288977B5009BE202 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin PBXVariantGroup section */
 		97C146FA1CF9000F007C117D /* Main.storyboard */ = {
@@ -369,6 +473,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -387,7 +492,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
@@ -415,7 +520,7 @@
 					"$(PROJECT_DIR)/Flutter",
 				);
 				INFOPLIST_FILE = Runner/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -454,6 +559,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -478,7 +584,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -509,6 +615,7 @@
 				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
 				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
 				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
 				CLANG_WARN_STRICT_PROTOTYPES = YES;
 				CLANG_WARN_SUSPICIOUS_MOVE = YES;
@@ -527,7 +634,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SUPPORTED_PLATFORMS = iphoneos;
@@ -556,7 +663,7 @@
 					"$(PROJECT_DIR)/Flutter",
 				);
 				INFOPLIST_FILE = Runner/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -592,7 +699,7 @@
 					"$(PROJECT_DIR)/Flutter",
 				);
 				INFOPLIST_FILE = Runner/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -607,6 +714,111 @@
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
+		};
+		A5197DEF288977B5009BE202 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = "Broadcast Extension/Broadcast Extension.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1.3.2;
+				DEVELOPMENT_TEAM = 92G479T7LY;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Broadcast Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "P2P Calls Sample (Screen Sharing)";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 The Chromium Authors. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.3.2;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app.Broadcast-Extension";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A5197DF0288977B5009BE202 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = "Broadcast Extension/Broadcast Extension.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1.3.2;
+				DEVELOPMENT_TEAM = 92G479T7LY;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Broadcast Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "P2P Calls Sample (Screen Sharing)";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 The Chromium Authors. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.3.2;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app.Broadcast-Extension";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		A5197DF1288977B5009BE202 /* Profile */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = "Broadcast Extension/Broadcast Extension.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1.3.2;
+				DEVELOPMENT_TEAM = 92G479T7LY;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Broadcast Extension/Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "P2P Calls Sample (Screen Sharing)";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2022 The Chromium Authors. All rights reserved.";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.3.2;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app.Broadcast-Extension";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Profile;
 		};
 /* End XCBuildConfiguration section */
 
@@ -627,6 +839,16 @@
 				97C147061CF9000F007C117D /* Debug */,
 				97C147071CF9000F007C117D /* Release */,
 				249021D4217E4FDB00AE95B9 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A5197DF2288977B5009BE202 /* Build configuration list for PBXNativeTarget "Broadcast Extension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A5197DEF288977B5009BE202 /* Debug */,
+				A5197DF0288977B5009BE202 /* Release */,
+				A5197DF1288977B5009BE202 /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
