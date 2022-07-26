@@ -223,8 +223,9 @@ class _BodyLayoutState extends State<BodyLayout> {
       attendees: attendees,
     );
     createMeeting(meeting).then((createdMeeting) async {
-      _currentCall = await _callClient.createCallSession(
-          createdMeeting.hostId!, CallType.VIDEO_CALL, startScreenSharing);
+      _currentCall = await _callClient.createCallSession(createdMeeting.hostId!,
+          callType: CallType.VIDEO_CALL,
+          startScreenSharing: startScreenSharing);
 
       Navigator.push(
         context,
