@@ -8,7 +8,7 @@ Future<bool> initForegroundService() async {
   if (Platform.isAndroid) {
     final androidConfig = FlutterBackgroundAndroidConfig(
       notificationTitle: 'P2P Calls sample',
-      notificationText: 'Screen sharing in in progress',
+      notificationText: 'Screen sharing is in progress',
       notificationImportance: AndroidNotificationImportance.Default,
       notificationIcon:
           AndroidResource(name: 'ic_launcher_foreground', defType: 'drawable'),

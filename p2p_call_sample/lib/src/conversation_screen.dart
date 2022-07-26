@@ -25,7 +25,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   static const String TAG = "_ConversationCallScreenState";
   final P2PSession _callSession;
   final bool _isIncoming;
-  final CubeStatsReportsManager _statsReportsManager = CubeStatsReportsManager();
+  final CubeStatsReportsManager _statsReportsManager =
+      CubeStatsReportsManager();
   bool _isCameraEnabled = true;
   bool _isSpeakerEnabled = true;
   bool _isMicMute = false;
@@ -516,8 +517,19 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
       await initForegroundService();
     }
 
+    var desktopCapturerSource = _enableScreenSharing && isDesktop
+        ? await showDialog<DesktopCapturerSource>(
+            context: context,
+            builder: (context) => ScreenSelectDialog(),
+          )
+        : null;
+
     foregroundServiceFuture.then((_) {
-      _callSession.enableScreenSharing(_enableScreenSharing).then((voidResult) {
+      _callSession
+          .enableScreenSharing(_enableScreenSharing,
+              desktopCapturerSource: desktopCapturerSource,
+              useIOSBroadcasting: true)
+          .then((voidResult) {
         setState(() {
           _enableScreenSharing = !_enableScreenSharing;
         });

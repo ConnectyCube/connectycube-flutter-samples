@@ -100,11 +100,20 @@ class CallManager {
   }
 
   void startNewCall(BuildContext context, int callType, Set<int> opponents,
-      {bool startScreenSharing = false}) {
+      {bool startScreenSharing = false}) async {
     if (opponents.isEmpty) return;
 
+    var desktopCapturerSource = startScreenSharing && isDesktop
+        ? await showDialog<DesktopCapturerSource>(
+            context: context,
+            builder: (context) => ScreenSelectDialog(),
+          )
+        : null;
+
     P2PSession callSession = _callClient!.createCallSession(callType, opponents,
-        startScreenSharing: startScreenSharing);
+        startScreenSharing: startScreenSharing,
+        desktopCapturerSource: desktopCapturerSource,
+        useIOSBroadcasting: true);
     _currentCall = callSession;
     Navigator.push(
       context,
