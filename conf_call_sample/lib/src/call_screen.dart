@@ -128,7 +128,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   final String _meetingId;
   final List<int> _opponents;
   final CubeStatsReportsManager _statsReportsManager =
-  CubeStatsReportsManager();
+      CubeStatsReportsManager();
   bool _isCameraEnabled = true;
   bool _isSpeakerEnabled = true;
   bool _isMicMute = false;
@@ -496,7 +496,10 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
                 ),
               ),
               Visibility(
-                visible: kIsWeb || Platform.isIOS || Platform.isAndroid,
+                visible: kIsWeb ||
+                    Platform.isIOS ||
+                    Platform.isAndroid ||
+                    Platform.isWindows,
                 child: Padding(
                   padding: EdgeInsets.only(right: 4),
                   child: FloatingActionButton(
