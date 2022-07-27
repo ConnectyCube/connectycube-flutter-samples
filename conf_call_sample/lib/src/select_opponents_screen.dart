@@ -223,9 +223,18 @@ class _BodyLayoutState extends State<BodyLayout> {
       attendees: attendees,
     );
     createMeeting(meeting).then((createdMeeting) async {
+      var desktopCapturerSource = startScreenSharing && isDesktop
+          ? await showDialog<DesktopCapturerSource>(
+              context: context,
+              builder: (context) => ScreenSelectDialog(),
+            )
+          : null;
+
       _currentCall = await _callClient.createCallSession(createdMeeting.hostId!,
           callType: CallType.VIDEO_CALL,
-          startScreenSharing: startScreenSharing);
+          startScreenSharing: startScreenSharing,
+          desktopCapturerSource: desktopCapturerSource,
+          useIOSBroadcasting: true);
 
       Navigator.push(
         context,

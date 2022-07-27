@@ -609,8 +609,19 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
       await initForegroundService();
     }
 
+    var desktopCapturerSource = _enableScreenSharing && isDesktop
+        ? await showDialog<DesktopCapturerSource>(
+            context: context,
+            builder: (context) => ScreenSelectDialog(),
+          )
+        : null;
+
     foregroundServiceFuture.then((_) {
-      _callSession.enableScreenSharing(_enableScreenSharing).then((voidResult) {
+      _callSession
+          .enableScreenSharing(_enableScreenSharing,
+              desktopCapturerSource: desktopCapturerSource,
+              useIOSBroadcasting: true)
+          .then((voidResult) {
         setState(() {
           _enableScreenSharing = !_enableScreenSharing;
         });
