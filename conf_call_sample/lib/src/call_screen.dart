@@ -127,6 +127,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   final bool _isIncoming;
   final String _meetingId;
   final List<int> _opponents;
+  final CubeStatsReportsManager _statsReportsManager =
+  CubeStatsReportsManager();
   bool _isCameraEnabled = true;
   bool _isSpeakerEnabled = true;
   bool _isMicMute = false;
@@ -144,6 +146,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   void initState() {
     super.initState();
     _initCustomMediaConfigs();
+    _statsReportsManager.init(_callSession);
     _callManager.onReceiveRejectCall = _onReceiveRejectCall;
     _callManager.onCloseCall = _onCloseCall;
 
@@ -235,6 +238,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
   void _onSessionClosed(session) {
     log("_onSessionClosed", TAG);
+    _statsReportsManager.dispose();
     _callSession.removeSessionCallbacksListener();
     (session as ConferenceSession).leave();
     Navigator.pop(context);
@@ -294,10 +298,70 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     streamsExpanded.addAll(remoteRenderers.entries
         .map(
           (entry) => Expanded(
-            child: RTCVideoView(
-              entry.value,
-              objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-              mirror: false,
+            child: Stack(
+              children: [
+                RTCVideoView(
+                  entry.value,
+                  objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                  mirror: false,
+                ),
+                Align(
+                    alignment: Alignment.centerLeft,
+                    child: Container(
+                      margin: EdgeInsets.all(8),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: 10,
+                        ),
+                        child: RotatedBox(
+                          quarterTurns: -1,
+                          child: StreamBuilder<CubeMicLevelEvent>(
+                            stream: _statsReportsManager.micLevelStream
+                                .where((event) => event.userId == entry.key),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return LinearProgressIndicator(value: 0);
+                              } else {
+                                var micLevelForUser = snapshot.data!;
+                                return LinearProgressIndicator(
+                                    value: micLevelForUser.micLevel);
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    )),
+                Align(
+                    alignment: Alignment.topCenter,
+                    child: Container(
+                      margin: EdgeInsets.only(top: 8),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.all(Radius.circular(12)),
+                        child: Container(
+                          padding: EdgeInsets.all(8),
+                          color: Colors.black26,
+                          child: StreamBuilder<CubeVideoBitrateEvent>(
+                            stream: _statsReportsManager.videoBitrateStream
+                                .where((event) => event.userId == entry.key),
+                            builder: (context, snapshot) {
+                              if (!snapshot.hasData) {
+                                return Text(
+                                  '0 kbits/sec',
+                                  style: TextStyle(color: Colors.white),
+                                );
+                              } else {
+                                var videoBitrateForUser = snapshot.data!;
+                                return Text(
+                                  '${videoBitrateForUser.bitRate} kbits/sec',
+                                  style: TextStyle(color: Colors.white),
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ))
+              ],
             ),
           ),
         )
@@ -545,8 +609,19 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
       await initForegroundService();
     }
 
+    var desktopCapturerSource = _enableScreenSharing && isDesktop
+        ? await showDialog<DesktopCapturerSource>(
+            context: context,
+            builder: (context) => ScreenSelectDialog(),
+          )
+        : null;
+
     foregroundServiceFuture.then((_) {
-      _callSession.enableScreenSharing(_enableScreenSharing).then((voidResult) {
+      _callSession
+          .enableScreenSharing(_enableScreenSharing,
+              desktopCapturerSource: desktopCapturerSource,
+              useIOSBroadcasting: true)
+          .then((voidResult) {
         setState(() {
           _enableScreenSharing = !_enableScreenSharing;
         });
