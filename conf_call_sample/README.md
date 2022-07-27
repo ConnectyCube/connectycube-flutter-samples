@@ -10,6 +10,8 @@ Project contains the following features implemented:
 - Switch cameras
 - Disable/enable video stream
 - Switch speaker phone and earpiece
+- Opponents' mic level monitoring
+- Opponents' video bitrate monitoring
 
 ## Documentation
 
