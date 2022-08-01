@@ -404,23 +404,17 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
                   backgroundColor: Colors.black38,
                 ),
               ),
-              Visibility(
-                visible: kIsWeb || Platform.isIOS || Platform.isAndroid,
-                child: Padding(
-                  padding: EdgeInsets.only(right: 4),
-                  child: FloatingActionButton(
-                    elevation: 0,
-                    heroTag: "ToggleScreenSharing",
-                    child: Icon(
-                      _enableScreenSharing
-                          ? Icons.screen_share
-                          : Icons.stop_screen_share,
-                      color: Colors.white,
-                    ),
-                    onPressed: () => _toggleScreenSharing(),
-                    backgroundColor: Colors.black38,
-                  ),
+              FloatingActionButton(
+                elevation: 0,
+                heroTag: "ToggleScreenSharing",
+                child: Icon(
+                  _enableScreenSharing
+                      ? Icons.screen_share
+                      : Icons.stop_screen_share,
+                  color: Colors.white,
                 ),
+                onPressed: () => _toggleScreenSharing(),
+                backgroundColor: Colors.black38,
               ),
               Visibility(
                 visible: _enableScreenSharing,

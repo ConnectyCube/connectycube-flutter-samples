@@ -54,5 +54,7 @@
     <string>com.connectycube.flutter.conferenceCallSample.Conference-Calls-Sample-Screen-Sharing</string>
     <key>RTCAppGroupIdentifier</key>
     <string>group.com.connectycube.flutter</string>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 </dict>
 </plist>

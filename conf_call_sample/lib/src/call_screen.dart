@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:conf_call_sample/src/utils/call_manager.dart';
 import 'package:conf_call_sample/src/utils/platform_utils.dart';
 import 'package:conf_call_sample/src/utils/video_config.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
@@ -495,25 +492,19 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
                   backgroundColor: Colors.black38,
                 ),
               ),
-              Visibility(
-                visible: kIsWeb ||
-                    Platform.isIOS ||
-                    Platform.isAndroid ||
-                    Platform.isWindows,
-                child: Padding(
-                  padding: EdgeInsets.only(right: 4),
-                  child: FloatingActionButton(
-                    elevation: 0,
-                    heroTag: "ToggleScreenSharing",
-                    child: Icon(
-                      _enableScreenSharing
-                          ? Icons.screen_share
-                          : Icons.stop_screen_share,
-                      color: Colors.white,
-                    ),
-                    onPressed: () => _toggleScreenSharing(),
-                    backgroundColor: Colors.black38,
+              Padding(
+                padding: EdgeInsets.only(right: 4),
+                child: FloatingActionButton(
+                  elevation: 0,
+                  heroTag: "ToggleScreenSharing",
+                  child: Icon(
+                    _enableScreenSharing
+                        ? Icons.screen_share
+                        : Icons.stop_screen_share,
+                    color: Colors.white,
                   ),
+                  onPressed: () => _toggleScreenSharing(),
+                  backgroundColor: Colors.black38,
                 ),
               ),
               Visibility(

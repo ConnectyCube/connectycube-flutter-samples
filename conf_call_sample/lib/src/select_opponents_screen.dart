@@ -1,6 +1,3 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
@@ -122,25 +119,6 @@ class _BodyLayoutState extends State<BodyLayout> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Visibility(
-                  visible: kIsWeb ||
-                      Platform.isIOS ||
-                      Platform.isAndroid ||
-                      Platform.isWindows,
-                  child: FloatingActionButton(
-                    heroTag: "ScreenSharing",
-                    child: Icon(
-                      Icons.screen_share,
-                      color: Colors.white,
-                    ),
-                    backgroundColor: Colors.teal,
-                    onPressed: () async {
-                      startBackgroundExecution().then((_) {
-                        _startCall(_selectedUsers, startScreenSharing: true);
-                      });
-                    },
-                  ),
-                ),
                 Container(
                   width: 24,
                 ),
@@ -215,7 +193,7 @@ class _BodyLayoutState extends State<BodyLayout> {
     };
   }
 
-  void _startCall(Set<int> opponents, {bool startScreenSharing = false}) async {
+  void _startCall(Set<int> opponents) async {
     if (opponents.isEmpty) return;
 
     var attendees = opponents.map((entry) {
@@ -232,18 +210,10 @@ class _BodyLayoutState extends State<BodyLayout> {
       attendees: attendees,
     );
     createMeeting(meeting).then((createdMeeting) async {
-      var desktopCapturerSource = startScreenSharing && isDesktop
-          ? await showDialog<DesktopCapturerSource>(
-              context: context,
-              builder: (context) => ScreenSelectDialog(),
-            )
-          : null;
-
-      _currentCall = await _callClient.createCallSession(createdMeeting.hostId!,
-          callType: CallType.VIDEO_CALL,
-          startScreenSharing: startScreenSharing,
-          desktopCapturerSource: desktopCapturerSource,
-          useIOSBroadcasting: true);
+      _currentCall = await _callClient.createCallSession(
+        createdMeeting.hostId!,
+        callType: CallType.VIDEO_CALL,
+      );
 
       Navigator.push(
         context,

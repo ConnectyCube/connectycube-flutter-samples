@@ -116,27 +116,6 @@ class _BodyLayoutState extends State<BodyLayout> {
             Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Visibility(
-                  visible: kIsWeb || Platform.isIOS || Platform.isAndroid,
-                  child: Padding(
-                    padding: EdgeInsets.all(12),
-                    child: FloatingActionButton(
-                      heroTag: "ScreenSharing",
-                      child: Icon(
-                        Icons.screen_share,
-                        color: Colors.white,
-                      ),
-                      backgroundColor: Colors.teal,
-                      onPressed: () async {
-                        startBackgroundExecution().then((_) {
-                          CallManager.instance.startNewCall(
-                              context, CallType.VIDEO_CALL, _selectedUsers,
-                              startScreenSharing: true);
-                        });
-                      },
-                    ),
-                  ),
-                ),
                 Padding(
                   padding: EdgeInsets.all(12),
                   child: FloatingActionButton(
