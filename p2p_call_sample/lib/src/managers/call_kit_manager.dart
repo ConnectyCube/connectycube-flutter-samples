@@ -31,7 +31,7 @@ class CallKitManager {
     ConnectycubeFlutterCallKit.instance.init(
         onCallAccepted: _onCallAccepted,
         onCallRejected: _onCallRejected,
-        icon: Platform.isAndroid ? 'default_avatar' : 'AppIcon',
+        icon: Platform.isAndroid ? 'default_avatar' : 'CallkitIcon',
         color: '#07711e',
         ringtone:
             Platform.isAndroid ? 'custom_ringtone' : 'custom_ringtone.caf');

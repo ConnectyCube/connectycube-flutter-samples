@@ -404,20 +404,23 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
                   backgroundColor: Colors.black38,
                 ),
               ),
-              FloatingActionButton(
-                elevation: 0,
-                heroTag: "ToggleScreenSharing",
-                child: Icon(
-                  _enableScreenSharing
-                      ? Icons.screen_share
-                      : Icons.stop_screen_share,
-                  color: Colors.white,
+              Visibility(
+                visible: _isVideoCall(),
+                child: FloatingActionButton(
+                  elevation: 0,
+                  heroTag: "ToggleScreenSharing",
+                  child: Icon(
+                    _enableScreenSharing
+                        ? Icons.screen_share
+                        : Icons.stop_screen_share,
+                    color: Colors.white,
+                  ),
+                  onPressed: () => _toggleScreenSharing(),
+                  backgroundColor: Colors.black38,
                 ),
-                onPressed: () => _toggleScreenSharing(),
-                backgroundColor: Colors.black38,
               ),
               Visibility(
-                visible: _enableScreenSharing,
+                visible: _isVideoCall() && _enableScreenSharing,
                 child: Padding(
                   padding: EdgeInsets.only(right: 4),
                   child: FloatingActionButton(
@@ -433,7 +436,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
                 ),
               ),
               Visibility(
-                visible: _enableScreenSharing,
+                visible: _isVideoCall() && _enableScreenSharing,
                 child: Padding(
                   padding: EdgeInsets.only(right: 4),
                   child: FloatingActionButton(
@@ -501,6 +504,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   }
 
   _toggleScreenSharing() async {
+    if (!_isVideoCall()) return;
+
     var foregroundServiceFuture = _enableScreenSharing
         ? startBackgroundExecution()
         : stopBackgroundExecution();
