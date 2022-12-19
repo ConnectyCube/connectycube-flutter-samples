@@ -53,3 +53,14 @@ initConnectycube() {
     },
   );
 }
+
+initConnectycubeContextLess() {
+  CubeSettings.instance.applicationId = config.APP_ID;
+  CubeSettings.instance.authorizationKey = config.AUTH_KEY;
+  CubeSettings.instance.authorizationSecret = config.AUTH_SECRET;
+  CubeSettings.instance.onSessionRestore = () {
+    return SharedPrefs.getUser().then((savedUser) {
+      return createSession(savedUser);
+    });
+  };
+}

@@ -5,6 +5,7 @@ final String PARAM_CALLER_NAME = 'caller_name';
 final String PARAM_CALL_OPPONENTS = 'call_opponents';
 final String PARAM_IOS_VOIP = 'ios_voip';
 final String PARAM_SIGNAL_TYPE = 'signal_type';
+final String PARAM_EXPIRATION = 'expiration';
 
 final String SIGNAL_TYPE_START_CALL = "startCall";
 final String SIGNAL_TYPE_END_CALL = "endCall";

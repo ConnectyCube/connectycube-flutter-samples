@@ -11,9 +11,9 @@ import 'package:universal_io/io.dart';
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'package:platform_device_id/platform_device_id.dart';
 
+import '../../main.dart';
 import '../utils/consts.dart';
 import '../utils/pref_util.dart';
-import '../utils/configs.dart' as config;
 
 class PushNotificationsManager {
   static const TAG = "PushNotificationsManager";
@@ -64,9 +64,8 @@ class PushNotificationsManager {
     CreateSubscriptionParameters parameters = CreateSubscriptionParameters();
     parameters.pushToken = token;
 
-    bool isProduction = bool.fromEnvironment('dart.vm.product');
     parameters.environment =
-        isProduction ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
+        kReleaseMode ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
 
     if (Platform.isAndroid) {
       parameters.channel = NotificationsChannels.GCM;
@@ -120,29 +119,31 @@ class PushNotificationsManager {
 Future<void> onCallRejectedWhenTerminated(CallEvent callEvent) async {
   print(
       '[PushNotificationsManager][onCallRejectedWhenTerminated] callEvent: $callEvent');
-  return sendPushAboutRejectFromKilledState({
+
+  var currentUser = await SharedPrefs.getUser();
+  initConnectycubeContextLess();
+
+  var sendOfflineReject = rejectCall(callEvent.sessionId, {
+    ...callEvent.opponentsIds.where((userId) => currentUser!.id != userId),
+    callEvent.callerId
+  });
+  var sendPushAboutReject = sendPushAboutRejectFromKilledState({
     PARAM_CALL_TYPE: callEvent.callType,
     PARAM_SESSION_ID: callEvent.sessionId,
     PARAM_CALLER_ID: callEvent.callerId,
     PARAM_CALLER_NAME: callEvent.callerName,
     PARAM_CALL_OPPONENTS: callEvent.opponentsIds.join(','),
   }, callEvent.callerId);
+
+  return Future.wait([sendOfflineReject, sendPushAboutReject]).then((result) {
+    return Future.value();
+  });
 }
 
 Future<void> sendPushAboutRejectFromKilledState(
   Map<String, dynamic> parameters,
   int callerId,
 ) {
-  CubeSettings.instance.applicationId = config.APP_ID;
-  CubeSettings.instance.authorizationKey = config.AUTH_KEY;
-  CubeSettings.instance.authorizationSecret = config.AUTH_SECRET;
-  CubeSettings.instance.accountKey = config.ACCOUNT_ID;
-  CubeSettings.instance.onSessionRestore = () {
-    return SharedPrefs.getUser().then((savedUser) {
-      return createSession(savedUser);
-    });
-  };
-
   CreateEventParams params = CreateEventParams();
   params.parameters = parameters;
   params.parameters['message'] = "Reject call";
@@ -150,11 +151,8 @@ Future<void> sendPushAboutRejectFromKilledState(
   // params.parameters[PARAM_IOS_VOIP] = 1;
 
   params.notificationType = NotificationType.PUSH;
-  params.environment = CubeEnvironment
-      .DEVELOPMENT; // TODO for sample we use DEVELOPMENT environment
-  // bool isProduction = bool.fromEnvironment('dart.vm.product');
-  // params.environment =
-  //     isProduction ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
+  params.environment =
+      kReleaseMode ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
   params.usersIds = [callerId];
 
   return createEvent(params.getEventForRequest());

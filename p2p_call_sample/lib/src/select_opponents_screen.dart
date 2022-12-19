@@ -189,6 +189,8 @@ class _BodyLayoutState extends State<BodyLayout> {
 
     checkSystemAlertWindowPermission(context);
 
+    requestNotificationsPermission();
+
     PushNotificationsManager.instance.init();
   }
 }
