@@ -14,9 +14,9 @@ dependencies:
   connectycube_sdk:
     path: ../../flutter-sdk
   shared_preferences: ^2.0.15
-#  connectycube_flutter_call_kit: ^2.2.1
-  connectycube_flutter_call_kit:
-    path: ../../connectycube-flutter-call-kit/connectycube_flutter_call_kit
+  connectycube_flutter_call_kit: ^2.2.1
+#  connectycube_flutter_call_kit:
+#    path: ../../connectycube-flutter-call-kit/connectycube_flutter_call_kit
   universal_io: ^2.0.4
   web_browser_detect: ^2.0.3
   flutter_background: ^1.1.0

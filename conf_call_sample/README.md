@@ -46,12 +46,15 @@ App will automatically run on your Android device.
 - Select `Runner.xcworkspace` to run Xcode project;
 - Press 'Build' button to start project building.
 
-App will automatically run on selected iOS device or simulator.
+The app will automatically run on the selected iOS device or simulator.
 
 ### Run on macOS
-- Run command from the  Teminal `flutter run -d macos`;
+- Run command from the Terminal `flutter run -d macos`;
 ### Run on Windows
-- Run command from the  Teminal `flutter run -d windows`;
+- Run command from the Terminal `flutter run -d windows`;
+### Run on Linux
+- Run command from the Terminal `flutter run -d linux`;
+
 ## Can't build yourself?
 
 Got troubles with building Flutter code sample? Just create an issue at [Issues page](https://github.com/ConnectyCube/connectycube-flutter-samples/issues) - we will create the sample for you. For FREE!
