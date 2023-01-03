@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
+import 'package:universal_io/io.dart';
 
 import 'firebase_options.dart';
 import 'src/chat_details_screen.dart';
@@ -19,9 +21,12 @@ import 'src/utils/pref_util.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+
+  if (!kIsWeb && !Platform.isLinux) {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  }
 
   runApp(App());
 }
@@ -153,7 +158,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
         CubeUser? user = sharedPrefs.getUser();
 
         if (user != null) {
-          if(!CubeChatConnection.instance.isAuthenticated()) {
+          if (!CubeChatConnection.instance.isAuthenticated()) {
             CubeChatConnection.instance.login(user);
           } else {
             CubeChatConnection.instance.markActive();

@@ -1,3 +1,4 @@
+import 'package:connectycube_sdk/connectycube_core.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background/flutter_background.dart';
@@ -88,5 +89,13 @@ Future<void> checkSystemAlertWindowPermission(BuildContext context) async {
         );
       }
     }
+  }
+}
+
+requestNotificationsPermission() async {
+  var isPermissionGranted = await Permission.notification.isGranted;
+  log('isPermissionGranted = $isPermissionGranted', 'platform_utils');
+  if(!isPermissionGranted){
+    await Permission.notification.request();
   }
 }

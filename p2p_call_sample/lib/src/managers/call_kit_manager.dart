@@ -1,3 +1,4 @@
+import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
@@ -32,6 +33,7 @@ class CallKitManager {
         onCallAccepted: _onCallAccepted,
         onCallRejected: _onCallRejected,
         icon: Platform.isAndroid ? 'default_avatar' : 'CallkitIcon',
+        notificationIcon: 'ic_notification',
         color: '#07711e',
         ringtone:
             Platform.isAndroid ? 'custom_ringtone' : 'custom_ringtone.caf');
@@ -57,6 +59,11 @@ class CallKitManager {
   }
 
   Future<void> _onCallRejected(CallEvent callEvent) async {
+    if (!CubeChatConnection.instance.isAuthenticated()) {
+      rejectCall(
+          callEvent.sessionId, {...callEvent.opponentsIds, callEvent.callerId});
+    }
+
     onCallEnded.call(callEvent.sessionId);
   }
 }

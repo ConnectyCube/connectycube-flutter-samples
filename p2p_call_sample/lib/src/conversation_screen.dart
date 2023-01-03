@@ -1,7 +1,6 @@
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:universal_io/io.dart';
 import 'package:web_browser_detect/web_browser_detect.dart';
 
 import 'login_screen.dart';
@@ -32,7 +31,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   bool _isMicMute = false;
 
   RTCVideoRenderer? localRenderer;
-  Map<int?, RTCVideoRenderer> remoteRenderers = {};
+  Map<int, RTCVideoRenderer> remoteRenderers = {};
 
   bool _enableScreenSharing;
 
@@ -55,6 +54,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
     _isSafari = kIsWeb && Browser().browserAgent == BrowserAgent.Safari;
 
+    _localMediaStream = CallManager.instance.localMediaStream;
+
     _callSession.onLocalStreamReceived = _addLocalMediaStream;
     _callSession.onRemoteStreamReceived = _addRemoteMediaStream;
     _callSession.onSessionClosed = _onSessionClosed;
@@ -62,7 +63,9 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     _callSession.setSessionCallbacksListener(this);
 
     if (_isIncoming) {
-      _callSession.acceptCall();
+      if (_callSession.state == RTCSessionState.RTC_SESSION_NEW) {
+        _callSession.acceptCall();
+      }
     } else {
       _callSession.startCall();
     }
@@ -184,6 +187,76 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     return _localVideoView!;
   }
 
+  Widget buildRemoteVideoItem(int opponentId, RTCVideoRenderer renderer) {
+    return Expanded(
+      child: Stack(
+        children: [
+          RTCVideoView(
+            renderer,
+            objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+            mirror: false,
+          ),
+          Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                margin: EdgeInsets.all(8),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: 10,
+                  ),
+                  child: RotatedBox(
+                    quarterTurns: -1,
+                    child: StreamBuilder<CubeMicLevelEvent>(
+                      stream: _statsReportsManager.micLevelStream
+                          .where((event) => event.userId == opponentId),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return LinearProgressIndicator(value: 0);
+                        } else {
+                          var micLevelForUser = snapshot.data!;
+                          return LinearProgressIndicator(
+                              value: micLevelForUser.micLevel);
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              )),
+          Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                margin: EdgeInsets.only(top: 8),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                  child: Container(
+                    padding: EdgeInsets.all(8),
+                    color: Colors.black26,
+                    child: StreamBuilder<CubeVideoBitrateEvent>(
+                      stream: _statsReportsManager.videoBitrateStream
+                          .where((event) => event.userId == opponentId),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return Text(
+                            '0 kbits/sec',
+                            style: TextStyle(color: Colors.white),
+                          );
+                        } else {
+                          var videoBitrateForUser = snapshot.data!;
+                          return Text(
+                            '${videoBitrateForUser.bitRate} kbits/sec',
+                            style: TextStyle(color: Colors.white),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ))
+        ],
+      ),
+    );
+  }
+
   List<Widget> renderStreamsGrid(Orientation orientation) {
     List<Widget> streamsExpanded = [];
 
@@ -205,77 +278,36 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
               : Expanded(child: Container()));
     }
 
-    streamsExpanded.addAll(remoteRenderers.entries
-        .map(
-          (entry) => Expanded(
-            child: Stack(
-              children: [
-                RTCVideoView(
-                  entry.value,
-                  objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                  mirror: false,
-                ),
-                Align(
-                    alignment: Alignment.centerLeft,
-                    child: Container(
-                      margin: EdgeInsets.all(8),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(
-                          vertical: 10,
-                        ),
-                        child: RotatedBox(
-                          quarterTurns: -1,
-                          child: StreamBuilder<CubeMicLevelEvent>(
-                            stream: _statsReportsManager.micLevelStream
-                                .where((event) => event.userId == entry.key),
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return LinearProgressIndicator(value: 0);
-                              } else {
-                                var micLevelForUser = snapshot.data!;
-                                return LinearProgressIndicator(
-                                    value: micLevelForUser.micLevel);
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                    )),
-                Align(
-                    alignment: Alignment.topCenter,
-                    child: Container(
-                      margin: EdgeInsets.only(top: 8),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.all(Radius.circular(12)),
-                        child: Container(
-                          padding: EdgeInsets.all(8),
-                          color: Colors.black26,
-                          child: StreamBuilder<CubeVideoBitrateEvent>(
-                            stream: _statsReportsManager.videoBitrateStream
-                                .where((event) => event.userId == entry.key),
-                            builder: (context, snapshot) {
-                              if (!snapshot.hasData) {
-                                return Text(
-                                  '0 kbits/sec',
-                                  style: TextStyle(color: Colors.white),
-                                );
-                              } else {
-                                var videoBitrateForUser = snapshot.data!;
-                                return Text(
-                                  '${videoBitrateForUser.bitRate} kbits/sec',
-                                  style: TextStyle(color: Colors.white),
-                                );
-                              }
-                            },
-                          ),
-                        ),
-                      ),
-                    ))
-              ],
-            ),
-          ),
-        )
-        .toList());
+    if (remoteRenderers.isEmpty) {
+      streamsExpanded
+          .addAll(CallManager.instance.remoteStreams.entries.map((entry) {
+        var videoRenderer = RTCVideoRenderer();
+        var initialisationFuture = videoRenderer.initialize().then((_) {
+          videoRenderer.srcObject = entry.value;
+          return videoRenderer;
+        });
+
+        return FutureBuilder<RTCVideoRenderer>(
+          future: initialisationFuture,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return buildRemoteVideoItem(entry.key, snapshot.data!);
+            } else {
+              return Expanded(
+                  child: Container(
+                child: Text('Waiting...'),
+              ));
+            }
+          },
+        );
+      }));
+    } else {
+      streamsExpanded.addAll(remoteRenderers.entries
+          .map(
+            (entry) => buildRemoteVideoItem(entry.key, entry.value),
+          )
+          .toList());
+    }
 
     if (streamsExpanded.length > 2) {
       List<Widget> rows = [];

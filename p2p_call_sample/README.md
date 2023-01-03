@@ -6,13 +6,13 @@ The project contains the following features implemented:
 
 - User authorization
 - Group video/audio calls (up to 4 users)
-- Start the screen sharing session or switch to the screen sharing and back during an active video call;
 - Mute/unmute microphone
 - Switch cameras
 - Disable/enable the video stream
 - Switch speakerphone and earpiece
 - Opponents' Mic level monitoring
 - Opponents' Video bitrate monitoring
+- Screen Sharing
 - Background calls (via push notifications)
 
 ## Documentation
@@ -53,12 +53,14 @@ The app will automatically run on your Android device.
 The app will automatically run on a selected iOS device or simulator.
 
 ### Run on macOS
-- Run command from the  Terminal `flutter run -d macos`;
+- Run command from the Terminal `flutter run -d macos`;
 ### Run on Windows
-- Run command from the  Terminal `flutter run -d windows`;
+- Run command from the Terminal `flutter run -d windows`;
 ### Run on Web
 - Add own `firebaseConfig` to the file `chat_sample/web/index.html`;
-- Run command from the  Terminal `flutter run -d chrome`;
+- Run command from the Terminal `flutter run -d chrome`;
+### Run on Linux
+- Run command from the Terminal `flutter run -d linux`;
 
 ## Receiving calls on the mobile platforms
 

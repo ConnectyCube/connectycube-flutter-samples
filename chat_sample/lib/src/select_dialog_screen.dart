@@ -131,6 +131,7 @@ class _BodyLayoutState extends State<BodyLayout> {
 
   Widget _getDialogsList(BuildContext context) {
     if (_isDialogContinues) {
+
       getDialogs().then((dialogs) {
         _isDialogContinues = false;
         log("getDialogs: $dialogs", TAG);
