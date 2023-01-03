@@ -53,12 +53,14 @@ The app will automatically run on your Android device.
 The app will automatically run on a selected iOS device or simulator.
 
 ### Run on macOS
-- Run command from the  Terminal `flutter run -d macos`;
+- Run command from the Terminal `flutter run -d macos`;
 ### Run on Windows
-- Run command from the  Terminal `flutter run -d windows`;
+- Run command from the Terminal `flutter run -d windows`;
 ### Run on Web
 - Add own `firebaseConfig` to the file `chat_sample/web/index.html`;
-- Run command from the  Terminal `flutter run -d chrome`;
+- Run command from the Terminal `flutter run -d chrome`;
+### Run on Linux
+- Run command from the Terminal `flutter run -d linux`;
 
 ## Receiving calls on the mobile platforms
 
