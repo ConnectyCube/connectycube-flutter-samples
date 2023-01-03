@@ -51,9 +51,9 @@ class CallManager {
 
   void _initCustomMediaConfigs() {
     RTCMediaConfig mediaConfig = RTCMediaConfig.instance;
-    mediaConfig.minHeight = 720;
-    mediaConfig.minWidth = 1280;
-    mediaConfig.minFrameRate = 30;
+    mediaConfig.minHeight = 340;
+    mediaConfig.minWidth = 480;
+    mediaConfig.minFrameRate = 25;
 
     RTCConfig.instance.statsReportsInterval = 200;
   }

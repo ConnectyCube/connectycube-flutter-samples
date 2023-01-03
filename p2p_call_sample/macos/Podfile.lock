@@ -1,9 +1,9 @@
 PODS:
   - device_info_plus_macos (0.0.1):
     - FlutterMacOS
-  - flutter_webrtc (0.9.4):
+  - flutter_webrtc (0.9.13):
     - FlutterMacOS
-    - WebRTC-SDK (= 104.5112.03)
+    - WebRTC-SDK (= 104.5112.06)
   - FlutterMacOS (1.0.0)
   - package_info_plus_macos (0.0.1):
     - FlutterMacOS
@@ -15,7 +15,7 @@ PODS:
     - FlutterMacOS
   - shared_preferences_macos (0.0.1):
     - FlutterMacOS
-  - WebRTC-SDK (104.5112.03)
+  - WebRTC-SDK (104.5112.06)
 
 DEPENDENCIES:
   - device_info_plus_macos (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus_macos/macos`)
@@ -51,14 +51,14 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   device_info_plus_macos: 1ad388a1ef433505c4038e7dd9605aadd1e2e9c7
-  flutter_webrtc: 45cd8f5825bb32054e817708bf343ceff2c9cab8
+  flutter_webrtc: 4bb537cadddcfb5e5b24c96cbd6ff56f064b8faf
   FlutterMacOS: ae6af50a8ea7d6103d888583d46bd8328a7e9811
   package_info_plus_macos: f010621b07802a241d96d01876d6705f15e77c1c
   path_provider_macos: 3c0c3b4b0d4a76d2bf989a913c2de869c5641a19
   platform_device_id: 3e414428f45df149bbbfb623e2c0ca27c545b763
   platform_device_id_macos: f763bb55f088be804d61b96eb4710b8ab6598e94
   shared_preferences_macos: a64dc611287ed6cbe28fd1297898db1336975727
-  WebRTC-SDK: 9f50fb5a410edc38e6fbb865fe940e3010bc8e7e
+  WebRTC-SDK: 85ee61404eb5698cf23a69a27008271db07159fc
 
 PODFILE CHECKSUM: c7161fcf45d4fd9025dc0f48a76d6e64e52f8176
 
