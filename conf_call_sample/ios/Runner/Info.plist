@@ -45,5 +45,16 @@
 	<string>$(PRODUCT_NAME) Camera Usage!</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>$(PRODUCT_NAME) Microphone Usage!</string>
+	<key>UIBackgroundModes</key>
+    <array>
+    	<string>voip</string>
+    	<string>audio</string>
+    </array>
+    <key>RTCScreenSharingExtension</key>
+    <string>com.connectycube.flutter.conferenceCallSample.Conference-Calls-Sample-Screen-Sharing</string>
+    <key>RTCAppGroupIdentifier</key>
+    <string>group.com.connectycube.flutter</string>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 </dict>
 </plist>

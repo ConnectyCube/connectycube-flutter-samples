@@ -1,161 +1,77 @@
 PODS:
-  - connectycube_flutter_call_kit (0.0.1):
+  - connectycube_flutter_call_kit (2.2.1):
     - Flutter
   - device_info (0.0.1):
     - Flutter
-  - Firebase/CoreOnly (8.3.0):
-    - FirebaseCore (= 8.3.0)
-  - Firebase/Messaging (8.3.0):
-    - Firebase/CoreOnly
-    - FirebaseMessaging (~> 8.3.0)
-  - firebase_core (1.4.0):
-    - Firebase/CoreOnly (= 8.3.0)
+  - device_info_plus (0.0.1):
     - Flutter
-  - firebase_messaging (10.0.4):
-    - Firebase/Messaging (= 8.3.0)
-    - firebase_core
-    - Flutter
-  - FirebaseCore (8.3.0):
-    - FirebaseCoreDiagnostics (~> 8.0)
-    - GoogleUtilities/Environment (~> 7.4)
-    - GoogleUtilities/Logger (~> 7.4)
-  - FirebaseCoreDiagnostics (8.6.0):
-    - GoogleDataTransport (~> 9.0)
-    - GoogleUtilities/Environment (~> 7.4)
-    - GoogleUtilities/Logger (~> 7.4)
-    - nanopb (~> 2.30908.0)
-  - FirebaseInstallations (8.6.0):
-    - FirebaseCore (~> 8.0)
-    - GoogleUtilities/Environment (~> 7.4)
-    - GoogleUtilities/UserDefaults (~> 7.4)
-    - PromisesObjC (< 3.0, >= 1.2)
-  - FirebaseMessaging (8.3.0):
-    - FirebaseCore (~> 8.0)
-    - FirebaseInstallations (~> 8.0)
-    - GoogleUtilities/AppDelegateSwizzler (~> 7.4)
-    - GoogleUtilities/Environment (~> 7.4)
-    - GoogleUtilities/Reachability (~> 7.4)
-    - GoogleUtilities/UserDefaults (~> 7.4)
   - Flutter (1.0.0)
-  - flutter_call_kit (0.0.1):
+  - flutter_webrtc (0.9.17):
     - Flutter
-  - flutter_voip_push_notification (0.0.1):
+    - WebRTC-SDK (= 104.5112.07)
+  - package_info_plus (0.4.5):
     - Flutter
-  - flutter_webrtc (0.2.2):
+  - path_provider_ios (0.0.1):
     - Flutter
-    - GoogleWebRTC (= 1.1.31999)
-    - Libyuv (= 1703)
-  - GoogleDataTransport (9.1.0):
-    - GoogleUtilities/Environment (~> 7.2)
-    - nanopb (~> 2.30908.0)
-    - PromisesObjC (< 3.0, >= 1.2)
-  - GoogleUtilities/AppDelegateSwizzler (7.5.1):
-    - GoogleUtilities/Environment
-    - GoogleUtilities/Logger
-    - GoogleUtilities/Network
-  - GoogleUtilities/Environment (7.5.1):
-    - PromisesObjC (< 3.0, >= 1.2)
-  - GoogleUtilities/Logger (7.5.1):
-    - GoogleUtilities/Environment
-  - GoogleUtilities/Network (7.5.1):
-    - GoogleUtilities/Logger
-    - "GoogleUtilities/NSData+zlib"
-    - GoogleUtilities/Reachability
-  - "GoogleUtilities/NSData+zlib (7.5.1)"
-  - GoogleUtilities/Reachability (7.5.1):
-    - GoogleUtilities/Logger
-  - GoogleUtilities/UserDefaults (7.5.1):
-    - GoogleUtilities/Logger
-  - GoogleWebRTC (1.1.31999)
-  - Libyuv (1703)
-  - nanopb (2.30908.0):
-    - nanopb/decode (= 2.30908.0)
-    - nanopb/encode (= 2.30908.0)
-  - nanopb/decode (2.30908.0)
-  - nanopb/encode (2.30908.0)
-  - path_provider (0.0.1):
+  - permission_handler_apple (9.0.4):
     - Flutter
   - platform_device_id (0.0.1):
     - Flutter
-  - PromisesObjC (2.0.0)
-  - shared_preferences (0.0.1):
+  - shared_preferences_ios (0.0.1):
     - Flutter
+  - WebRTC-SDK (104.5112.07)
 
 DEPENDENCIES:
   - connectycube_flutter_call_kit (from `.symlinks/plugins/connectycube_flutter_call_kit/ios`)
   - device_info (from `.symlinks/plugins/device_info/ios`)
-  - firebase_core (from `.symlinks/plugins/firebase_core/ios`)
-  - firebase_messaging (from `.symlinks/plugins/firebase_messaging/ios`)
+  - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
-  - flutter_call_kit (from `.symlinks/plugins/flutter_call_kit/ios`)
-  - flutter_voip_push_notification (from `.symlinks/plugins/flutter_voip_push_notification/ios`)
   - flutter_webrtc (from `.symlinks/plugins/flutter_webrtc/ios`)
-  - path_provider (from `.symlinks/plugins/path_provider/ios`)
+  - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
+  - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
+  - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - platform_device_id (from `.symlinks/plugins/platform_device_id/ios`)
-  - shared_preferences (from `.symlinks/plugins/shared_preferences/ios`)
+  - shared_preferences_ios (from `.symlinks/plugins/shared_preferences_ios/ios`)
 
 SPEC REPOS:
   trunk:
-    - Firebase
-    - FirebaseCore
-    - FirebaseCoreDiagnostics
-    - FirebaseInstallations
-    - FirebaseMessaging
-    - GoogleDataTransport
-    - GoogleUtilities
-    - GoogleWebRTC
-    - Libyuv
-    - nanopb
-    - PromisesObjC
+    - WebRTC-SDK
 
 EXTERNAL SOURCES:
   connectycube_flutter_call_kit:
     :path: ".symlinks/plugins/connectycube_flutter_call_kit/ios"
   device_info:
     :path: ".symlinks/plugins/device_info/ios"
-  firebase_core:
-    :path: ".symlinks/plugins/firebase_core/ios"
-  firebase_messaging:
-    :path: ".symlinks/plugins/firebase_messaging/ios"
+  device_info_plus:
+    :path: ".symlinks/plugins/device_info_plus/ios"
   Flutter:
     :path: Flutter
-  flutter_call_kit:
-    :path: ".symlinks/plugins/flutter_call_kit/ios"
-  flutter_voip_push_notification:
-    :path: ".symlinks/plugins/flutter_voip_push_notification/ios"
   flutter_webrtc:
     :path: ".symlinks/plugins/flutter_webrtc/ios"
-  path_provider:
-    :path: ".symlinks/plugins/path_provider/ios"
+  package_info_plus:
+    :path: ".symlinks/plugins/package_info_plus/ios"
+  path_provider_ios:
+    :path: ".symlinks/plugins/path_provider_ios/ios"
+  permission_handler_apple:
+    :path: ".symlinks/plugins/permission_handler_apple/ios"
   platform_device_id:
     :path: ".symlinks/plugins/platform_device_id/ios"
-  shared_preferences:
-    :path: ".symlinks/plugins/shared_preferences/ios"
+  shared_preferences_ios:
+    :path: ".symlinks/plugins/shared_preferences_ios/ios"
 
 SPEC CHECKSUMS:
-  connectycube_flutter_call_kit: 3f5730ee17df32194fe1072f197bb1f87fb18955
+  connectycube_flutter_call_kit: 0be5790a2f18114162a62b28290314b5aa7c4f97
   device_info: d7d233b645a32c40dfdc212de5cf646ca482f175
-  Firebase: 817b9171d0d51dccc458b94a5e8edff6b1dd323d
-  firebase_core: 72374607c8c6f5a0adc0559e5c5bf57deda975e3
-  firebase_messaging: 55c5b8184efd330b9d1f1765b55c4ae57e015c5e
-  FirebaseCore: a6dba751680d7033b9d3831e1cfc95ead0605118
-  FirebaseCoreDiagnostics: 3721920bde3a9a6d5aa093c1d25e9d3e47f694af
-  FirebaseInstallations: 0ede6ffcd215b8f93c19d9b06c1c54e2d4107e98
-  FirebaseMessaging: 42252b79b860482021483748669ec32e22196462
-  Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
-  flutter_call_kit: 1024bd6c98b866857990bc0f7e7f9e751261270e
-  flutter_voip_push_notification: f28f3ce1c6b835a3fa9e833f37f33dc1291ab888
-  flutter_webrtc: 39898454258b54ba51996850d5da8d5d53bf1524
-  GoogleDataTransport: 85fd18ff3019bb85d3f2c551d04c481dedf71fc9
-  GoogleUtilities: 3df19e3c24f7bbc291d8b5809aa6b0d41e642437
-  GoogleWebRTC: b39a78c4f5cc6b0323415b9233db03a2faa7b0f0
-  Libyuv: 5f79ced0ee66e60a612ca97de1e6ccacd187a437
-  nanopb: a0ba3315591a9ae0a16a309ee504766e90db0c96
-  path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
+  device_info_plus: e5c5da33f982a436e103237c0c85f9031142abed
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  flutter_webrtc: 6767eafaa728c1e58026e901ca19f3fd5d713397
+  package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
+  path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
+  permission_handler_apple: 44366e37eaf29454a1e7b1b7d736c2cceaeb17ce
   platform_device_id: 81b3e2993881f87d0c82ef151dc274df4869aef5
-  PromisesObjC: 68159ce6952d93e17b2dfe273b8c40907db5ba58
-  shared_preferences: af6bfa751691cdc24be3045c43ec037377ada40d
+  shared_preferences_ios: 548a61f8053b9b8a49ac19c1ffbc8b92c50d68ad
+  WebRTC-SDK: ef83f71e443c135d98de109940343bcf6d313e8f
 
-PODFILE CHECKSUM: fe0e1ee7f3d1f7d00b11b474b62dd62134535aea
+PODFILE CHECKSUM: 8cab771d017faed4ca2df5fd6a8d7b8f53debe97
 
-COCOAPODS: 1.10.0
+COCOAPODS: 1.11.3

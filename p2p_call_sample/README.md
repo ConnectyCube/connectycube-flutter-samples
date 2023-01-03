@@ -2,14 +2,17 @@
 
 This README introduces [ConnectyCube](https://connectycube.com) P2P Calls code sample for Flutter
 
-Project contains the following features implemented:
+The project contains the following features implemented:
 
 - User authorization
 - Group video/audio calls (up to 4 users)
+- Start the screen sharing session or switch to the screen sharing and back during an active video call;
 - Mute/unmute microphone
 - Switch cameras
-- Disable/enable video stream
-- Switch speaker phone and earpiece
+- Disable/enable the video stream
+- Switch speakerphone and earpiece
+- Opponents' Mic level monitoring
+- Opponents' Video bitrate monitoring
 - Background calls (via push notifications)
 
 ## Documentation
@@ -27,9 +30,9 @@ ConnectyCube P2P Calls API documentation - [https://developers.connectycube.com/
 
 - Members call statuses
 
-## Quick start and develop
+## Quickstart and develop
 
-Quick start [Flutter](https://flutter.dev/docs/get-started) app.
+Quickstart [Flutter](https://flutter.dev/docs/get-started) app.
 
 
 ## Run
@@ -40,49 +43,42 @@ Prepare environment for Flutter and clone the project.
 - Right mouse button click on `main.dart`;
 - Chose 'Run 'main.dart''.
 
-App will automatically run on your Android device.
+The app will automatically run on your Android device.
 
 ### Run on iOS:
 - Start Xcode;
 - Select `Runner.xcworkspace` to run Xcode project;
-- Press 'Build' button to start project building.
+- Press the' Build' button to start project building.
 
-App will automatically run on selected iOS device or simulator.
+The app will automatically run on a selected iOS device or simulator.
 
 ### Run on macOS
-- Run command from the  Teminal `flutter run -d macos`;
+- Run command from the  Terminal `flutter run -d macos`;
 ### Run on Windows
-- Run command from the  Teminal `flutter run -d windows`;
+- Run command from the  Terminal `flutter run -d windows`;
+### Run on Web
+- Add own `firebaseConfig` to the file `chat_sample/web/index.html`;
+- Run command from the  Terminal `flutter run -d chrome`;
 
-## Background calls
+## Receiving calls on the mobile platforms
 
 <kbd><img alt="Flutter P2P Calls code sample, incoming call in background Android" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/background_call_android.png" height="440" /></kbd>
 <kbd><img alt="Flutter P2P Calls code sample, incoming call locked Android" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/background_call_android_locked.png" height="440" /></kbd>
 <kbd><img alt="Flutter P2P Calls code sample, incoming call in background iOS" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/background_call_ios.PNG" height="440" /></kbd>
 <kbd><img alt="Flutter P2P Calls code sample, incoming call locked iOS" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/background_call_ios_locked.PNG" height="440" /></kbd>
 
-For background calls we use Connectycube Push notifications feature and some helpful plugins:
-- For iOS we use:
-    * [flutter_voip_push_notification](https://pub.dev/packages/flutter_voip_push_notification);
-    * [flutter_call_kit](https://pub.dev/packages/flutter_call_kit) (from the [GitHub repository](https://github.com/peerwaya/flutter_call_kit));
-
-- For Android we use:
-    * [firebase_messaging](https://pub.dev/packages/firebase_messaging)
-    * [connectycube_flutter_call_kit](https://pub.dev/packages/connectycube_flutter_call_kit)
-
+For notifying mobile platforms we use Connectycube Push notifications feature and own [Connectycube Call Kit plugin](https://pub.dev/packages/connectycube_flutter_call_kit) for supporting Call Kit feature.
 
 ### Configure Push notifications:
-1. Create an own app in the ConnectyCube admin panel (if not created yet);
+1. Create your own app in the ConnectyCube admin panel (if not created yet);
 2. Create a project in the Firebase developer console (if not created yet);
 3. Add the Server API key from the Firebase developer console to the ConnectyCube admin panel for the Android platform ([short guide](https://developers.connectycube.com/flutter/push-notifications?id=android));
-4. Add Apple certificate for the iOS platform ([short guide, how to generate and set it to the admin panel](https://developers.connectycube.com/ios/push-notifications?id=create-apns-certificate)). But instead of APNS certificate you should choose VoIP certificate;
-5. Add config files from the Firebase developer console to this project:
-    - for Android - file `google-services.json` by path `p2p_call_sample/android/app/`;
-    - for iOS - file `GoogleService-Info.plist` by path `p2p_call_sample/ios/Runner/` (if you have build problems on this step, try add this file via Xcode);
+4. Add Apple certificate for the iOS platform ([short guide, how to generate and set it to the admin panel](https://developers.connectycube.com/ios/push-notifications?id=create-apns-certificate)). But instead of an APNS certificate, you should choose a VoIP certificate;
+5. Add `google-services.json` file from the Firebase developer console to the Android app by path `p2p_call_sample/android/app/`
 6. Configure file `p2p_call_sample/lib/src/utils/configs.dart` with your endpoints from the 1st. point of this guide;
 7. Create users in the ConnectyCube admin panel and add them to the configure file `p2p_call_sample/lib/src/utils/configs.dart`
 8. Build and run the app as usual;
 
 ## Can't build yourself?
 
-Got troubles with building Flutter code sample? Just create an issue at [Issues page](https://github.com/ConnectyCube/connectycube-flutter-samples/issues) - we will create the sample for you. For FREE!
+Got troubles with building Flutter code samples? Just create an issue at [Issues page](https://github.com/ConnectyCube/connectycube-flutter-samples/issues) - we will create the sample for you. For FREE!

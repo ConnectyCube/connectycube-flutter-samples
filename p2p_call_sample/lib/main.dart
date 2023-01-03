@@ -1,4 +1,3 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
@@ -37,13 +36,12 @@ class _AppState extends State<App> {
   @override
   void initState() {
     super.initState();
-    Firebase.initializeApp();
 
     initConnectycube();
   }
 }
 
-initConnectycube(){
+initConnectycube() {
   init(
     config.APP_ID,
     config.AUTH_KEY,
@@ -54,4 +52,15 @@ initConnectycube(){
       });
     },
   );
+}
+
+initConnectycubeContextLess() {
+  CubeSettings.instance.applicationId = config.APP_ID;
+  CubeSettings.instance.authorizationKey = config.AUTH_KEY;
+  CubeSettings.instance.authorizationSecret = config.AUTH_SECRET;
+  CubeSettings.instance.onSessionRestore = () {
+    return SharedPrefs.getUser().then((savedUser) {
+      return createSession(savedUser);
+    });
+  };
 }

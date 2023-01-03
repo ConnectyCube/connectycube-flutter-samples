@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
@@ -5,6 +8,7 @@ import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'managers/call_manager.dart';
 import 'managers/push_notifications_manager.dart';
 import 'utils/configs.dart' as utils;
+import 'utils/platform_utils.dart';
 import 'utils/pref_util.dart';
 
 class SelectOpponentsScreen extends StatelessWidget {
@@ -82,8 +86,6 @@ class SelectOpponentsScreen extends StatelessWidget {
 class BodyLayout extends StatefulWidget {
   final CubeUser currentUser;
 
-
-
   @override
   State<StatefulWidget> createState() {
     return _BodyLayoutState(currentUser);
@@ -96,13 +98,12 @@ class _BodyLayoutState extends State<BodyLayout> {
   final CubeUser currentUser;
   late Set<int> _selectedUsers;
 
-
   _BodyLayoutState(this.currentUser);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: EdgeInsets.all(48),
+        padding: EdgeInsets.only(top: 48, left: 48, right: 48, bottom: 12),
         child: Column(
           children: [
             Text(
@@ -116,7 +117,7 @@ class _BodyLayoutState extends State<BodyLayout> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Padding(
-                  padding: EdgeInsets.only(right: 24),
+                  padding: EdgeInsets.all(12),
                   child: FloatingActionButton(
                     heroTag: "VideoCall",
                     child: Icon(
@@ -129,7 +130,7 @@ class _BodyLayoutState extends State<BodyLayout> {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.only(left: 24),
+                  padding: EdgeInsets.all(12),
                   child: FloatingActionButton(
                     heroTag: "AudioCall",
                     child: Icon(
@@ -182,7 +183,13 @@ class _BodyLayoutState extends State<BodyLayout> {
   void initState() {
     super.initState();
 
+    initForegroundService();
+
     _selectedUsers = {};
+
+    checkSystemAlertWindowPermission(context);
+
+    requestNotificationsPermission();
 
     PushNotificationsManager.instance.init();
   }

@@ -1,7 +1,8 @@
 import 'dart:convert';
-import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:universal_io/io.dart';
 
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -21,7 +22,6 @@ class PushNotificationsManager {
   late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
   PushNotificationsManager._internal() {
-    Firebase.initializeApp();
     flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
   }
 
@@ -50,20 +50,22 @@ class PushNotificationsManager {
     final InitializationSettings initializationSettings =
         InitializationSettings(
             android: initializationSettingsAndroid,
-            iOS: initializationSettingsIOS);
+            iOS: initializationSettingsIOS,
+            macOS: MacOSInitializationSettings());
     await flutterLocalNotificationsPlugin.initialize(initializationSettings,
         onSelectNotification: onSelectNotification);
 
     String? token;
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid || kIsWeb) {
       firebaseMessaging.getToken().then((token) {
         log('[getToken] token: $token', TAG);
         subscribe(token);
       }).catchError((onError) {
         log('[getToken] onError: $onError', TAG);
       });
-    } else if (Platform.isIOS) {
+    } else if (Platform.isIOS || Platform.isMacOS) {
       token = await firebaseMessaging.getAPNSToken();
+      log('[getAPNSToken] token: $token', TAG);
     }
 
     if (!isEmpty(token)) {
@@ -75,7 +77,8 @@ class PushNotificationsManager {
     });
 
     FirebaseMessaging.onMessage.listen((remoteMessage) {
-      log('[onMessage] message: $remoteMessage', TAG);
+      log('[onMessage] message: ${remoteMessage.data}', TAG);
+      showNotification(remoteMessage);
     });
 
     FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
@@ -99,32 +102,38 @@ class PushNotificationsManager {
       return;
     }
 
-    bool isProduction = bool.fromEnvironment('dart.vm.product');
-
     CreateSubscriptionParameters parameters = CreateSubscriptionParameters();
+    parameters.pushToken = token;
+
+    bool isProduction = kIsWeb ? true : bool.fromEnvironment('dart.vm.product');
     parameters.environment =
         isProduction ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
 
-    if (Platform.isAndroid) {
+    if (Platform.isAndroid || kIsWeb) {
       parameters.channel = NotificationsChannels.GCM;
       parameters.platform = CubePlatform.ANDROID;
-      parameters.bundleIdentifier = "com.connectycube.flutter.chat_sample";
-    } else if (Platform.isIOS) {
+    } else if (Platform.isIOS || Platform.isMacOS) {
       parameters.channel = NotificationsChannels.APNS;
       parameters.platform = CubePlatform.IOS;
-      parameters.bundleIdentifier = "com.connectycube.flutter.chatSample.app";
     }
 
-    String? deviceId = await PlatformDeviceId.getDeviceId;
-    parameters.udid = deviceId;
-    parameters.pushToken = token;
+    var deviceId = await PlatformDeviceId.getDeviceId;
+
+    if (kIsWeb) {
+      parameters.udid = base64Encode(utf8.encode(deviceId ?? ''));
+    } else {
+      parameters.udid = deviceId;
+    }
+
+    var packageInfo = await PackageInfo.fromPlatform();
+    parameters.bundleIdentifier = packageInfo.packageName;
 
     createSubscription(parameters.getRequestParameters())
         .then((cubeSubscription) {
       log('[subscribe] subscription SUCCESS', PushNotificationsManager.TAG);
       sharedPrefs.saveSubscriptionToken(token!);
       cubeSubscription.forEach((subscription) {
-        if (subscription.device!.clientIdentificationSequence == token) {
+        if (subscription.clientIdentificationSequence == token) {
           sharedPrefs.saveSubscriptionId(subscription.id!);
         }
       });
@@ -166,14 +175,15 @@ class PushNotificationsManager {
 }
 
 showNotification(RemoteMessage message) async {
-  log('[showNotification] message: $message', PushNotificationsManager.TAG);
+  log('[showNotification] message: ${message.data}',
+      PushNotificationsManager.TAG);
   Map<String, dynamic> data = message.data;
 
   const AndroidNotificationDetails androidPlatformChannelSpecifics =
       AndroidNotificationDetails(
     'messages_channel_id',
     'Chat messages',
-    'Chat messages will be received here',
+    channelDescription: 'Chat messages will be received here',
     importance: Importance.max,
     priority: Priority.high,
     showWhen: true,
@@ -191,8 +201,8 @@ showNotification(RemoteMessage message) async {
 }
 
 Future<void> onBackgroundMessage(RemoteMessage message) async {
-  await Firebase.initializeApp();
-  log('[onBackgroundMessage] message: $message', PushNotificationsManager.TAG);
+  log('[onBackgroundMessage] message: ${message.data}',
+      PushNotificationsManager.TAG);
   showNotification(message);
   return Future.value();
 }

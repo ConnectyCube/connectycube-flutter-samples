@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
+import 'firebase_options.dart';
 import 'src/chat_details_screen.dart';
 import 'src/chat_dialog_screen.dart';
 import 'src/login_screen.dart';
@@ -16,7 +17,14 @@ import 'src/utils/configs.dart' as config;
 import 'src/utils/consts.dart';
 import 'src/utils/pref_util.dart';
 
-void main() => runApp(App());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  runApp(App());
+}
 
 class App extends StatefulWidget {
   @override
@@ -38,7 +46,8 @@ class _AppState extends State<App> with WidgetsBindingObserver {
       home: LoginScreen(),
       onGenerateRoute: (settings) {
         String? name = settings.name;
-        Map<String, dynamic>? args = settings.arguments as Map<String, dynamic>?;
+        Map<String, dynamic>? args =
+            settings.arguments as Map<String, dynamic>?;
 
         MaterialPageRoute pageRout;
 
@@ -88,8 +97,6 @@ class _AppState extends State<App> with WidgetsBindingObserver {
   void initState() {
     super.initState();
 
-    Firebase.initializeApp();
-
     init(config.APP_ID, config.AUTH_KEY, config.AUTH_SECRET,
         onSessionRestore: () async {
       SharedPrefs sharedPrefs = await SharedPrefs.instance.init();
@@ -97,6 +104,8 @@ class _AppState extends State<App> with WidgetsBindingObserver {
 
       return createSession(user);
     });
+
+    // setEndpoints("", ""); // set custom API and Char server domains
 
     connectivityStateSubscription =
         Connectivity().onConnectivityChanged.listen((connectivityType) {
@@ -117,15 +126,15 @@ class _AppState extends State<App> with WidgetsBindingObserver {
       }
     });
 
-    appState = WidgetsBinding.instance!.lifecycleState;
-    WidgetsBinding.instance!.addObserver(this);
+    appState = WidgetsBinding.instance.lifecycleState;
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
     connectivityStateSubscription.cancel();
 
-    WidgetsBinding.instance!.removeObserver(this);
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
@@ -136,14 +145,19 @@ class _AppState extends State<App> with WidgetsBindingObserver {
 
     if (AppLifecycleState.paused == state) {
       if (CubeChatConnection.instance.isAuthenticated()) {
-        CubeChatConnection.instance.logout();
+        CubeChatConnection.instance.markInactive();
       }
     } else if (AppLifecycleState.resumed == state) {
+      // just for an example user was saved in the local storage
       SharedPrefs.instance.init().then((sharedPrefs) {
         CubeUser? user = sharedPrefs.getUser();
 
-        if (user != null && !CubeChatConnection.instance.isAuthenticated()) {
-          CubeChatConnection.instance.login(user);
+        if (user != null) {
+          if(!CubeChatConnection.instance.isAuthenticated()) {
+            CubeChatConnection.instance.login(user);
+          } else {
+            CubeChatConnection.instance.markActive();
+          }
         }
       });
     }

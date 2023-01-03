@@ -1,8 +1,11 @@
 import 'package:connectycube_sdk/connectycube_sdk.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:web_browser_detect/web_browser_detect.dart';
 
 import 'login_screen.dart';
 import 'managers/call_manager.dart';
+import 'utils/platform_utils.dart';
 
 class ConversationCallScreen extends StatefulWidget {
   final P2PSession _callSession;
@@ -21,65 +24,128 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   static const String TAG = "_ConversationCallScreenState";
   final P2PSession _callSession;
   final bool _isIncoming;
+  final CubeStatsReportsManager _statsReportsManager =
+      CubeStatsReportsManager();
   bool _isCameraEnabled = true;
   bool _isSpeakerEnabled = true;
   bool _isMicMute = false;
 
-  Map<int?, RTCVideoRenderer> streams = {};
+  RTCVideoRenderer? localRenderer;
+  Map<int, RTCVideoRenderer> remoteRenderers = {};
 
-  _ConversationCallScreenState(this._callSession, this._isIncoming);
+  bool _enableScreenSharing;
+
+  MediaStream? _localMediaStream;
+
+  bool _isSafari = false;
+
+  Widget? _localVideoView;
+
+  bool _needRebuildLocalVideoView = true;
+
+  bool _customMediaStream = false;
+
+  _ConversationCallScreenState(this._callSession, this._isIncoming)
+      : _enableScreenSharing = !_callSession.startScreenSharing;
 
   @override
   void initState() {
     super.initState();
 
+    _isSafari = kIsWeb && Browser().browserAgent == BrowserAgent.Safari;
+
+    _localMediaStream = CallManager.instance.localMediaStream;
+
     _callSession.onLocalStreamReceived = _addLocalMediaStream;
     _callSession.onRemoteStreamReceived = _addRemoteMediaStream;
     _callSession.onSessionClosed = _onSessionClosed;
-
+    _statsReportsManager.init(_callSession);
     _callSession.setSessionCallbacksListener(this);
+
     if (_isIncoming) {
-      _callSession.acceptCall();
+      if (_callSession.state == RTCSessionState.RTC_SESSION_NEW) {
+        _callSession.acceptCall();
+      }
     } else {
       _callSession.startCall();
     }
   }
 
   @override
-  void dispose() {
-    super.dispose();
-    streams.forEach((opponentId, stream) async {
+  void deactivate() {
+    super.deactivate();
+
+    stopBackgroundExecution();
+
+    localRenderer?.srcObject = null;
+    localRenderer?.dispose();
+
+    remoteRenderers.forEach((opponentId, renderer) {
       log("[dispose] dispose renderer for $opponentId", TAG);
-      await stream.dispose();
+      try {
+        renderer.srcObject = null;
+        renderer.dispose();
+      } catch (e) {
+        log('Error $e');
+      }
     });
   }
 
-  void _addLocalMediaStream(MediaStream stream) {
+  Future<void> _addLocalMediaStream(MediaStream stream) async {
     log("_addLocalMediaStream", TAG);
-    _onStreamAdd(CubeChatConnection.instance.currentUser!.id!, stream);
+
+    _localMediaStream = stream;
+
+    if (!mounted) return;
+
+    setState(() {
+      _needRebuildLocalVideoView = _isSafari || localRenderer == null;
+    });
+
+    /// workaround for updating localVideo in Safari browser
+    if (_isSafari) {
+      if (!_customMediaStream) {
+        _customMediaStream = true;
+
+        var customMediaStream = _enableScreenSharing
+            ? await navigator.mediaDevices
+                .getUserMedia({'audio': true, 'video': _isVideoCall()})
+            : await navigator.mediaDevices
+                .getDisplayMedia({'audio': true, 'video': true});
+
+        _callSession.replaceMediaStream(customMediaStream);
+        setState(() {
+          _needRebuildLocalVideoView = true;
+        });
+      }
+    } else {
+      localRenderer?.srcObject = _localMediaStream;
+    }
   }
 
   void _addRemoteMediaStream(session, int userId, MediaStream stream) {
     log("_addRemoteMediaStream for user $userId", TAG);
-    _onStreamAdd(userId, stream);
+    _onRemoteStreamAdd(userId, stream);
   }
 
-  void _removeMediaStream(callSession, int userId) {
+  Future<void> _removeMediaStream(callSession, int userId) async {
     log("_removeMediaStream for user $userId", TAG);
-    RTCVideoRenderer? videoRenderer = streams[userId];
+    RTCVideoRenderer? videoRenderer = remoteRenderers[userId];
     if (videoRenderer == null) return;
 
     videoRenderer.srcObject = null;
     videoRenderer.dispose();
 
     setState(() {
-      streams.remove(userId);
+      remoteRenderers.remove(userId);
     });
   }
 
   void _onSessionClosed(session) {
     log("_onSessionClosed", TAG);
     _callSession.removeSessionCallbacksListener();
+
+    _statsReportsManager.dispose();
 
     Navigator.pushReplacement(
       context,
@@ -89,28 +155,161 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     );
   }
 
-  void _onStreamAdd(int opponentId, MediaStream stream) async {
+  void _onRemoteStreamAdd(int opponentId, MediaStream stream) async {
     log("_onStreamAdd for user $opponentId", TAG);
 
     RTCVideoRenderer streamRender = RTCVideoRenderer();
     await streamRender.initialize();
     streamRender.srcObject = stream;
-    setState(() => streams[opponentId] = streamRender);
+    setState(() {
+      remoteRenderers[opponentId] = streamRender;
+      _needRebuildLocalVideoView = _isSafari;
+    });
+  }
+
+  Future<Widget> _buildLocalVideoItem() async {
+    log("buildLocalVideoStreamItem", TAG);
+    if (localRenderer == null || _isSafari) {
+      localRenderer = RTCVideoRenderer();
+      await localRenderer!.initialize();
+    }
+
+    localRenderer?.srcObject = _localMediaStream;
+
+    _localVideoView = Expanded(
+        child: RTCVideoView(
+      localRenderer!,
+      objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+      mirror: true,
+    ));
+    _needRebuildLocalVideoView = false;
+
+    return _localVideoView!;
+  }
+
+  Widget buildRemoteVideoItem(int opponentId, RTCVideoRenderer renderer) {
+    return Expanded(
+      child: Stack(
+        children: [
+          RTCVideoView(
+            renderer,
+            objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+            mirror: false,
+          ),
+          Align(
+              alignment: Alignment.centerLeft,
+              child: Container(
+                margin: EdgeInsets.all(8),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    vertical: 10,
+                  ),
+                  child: RotatedBox(
+                    quarterTurns: -1,
+                    child: StreamBuilder<CubeMicLevelEvent>(
+                      stream: _statsReportsManager.micLevelStream
+                          .where((event) => event.userId == opponentId),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return LinearProgressIndicator(value: 0);
+                        } else {
+                          var micLevelForUser = snapshot.data!;
+                          return LinearProgressIndicator(
+                              value: micLevelForUser.micLevel);
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              )),
+          Align(
+              alignment: Alignment.topCenter,
+              child: Container(
+                margin: EdgeInsets.only(top: 8),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.all(Radius.circular(12)),
+                  child: Container(
+                    padding: EdgeInsets.all(8),
+                    color: Colors.black26,
+                    child: StreamBuilder<CubeVideoBitrateEvent>(
+                      stream: _statsReportsManager.videoBitrateStream
+                          .where((event) => event.userId == opponentId),
+                      builder: (context, snapshot) {
+                        if (!snapshot.hasData) {
+                          return Text(
+                            '0 kbits/sec',
+                            style: TextStyle(color: Colors.white),
+                          );
+                        } else {
+                          var videoBitrateForUser = snapshot.data!;
+                          return Text(
+                            '${videoBitrateForUser.bitRate} kbits/sec',
+                            style: TextStyle(color: Colors.white),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ))
+        ],
+      ),
+    );
   }
 
   List<Widget> renderStreamsGrid(Orientation orientation) {
-    List<Widget> streamsExpanded = streams.entries
-        .map(
-          (entry) => Expanded(
-            child: RTCVideoView(
-              entry.value,
-              objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-              mirror: true,
-            ),
-          ),
-        )
-        .toList();
-    if (streams.length > 2) {
+    List<Widget> streamsExpanded = [];
+
+    if (_localMediaStream != null) {
+      streamsExpanded.add(_isSafari || _localVideoView == null
+          ? FutureBuilder<Widget>(
+              future: _needRebuildLocalVideoView
+                  ? _buildLocalVideoItem()
+                  : Future.value(_localVideoView),
+              builder: (context, snapshot) {
+                if (snapshot.hasData) {
+                  return snapshot.data!;
+                } else {
+                  return Expanded(child: Container());
+                }
+              })
+          : _localVideoView != null
+              ? _localVideoView!
+              : Expanded(child: Container()));
+    }
+
+    if (remoteRenderers.isEmpty) {
+      streamsExpanded
+          .addAll(CallManager.instance.remoteStreams.entries.map((entry) {
+        var videoRenderer = RTCVideoRenderer();
+        var initialisationFuture = videoRenderer.initialize().then((_) {
+          videoRenderer.srcObject = entry.value;
+          return videoRenderer;
+        });
+
+        return FutureBuilder<RTCVideoRenderer>(
+          future: initialisationFuture,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return buildRemoteVideoItem(entry.key, snapshot.data!);
+            } else {
+              return Expanded(
+                  child: Container(
+                child: Text('Waiting...'),
+              ));
+            }
+          },
+        );
+      }));
+    } else {
+      streamsExpanded.addAll(remoteRenderers.entries
+          .map(
+            (entry) => buildRemoteVideoItem(entry.key, entry.value),
+          )
+          .toList());
+    }
+
+    if (streamsExpanded.length > 2) {
       List<Widget> rows = [];
 
       for (var i = 0; i < streamsExpanded.length; i += 2) {
@@ -141,58 +340,57 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () => _onBackPressed(context),
-      child: Stack(
-        children: [
-          Scaffold(
-              body: _isVideoCall()
-                  ? OrientationBuilder(
-                      builder: (context, orientation) {
-                        return Center(
-                          child: Container(
-                            child: orientation == Orientation.portrait
-                                ? Column(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: renderStreamsGrid(orientation))
-                                : Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                    children: renderStreamsGrid(orientation)),
-                          ),
-                        );
-                      },
-                    )
-                  : Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: <Widget>[
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 24),
-                            child: Text(
-                              "Audio call",
-                              style: TextStyle(fontSize: 28),
-                            ),
-                          ),
-                          Padding(
-                            padding: EdgeInsets.only(bottom: 12),
-                            child: Text(
-                              "Members:",
-                              style: TextStyle(
-                                  fontSize: 20, fontStyle: FontStyle.italic),
-                            ),
-                          ),
-                          Text(
-                            _callSession.opponentsIds.join(", "),
-                            style: TextStyle(fontSize: 20),
-                          ),
-                        ],
+      child: Scaffold(
+        body: Stack(fit: StackFit.loose, clipBehavior: Clip.none, children: [
+          _isVideoCall()
+              ? OrientationBuilder(
+                  builder: (context, orientation) {
+                    return Center(
+                      child: Container(
+                        child: orientation == Orientation.portrait
+                            ? Column(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: renderStreamsGrid(orientation))
+                            : Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceEvenly,
+                                children: renderStreamsGrid(orientation)),
                       ),
-                    )),
+                    );
+                  },
+                )
+              : Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 24),
+                        child: Text(
+                          "Audio call",
+                          style: TextStyle(fontSize: 28),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.only(bottom: 12),
+                        child: Text(
+                          "Members:",
+                          style: TextStyle(
+                              fontSize: 20, fontStyle: FontStyle.italic),
+                        ),
+                      ),
+                      Text(
+                        _callSession.opponentsIds.join(", "),
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    ],
+                  ),
+                ),
           Align(
             alignment: Alignment.bottomCenter,
             child: _getActionsPanel(),
           ),
-        ],
+        ]),
       ),
     );
   }
@@ -238,30 +436,51 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
                   backgroundColor: Colors.black38,
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.only(right: 4),
+              Visibility(
+                visible: _isVideoCall(),
                 child: FloatingActionButton(
                   elevation: 0,
-                  heroTag: "SwitchCamera",
+                  heroTag: "ToggleScreenSharing",
                   child: Icon(
-                    Icons.switch_video,
-                    color: _isVideoEnabled() ? Colors.white : Colors.grey,
+                    _enableScreenSharing
+                        ? Icons.screen_share
+                        : Icons.stop_screen_share,
+                    color: Colors.white,
                   ),
-                  onPressed: () => _switchCamera(),
+                  onPressed: () => _toggleScreenSharing(),
                   backgroundColor: Colors.black38,
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.only(right: 4),
-                child: FloatingActionButton(
-                  elevation: 0,
-                  heroTag: "ToggleCamera",
-                  child: Icon(
-                    Icons.videocam,
-                    color: _isVideoEnabled() ? Colors.white : Colors.grey,
+              Visibility(
+                visible: _isVideoCall() && _enableScreenSharing,
+                child: Padding(
+                  padding: EdgeInsets.only(right: 4),
+                  child: FloatingActionButton(
+                    elevation: 0,
+                    heroTag: "SwitchCamera",
+                    child: Icon(
+                      Icons.switch_video,
+                      color: _isVideoEnabled() ? Colors.white : Colors.grey,
+                    ),
+                    onPressed: () => _switchCamera(),
+                    backgroundColor: Colors.black38,
                   ),
-                  onPressed: () => _toggleCamera(),
-                  backgroundColor: Colors.black38,
+                ),
+              ),
+              Visibility(
+                visible: _isVideoCall() && _enableScreenSharing,
+                child: Padding(
+                  padding: EdgeInsets.only(right: 4),
+                  child: FloatingActionButton(
+                    elevation: 0,
+                    heroTag: "ToggleCamera",
+                    child: Icon(
+                      Icons.videocam,
+                      color: _isVideoEnabled() ? Colors.white : Colors.grey,
+                    ),
+                    onPressed: () => _toggleCamera(),
+                    backgroundColor: Colors.black38,
+                  ),
                 ),
               ),
               Expanded(
@@ -313,6 +532,39 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     setState(() {
       _isCameraEnabled = !_isCameraEnabled;
       _callSession.setVideoEnabled(_isCameraEnabled);
+    });
+  }
+
+  _toggleScreenSharing() async {
+    if (!_isVideoCall()) return;
+
+    var foregroundServiceFuture = _enableScreenSharing
+        ? startBackgroundExecution()
+        : stopBackgroundExecution();
+
+    var hasPermissions = await hasBackgroundExecutionPermissions();
+
+    if (!hasPermissions) {
+      await initForegroundService();
+    }
+
+    var desktopCapturerSource = _enableScreenSharing && isDesktop
+        ? await showDialog<DesktopCapturerSource>(
+            context: context,
+            builder: (context) => ScreenSelectDialog(),
+          )
+        : null;
+
+    foregroundServiceFuture.then((_) {
+      _callSession
+          .enableScreenSharing(_enableScreenSharing,
+              desktopCapturerSource: desktopCapturerSource,
+              useIOSBroadcasting: true)
+          .then((voidResult) {
+        setState(() {
+          _enableScreenSharing = !_enableScreenSharing;
+        });
+      });
     });
   }
 

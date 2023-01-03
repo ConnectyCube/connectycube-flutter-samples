@@ -44,7 +44,7 @@ class SelectDialogScreen extends StatelessWidget {
   }
 
   Future<bool> _onBackPressed() {
-    return Future.value(false);
+    return Future.value(true);
   }
 
   _openSettings(BuildContext context) {
@@ -131,6 +131,7 @@ class _BodyLayoutState extends State<BodyLayout> {
 
   Widget _getDialogsList(BuildContext context) {
     if (_isDialogContinues) {
+
       getDialogs().then((dialogs) {
         _isDialogContinues = false;
         log("getDialogs: $dialogs", TAG);

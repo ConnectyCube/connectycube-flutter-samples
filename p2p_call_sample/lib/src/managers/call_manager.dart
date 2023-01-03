@@ -1,6 +1,6 @@
-import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:universal_io/io.dart';
 
 import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
 import 'package:connectycube_sdk/connectycube_sdk.dart';
@@ -13,9 +13,6 @@ import '../utils/consts.dart';
 
 class CallManager {
   static String TAG = "CallManager";
-
-  // collect pending calls in case when it was accepted/ended before establish chat connection
-  Map<String?, String> _callsMap = {};
 
   static CallManager get instance => _getInstance();
   static CallManager? _instance;
@@ -31,6 +28,8 @@ class CallManager {
   P2PClient? _callClient;
   P2PSession? _currentCall;
   BuildContext? context;
+  MediaStream? localMediaStream;
+  Map<int, MediaStream> remoteStreams = {};
 
   init(BuildContext context) {
     this.context = context;
@@ -48,18 +47,19 @@ class CallManager {
 
   destroy() {
     P2PClient.instance.destroy();
-    _callsMap.clear();
   }
 
   void _initCustomMediaConfigs() {
     RTCMediaConfig mediaConfig = RTCMediaConfig.instance;
-    mediaConfig.minHeight = 720;
-    mediaConfig.minWidth = 1280;
-    mediaConfig.minFrameRate = 30;
+    mediaConfig.minHeight = 340;
+    mediaConfig.minWidth = 480;
+    mediaConfig.minFrameRate = 25;
+
+    RTCConfig.instance.statsReportsInterval = 200;
   }
 
   void _initCalls() {
-    if(_callClient == null) {
+    if (_callClient == null) {
       _callClient = P2PClient.instance;
 
       _callClient!.init();
@@ -76,31 +76,49 @@ class CallManager {
       var callState = await _getCallState(_currentCall!.sessionId);
 
       if (callState == CallState.REJECTED) {
-        reject(_currentCall!.sessionId);
+        reject(_currentCall!.sessionId, false);
       } else if (callState == CallState.ACCEPTED) {
-        acceptCall(_currentCall!.sessionId);
-      } else if (callState == CallState.UNKNOWN) {
-        // ConnectycubeFlutterCallKit.setCallState(sessionId: _currentCall.sessionId, callState: CallState.PENDING);
-        // _showIncomingCallScreen(_currentCall);
-        if(Platform.isWindows || Platform.isMacOS){
-          _showIncomingCallScreen(_currentCall!);
+        acceptCall(_currentCall!.sessionId, false);
+      } else if (callState == CallState.UNKNOWN ||
+          callState == CallState.PENDING) {
+        if (callState == CallState.UNKNOWN) {
+          ConnectycubeFlutterCallKit.setCallState(
+              sessionId: _currentCall!.sessionId, callState: CallState.PENDING);
         }
+
+        _showIncomingCallScreen(_currentCall!);
       }
+
+      _currentCall?.onLocalStreamReceived = (localStream) {
+        localMediaStream = localStream;
+      };
+
+      _currentCall?.onRemoteStreamReceived = (session, userId, stream){
+        remoteStreams[userId] = stream;
+      };
+
+      _currentCall?.onRemoteStreamRemoved = (session, userId, stream){
+        remoteStreams.remove(userId);
+      };
     };
 
     _callClient!.onSessionClosed = (callSession) {
       if (_currentCall != null &&
           _currentCall!.sessionId == callSession.sessionId) {
         _currentCall = null;
-        CallKitManager.instance.reportEndCallWithUUID(callSession.sessionId);
+        localMediaStream = null;
+        remoteStreams.clear();
+        CallKitManager.instance.processCallFinished(callSession.sessionId);
       }
     };
   }
 
-  void startNewCall(BuildContext context, int callType, Set<int> opponents) {
+  void startNewCall(
+      BuildContext context, int callType, Set<int> opponents) async {
     if (opponents.isEmpty) return;
 
-    P2PSession callSession = _callClient!.createCallSession(callType, opponents);
+    P2PSession callSession =
+        _callClient!.createCallSession(callType, opponents);
     _currentCall = callSession;
     Navigator.push(
       context,
@@ -123,14 +141,21 @@ class CallManager {
     }
   }
 
-  void _savePendingCall(sessionId) {
-    _callsMap[sessionId] = CallState.PENDING;
-  }
-
-  void acceptCall(String sessionId) {
+  void acceptCall(String sessionId, bool fromCallkit) {
+    log('acceptCall, from callKit: $fromCallkit', TAG);
     ConnectycubeFlutterCallKit.setOnLockScreenVisibility(isVisible: true);
+
     if (_currentCall != null) {
       if (context != null) {
+        // if (AppLifecycleState.resumed !=
+        //     WidgetsBinding.instance.lifecycleState) {
+        //   _currentCall?.acceptCall();
+        // }
+
+        if (!fromCallkit) {
+          ConnectycubeFlutterCallKit.reportCallAccepted(sessionId: sessionId);
+        }
+
         Navigator.pushReplacement(
           context!,
           MaterialPageRoute(
@@ -138,25 +163,27 @@ class CallManager {
           ),
         );
       }
-    } else {
-      _callsMap[sessionId] = CallState.ACCEPTED;
     }
   }
 
-  void reject(String sessionId) {
+  void reject(String sessionId, bool fromCallkit) {
     if (_currentCall != null) {
-      CallKitManager.instance.rejectCall(_currentCall!.sessionId);
+      if (fromCallkit) {
+        ConnectycubeFlutterCallKit.setOnLockScreenVisibility(isVisible: false);
+      } else {
+        CallKitManager.instance.processCallFinished(_currentCall!.sessionId);
+      }
+
       _currentCall!.reject();
-    } else {
-      _callsMap[sessionId] = CallState.REJECTED;
+      _sendEndCallSignalForOffliners(_currentCall);
     }
   }
 
   void hungUp() {
     if (_currentCall != null) {
-      CallKitManager.instance.endCall(_currentCall!.sessionId);
-      _sendEndCallSignalForOffliners(_currentCall!);
+      CallKitManager.instance.processCallFinished(_currentCall!.sessionId);
       _currentCall!.hungUp();
+      _sendEndCallSignalForOffliners(_currentCall);
     }
   }
 
@@ -175,15 +202,11 @@ class CallManager {
       PARAM_CALLER_ID: currentCall.callerId,
       PARAM_CALLER_NAME: callerName,
       PARAM_CALL_OPPONENTS: currentCall.opponentsIds.join(','),
-      PARAM_IOS_VOIP: 1,
     };
 
     params.notificationType = NotificationType.PUSH;
-    params.environment = CubeEnvironment
-        .DEVELOPMENT; // TODO for sample we use DEVELOPMENT environment
-    // bool isProduction = bool.fromEnvironment('dart.vm.product');
-    // params.environment =
-    //     isProduction ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
+    params.environment =
+        kReleaseMode ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
     params.usersIds = currentCall.opponentsIds.toList();
 
     return params;
@@ -192,6 +215,10 @@ class CallManager {
   void _sendStartCallSignalForOffliners(P2PSession currentCall) {
     CreateEventParams params = _getCallEventParameters(currentCall);
     params.parameters[PARAM_SIGNAL_TYPE] = SIGNAL_TYPE_START_CALL;
+    params.parameters[PARAM_IOS_VOIP] = 1;
+    params.parameters[PARAM_EXPIRATION] =
+        DateTime.now().millisecondsSinceEpoch ~/ 1000 +
+            RTCConfig.instance.noAnswerTimeout;
 
     createEvent(params.getEventForRequest()).then((cubeEvent) {
       log("Event for offliners created: $cubeEvent");
@@ -200,7 +227,9 @@ class CallManager {
     });
   }
 
-  void _sendEndCallSignalForOffliners(P2PSession currentCall) {
+  void _sendEndCallSignalForOffliners(P2PSession? currentCall) {
+    if (currentCall == null) return;
+
     CubeUser? currentUser = CubeChatConnection.instance.currentUser;
     if (currentUser == null || currentUser.id != currentCall.callerId) return;
 
@@ -217,13 +246,10 @@ class CallManager {
   void _initCallKit() {
     CallKitManager.instance.init(
       onCallAccepted: (uuid) {
-        acceptCall(uuid);
+        acceptCall(uuid, true);
       },
       onCallEnded: (uuid) {
-        hungUp();
-      },
-      onNewCallShown: (error, uuid, handle, callerName, fromPushKit) {
-        _savePendingCall(uuid);
+        reject(uuid, true);
       },
       onMuteCall: (mute, uuid) {
         _currentCall?.setMicrophoneMute(mute);
@@ -240,12 +266,10 @@ class CallManager {
   }
 
   Future<String> _getCallState(String sessionId) async {
-    if (Platform.isAndroid) {
-      return ConnectycubeFlutterCallKit.getCallState(sessionId: sessionId);
-    } else if (Platform.isIOS) {
-      if (_callsMap.containsKey(sessionId)) {
-        return Future.value(_callsMap[sessionId]);
-      }
+    if (Platform.isAndroid || Platform.isIOS) {
+      var callState =
+          ConnectycubeFlutterCallKit.getCallState(sessionId: sessionId);
+      return callState;
     }
 
     return Future.value(CallState.UNKNOWN);

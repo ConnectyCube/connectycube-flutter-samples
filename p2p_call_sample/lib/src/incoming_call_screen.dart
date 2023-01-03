@@ -87,15 +87,14 @@ class IncomingCallScreen extends StatelessWidget {
   }
 
   void _acceptCall(BuildContext context, P2PSession callSession) {
-    CallManager.instance.acceptCall(callSession.sessionId);
+    CallManager.instance.acceptCall(callSession.sessionId, false);
   }
 
   void _rejectCall(BuildContext context, P2PSession callSession) {
-    CallManager.instance.reject(callSession.sessionId);
+    CallManager.instance.reject(callSession.sessionId, false);
   }
 
   Future<bool> _onBackPressed(BuildContext context) {
     return Future.value(false);
   }
 }
-
