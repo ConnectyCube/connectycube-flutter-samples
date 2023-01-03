@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:chat_sample/src/utils/api_utils.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:universal_io/io.dart';
 
@@ -74,6 +75,7 @@ class ChatScreenState extends State<ChatScreen> {
   final Map<int?, CubeUser?> _occupants = Map();
 
   late bool isLoading;
+  late StreamSubscription<ConnectivityResult> connectivityStateSubscription;
   String? imageUrl;
   List<CubeMessage> listMessage = [];
   Timer? typingTimer;
@@ -96,8 +98,10 @@ class ChatScreenState extends State<ChatScreen> {
   List<CubeMessage> _unreadMessages = [];
   List<CubeMessage> _unsentMessages = [];
 
-  static const int messagesPerPage = 20;
+  static const int messagesPerPage = 50;
   int lastPartSize = 0;
+
+  List<CubeMessage> oldMessages = [];
 
   ChatScreenState(this._cubeUser, this._cubeDialog);
 
@@ -109,6 +113,8 @@ class ChatScreenState extends State<ChatScreen> {
     isLoading = false;
     imageUrl = '';
     listScrollController.addListener(onScrollChanged);
+    connectivityStateSubscription =
+        Connectivity().onConnectivityChanged.listen(onConnectivityChanged);
   }
 
   @override
@@ -118,6 +124,7 @@ class ChatScreenState extends State<ChatScreen> {
     readSubscription?.cancel();
     typingSubscription?.cancel();
     textEditingController.dispose();
+    connectivityStateSubscription.cancel();
     super.dispose();
   }
 
@@ -779,10 +786,6 @@ class ChatScreenState extends State<ChatScreen> {
       );
     }
 
-    // if (listMessage != null && listMessage!.isNotEmpty) {
-    //   return Flexible(child: getWidgetMessages(listMessage));
-    // }
-
     return Flexible(
       child: StreamBuilder<List<CubeMessage>>(
         stream: getMessagesList().asStream(),
@@ -828,13 +831,34 @@ class ChatScreenState extends State<ChatScreen> {
         messagesPerPage >= lastPartSize) {
       setState(() {
         isLoading = true;
-        getMessagesByDate(listMessage.last.dateSent ?? 0, false)
-            .then((messages) {
-          setState(() {
-            isLoading = false;
-            listMessage.addAll(messages);
+
+        if (oldMessages.isNotEmpty) {
+          getMessagesBetweenDates(
+                  oldMessages.first.dateSent ?? 0,
+                  listMessage.last.dateSent ??
+                      DateTime.now().millisecondsSinceEpoch ~/ 1000)
+              .then((newMessages) {
+            setState(() {
+              isLoading = false;
+
+              listMessage.addAll(newMessages);
+
+              if (newMessages.length < messagesPerPage) {
+                oldMessages.insertAll(0, listMessage);
+                listMessage = List.from(oldMessages);
+                oldMessages.clear();
+              }
+            });
           });
-        });
+        } else {
+          getMessagesByDate(listMessage.last.dateSent ?? 0, false)
+              .then((messages) {
+            setState(() {
+              isLoading = false;
+              listMessage.addAll(messages);
+            });
+          });
+        }
       });
     }
   }
@@ -927,5 +951,49 @@ class ChatScreenState extends State<ChatScreen> {
         })
         .whenComplete(() {})
         .catchError((onError) {});
+  }
+
+  Future<List<CubeMessage>> getMessagesBetweenDates(
+      int startDate, int endDate) async {
+    var params = GetMessagesParameters();
+    params.sorter = RequestSorter(SORT_DESC, '', 'date_sent');
+    params.limit = messagesPerPage;
+    params.filters = [
+      RequestFilter('', 'date_sent', 'gt', startDate),
+      RequestFilter('', 'date_sent', 'lt', endDate)
+    ];
+
+    return getMessages(_cubeDialog.dialogId!, params.getRequestParameters())
+        .then((result) {
+      return result!.items;
+    });
+  }
+
+  void onConnectivityChanged(ConnectivityResult connectivityType) {
+    log("[ChatScreenState] connectivityType changed to '$connectivityType'");
+
+    if (connectivityType == ConnectivityResult.wifi ||
+        connectivityType == ConnectivityResult.mobile) {
+      setState(() {
+        isLoading = true;
+      });
+
+      getMessagesBetweenDates(listMessage.first.dateSent ?? 0,
+              DateTime.now().millisecondsSinceEpoch ~/ 1000)
+          .then((newMessages) {
+        setState(() {
+          if (newMessages.length == messagesPerPage) {
+            oldMessages = List.from(listMessage);
+            listMessage = newMessages;
+          } else {
+            listMessage.insertAll(0, newMessages);
+          }
+        });
+      }).whenComplete(() {
+        setState(() {
+          isLoading = false;
+        });
+      });
+    }
   }
 }
