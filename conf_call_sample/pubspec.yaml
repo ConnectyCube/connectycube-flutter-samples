@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  connectycube_sdk: ^2.2.1
+  connectycube_sdk: ^2.3.0
 #  connectycube_sdk:
 #    path: ../../flutter-sdk
   flutter_background: ^1.1.0
