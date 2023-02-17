@@ -33,7 +33,5 @@ class _AppState extends State<App> {
       config.AUTH_KEY,
       config.AUTH_SECRET,
     );
-    
-    setEndpoints('https://apistaging.connectycube.com', 'chatstaging.connectycube.com');
   }
 }

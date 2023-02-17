@@ -247,14 +247,12 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
   void onPublishersReceived(publishers) {
     log("onPublishersReceived", TAG);
-    // subscribeToPublishers(publishers);
+    subscribeToPublishers(publishers);
     handlePublisherReceived(publishers);
   }
 
-  void onPublisherLeft(publisherId) {
-    log("onPublisherLeft $publisherId", TAG);
-    _removeMediaStream(_callSession, publisherId!);
-    _closeSessionIfLast();
+  void onPublisherLeft(publisher) {
+    log("onPublisherLeft $publisher", TAG);
   }
 
   void onError(ex) {
@@ -278,6 +276,12 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     setState(() {
       streamRender!.srcObject = stream;
       remoteRenderers[opponentId] = streamRender;
+    });
+  }
+
+  void subscribeToPublishers(List<int?> publishers) {
+    publishers.forEach((publisher) {
+      _callSession.subscribeToPublisher(publisher);
     });
   }
 
