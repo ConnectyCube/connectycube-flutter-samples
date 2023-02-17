@@ -163,7 +163,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
         _callManager.startCall(
             _meetingId, _opponents, _callSession.currentUserId);
       }
-    }));
+    }), conferenceRole: ConferenceRole.PUBLISHER);
+    // }), conferenceRole: ConferenceRole.LISTENER);
   }
 
   @override
@@ -243,12 +244,14 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
   void onPublishersReceived(publishers) {
     log("onPublishersReceived", TAG);
-    subscribeToPublishers(publishers);
+    // subscribeToPublishers(publishers);
     handlePublisherReceived(publishers);
   }
 
-  void onPublisherLeft(publisher) {
-    log("onPublisherLeft $publisher", TAG);
+  void onPublisherLeft(publisherId) {
+    log("onPublisherLeft $publisherId", TAG);
+    _removeMediaStream(_callSession, publisherId!);
+    _closeSessionIfLast();
   }
 
   void onError(ex) {
@@ -256,17 +259,18 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   }
 
   void _onRemoteStreamAdd(int opponentId, MediaStream stream) async {
-    log("_onStreamAdd for user $opponentId", TAG);
+    log("_onRemoteStreamAdd for user $opponentId", TAG);
 
-    RTCVideoRenderer streamRender = RTCVideoRenderer();
-    await streamRender.initialize();
-    streamRender.srcObject = stream;
-    setState(() => remoteRenderers[opponentId] = streamRender);
-  }
+    var streamRender = remoteRenderers[opponentId];
 
-  void subscribeToPublishers(List<int?> publishers) {
-    publishers.forEach((publisher) {
-      _callSession.subscribeToPublisher(publisher);
+    if (streamRender == null) {
+      streamRender = RTCVideoRenderer();
+      await streamRender.initialize();
+    }
+
+    setState(() {
+      streamRender!.srcObject = stream;
+      remoteRenderers[opponentId] = streamRender;
     });
   }
 
