@@ -244,7 +244,6 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
   void onPublishersReceived(publishers) {
     log("onPublishersReceived", TAG);
-    // subscribeToPublishers(publishers);
     handlePublisherReceived(publishers);
   }
 
@@ -665,8 +664,6 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   @override
   void onConnectionClosedForUser(ConferenceSession session, int? userId) {
     log("onConnectionClosedForUser userId= $userId");
-    _removeMediaStream(session, userId!);
-    _closeSessionIfLast();
   }
 
   @override
