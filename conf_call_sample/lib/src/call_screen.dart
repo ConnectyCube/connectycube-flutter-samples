@@ -135,6 +135,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
   bool _enableScreenSharing;
 
+  int _currentBitrate = 0;
+
   _ConversationCallScreenState(
       this._callSession, this._meetingId, this._opponents, this._isIncoming)
       : _enableScreenSharing = !_callSession.startScreenSharing;
@@ -153,6 +155,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     _callSession.onPublishersReceived = onPublishersReceived;
     _callSession.onPublisherLeft = onPublisherLeft;
     _callSession.onError = onError;
+    _callSession.onSubStreamChanged = onSubStreamChanged;
 
     _callSession.setSessionCallbacksListener(this);
 
@@ -258,6 +261,10 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     log("onError $ex", TAG);
   }
 
+  void onSubStreamChanged(int userId, StreamType streamType) {
+    log("onSubStreamChanged userId: $userId, streamType: $streamType");
+  }
+
   void _onRemoteStreamAdd(int opponentId, MediaStream stream) async {
     log("_onRemoteStreamAdd for user $opponentId", TAG);
 
@@ -289,11 +296,56 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
     if (localRenderer != null) {
       streamsExpanded.add(Expanded(
-          child: RTCVideoView(
-        localRenderer!,
-        objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-        mirror: true,
-      )));
+          child: Stack(children: [
+        RTCVideoView(
+          localRenderer!,
+          objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+          mirror: true,
+        ),
+        Align(
+          alignment: Alignment.topCenter,
+          child: Padding(
+            padding: EdgeInsets.only(top: 20),
+            child: Container(
+              color: Colors.white30,
+              child: DropdownButton<int>(
+                items: [
+                  DropdownMenuItem(
+                    child: Text('No limit'),
+                    value: 0,
+                  ),
+                  DropdownMenuItem(
+                    child: Text('Cap to 128kbit'),
+                    value: 128000,
+                  ),
+                  DropdownMenuItem(
+                    child: Text('Cap to 256kbit'),
+                    value: 256000,
+                  ),
+                  DropdownMenuItem(
+                    child: Text('Cap to 512kbit'),
+                    value: 512000,
+                  ),
+                  DropdownMenuItem(
+                    child: Text('Cap to 1mbit'),
+                    value: 1024000,
+                  ),
+                  DropdownMenuItem(
+                    child: Text('Cap to 1.5mbit'),
+                    value: 1536000,
+                  ),
+                  DropdownMenuItem(
+                    child: Text('Cap to 2mbit'),
+                    value: 2048000,
+                  ),
+                ],
+                value: _currentBitrate,
+                onChanged: _changeRoomBitrate,
+              ),
+            ),
+          ),
+        ),
+      ])));
     }
 
     streamsExpanded.addAll(remoteRenderers.entries
@@ -361,7 +413,17 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
                           ),
                         ),
                       ),
-                    ))
+                    )),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: _getSwitchStreamPanel(entry.key!),
+                ),
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: Padding(
+                      padding: EdgeInsets.only(right: 60),
+                      child: _getSwitchLayerPanel(entry.key!)),
+                )
               ],
             ),
           ),
@@ -565,6 +627,121 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     );
   }
 
+  Widget _getSwitchStreamPanel(int userId) {
+    return Container(
+      margin: EdgeInsets.only(left: 8, right: 8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(32),
+            bottomRight: Radius.circular(32),
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32)),
+        child: Container(
+          padding: EdgeInsets.all(4),
+          color: Colors.white30,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.all(4),
+                child: FloatingActionButton(
+                  elevation: 0,
+                  heroTag: "High",
+                  child: Text('H'),
+                  onPressed: () =>
+                      _chooseOpponentStreamQuality(userId, StreamType.high),
+                  backgroundColor: Colors.green,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(4),
+                child: FloatingActionButton(
+                  elevation: 0,
+                  heroTag: "Medium",
+                  child: Text('M'),
+                  onPressed: () =>
+                      _chooseOpponentStreamQuality(userId, StreamType.medium),
+                  backgroundColor: Colors.yellow,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(4),
+                child: FloatingActionButton(
+                  elevation: 0,
+                  heroTag: "Low",
+                  child: Text('L'),
+                  onPressed: () =>
+                      _chooseOpponentStreamQuality(userId, StreamType.low),
+                  backgroundColor: Colors.red,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _getSwitchLayerPanel(int userId) {
+    return Container(
+      margin: EdgeInsets.only(left: 8, right: 8),
+      child: ClipRRect(
+        borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(32),
+            bottomRight: Radius.circular(32),
+            topLeft: Radius.circular(32),
+            topRight: Radius.circular(32)),
+        child: Container(
+          padding: EdgeInsets.all(4),
+          color: Colors.white30,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Padding(
+                padding: EdgeInsets.all(4),
+                child: FloatingActionButton(
+                  elevation: 0,
+                  heroTag: "High",
+                  child: Text('TL2'),
+                  onPressed: () => _chooseOpponentStreamFps(userId, 2),
+                  backgroundColor: Colors.blue,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(4),
+                child: FloatingActionButton(
+                  elevation: 0,
+                  heroTag: "Medium",
+                  child: Text('TL1'),
+                  onPressed: () => _chooseOpponentStreamFps(userId, 1),
+                  backgroundColor: Colors.blue,
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(4),
+                child: FloatingActionButton(
+                  elevation: 0,
+                  heroTag: "Low",
+                  child: Text('TL0'),
+                  onPressed: () => _chooseOpponentStreamFps(userId, 0),
+                  backgroundColor: Colors.blue,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _changeRoomBitrate(int? bitrate) {
+    logTime('_changeRoomBitrate to $bitrate');
+    setState(() {
+      _currentBitrate = bitrate ?? 0;
+    });
+    // _callSession.setupBitrate(bitrate);
+  }
+
   _endCall() {
     _callManager.stopCall();
     _callSession.leave();
@@ -572,6 +749,14 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
   Future<bool> _onBackPressed(BuildContext context) {
     return Future.value(false);
+  }
+
+  _chooseOpponentStreamQuality(int userId, StreamType type) {
+    _callSession.requestPreferredStreamForOpponent(userId, type);
+  }
+
+  _chooseOpponentStreamFps(int userId, int layer) {
+    _callSession.requestPreferredLayerForOpponentStream(userId, layer);
   }
 
   _muteMic() {
