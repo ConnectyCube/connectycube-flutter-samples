@@ -247,12 +247,14 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
   void onPublishersReceived(publishers) {
     log("onPublishersReceived", TAG);
-    subscribeToPublishers(publishers);
+    // subscribeToPublishers(publishers);
     handlePublisherReceived(publishers);
   }
 
   void onPublisherLeft(publisher) {
     log("onPublisherLeft $publisher", TAG);
+    _removeMediaStream(_callSession, publisher);
+    _closeSessionIfLast();
   }
 
   void onError(ex) {
@@ -260,7 +262,11 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   }
 
   void onSubStreamChanged(int userId, StreamType streamType) {
-    log("onSubStreamChanged userId: $userId, streamType: $streamType");
+    log("onSubStreamChanged userId: $userId, streamType: $streamType", TAG);
+  }
+
+  void onLayerChanged(int userId, int layer) {
+    log("onLayerChanged userId: $userId, layer: $layer", TAG);
   }
 
   void _onRemoteStreamAdd(int opponentId, MediaStream stream) async {
@@ -743,7 +749,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     setState(() {
       _currentBitrate = bitrate ?? 0;
     });
-    // _callSession.setupBitrate(bitrate);
+    _callSession.setupBitrate(bitrate);
   }
 
   _endCall() {
@@ -848,18 +854,17 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
   @override
   void onConnectedToUser(ConferenceSession session, int? userId) {
-    log("onConnectedToUser userId= $userId");
+    log("onConnectedToUser userId= $userId", TAG);
   }
 
   @override
   void onConnectionClosedForUser(ConferenceSession session, int? userId) {
-    log("onConnectionClosedForUser userId= $userId");
-    _removeMediaStream(session, userId!);
-    _closeSessionIfLast();
+    log("onConnectionClosedForUser userId= $userId", TAG);
+
   }
 
   @override
   void onDisconnectedFromUser(ConferenceSession session, int? userId) {
-    log("onDisconnectedFromUser userId= $userId");
+    log("onDisconnectedFromUser userId= $userId", TAG);
   }
 }
