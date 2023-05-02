@@ -3,7 +3,7 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
-  platform_device_id_linux
+  flutter_webrtc
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST
