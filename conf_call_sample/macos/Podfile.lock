@@ -1,47 +1,42 @@
 PODS:
+  - device_info_plus (0.0.1):
+    - FlutterMacOS
   - flutter_webrtc (0.9.22):
     - FlutterMacOS
     - WebRTC-SDK (= 104.5112.12)
   - FlutterMacOS (1.0.0)
-  - path_provider_macos (0.0.1):
-    - FlutterMacOS
-  - platform_device_id (0.0.1):
-    - FlutterMacOS
-  - platform_device_id_macos (0.0.1):
+  - path_provider_foundation (0.0.1):
+    - Flutter
     - FlutterMacOS
   - WebRTC-SDK (104.5112.12)
 
 DEPENDENCIES:
+  - device_info_plus (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos`)
   - flutter_webrtc (from `Flutter/ephemeral/.symlinks/plugins/flutter_webrtc/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
-  - path_provider_macos (from `Flutter/ephemeral/.symlinks/plugins/path_provider_macos/macos`)
-  - platform_device_id (from `Flutter/ephemeral/.symlinks/plugins/platform_device_id/macos`)
-  - platform_device_id_macos (from `Flutter/ephemeral/.symlinks/plugins/platform_device_id_macos/macos`)
+  - path_provider_foundation (from `Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/macos`)
 
 SPEC REPOS:
   trunk:
     - WebRTC-SDK
 
 EXTERNAL SOURCES:
+  device_info_plus:
+    :path: Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos
   flutter_webrtc:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_webrtc/macos
   FlutterMacOS:
     :path: Flutter/ephemeral
-  path_provider_macos:
-    :path: Flutter/ephemeral/.symlinks/plugins/path_provider_macos/macos
-  platform_device_id:
-    :path: Flutter/ephemeral/.symlinks/plugins/platform_device_id/macos
-  platform_device_id_macos:
-    :path: Flutter/ephemeral/.symlinks/plugins/platform_device_id_macos/macos
+  path_provider_foundation:
+    :path: Flutter/ephemeral/.symlinks/plugins/path_provider_foundation/macos
 
 SPEC CHECKSUMS:
+  device_info_plus: 5401765fde0b8d062a2f8eb65510fb17e77cf07f
   flutter_webrtc: 0e2af3876ed28d4599c06734c771c2526309356b
-  FlutterMacOS: ae6af50a8ea7d6103d888583d46bd8328a7e9811
-  path_provider_macos: 3c0c3b4b0d4a76d2bf989a913c2de869c5641a19
-  platform_device_id: 3e414428f45df149bbbfb623e2c0ca27c545b763
-  platform_device_id_macos: f763bb55f088be804d61b96eb4710b8ab6598e94
+  FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
+  path_provider_foundation: c68054786f1b4f3343858c1e1d0caaded73f0be9
   WebRTC-SDK: 6469c304549f7187e7e67119c8b3184f9ec6b7f6
 
-PODFILE CHECKSUM: 6eac6b3292e5142cfc23bdeb71848a40ec51c14c
+PODFILE CHECKSUM: 0095aabf5a2ba4b7b30669b8afaa68ef378ace64
 
 COCOAPODS: 1.11.3
