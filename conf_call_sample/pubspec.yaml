@@ -10,10 +10,12 @@ dependencies:
   flutter:
     sdk: flutter
 
-  connectycube_sdk: ^2.3.0
+  connectycube_sdk: ^2.5.0
 #  connectycube_sdk:
 #    path: ../../flutter-sdk
-  flutter_background: ^1.1.0
+  flutter_background: ^1.2.0
+  web_browser_detect: ^2.0.3
+  flutter_speed_dial: ^6.2.0
 
 dev_dependencies:
   flutter_test:
