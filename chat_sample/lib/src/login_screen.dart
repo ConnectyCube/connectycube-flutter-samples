@@ -282,7 +282,8 @@ class LoginPageState extends State<LoginPage> {
     createSession(user).then((cubeSession) async {
       print("createSession cubeSession: $cubeSession");
       var tempUser = user;
-      user = cubeSession.user!..password = tempUser.password;
+      user = cubeSession.user!
+        ..password = tempUser.password;
       if (saveUser)
         SharedPrefs.instance.init().then((sharedPrefs) {
           sharedPrefs.saveNewUser(user);
@@ -335,8 +336,8 @@ class LoginPageState extends State<LoginPage> {
     //     log("getNotificationAppLaunchDetails, dialog_id: $dialogId");
     //
     //     getDialogs({'id': dialogId}).then((dialogs) {
-    //       if (dialogs?.items != null && dialogs.items.isNotEmpty ?? false) {
-    //         CubeDialog dialog = dialogs.items.first;
+    //       if (dialogs?.items != null && dialogs!.items.isNotEmpty ?? false) {
+    //         CubeDialog dialog = dialogs!.items.first;
     //         Navigator.pushReplacementNamed(context, 'chat_dialog',
     //             arguments: {USER_ARG_NAME: cubeUser, DIALOG_ARG_NAME: dialog});
     //       }
@@ -354,7 +355,7 @@ class LoginPageState extends State<LoginPage> {
     FlutterLocalNotificationsPlugin()
         .getNotificationAppLaunchDetails()
         .then((details) {
-      String? payload = details!.payload;
+      String? payload = details!.notificationResponse?.payload;
 
       if (payload == null) {
         Navigator.pushReplacementNamed(

@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:convert';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:universal_io/io.dart';
@@ -6,9 +8,9 @@ import 'package:universal_io/io.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:platform_device_id/platform_device_id.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
+import 'package:uuid/uuid.dart';
 
 import 'utils/consts.dart';
 import 'utils/pref_util.dart';
@@ -39,8 +41,8 @@ class PushNotificationsManager {
 
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('ic_launcher_foreground');
-    final IOSInitializationSettings initializationSettingsIOS =
-        IOSInitializationSettings(
+    final DarwinInitializationSettings initializationSettingsIOS =
+        DarwinInitializationSettings(
       requestSoundPermission: true,
       requestBadgePermission: true,
       requestAlertPermission: true,
@@ -51,9 +53,10 @@ class PushNotificationsManager {
         InitializationSettings(
             android: initializationSettingsAndroid,
             iOS: initializationSettingsIOS,
-            macOS: MacOSInitializationSettings());
-    await flutterLocalNotificationsPlugin.initialize(initializationSettings,
-        onSelectNotification: onSelectNotification);
+            macOS: DarwinInitializationSettings());
+    await flutterLocalNotificationsPlugin.initialize(
+      initializationSettings,
+    );
 
     String? token;
     if (Platform.isAndroid || kIsWeb) {
@@ -117,13 +120,25 @@ class PushNotificationsManager {
       parameters.platform = CubePlatform.IOS;
     }
 
-    var deviceId = await PlatformDeviceId.getDeviceId;
+    var deviceInfoPlugin = DeviceInfoPlugin();
+
+    var deviceId;
 
     if (kIsWeb) {
-      parameters.udid = base64Encode(utf8.encode(deviceId ?? ''));
-    } else {
-      parameters.udid = deviceId;
+      var webBrowserInfo = await deviceInfoPlugin.webBrowserInfo;
+      deviceId = base64Encode(utf8.encode(webBrowserInfo.userAgent ?? ''));
+    } else if (Platform.isAndroid) {
+      var androidInfo = await deviceInfoPlugin.androidInfo;
+      deviceId = androidInfo.id;
+    } else if (Platform.isIOS) {
+      var iosInfo = await deviceInfoPlugin.iosInfo;
+      deviceId = iosInfo.identifierForVendor;
+    } else if (Platform.isMacOS) {
+      var macOsInfo = await deviceInfoPlugin.macOsInfo;
+      deviceId = macOsInfo.computerName;
     }
+
+    parameters.udid = deviceId ?? Uuid().v4;
 
     var packageInfo = await PackageInfo.fromPlatform();
     parameters.bundleIdentifier = packageInfo.packageName;

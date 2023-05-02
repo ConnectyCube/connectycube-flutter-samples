@@ -9,10 +9,12 @@ Project contains the following features implemented:
 - Mute/unmute microphone
 - Switch cameras
 - Disable/enable video stream
-- Switch speaker phone and earpiece
+- Switch audio output
+- Switch audio input
 - Screen sharing
 - Opponents' mic level monitoring
 - Opponents' video bitrate monitoring
+- Speaker/grid modes (the Simulcast feature is applied)
 
 ## Documentation
 
