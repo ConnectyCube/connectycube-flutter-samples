@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  connectycube_sdk: ^2.5.0
+  connectycube_sdk: ^2.5.1
 #  connectycube_sdk:
 #    path: ../../flutter-sdk
   shared_preferences: ^2.0.12
@@ -19,6 +19,7 @@ dependencies:
   cached_network_image: ^3.2.0
   photo_view: ^0.13.0
   device_info_plus: ^8.2.1
+  emoji_picker_flutter: ^1.5.4
   firebase_messaging: ^14.2.0
   flutter_local_notifications: ^13.0.0
   connectivity_plus: ^2.3.4

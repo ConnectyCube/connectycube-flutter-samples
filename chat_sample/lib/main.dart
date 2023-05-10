@@ -158,8 +158,10 @@ class _AppState extends State<App> with WidgetsBindingObserver {
         CubeUser? user = sharedPrefs.getUser();
 
         if (user != null) {
-          if (!CubeChatConnection.instance.isAuthenticated()) {
-            CubeChatConnection.instance.login(user);
+          if (!CubeChatConnection.instance.isAuthenticated() &&
+              CubeChatConnection.instance.chatConnectionState ==
+                  CubeChatConnectionState.Idle) {
+            // CubeChatConnection.instance.login(user);
           } else {
             CubeChatConnection.instance.markActive();
           }

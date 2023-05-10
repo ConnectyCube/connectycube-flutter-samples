@@ -227,7 +227,9 @@ class _BodyLayoutState extends State<BodyLayout> {
                         style: TextStyle(
                             color: primaryColor,
                             fontWeight: FontWeight.bold,
-                            fontSize: 20.0),
+                            fontSize: 20.0,
+                            overflow: TextOverflow.ellipsis),
+                        maxLines: 1,
                       ),
                       alignment: Alignment.centerLeft,
                       margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
@@ -235,7 +237,8 @@ class _BodyLayoutState extends State<BodyLayout> {
                     Container(
                       child: Text(
                         '${dialogList[index].data.lastMessage ?? 'Not available'}',
-                        style: TextStyle(color: primaryColor),
+                        style: TextStyle(color: primaryColor, overflow: TextOverflow.ellipsis),
+                        maxLines: 2,
                       ),
                       alignment: Alignment.centerLeft,
                       margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),

@@ -4,6 +4,8 @@ PODS:
     - ReachabilitySwift
   - device_info_plus (0.0.1):
     - FlutterMacOS
+  - emoji_picker_flutter (0.0.1):
+    - FlutterMacOS
   - Firebase/CoreOnly (10.7.0):
     - FirebaseCore (= 10.7.0)
   - Firebase/Messaging (10.7.0):
@@ -90,6 +92,7 @@ PODS:
 DEPENDENCIES:
   - connectivity_plus_macos (from `Flutter/ephemeral/.symlinks/plugins/connectivity_plus_macos/macos`)
   - device_info_plus (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos`)
+  - emoji_picker_flutter (from `Flutter/ephemeral/.symlinks/plugins/emoji_picker_flutter/macos`)
   - firebase_core (from `Flutter/ephemeral/.symlinks/plugins/firebase_core/macos`)
   - firebase_messaging (from `Flutter/ephemeral/.symlinks/plugins/firebase_messaging/macos`)
   - flutter_local_notifications (from `Flutter/ephemeral/.symlinks/plugins/flutter_local_notifications/macos`)
@@ -120,6 +123,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/connectivity_plus_macos/macos
   device_info_plus:
     :path: Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos
+  emoji_picker_flutter:
+    :path: Flutter/ephemeral/.symlinks/plugins/emoji_picker_flutter/macos
   firebase_core:
     :path: Flutter/ephemeral/.symlinks/plugins/firebase_core/macos
   firebase_messaging:
@@ -142,6 +147,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   connectivity_plus_macos: f6e86fd000e971d361e54b5afcadc8c8fa773308
   device_info_plus: 5401765fde0b8d062a2f8eb65510fb17e77cf07f
+  emoji_picker_flutter: 533634326b1c5de9a181ba14b9758e6dfe967a20
   Firebase: 0219acf760880eeec8ce479895bd7767466d9f81
   firebase_core: 104c957652eab7d9d9c779102f509714a56ad382
   firebase_messaging: fbe4ca035331b288ae5475e7106060fe06e245df
