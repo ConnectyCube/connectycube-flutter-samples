@@ -44,8 +44,10 @@ class CallKitManager {
   }
 
   Future<void> processCallFinished(String uuid) async {
-    ConnectycubeFlutterCallKit.reportCallEnded(sessionId: uuid);
-    ConnectycubeFlutterCallKit.setOnLockScreenVisibility(isVisible: false);
+    if(Platform.isAndroid || Platform.isIOS) {
+      ConnectycubeFlutterCallKit.reportCallEnded(sessionId: uuid);
+      ConnectycubeFlutterCallKit.setOnLockScreenVisibility(isVisible: false);
+    }
   }
 
   /// Event Listener Callbacks for 'connectycube_flutter_call_kit'

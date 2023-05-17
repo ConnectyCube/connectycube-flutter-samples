@@ -7,7 +7,7 @@ import Foundation
 
 import device_info_plus
 import flutter_webrtc
-import package_info_plus_macos
+import package_info_plus
 import path_provider_macos
 import shared_preferences_macos
 

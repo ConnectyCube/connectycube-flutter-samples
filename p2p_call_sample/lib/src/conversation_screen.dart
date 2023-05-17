@@ -1,6 +1,9 @@
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:p2p_call_sample/src/utils/configs.dart';
+import 'package:universal_io/io.dart';
 import 'package:web_browser_detect/web_browser_detect.dart';
 
 import 'login_screen.dart';
@@ -29,21 +32,15 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   bool _isCameraEnabled = true;
   bool _isSpeakerEnabled = true;
   bool _isMicMute = false;
+  bool _isFrontCameraUsed = true;
+  final int _currentUserId = CubeChatConnection.instance.currentUser!.id!;
 
-  RTCVideoRenderer? localRenderer;
-  Map<int, RTCVideoRenderer> remoteRenderers = {};
+  MapEntry<int, RTCVideoRenderer>? primaryRenderer;
+  Map<int, RTCVideoRenderer> minorRenderers = {};
+  RTCVideoViewObjectFit primaryVideoFit =
+      RTCVideoViewObjectFit.RTCVideoViewObjectFitCover;
 
   bool _enableScreenSharing;
-
-  MediaStream? _localMediaStream;
-
-  bool _isSafari = false;
-
-  Widget? _localVideoView;
-
-  bool _needRebuildLocalVideoView = true;
-
-  bool _customMediaStream = false;
 
   _ConversationCallScreenState(this._callSession, this._isIncoming)
       : _enableScreenSharing = !_callSession.startScreenSharing;
@@ -52,9 +49,29 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   void initState() {
     super.initState();
 
-    _isSafari = kIsWeb && Browser().browserAgent == BrowserAgent.Safari;
+    if (CallManager.instance.localMediaStream != null) {
+      primaryRenderer = MapEntry(_currentUserId, RTCVideoRenderer());
+      primaryRenderer!.value.initialize().then((value) {
+        primaryRenderer?.value.srcObject =
+            CallManager.instance.localMediaStream;
+      });
+      CallManager.instance.localMediaStream = null;
+    }
 
-    _localMediaStream = CallManager.instance.localMediaStream;
+    if (CallManager.instance.remoteStreams.isNotEmpty) {
+      minorRenderers.addEntries([
+        ...CallManager.instance.remoteStreams.entries.map((mediaStreamEntry) {
+          var videoRenderer = RTCVideoRenderer();
+          videoRenderer.initialize().then((value) {
+            videoRenderer.srcObject = mediaStreamEntry.value;
+          });
+
+          return MapEntry(mediaStreamEntry.key, videoRenderer);
+        })
+      ]);
+      CallManager.instance.remoteStreams
+          .clear(); //TODO VT check concurrency issue
+    }
 
     _callSession.onLocalStreamReceived = _addLocalMediaStream;
     _callSession.onRemoteStreamReceived = _addRemoteMediaStream;
@@ -72,17 +89,18 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   }
 
   @override
-  void deactivate() {
-    super.deactivate();
+  void dispose() {
+    super.dispose();
 
     stopBackgroundExecution();
 
-    localRenderer?.srcObject = null;
-    localRenderer?.dispose();
+    primaryRenderer?.value.srcObject = null;
+    primaryRenderer?.value.dispose();
 
-    remoteRenderers.forEach((opponentId, renderer) {
+    minorRenderers.forEach((opponentId, renderer) {
       log("[dispose] dispose renderer for $opponentId", TAG);
       try {
+        renderer.srcObject?.dispose();
         renderer.srcObject = null;
         renderer.dispose();
       } catch (e) {
@@ -92,53 +110,64 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   }
 
   Future<void> _addLocalMediaStream(MediaStream stream) async {
-    log("_addLocalMediaStream", TAG);
+    log("_addLocalMediaStream, stream Id: ${stream.id}", TAG);
 
-    _localMediaStream = stream;
-
-    if (!mounted) return;
-
-    setState(() {
-      _needRebuildLocalVideoView = _isSafari || localRenderer == null;
-    });
-
-    /// workaround for updating localVideo in Safari browser
-    if (_isSafari) {
-      if (!_customMediaStream) {
-        _customMediaStream = true;
-
-        var customMediaStream = _enableScreenSharing
-            ? await navigator.mediaDevices
-                .getUserMedia({'audio': true, 'video': _isVideoCall()})
-            : await navigator.mediaDevices
-                .getDisplayMedia({'audio': true, 'video': true});
-
-        _callSession.replaceMediaStream(customMediaStream);
-        setState(() {
-          _needRebuildLocalVideoView = true;
-        });
-      }
-    } else {
-      localRenderer?.srcObject = _localMediaStream;
-    }
+    _addMediaStream(_currentUserId, stream);
   }
 
   void _addRemoteMediaStream(session, int userId, MediaStream stream) {
     log("_addRemoteMediaStream for user $userId", TAG);
-    _onRemoteStreamAdd(userId, stream);
+
+    _addMediaStream(userId, stream);
   }
 
   Future<void> _removeMediaStream(callSession, int userId) async {
     log("_removeMediaStream for user $userId", TAG);
-    RTCVideoRenderer? videoRenderer = remoteRenderers[userId];
+    var videoRenderer = minorRenderers[userId];
     if (videoRenderer == null) return;
 
     videoRenderer.srcObject = null;
     videoRenderer.dispose();
 
     setState(() {
-      remoteRenderers.remove(userId);
+      minorRenderers.remove(userId);
     });
+  }
+
+  Future<void> _addMediaStream(int userId, MediaStream stream) async {
+    if (primaryRenderer == null) {
+      primaryRenderer = MapEntry(userId, RTCVideoRenderer());
+      await primaryRenderer!.value.initialize();
+
+      setState(() {
+        primaryRenderer?.value.srcObject = stream;
+      });
+
+      return;
+    }
+
+    if (minorRenderers[userId] == null) {
+      minorRenderers[userId] = RTCVideoRenderer();
+      await minorRenderers[userId]?.initialize();
+    }
+
+    setState(() {
+      minorRenderers[userId]?.srcObject = stream;
+
+      if (primaryRenderer?.key == _currentUserId ||
+          primaryRenderer?.key == userId) {
+        _replacePrimaryRenderer(userId);
+      }
+    });
+  }
+
+  void _replacePrimaryRenderer(int newPrimaryUser) {
+    if (primaryRenderer?.key != newPrimaryUser) {
+      minorRenderers.addEntries([primaryRenderer!]);
+    }
+
+    primaryRenderer =
+        MapEntry(newPrimaryUser, minorRenderers.remove(newPrimaryUser)!);
   }
 
   void _onSessionClosed(session) {
@@ -155,39 +184,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     );
   }
 
-  void _onRemoteStreamAdd(int opponentId, MediaStream stream) async {
-    log("_onStreamAdd for user $opponentId", TAG);
-
-    RTCVideoRenderer streamRender = RTCVideoRenderer();
-    await streamRender.initialize();
-    streamRender.srcObject = stream;
-    setState(() {
-      remoteRenderers[opponentId] = streamRender;
-      _needRebuildLocalVideoView = _isSafari;
-    });
-  }
-
-  Future<Widget> _buildLocalVideoItem() async {
-    log("buildLocalVideoStreamItem", TAG);
-    if (localRenderer == null || _isSafari) {
-      localRenderer = RTCVideoRenderer();
-      await localRenderer!.initialize();
-    }
-
-    localRenderer?.srcObject = _localMediaStream;
-
-    _localVideoView = Expanded(
-        child: RTCVideoView(
-      localRenderer!,
-      objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-      mirror: true,
-    ));
-    _needRebuildLocalVideoView = false;
-
-    return _localVideoView!;
-  }
-
-  Widget buildRemoteVideoItem(int opponentId, RTCVideoRenderer renderer) {
+  Widget buildMinorVideoItem(int opponentId, RTCVideoRenderer renderer) {
     return Expanded(
       child: Stack(
         children: [
@@ -260,54 +257,34 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   List<Widget> renderStreamsGrid(Orientation orientation) {
     List<Widget> streamsExpanded = [];
 
-    if (_localMediaStream != null) {
-      streamsExpanded.add(_isSafari || _localVideoView == null
-          ? FutureBuilder<Widget>(
-              future: _needRebuildLocalVideoView
-                  ? _buildLocalVideoItem()
-                  : Future.value(_localVideoView),
-              builder: (context, snapshot) {
-                if (snapshot.hasData) {
-                  return snapshot.data!;
-                } else {
-                  return Expanded(child: Container());
-                }
-              })
-          : _localVideoView != null
-              ? _localVideoView!
-              : Expanded(child: Container()));
+    if (primaryRenderer != null) {
+      streamsExpanded.add(Expanded(
+          child: RTCVideoView(
+        primaryRenderer!.value,
+        objectFit: RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+        mirror: true,
+      )));
     }
 
-    if (remoteRenderers.isEmpty) {
-      streamsExpanded
-          .addAll(CallManager.instance.remoteStreams.entries.map((entry) {
-        var videoRenderer = RTCVideoRenderer();
-        var initialisationFuture = videoRenderer.initialize().then((_) {
-          videoRenderer.srcObject = entry.value;
-          return videoRenderer;
-        });
+    if (CallManager.instance.remoteStreams.isNotEmpty) {
+      minorRenderers.addEntries([
+        ...CallManager.instance.remoteStreams.entries.map((mediaStreamEntry) {
+          var videoRenderer = RTCVideoRenderer();
+          videoRenderer.initialize().then((value) {
+            videoRenderer.srcObject = mediaStreamEntry.value;
+          });
 
-        return FutureBuilder<RTCVideoRenderer>(
-          future: initialisationFuture,
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              return buildRemoteVideoItem(entry.key, snapshot.data!);
-            } else {
-              return Expanded(
-                  child: Container(
-                child: Text('Waiting...'),
-              ));
-            }
-          },
-        );
-      }));
-    } else {
-      streamsExpanded.addAll(remoteRenderers.entries
-          .map(
-            (entry) => buildRemoteVideoItem(entry.key, entry.value),
-          )
-          .toList());
+          return MapEntry(mediaStreamEntry.key, videoRenderer);
+        })
+      ]);
+      CallManager.instance.remoteStreams.clear();
     }
+
+    streamsExpanded.addAll(minorRenderers.entries
+        .map(
+          (entry) => buildMinorVideoItem(entry.key, entry.value),
+        )
+        .toList());
 
     if (streamsExpanded.length > 2) {
       List<Widget> rows = [];
@@ -341,23 +318,14 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     return WillPopScope(
       onWillPop: () => _onBackPressed(context),
       child: Scaffold(
+        backgroundColor: Colors.grey,
         body: Stack(fit: StackFit.loose, clipBehavior: Clip.none, children: [
           _isVideoCall()
               ? OrientationBuilder(
                   builder: (context, orientation) {
-                    return Center(
-                      child: Container(
-                        child: orientation == Orientation.portrait
-                            ? Column(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: renderStreamsGrid(orientation))
-                            : Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: renderStreamsGrid(orientation)),
-                      ),
-                    );
+                    return _callSession.opponentsIds.length > 1
+                        ? _buildGroupCallLayout(orientation)
+                        : _buildPrivateCallLayout(orientation);
                   },
                 )
               : Center(
@@ -395,6 +363,292 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     );
   }
 
+  Widget _buildGroupCallLayout(Orientation orientation) {
+    return Center(
+      child: Container(
+        child: orientation == Orientation.portrait
+            ? Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: renderGroupCallViews(orientation))
+            : Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: renderGroupCallViews(orientation)),
+      ),
+    );
+  }
+
+  Widget _buildPrivateCallLayout(Orientation orientation) {
+    return Container(
+      // margin: MediaQuery.of(context).padding,
+      child: Stack(children: [
+        if (primaryRenderer != null) _buildPrimaryVideoView(orientation),
+        if (minorRenderers.isNotEmpty)
+          Align(
+              alignment: Alignment.topRight,
+              child: Padding(
+                padding: orientation == Orientation.portrait
+                    ? EdgeInsets.only(top: 40, right: 20)
+                    : EdgeInsets.only(right: 20, top: 20),
+                child: buildItems(
+                        minorRenderers,
+                        orientation == Orientation.portrait
+                            ? MediaQuery.of(context).size.width / 3
+                            : MediaQuery.of(context).size.width / 4,
+                        orientation == Orientation.portrait
+                            ? MediaQuery.of(context).size.height / 4
+                            : MediaQuery.of(context).size.height / 2.5)
+                    .first,
+              ))
+      ]),
+    );
+  }
+
+  List<Widget> renderGroupCallViews(Orientation orientation) {
+    List<Widget> streamsExpanded = [];
+
+    if (primaryRenderer != null) {
+      streamsExpanded.add(
+        Expanded(flex: 3, child: _buildPrimaryVideoView(orientation)),
+      );
+    }
+
+    var itemHeight;
+    var itemWidth;
+
+    if (orientation == Orientation.portrait) {
+      itemHeight = MediaQuery.of(context).size.height / 3 * 0.8;
+      itemWidth = itemHeight / 3 * 4;
+    } else {
+      itemWidth = MediaQuery.of(context).size.width / 3 * 0.8;
+      itemHeight = itemWidth / 4 * 3;
+    }
+
+    var minorItems = buildItems(minorRenderers, itemWidth, itemHeight);
+
+    if (minorRenderers.isNotEmpty) {
+      var membersList = Expanded(
+        flex: 1,
+        child: ListView(
+          scrollDirection: orientation == Orientation.landscape
+              ? Axis.vertical
+              : Axis.horizontal,
+          children: minorItems,
+        ),
+      );
+
+      streamsExpanded.add(membersList);
+    }
+
+    return streamsExpanded;
+  }
+
+  List<Widget> buildItems(Map<int, RTCVideoRenderer> renderers,
+      double itemWidth, double itemHeight) {
+    return renderers.entries
+        .map(
+          (entry) => GestureDetector(
+            onTap: () {
+              setState(() {
+                _replacePrimaryRenderer(entry.key);
+              });
+            },
+            child: AbsorbPointer(
+              child: SizedBox(
+                width: itemWidth,
+                height: itemHeight,
+                child: Padding(
+                  padding: EdgeInsets.all(4),
+                  child: Stack(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.all(4),
+                        decoration: ShapeDecoration(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(2.0),
+                          ),
+                        ),
+                        child: Stack(
+                          children: [
+                            StreamBuilder<CubeMicLevelEvent>(
+                              stream: _statsReportsManager.micLevelStream
+                                  .where((event) => event.userId == entry.key),
+                              builder: (context, snapshot) {
+                                var width = !snapshot.hasData
+                                    ? 0
+                                    : snapshot.data!.micLevel * 4;
+
+                                return Container(
+                                  decoration: ShapeDecoration(
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(2.0),
+                                      side: BorderSide(
+                                          width: width.toDouble(),
+                                          color: Colors.green,
+                                          strokeAlign: 1.0),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                            RTCVideoView(
+                              entry.value,
+                              objectFit: RTCVideoViewObjectFit
+                                  .RTCVideoViewObjectFitCover,
+                              mirror: entry.key == _currentUserId &&
+                                  _isFrontCameraUsed &&
+                                  _enableScreenSharing,
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (entry.key != _currentUserId)
+                        Align(
+                            alignment: Alignment.topCenter,
+                            child: Container(
+                              margin: EdgeInsets.only(top: 8),
+                              child: ClipRRect(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(12)),
+                                child: Container(
+                                  padding: EdgeInsets.all(6),
+                                  color: Colors.black26,
+                                  child: StreamBuilder<CubeVideoBitrateEvent>(
+                                    stream: _statsReportsManager
+                                        .videoBitrateStream
+                                        .where((event) =>
+                                            event.userId == entry.key),
+                                    builder: (context, snapshot) {
+                                      if (!snapshot.hasData) {
+                                        return Text(
+                                          '0 kbits/sec',
+                                          style: TextStyle(color: Colors.white),
+                                        );
+                                      } else {
+                                        var videoBitrateForUser =
+                                            snapshot.data!;
+                                        return Text(
+                                          '${videoBitrateForUser.bitRate} kbits/sec',
+                                          style: TextStyle(color: Colors.white),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                ),
+                              ),
+                            )),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                          margin: EdgeInsets.only(bottom: 8),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.all(Radius.circular(12)),
+                            child: Container(
+                              padding: EdgeInsets.all(6),
+                              color: Colors.black26,
+                              child: Text(
+                                entry.key ==
+                                        CubeChatConnection
+                                            .instance.currentUser?.id
+                                    ? 'Me'
+                                    : users
+                                            .where(
+                                                (user) => user.id == entry.key)
+                                            .first
+                                            .fullName ??
+                                        'Unknown',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        )
+        .toList();
+  }
+
+  Widget _buildPrimaryVideoView(Orientation orientation) {
+    return Stack(
+      children: [
+        RTCVideoView(
+          primaryRenderer!.value,
+          objectFit: primaryVideoFit,
+          mirror: primaryRenderer!.key == _currentUserId &&
+              _isFrontCameraUsed &&
+              _enableScreenSharing,
+        ),
+        Align(
+          alignment: Alignment.topLeft,
+          child: Padding(
+            padding: orientation == Orientation.portrait
+                ? EdgeInsets.only(top: 40, left: 20)
+                : EdgeInsets.only(left: 20, top: 20),
+            child: FloatingActionButton(
+              elevation: 0,
+              heroTag: "ToggleScreenFit",
+              child: Icon(
+                primaryVideoFit ==
+                        RTCVideoViewObjectFit.RTCVideoViewObjectFitCover
+                    ? Icons.zoom_in_map
+                    : Icons.zoom_out_map,
+                color: Colors.white,
+              ),
+              onPressed: () => _switchPrimaryVideoFit(),
+              backgroundColor: Colors.black38,
+            ),
+          ),
+        ),
+        if (primaryRenderer!.key != _currentUserId)
+          Align(
+            alignment: Alignment.topCenter,
+            child: Container(
+              margin:
+                  EdgeInsets.only(top: MediaQuery.of(context).padding.top + 8),
+              child: ClipRRect(
+                borderRadius: BorderRadius.all(Radius.circular(12)),
+                child: Container(
+                  padding: EdgeInsets.all(6),
+                  color: Colors.black26,
+                  child: StreamBuilder<CubeVideoBitrateEvent>(
+                    stream: _statsReportsManager.videoBitrateStream
+                        .where((event) => event.userId == primaryRenderer!.key),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) {
+                        return Text(
+                          '0 kbits/sec',
+                          style: TextStyle(color: Colors.white),
+                        );
+                      } else {
+                        var videoBitrateForUser = snapshot.data!;
+                        return Text(
+                          '${videoBitrateForUser.bitRate} kbits/sec',
+                          style: TextStyle(color: Colors.white),
+                        );
+                      }
+                    },
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  _switchPrimaryVideoFit() async {
+    setState(() {
+      primaryVideoFit =
+          primaryVideoFit == RTCVideoViewObjectFit.RTCVideoViewObjectFitCover
+              ? RTCVideoViewObjectFit.RTCVideoViewObjectFitContain
+              : RTCVideoViewObjectFit.RTCVideoViewObjectFitCover;
+    });
+  }
+
   Widget _getActionsPanel() {
     return Container(
       margin: EdgeInsets.only(bottom: 16, left: 8, right: 8),
@@ -416,72 +670,97 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
                   elevation: 0,
                   heroTag: "Mute",
                   child: Icon(
-                    Icons.mic,
+                    _isMicMute ? Icons.mic_off : Icons.mic,
                     color: _isMicMute ? Colors.grey : Colors.white,
                   ),
                   onPressed: () => _muteMic(),
                   backgroundColor: Colors.black38,
                 ),
               ),
-              Padding(
-                padding: EdgeInsets.only(right: 4),
-                child: FloatingActionButton(
-                  elevation: 0,
-                  heroTag: "Speacker",
-                  child: Icon(
-                    Icons.volume_up,
-                    color: _isSpeakerEnabled ? Colors.white : Colors.grey,
-                  ),
-                  onPressed: () => _switchSpeaker(),
-                  backgroundColor: Colors.black38,
-                ),
-              ),
               Visibility(
-                visible: _isVideoCall(),
-                child: FloatingActionButton(
-                  elevation: 0,
-                  heroTag: "ToggleScreenSharing",
-                  child: Icon(
-                    _enableScreenSharing
-                        ? Icons.screen_share
-                        : Icons.stop_screen_share,
-                    color: Colors.white,
-                  ),
-                  onPressed: () => _toggleScreenSharing(),
-                  backgroundColor: Colors.black38,
-                ),
-              ),
-              Visibility(
-                visible: _isVideoCall() && _enableScreenSharing,
-                child: Padding(
-                  padding: EdgeInsets.only(right: 4),
-                  child: FloatingActionButton(
-                    elevation: 0,
-                    heroTag: "SwitchCamera",
-                    child: Icon(
-                      Icons.switch_video,
-                      color: _isVideoEnabled() ? Colors.white : Colors.grey,
-                    ),
-                    onPressed: () => _switchCamera(),
-                    backgroundColor: Colors.black38,
-                  ),
-                ),
-              ),
-              Visibility(
-                visible: _isVideoCall() && _enableScreenSharing,
+                visible: _enableScreenSharing,
                 child: Padding(
                   padding: EdgeInsets.only(right: 4),
                   child: FloatingActionButton(
                     elevation: 0,
                     heroTag: "ToggleCamera",
                     child: Icon(
-                      Icons.videocam,
+                      _isVideoEnabled() ? Icons.videocam : Icons.videocam_off,
                       color: _isVideoEnabled() ? Colors.white : Colors.grey,
                     ),
                     onPressed: () => _toggleCamera(),
                     backgroundColor: Colors.black38,
                   ),
                 ),
+              ),
+              SpeedDial(
+                heroTag: "Options",
+                icon: Icons.more_vert,
+                activeIcon: Icons.close,
+                backgroundColor: Colors.black38,
+                switchLabelPosition: true,
+                overlayColor: Colors.black,
+                elevation: 0,
+                overlayOpacity: 0.5,
+                children: [
+                  SpeedDialChild(
+                    elevation: 0,
+                    child: Icon(
+                      _enableScreenSharing
+                          ? Icons.screen_share
+                          : Icons.stop_screen_share,
+                      color: Colors.white,
+                    ),
+                    backgroundColor: Colors.black38,
+                    foregroundColor: Colors.white,
+                    label:
+                        '${_enableScreenSharing ? 'Start' : 'Stop'} Screen Sharing',
+                    onTap: () => _toggleScreenSharing(),
+                  ),
+                  SpeedDialChild(
+                    elevation: 0,
+                    visible: !(kIsWeb &&
+                        (Browser().browserAgent == BrowserAgent.Safari ||
+                            Browser().browserAgent == BrowserAgent.Firefox)),
+                    child: Icon(
+                      kIsWeb || WebRTC.platformIsDesktop
+                          ? Icons.surround_sound
+                          : _isSpeakerEnabled
+                              ? Icons.volume_up
+                              : Icons.volume_off,
+                      color: _isSpeakerEnabled ? Colors.white : Colors.grey,
+                    ),
+                    backgroundColor: Colors.black38,
+                    foregroundColor: Colors.white,
+                    label:
+                        'Switch ${kIsWeb || WebRTC.platformIsDesktop ? 'Audio output' : 'Speakerphone'}',
+                    onTap: () => _switchSpeaker(),
+                  ),
+                  SpeedDialChild(
+                    elevation: 0,
+                    visible: kIsWeb || WebRTC.platformIsDesktop,
+                    child: Icon(
+                      Icons.record_voice_over,
+                      color: Colors.white,
+                    ),
+                    backgroundColor: Colors.black38,
+                    foregroundColor: Colors.white,
+                    label: 'Switch Audio Input device',
+                    onTap: () => _switchAudioInput(),
+                  ),
+                  SpeedDialChild(
+                    elevation: 0,
+                    visible: _enableScreenSharing,
+                    child: Icon(
+                      Icons.cameraswitch,
+                      color: _isVideoEnabled() ? Colors.white : Colors.grey,
+                    ),
+                    backgroundColor: Colors.black38,
+                    foregroundColor: Colors.white,
+                    label: 'Switch Camera',
+                    onTap: () => _switchCamera(),
+                  ),
+                ],
               ),
               Expanded(
                 child: SizedBox(),
@@ -523,7 +802,57 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   _switchCamera() {
     if (!_isVideoEnabled()) return;
 
-    _callSession.switchCamera();
+    if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
+      _callSession.switchCamera().then((isFrontCameraUsed) {
+        setState(() {
+          _isFrontCameraUsed = isFrontCameraUsed;
+        });
+      });
+    } else {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return FutureBuilder<List<MediaDeviceInfo>>(
+            future: _callSession.getCameras(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return AlertDialog(
+                  content: const Text('No cameras found'),
+                  actions: <Widget>[
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        textStyle: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      child: const Text('Ok'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    )
+                  ],
+                );
+              } else {
+                return SimpleDialog(
+                  title: const Text('Select camera'),
+                  children: snapshot.data?.map(
+                    (mediaDeviceInfo) {
+                      return SimpleDialogOption(
+                        onPressed: () {
+                          Navigator.pop(context, mediaDeviceInfo.deviceId);
+                        },
+                        child: Text(mediaDeviceInfo.label),
+                      );
+                    },
+                  ).toList(),
+                );
+              }
+            },
+          );
+        },
+      ).then((deviceId) {
+        log("onCameraSelected deviceId: $deviceId", TAG);
+        if (deviceId != null) _callSession.switchCamera(deviceId: deviceId);
+      });
+    }
   }
 
   _toggleCamera() {
@@ -536,8 +865,6 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   }
 
   _toggleScreenSharing() async {
-    if (!_isVideoCall()) return;
-
     var foregroundServiceFuture = _enableScreenSharing
         ? startBackgroundExecution()
         : stopBackgroundExecution();
@@ -559,10 +886,12 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
       _callSession
           .enableScreenSharing(_enableScreenSharing,
               desktopCapturerSource: desktopCapturerSource,
-              useIOSBroadcasting: true)
+              useIOSBroadcasting: true,
+              requestAudioForScreenSharing: true)
           .then((voidResult) {
         setState(() {
           _enableScreenSharing = !_enableScreenSharing;
+          _isFrontCameraUsed = _enableScreenSharing;
         });
       });
     });
@@ -577,10 +906,119 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   }
 
   _switchSpeaker() {
-    setState(() {
-      _isSpeakerEnabled = !_isSpeakerEnabled;
-      _callSession.enableSpeakerphone(_isSpeakerEnabled);
-    });
+    if (kIsWeb || WebRTC.platformIsDesktop) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return FutureBuilder<List<MediaDeviceInfo>>(
+            future: _callSession.getAudioOutputs(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return AlertDialog(
+                  content: const Text('No Audio output devices found'),
+                  actions: <Widget>[
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        textStyle: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      child: const Text('Ok'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    )
+                  ],
+                );
+              } else {
+                return SimpleDialog(
+                  title: const Text('Select Audio output device'),
+                  children: snapshot.data?.map(
+                    (mediaDeviceInfo) {
+                      return SimpleDialogOption(
+                        onPressed: () {
+                          Navigator.pop(context, mediaDeviceInfo.deviceId);
+                        },
+                        child: Text(mediaDeviceInfo.label),
+                      );
+                    },
+                  ).toList(),
+                );
+              }
+            },
+          );
+        },
+      ).then((deviceId) {
+        log("onAudioOutputSelected deviceId: $deviceId", TAG);
+        if (deviceId != null) {
+          setState(() {
+            if (kIsWeb) {
+              primaryRenderer?.value.audioOutput(deviceId);
+              minorRenderers.forEach((userId, renderer) {
+                renderer.audioOutput(deviceId);
+              });
+            } else {
+              _callSession.selectAudioOutput(deviceId);
+            }
+          });
+        }
+      });
+    } else {
+      setState(() {
+        _isSpeakerEnabled = !_isSpeakerEnabled;
+        _callSession.enableSpeakerphone(_isSpeakerEnabled);
+      });
+    }
+  }
+
+  _switchAudioInput() {
+    if (kIsWeb || WebRTC.platformIsDesktop) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return FutureBuilder<List<MediaDeviceInfo>>(
+            future: _callSession.getAudioInputs(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return AlertDialog(
+                  content: const Text('No Audio input devices found'),
+                  actions: <Widget>[
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        textStyle: Theme.of(context).textTheme.labelLarge,
+                      ),
+                      child: const Text('Ok'),
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    )
+                  ],
+                );
+              } else {
+                return SimpleDialog(
+                  title: const Text('Select Audio input device'),
+                  children: snapshot.data?.map(
+                    (mediaDeviceInfo) {
+                      return SimpleDialogOption(
+                        onPressed: () {
+                          Navigator.pop(context, mediaDeviceInfo.deviceId);
+                        },
+                        child: Text(mediaDeviceInfo.label),
+                      );
+                    },
+                  ).toList(),
+                );
+              }
+            },
+          );
+        },
+      ).then((deviceId) {
+        log("onAudioOutputSelected deviceId: $deviceId", TAG);
+        if (deviceId != null) {
+          setState(() {
+            _callSession.selectAudioInput(deviceId);
+          });
+        }
+      });
+    }
   }
 
   @override

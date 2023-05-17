@@ -81,7 +81,7 @@ class CallManager {
         acceptCall(_currentCall!.sessionId, false);
       } else if (callState == CallState.UNKNOWN ||
           callState == CallState.PENDING) {
-        if (callState == CallState.UNKNOWN) {
+        if (callState == CallState.UNKNOWN && (Platform.isIOS || Platform.isAndroid)) {
           ConnectycubeFlutterCallKit.setCallState(
               sessionId: _currentCall!.sessionId, callState: CallState.PENDING);
         }
@@ -102,11 +102,20 @@ class CallManager {
       };
     };
 
-    _callClient!.onSessionClosed = (callSession) {
+    _callClient!.onSessionClosed = (callSession) async {
       if (_currentCall != null &&
           _currentCall!.sessionId == callSession.sessionId) {
         _currentCall = null;
+        localMediaStream?.getTracks().forEach((track) async {
+          await track.stop();
+        });
+        await localMediaStream?.dispose();
         localMediaStream = null;
+
+        remoteStreams.forEach((key, value) async {
+          await value.dispose();
+        });
+
         remoteStreams.clear();
         CallKitManager.instance.processCallFinished(callSession.sessionId);
       }
@@ -147,10 +156,10 @@ class CallManager {
 
     if (_currentCall != null) {
       if (context != null) {
-        // if (AppLifecycleState.resumed !=
-        //     WidgetsBinding.instance.lifecycleState) {
-        //   _currentCall?.acceptCall();
-        // }
+        if (AppLifecycleState.resumed !=
+            WidgetsBinding.instance.lifecycleState) {
+          _currentCall?.acceptCall();
+        }
 
         if (!fromCallkit) {
           ConnectycubeFlutterCallKit.reportCallAccepted(sessionId: sessionId);
