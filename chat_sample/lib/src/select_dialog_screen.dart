@@ -131,17 +131,16 @@ class _BodyLayoutState extends State<BodyLayout> {
 
   Widget _getDialogsList(BuildContext context) {
     if (_isDialogContinues) {
-
       getDialogs().then((dialogs) {
         _isDialogContinues = false;
         log("getDialogs: $dialogs", TAG);
         setState(() {
           dialogList.clear();
-          dialogList
-              .addAll(dialogs!.items.map((dialog) => ListItem(dialog)).toList());
+          dialogList.addAll(
+              dialogs!.items.map((dialog) => ListItem(dialog)).toList());
         });
       }).catchError((exception) {
-          _processGetDialogError(exception);
+        _processGetDialogError(exception);
       });
     }
     if (_isDialogContinues && dialogList.isEmpty)
@@ -156,7 +155,7 @@ class _BodyLayoutState extends State<BodyLayout> {
         itemCount: dialogList.length,
         itemBuilder: _getListItemTile,
         separatorBuilder: (context, index) {
-          return Divider(thickness: 2, indent: 40, endIndent: 40);
+          return Divider(thickness: 2, indent: 40);
         },
       );
   }
@@ -237,7 +236,9 @@ class _BodyLayoutState extends State<BodyLayout> {
                     Container(
                       child: Text(
                         '${dialogList[index].data.lastMessage ?? 'Not available'}',
-                        style: TextStyle(color: primaryColor, overflow: TextOverflow.ellipsis),
+                        style: TextStyle(
+                            color: primaryColor,
+                            overflow: TextOverflow.ellipsis),
                         maxLines: 2,
                       ),
                       alignment: Alignment.centerLeft,
@@ -264,11 +265,25 @@ class _BodyLayoutState extends State<BodyLayout> {
               maintainState: true,
               visible: dialogList[index].isSelected,
             ),
-            Container(
-              child: Text(
-                '${dialogList[index].data.lastMessageDateSent != null ? DateFormat('MMM dd').format(DateTime.fromMillisecondsSinceEpoch(dialogList[index].data.lastMessageDateSent! * 1000)) : 'Not available'}',
-                style: TextStyle(color: primaryColor),
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${dialogList[index].data.lastMessageDateSent != null ? DateFormat('MMM dd').format(DateTime.fromMillisecondsSinceEpoch(dialogList[index].data.lastMessageDateSent! * 1000)) : 'Not available'}',
+                  style: TextStyle(color: primaryColor),
+                ),
+                if (dialogList[index].data.unreadMessageCount != null &&
+                    dialogList[index].data.unreadMessageCount != 0)
+                  Container(
+                      padding: EdgeInsets.symmetric(vertical: 2, horizontal: 6),
+                      decoration: BoxDecoration(
+                          color: Colors.green,
+                          borderRadius: BorderRadius.circular(10.0)),
+                      child: Text(
+                        dialogList[index].data.unreadMessageCount.toString(),
+                        style: TextStyle(color: Colors.white),
+                      )),
+              ],
             ),
           ],
         ),
@@ -321,12 +336,42 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   updateDialog(CubeMessage msg) {
-    ListItem<CubeDialog>? dialogItem = dialogList.firstWhereOrNull(
-        (dlg) => dlg.data.dialogId == msg.dialogId);
+    ListItem<CubeDialog>? dialogItem =
+        dialogList.firstWhereOrNull((dlg) => dlg.data.dialogId == msg.dialogId);
     if (dialogItem == null) return;
-    dialogItem.data.lastMessage = msg.body;
+
     setState(() {
       dialogItem.data.lastMessage = msg.body;
+      dialogItem.data.unreadMessageCount =
+          dialogItem.data.unreadMessageCount == null
+              ? 1
+              : dialogItem.data.unreadMessageCount! + 1;
+      dialogItem.data.lastMessageDateSent = msg.dateSent;
+      dialogList.sort((a, b) {
+        DateTime dateA;
+        if (a.data.lastMessageDateSent != null) {
+          dateA = DateTime.fromMillisecondsSinceEpoch(
+              a.data.lastMessageDateSent! * 1000);
+        } else {
+          dateA = a.data.createdAt!;
+        }
+
+        DateTime dateB;
+        if (b.data.lastMessageDateSent != null) {
+          dateB = DateTime.fromMillisecondsSinceEpoch(
+              b.data.lastMessageDateSent! * 1000);
+        } else {
+          dateB = b.data.createdAt!;
+        }
+
+        if (dateA.isAfter(dateB)) {
+          return -1;
+        } else if (dateA.isBefore(dateB)) {
+          return 1;
+        } else {
+          return 0;
+        }
+      });
     });
   }
 }
