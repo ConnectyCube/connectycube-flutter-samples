@@ -10,25 +10,25 @@ dependencies:
   flutter:
     sdk: flutter
 
-  connectycube_sdk: ^2.5.1
-#  connectycube_sdk:
-#    path: ../../flutter-sdk
+  connectycube_sdk: ^2.5.5
+  #  connectycube_sdk:
+  #    path: ../../flutter-sdk
   shared_preferences: ^2.0.12
   file_picker: ^5.2.11
   fluttertoast: ^8.0.8
   cached_network_image: ^3.2.0
-  photo_view: ^0.13.0
-  device_info_plus: ^8.2.1
+  photo_view: ^0.14.0
+  device_info_plus: ^9.0.0
   emoji_picker_flutter: ^1.5.4
   firebase_messaging: ^14.2.0
-  flutter_local_notifications: ^13.0.0
-  connectivity_plus: ^2.3.4
+  flutter_local_notifications: ^14.0.1
+  connectivity_plus: ^4.0.0
   logging: ^1.0.2
-  collection: ^1.15.0
-  universal_io: ^2.0.4
+  collection: ^1.17.1
+  universal_io: ^2.2.0
   path_provider: ^2.0.8
   firebase_core: ^2.4.0
-  package_info_plus: ^3.1.1
+  package_info_plus: ^4.0.0
   uuid: ^3.0.6
 
 dev_dependencies:
@@ -40,3 +40,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/splash.png
+  fonts:
+    - family: NotoColorEmoji
+      fonts:
+        - asset: assets/fonts/NotoColorEmoji-Regular.ttf

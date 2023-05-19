@@ -169,8 +169,7 @@ class ChatScreenState extends State<ChatScreen> {
 
   void onReceiveMessage(CubeMessage message) {
     log("onReceiveMessage message= $message");
-    if (message.dialogId != _cubeDialog.dialogId ||
-        message.senderId == _cubeUser.id) return;
+    if (message.dialogId != _cubeDialog.dialogId) return;
 
     addMessageToListView(message);
   }
@@ -1075,7 +1074,7 @@ class ChatScreenState extends State<ChatScreen> {
 
     return LayoutBuilder(builder: (context, constraints) {
       var widgetWidth =
-          constraints.maxWidth == double.infinity ? 280 : constraints.maxWidth;
+          constraints.maxWidth == double.infinity ? 240 : constraints.maxWidth;
       var maxColumns = (widgetWidth / 60).round();
       if (message.reactions!.total.length < maxColumns) {
         maxColumns = message.reactions!.total.length;
@@ -1093,30 +1092,34 @@ class ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.symmetric(vertical: 4),
             children: <Widget>[
               ...message.reactions!.total.keys.map((reaction) {
-                return Padding(
-                    padding: EdgeInsets.only(
-                      left: isOwnMessage ? 4 : 0,
-                      right: isOwnMessage ? 0 : 4,
-                    ),
-                    child: ClipRRect(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(16),
+                return GestureDetector(
+                    onTap: () => _performReaction(Emoji(reaction, ''), message),
+                    child: Padding(
+                        padding: EdgeInsets.only(
+                          left: isOwnMessage ? 4 : 0,
+                          right: isOwnMessage ? 0 : 4,
                         ),
-                        child: Container(
-                          padding:
-                              EdgeInsets.symmetric(vertical: 4, horizontal: 6),
-                          color: message.reactions!.own.contains(reaction)
-                              ? Colors.green
-                              : Colors.grey,
-                          child: GestureDetector(
-                              onTap: () => _performReaction(
-                                  Emoji(reaction, ''), message),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(16),
+                          ),
+                          child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 4, horizontal: 6),
+                              color: message.reactions!.own.contains(reaction)
+                                  ? Colors.green
+                                  : Colors.grey,
                               child: Row(
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceAround,
                                 children: [
-                                  Text(reaction),
+                                  Text(reaction,
+                                      style: kIsWeb
+                                          ? TextStyle(
+                                              color: Colors.green,
+                                              fontFamily: 'NotoColorEmoji')
+                                          : null),
                                   Text(
                                       ' ${message.reactions!.total[reaction].toString()}',
                                       style: TextStyle(
@@ -1136,10 +1139,23 @@ class ChatScreenState extends State<ChatScreen> {
         context: context,
         builder: (BuildContext context) {
           return Dialog(
-              child: SizedBox(
+              child: Container(
+                  margin: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(8.0)),
                   width: 400,
                   height: 400,
                   child: EmojiPicker(
+                    config: Config(
+                      emojiTextStyle: kIsWeb
+                          ? TextStyle(
+                              color: Colors.green, fontFamily: 'NotoColorEmoji')
+                          : null,
+                      iconColorSelected: Colors.green,
+                      indicatorColor: Colors.green,
+                      bgColor: Colors.white,
+                    ),
                     onEmojiSelected: (category, emoji) {
                       Navigator.pop(context, emoji);
                     },
@@ -1150,15 +1166,20 @@ class ChatScreenState extends State<ChatScreen> {
         _performReaction(emoji, message);
       }
     });
-    ;
   }
 
   void _performReaction(Emoji emoji, CubeMessage message) {
     if ((message.reactions?.own.isNotEmpty ?? false) &&
         (message.reactions?.own.contains(emoji.emoji) ?? false)) {
       removeMessageReaction(message.messageId!, emoji.emoji);
+      _updateMessageReactions(MessageReaction(
+          _cubeUser.id!, _cubeDialog.dialogId!, message.messageId!,
+          removeReaction: emoji.emoji));
     } else {
       addMessageReaction(message.messageId!, emoji.emoji);
+      _updateMessageReactions(MessageReaction(
+          _cubeUser.id!, _cubeDialog.dialogId!, message.messageId!,
+          addReaction: emoji.emoji));
     }
   }
 
@@ -1176,26 +1197,32 @@ class ChatScreenState extends State<ChatScreen> {
         });
       } else {
         if (reaction.addReaction != null) {
-          if (reaction.userId == _cubeUser.id) {
-            msg.reactions!.own.add(reaction.addReaction!);
-          }
+          if (reaction.userId != _cubeUser.id ||
+              !(msg.reactions?.own.contains(reaction.addReaction) ?? false)) {
+            if (reaction.userId == _cubeUser.id) {
+              msg.reactions!.own.add(reaction.addReaction!);
+            }
 
-          msg.reactions!.total[reaction.addReaction!] =
-              msg.reactions!.total[reaction.addReaction] == null
-                  ? 1
-                  : msg.reactions!.total[reaction.addReaction]! + 1;
+            msg.reactions!.total[reaction.addReaction!] =
+                msg.reactions!.total[reaction.addReaction] == null
+                    ? 1
+                    : msg.reactions!.total[reaction.addReaction]! + 1;
+          }
         }
 
         if (reaction.removeReaction != null) {
-          if (reaction.userId == _cubeUser.id) {
-            msg.reactions!.own.remove(reaction.removeReaction!);
-          }
+          if (reaction.userId != _cubeUser.id ||
+              (msg.reactions?.own.contains(reaction.removeReaction) ?? false)) {
+            if (reaction.userId == _cubeUser.id) {
+              msg.reactions!.own.remove(reaction.removeReaction!);
+            }
 
-          msg.reactions!.total[reaction.removeReaction!] =
-              msg.reactions!.total[reaction.removeReaction] != null &&
-                      msg.reactions!.total[reaction.removeReaction]! > 0
-                  ? msg.reactions!.total[reaction.removeReaction]! - 1
-                  : 0;
+            msg.reactions!.total[reaction.removeReaction!] =
+                msg.reactions!.total[reaction.removeReaction] != null &&
+                        msg.reactions!.total[reaction.removeReaction]! > 0
+                    ? msg.reactions!.total[reaction.removeReaction]! - 1
+                    : 0;
+          }
 
           msg.reactions!.total.removeWhere((key, value) => value == 0);
         }
