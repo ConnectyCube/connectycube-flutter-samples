@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_apns_only/flutter_apns_only.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:universal_io/io.dart';
 
@@ -89,10 +90,31 @@ class PushNotificationsManager {
     // TODO test after fix https://github.com/FirebaseExtended/flutterfire/issues/4898
     FirebaseMessaging.onMessageOpenedApp.listen((remoteMessage) {
       log('[onMessageOpenedApp] remoteMessage: $remoteMessage', TAG);
-      if (onNotificationClicked != null) {
-        onNotificationClicked!.call(jsonEncode(remoteMessage.data));
-      }
+      onNotificationClicked?.call(jsonEncode(remoteMessage.data));
     });
+
+    if (Platform.isIOS) {
+      final connector = ApnsPushConnectorOnly();
+
+      connector.configureApns(
+        onLaunch: (message) async {
+          log('[onLaunch] message.payload: ${message.payload}', TAG);
+          var selectedDialogId = message.payload['data']['dialog_id'];
+          if (selectedDialogId != null) {
+            SharedPrefs.instance.init().then((prefs) {
+              prefs.saveSelectedDialogId(selectedDialogId);
+            });
+          }
+        },
+        onResume: (message) async {
+          log('[onResume] message.payload: ${message.payload}', TAG);
+          onNotificationClicked?.call(jsonEncode(message.payload['data']));
+        },
+        onMessage: (message) async {
+          log('[onResume] message.payload: ${message.payload}', TAG);
+        },
+      );
+    }
   }
 
   subscribe(String? token) async {
@@ -182,9 +204,7 @@ class PushNotificationsManager {
   Future<dynamic> onSelectNotification(String? payload) {
     log('[onSelectNotification] payload: $payload',
         PushNotificationsManager.TAG);
-    if (onNotificationClicked != null) {
-      onNotificationClicked!.call(payload);
-    }
+    onNotificationClicked?.call(payload);
     return Future.value();
   }
 }
@@ -215,6 +235,7 @@ showNotification(RemoteMessage message) async {
   );
 }
 
+@pragma('vm:entry-point')
 Future<void> onBackgroundMessage(RemoteMessage message) async {
   log('[onBackgroundMessage] message: ${message.data}',
       PushNotificationsManager.TAG);
@@ -233,22 +254,20 @@ Future<dynamic> onNotificationSelected(String? payload, BuildContext? context) {
     return SharedPrefs.instance.init().then((sharedPrefs) {
       CubeUser? user = sharedPrefs.getUser();
 
-      if (user != null && !CubeChatConnection.instance.isAuthenticated()) {
-        Map<String, dynamic> payloadObject = jsonDecode(payload);
-        String? dialogId = payloadObject['dialog_id'];
+      Map<String, dynamic> payloadObject = jsonDecode(payload);
+      String? dialogId = payloadObject['dialog_id'];
 
-        log("getNotificationAppLaunchDetails, dialog_id: $dialogId",
-            PushNotificationsManager.TAG);
+      log("getNotificationAppLaunchDetails, dialog_id: $dialogId",
+          PushNotificationsManager.TAG);
 
-        getDialogs({'id': dialogId}).then((dialogs) {
-          if (dialogs?.items != null && dialogs!.items.isNotEmpty) {
-            CubeDialog dialog = dialogs.items.first;
+      getDialogs({'id': dialogId}).then((dialogs) {
+        if (dialogs?.items != null && dialogs!.items.isNotEmpty) {
+          CubeDialog dialog = dialogs.items.first;
 
-            Navigator.pushReplacementNamed(context, 'chat_dialog',
-                arguments: {USER_ARG_NAME: user, DIALOG_ARG_NAME: dialog});
-          }
-        });
-      }
+          Navigator.pushNamed(context, 'chat_dialog',
+              arguments: {USER_ARG_NAME: user, DIALOG_ARG_NAME: dialog});
+        }
+      });
     });
   } else {
     return Future.value();
