@@ -295,23 +295,26 @@ class ChatScreenState extends State<ChatScreen> {
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      child: Stack(
-        children: <Widget>[
-          Column(
-            children: <Widget>[
-              // List of messages
-              buildListMessage(),
-              //Typing content
-              buildTyping(),
-              // Input content
-              buildInput(),
-            ],
-          ),
+      child: SafeArea(
+        child: Stack(
+          children: <Widget>[
+            Column(
+              children: <Widget>[
+                // List of messages
+                buildListMessage(),
+                //Typing content
+                buildTyping(),
+                // Input content
+                buildInput(),
+              ],
+            ),
 
-          // Loading
-          buildLoading()
-        ],
+            // Loading
+            buildLoading()
+          ],
+        ),
       ),
+
       onWillPop: onBackPress,
     );
   }
@@ -931,10 +934,11 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   Future<bool> onBackPress() {
-    Navigator.pushNamedAndRemoveUntil(context, 'select_dialog', (r) => false,
-        arguments: {USER_ARG_NAME: _cubeUser});
-
-    return Future.value(false);
+    return Navigator.pushNamedAndRemoveUntil<bool>(
+        context, 'select_dialog', (r) => false,
+        arguments: {USER_ARG_NAME: _cubeUser}).then((value) {
+      return true;
+    });
   }
 
   _initChatListeners() {

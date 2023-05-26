@@ -105,7 +105,6 @@ class PushNotificationsManager {
               prefs.saveSelectedDialogId(selectedDialogId);
             });
           }
-          // onNotificationClicked?.call(jsonEncode(message.payload['data']));
         },
         onResume: (message) async {
           log('[onResume] message.payload: ${message.payload}', TAG);
@@ -236,6 +235,7 @@ showNotification(RemoteMessage message) async {
   );
 }
 
+@pragma('vm:entry-point')
 Future<void> onBackgroundMessage(RemoteMessage message) async {
   log('[onBackgroundMessage] message: ${message.data}',
       PushNotificationsManager.TAG);
