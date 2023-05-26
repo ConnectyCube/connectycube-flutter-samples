@@ -10,6 +10,7 @@ const String prefUserId = "pref_user_id";
 const String prefUserAvatar = "pref_user_avatar";
 const String prefSubscriptionToken = "pref_subscription_token";
 const String prefSubscriptionId = "pref_subscription_id";
+const String prefSelectedDialogId = "pref_selected_dialog_id";
 
 class SharedPrefs {
   static final SharedPrefs _instance = SharedPrefs._internal();
@@ -82,5 +83,13 @@ class SharedPrefs {
 
   int getSubscriptionId() {
     return prefs.getInt(prefSubscriptionId) ?? 0;
+  }
+
+  saveSelectedDialogId(String dialogId){
+    prefs.setString(prefSelectedDialogId, dialogId);
+  }
+
+  String? getSelectedDialogId(){
+    return prefs.getString(prefSelectedDialogId);
   }
 }

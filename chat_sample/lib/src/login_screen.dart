@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:universal_io/io.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -282,8 +283,7 @@ class LoginPageState extends State<LoginPage> {
     createSession(user).then((cubeSession) async {
       print("createSession cubeSession: $cubeSession");
       var tempUser = user;
-      user = cubeSession.user!
-        ..password = tempUser.password;
+      user = cubeSession.user!..password = tempUser.password;
       if (saveUser)
         SharedPrefs.instance.init().then((sharedPrefs) {
           sharedPrefs.saveNewUser(user);
@@ -352,35 +352,60 @@ class LoginPageState extends State<LoginPage> {
     //   );
     // });
 
-    FlutterLocalNotificationsPlugin()
-        .getNotificationAppLaunchDetails()
-        .then((details) {
-      String? payload = details!.notificationResponse?.payload;
-
-      if (payload == null) {
+    if (Platform.isIOS) {
+      var prefs = await SharedPrefs.instance.init();
+      var selectedDialogId = prefs.getSelectedDialogId();
+      if (selectedDialogId != null && selectedDialogId.isNotEmpty) {
+        getDialogs({'id': selectedDialogId}).then((dialogs) {
+          if (dialogs?.items != null && dialogs!.items.isNotEmpty) {
+            CubeDialog dialog = dialogs.items.first;
+            Navigator.pushNamed(context, 'chat_dialog',
+                arguments: {USER_ARG_NAME: cubeUser, DIALOG_ARG_NAME: dialog});
+          }
+        }).whenComplete(() {
+          prefs.saveSelectedDialogId('');
+        });
+      } else {
         Navigator.pushReplacementNamed(
           context,
           'select_dialog',
           arguments: {USER_ARG_NAME: cubeUser},
         );
-      } else {
-        Map<String, dynamic> payloadObject = jsonDecode(payload);
-        String? dialogId = payloadObject['dialog_id'];
-
-        getDialogs({'id': dialogId}).then((dialogs) {
-          if (dialogs?.items != null && dialogs!.items.isNotEmpty) {
-            CubeDialog dialog = dialogs.items.first;
-            Navigator.pushReplacementNamed(context, 'chat_dialog',
-                arguments: {USER_ARG_NAME: cubeUser, DIALOG_ARG_NAME: dialog});
-          }
-        });
       }
-    }).catchError((onError) {
-      Navigator.pushReplacementNamed(
-        context,
-        'select_dialog',
-        arguments: {USER_ARG_NAME: cubeUser},
-      );
-    });
+    } else {
+      FlutterLocalNotificationsPlugin()
+          .getNotificationAppLaunchDetails()
+          .then((details) {
+        String? payload = details!.notificationResponse?.payload;
+
+        if (payload == null) {
+          Navigator.pushReplacementNamed(
+            context,
+            'select_dialog',
+            arguments: {USER_ARG_NAME: cubeUser},
+          );
+        } else {
+          Map<String, dynamic> payloadObject = jsonDecode(payload);
+          String? dialogId = payloadObject['dialog_id'];
+
+          getDialogs({'id': dialogId}).then((dialogs) {
+            if (dialogs?.items != null && dialogs!.items.isNotEmpty) {
+              CubeDialog dialog = dialogs.items.first;
+              Navigator.pushReplacementNamed(context, 'chat_dialog',
+                  arguments: {
+                    USER_ARG_NAME: cubeUser,
+                    DIALOG_ARG_NAME: dialog
+                  });
+            }
+          });
+        }
+      }).catchError((onError) {
+        Navigator.pushReplacementNamed(
+          context,
+          'select_dialog',
+          arguments: {USER_ARG_NAME: cubeUser},
+        );
+      });
+    }
   }
 }

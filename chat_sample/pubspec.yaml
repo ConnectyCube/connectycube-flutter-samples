@@ -1,7 +1,7 @@
 name: chat_sample
 description: Chat Sample
 
-version: 0.6.2
+version: 0.7.0
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
@@ -10,24 +10,26 @@ dependencies:
   flutter:
     sdk: flutter
 
-  connectycube_sdk: ^2.5.0
+  connectycube_sdk: ^2.5.6
 #  connectycube_sdk:
-#    path: ../../flutter-sdk
+#      path: ../../flutter-sdk
   shared_preferences: ^2.0.12
   file_picker: ^5.2.11
   fluttertoast: ^8.0.8
+  flutter_apns_only: ^1.6.0
   cached_network_image: ^3.2.0
-  photo_view: ^0.13.0
-  device_info_plus: ^8.2.1
-  firebase_messaging: ^14.2.0
-  flutter_local_notifications: ^13.0.0
-  connectivity_plus: ^2.3.4
+  photo_view: ^0.14.0
+  device_info_plus: ^9.0.0
+  emoji_picker_flutter: ^1.5.4
+  firebase_messaging: ^14.6.1
+  flutter_local_notifications: ^14.1.0
+  connectivity_plus: ^4.0.0
   logging: ^1.0.2
-  collection: ^1.15.0
-  universal_io: ^2.0.4
+  collection: ^1.17.1
+  universal_io: ^2.2.0
   path_provider: ^2.0.8
-  firebase_core: ^2.4.0
-  package_info_plus: ^3.1.1
+  firebase_core: ^2.13.0
+  package_info_plus: ^4.0.0
   uuid: ^3.0.6
 
 dev_dependencies:
@@ -39,3 +41,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/splash.png
+  fonts:
+    - family: NotoColorEmoji
+      fonts:
+        - asset: assets/fonts/NotoColorEmoji-Regular.ttf
