@@ -7042,6 +7042,7 @@ SOFTWARE.
 firebase_core
 firebase_core_platform_interface
 firebase_messaging
+flutter_apns_only
 
 // Copyright 2017 The Chromium Authors. All rights reserved.
 //

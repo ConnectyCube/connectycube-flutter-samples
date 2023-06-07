@@ -17,7 +17,7 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(automaticallyImplyLeading: false, title: Text('Chat')),
+      // appBar: AppBar(automaticallyImplyLeading: false, title: Text('Chat')),
       body: LoginPage(),
     );
   }
@@ -77,14 +77,16 @@ class LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      body: SingleChildScrollView(
-        child: new Container(
-          padding: EdgeInsets.all(16.0),
-          child: new Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.end,
-            children: <Widget>[_buildLogoField(), _initLoginWidgets()],
+      body: Center(
+        child: SingleChildScrollView(
+          child: new Container(
+            padding: EdgeInsets.all(16.0),
+            child: new Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: <Widget>[_buildLogoField(), _initLoginWidgets()],
+            ),
           ),
         ),
       ),
@@ -98,8 +100,8 @@ class LoginPageState extends State<LoginPage> {
         alignment: FractionalOffset.center,
         child: Column(
           children: [
-            Padding(
-              padding: EdgeInsets.all(40.0),
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: 350),
               child: Image.asset('assets/images/splash.png'),
             ),
             Container(
@@ -147,63 +149,71 @@ class LoginPageState extends State<LoginPage> {
   }
 
   Widget _buildTextFields() {
-    return new Container(
-      child: new Column(
-        children: <Widget>[
-          new Container(
-            child: new TextField(
-              controller: _loginFilter,
-              decoration: new InputDecoration(labelText: 'Login'),
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: 350),
+      child: Container(
+        child: Column(
+          children: <Widget>[
+            Container(
+              child: TextField(
+                controller: _loginFilter,
+                decoration: InputDecoration(labelText: 'Login'),
+              ),
             ),
-          ),
-          new Container(
-            child: new TextField(
-              controller: _passwordFilter,
-              decoration: new InputDecoration(labelText: 'Password'),
-              obscureText: true,
-            ),
-          )
-        ],
+            Container(
+              child: TextField(
+                controller: _passwordFilter,
+                decoration: InputDecoration(labelText: 'Password'),
+                obscureText: true,
+                enableSuggestions: false,
+                autocorrect: false,
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildButtons() {
-    if (_form == FormType.login) {
-      return new Container(
-        child: new Column(
-          children: <Widget>[
-            new ElevatedButton(
-              child: new Text('Login'),
-              onPressed: _loginPressed,
-            ),
-            new TextButton(
-              child: new Text('Don\'t have an account? Tap here to register.'),
-              onPressed: _formChange,
-            ),
-            new TextButton(
-              child: new Text('Delete user?'),
-              onPressed: _deleteUserPressed,
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: 350),
+      child: _form == FormType.login
+          ? Container(
+              margin: EdgeInsets.only(top: 8),
+              child: Column(
+                children: <Widget>[
+                  ElevatedButton(
+                    child: new Text('Login'),
+                    onPressed: _loginPressed,
+                  ),
+                  TextButton(
+                    child: new Text(
+                        'Don\'t have an account? Tap here to register.'),
+                    onPressed: _formChange,
+                  ),
+                  TextButton(
+                    child: new Text('Delete user?'),
+                    onPressed: _deleteUserPressed,
+                  ),
+                ],
+              ),
             )
-          ],
-        ),
-      );
-    } else {
-      return new Container(
-        child: new Column(
-          children: <Widget>[
-            new ElevatedButton(
-              child: new Text('Create an Account'),
-              onPressed: _createAccountPressed,
+          : Container(
+              child: Column(
+                children: <Widget>[
+                  ElevatedButton(
+                    child: new Text('Create an Account'),
+                    onPressed: _createAccountPressed,
+                  ),
+                  TextButton(
+                    child: new Text('Have an account? Click here to login.'),
+                    onPressed: _formChange,
+                  ),
+                ],
+              ),
             ),
-            new TextButton(
-              child: new Text('Have an account? Click here to login.'),
-              onPressed: _formChange,
-            )
-          ],
-        ),
-      );
-    }
+    );
   }
 
   void _loginPressed() {
