@@ -1,6 +1,6 @@
 {
-    "name": "chat_sample",
-    "short_name": "chat_sample",
+    "name": "Connectycube Chat Sample",
+    "short_name": "Chat Sample",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
