@@ -1,5 +1,4 @@
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -88,28 +87,34 @@ class _BodyLayoutState extends State<BodyLayout> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        child: Container(
-            alignment: Alignment.center,
-            padding: EdgeInsets.all(60),
-            child: Column(
-              children: [
-                _buildAvatarFields(),
-                _buildTextFields(),
-                _buildButtons(),
-                Container(
-                  margin: EdgeInsets.only(left: 8),
-                  child: Visibility(
-                    maintainSize: false,
-                    maintainAnimation: false,
-                    maintainState: false,
-                    visible: _isUsersContinues,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 400),
+            child: Container(
+              alignment: Alignment.center,
+              padding: EdgeInsets.all(60),
+              child: Column(
+                children: [
+                  _buildAvatarFields(),
+                  _buildTextFields(),
+                  _buildButtons(),
+                  Container(
+                    margin: EdgeInsets.only(left: 8),
+                    child: Visibility(
+                      maintainSize: false,
+                      maintainAnimation: false,
+                      maintainState: false,
+                      visible: _isUsersContinues,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                      ),
                     ),
                   ),
-                ),
-              ],
-            )),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }

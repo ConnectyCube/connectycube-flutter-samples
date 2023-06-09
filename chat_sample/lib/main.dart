@@ -11,6 +11,7 @@ import 'package:universal_io/io.dart';
 import 'firebase_options.dart';
 import 'src/chat_details_screen.dart';
 import 'src/chat_dialog_screen.dart';
+import 'src/chat_dialog_resizable_screen.dart';
 import 'src/login_screen.dart';
 import 'src/push_notifications_manager.dart';
 import 'src/select_dialog_screen.dart';
@@ -62,6 +63,15 @@ class _AppState extends State<App> with WidgetsBindingObserver {
                 builder: (context) => ChatDialogScreen(
                     args![USER_ARG_NAME], args[DIALOG_ARG_NAME]));
             break;
+
+          case 'chat_dialog_resizable':
+            pageRout = MaterialPageRoute<bool>(
+              builder: (context) => ChatDialogResizableScreen(
+                  args![USER_ARG_NAME], args[DIALOG_ARG_NAME]),
+            );
+
+            break;
+
           case 'chat_details':
             pageRout = MaterialPageRoute(
                 builder: (context) => ChatDetailsScreen(
@@ -70,7 +80,8 @@ class _AppState extends State<App> with WidgetsBindingObserver {
 
           case 'select_dialog':
             pageRout = MaterialPageRoute<bool>(
-                builder: (context) => SelectDialogScreen(args![USER_ARG_NAME]));
+                builder: (context) =>
+                    SelectDialogScreen(args![USER_ARG_NAME], null, null));
 
             break;
 

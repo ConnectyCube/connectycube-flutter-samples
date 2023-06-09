@@ -36,7 +36,7 @@ class ChatDialogScreen extends StatelessWidget {
         centerTitle: false,
         actions: <Widget>[
           IconButton(
-            onPressed: () => _chatDetails(context),
+            onPressed: () => showChatDetails(context, _cubeUser, _cubeDialog),
             icon: Icon(
               Icons.info_outline,
               color: Colors.white,
@@ -45,16 +45,6 @@ class ChatDialogScreen extends StatelessWidget {
         ],
       ),
       body: ChatScreen(_cubeUser, _cubeDialog),
-    );
-  }
-
-  _chatDetails(BuildContext context) async {
-    log("_chatDetails= $_cubeDialog");
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ChatDetailsScreen(_cubeUser, _cubeDialog),
-      ),
     );
   }
 }
@@ -1233,4 +1223,14 @@ class ChatScreenState extends State<ChatScreen> {
       }
     });
   }
+}
+
+void showChatDetails(BuildContext context, CubeUser cubeUser, CubeDialog cubeDialog) async {
+  log("_chatDetails= $cubeDialog");
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => ChatDetailsScreen(cubeUser, cubeDialog),
+    ),
+  );
 }

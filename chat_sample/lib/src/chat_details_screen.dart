@@ -236,7 +236,10 @@ class GroupScreenState extends ScreenState {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        child: Container(
+        child: Center(
+        child: ConstrainedBox(
+        constraints: BoxConstraints(maxWidth: 400),
+    child: Container(
             alignment: Alignment.center,
             padding: EdgeInsets.all(40),
             child: Column(
@@ -257,7 +260,7 @@ class GroupScreenState extends ScreenState {
                   ),
                 ),
               ],
-            )),
+            )),),),
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: "Update dialog",

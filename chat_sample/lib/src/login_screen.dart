@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:flutter/material.dart';
@@ -369,18 +370,13 @@ class LoginPageState extends State<LoginPage> {
         getDialogs({'id': selectedDialogId}).then((dialogs) {
           if (dialogs?.items != null && dialogs!.items.isNotEmpty) {
             CubeDialog dialog = dialogs.items.first;
-            Navigator.pushNamed(context, 'chat_dialog',
-                arguments: {USER_ARG_NAME: cubeUser, DIALOG_ARG_NAME: dialog});
+            navigateToNextScreen(cubeUser, dialog);
           }
         }).whenComplete(() {
           prefs.saveSelectedDialogId('');
         });
       } else {
-        Navigator.pushReplacementNamed(
-          context,
-          'select_dialog',
-          arguments: {USER_ARG_NAME: cubeUser},
-        );
+        navigateToNextScreen(cubeUser, null);
       }
     } else {
       FlutterLocalNotificationsPlugin()
@@ -389,11 +385,7 @@ class LoginPageState extends State<LoginPage> {
         String? payload = details!.notificationResponse?.payload;
 
         if (payload == null) {
-          Navigator.pushReplacementNamed(
-            context,
-            'select_dialog',
-            arguments: {USER_ARG_NAME: cubeUser},
-          );
+          navigateToNextScreen(cubeUser, null);
         } else {
           Map<String, dynamic> payloadObject = jsonDecode(payload);
           String? dialogId = payloadObject['dialog_id'];
@@ -401,21 +393,32 @@ class LoginPageState extends State<LoginPage> {
           getDialogs({'id': dialogId}).then((dialogs) {
             if (dialogs?.items != null && dialogs!.items.isNotEmpty) {
               CubeDialog dialog = dialogs.items.first;
-              Navigator.pushReplacementNamed(context, 'chat_dialog',
-                  arguments: {
-                    USER_ARG_NAME: cubeUser,
-                    DIALOG_ARG_NAME: dialog
-                  });
+              navigateToNextScreen(cubeUser, dialog);
             }
           });
         }
       }).catchError((onError) {
-        Navigator.pushReplacementNamed(
-          context,
-          'select_dialog',
-          arguments: {USER_ARG_NAME: cubeUser},
-        );
+        navigateToNextScreen(cubeUser, null);
       });
+    }
+  }
+
+  void navigateToNextScreen(CubeUser cubeUser, CubeDialog? dialog) {
+    if (kIsWeb || Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+      Navigator.pushReplacementNamed(
+        context,
+        'chat_dialog_resizable',
+        arguments: {USER_ARG_NAME: cubeUser, DIALOG_ARG_NAME: dialog},
+      );
+    } else if (dialog != null) {
+      Navigator.pushReplacementNamed(context, 'chat_dialog',
+          arguments: {USER_ARG_NAME: cubeUser, DIALOG_ARG_NAME: dialog});
+    } else {
+      Navigator.pushReplacementNamed(
+        context,
+        'select_dialog',
+        arguments: {USER_ARG_NAME: cubeUser},
+      );
     }
   }
 }
