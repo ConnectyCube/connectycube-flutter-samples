@@ -86,12 +86,13 @@ class _BodyLayoutState extends State<BodyLayout> {
         flex: 2,
         child: Stack(
           children: [
-            ChatScreen(currentUser, selectedDialog!),
+            ChatDialogScreen(currentUser, selectedDialog!),
             Align(
               alignment: Alignment.topCenter,
               child: SizedBox(
                 height: AppBar().preferredSize.height,
                 child: AppBar(
+                  elevation: 0,
                   automaticallyImplyLeading: false,
                   leading: !isBigScreen && selectedDialog != null
                       ? IconButton(

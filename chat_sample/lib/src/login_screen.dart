@@ -404,7 +404,7 @@ class LoginPageState extends State<LoginPage> {
   }
 
   void navigateToNextScreen(CubeUser cubeUser, CubeDialog? dialog) {
-    if (kIsWeb || Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
+    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
       Navigator.pushReplacementNamed(
         context,
         'chat_dialog_resizable',
