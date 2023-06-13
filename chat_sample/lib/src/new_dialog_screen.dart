@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_chat.dart';
 
-import 'chat_dialog_screen.dart';
 import '../src/new_group_dialog_screen.dart';
 import '../src/utils/api_utils.dart';
 import '../src/utils/consts.dart';
@@ -132,6 +131,7 @@ class _BodyLayoutState extends State<BodyLayout> {
         children: <Widget>[
           new Container(
             child: new TextField(
+                autofocus: true,
                 textInputAction: TextInputAction.search,
                 decoration: new InputDecoration(labelText: 'Search users'),
                 onSubmitted: (value) {
@@ -221,27 +221,7 @@ class _BodyLayoutState extends State<BodyLayout> {
         child: TextButton(
           child: Row(
             children: <Widget>[
-              Material(
-                child: CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.white,
-                  child: CircleAvatar(
-                    backgroundImage: userList[index].avatar != null &&
-                            userList[index].avatar!.isNotEmpty
-                        ? NetworkImage(userList[index].avatar!)
-                        : null,
-                    radius: 25,
-                    child: getAvatarTextWidget(
-                        userList[index].avatar != null &&
-                            userList[index].avatar!.isNotEmpty,
-                        userList[index].fullName!.substring(0, 2).toUpperCase()),
-                  ),
-                ),
-                borderRadius: BorderRadius.all(
-                  Radius.circular(40.0),
-                ),
-                clipBehavior: Clip.hardEdge,
-              ),
+              getUserAvatarWidget(userList[index], 30),
               Flexible(
                 child: Container(
                   child: Column(
@@ -281,27 +261,7 @@ class _BodyLayoutState extends State<BodyLayout> {
         child: TextButton(
           child: Row(
             children: <Widget>[
-              Material(
-                child: CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.white,
-                  child: CircleAvatar(
-                    backgroundImage: userList[index].avatar != null &&
-                            userList[index].avatar!.isNotEmpty
-                        ? NetworkImage(userList[index].avatar!)
-                        : null,
-                    radius: 25,
-                    child: getAvatarTextWidget(
-                        userList[index].avatar != null &&
-                            userList[index].avatar!.isNotEmpty,
-                        userList[index].fullName!.substring(0, 2).toUpperCase()),
-                  ),
-                ),
-                borderRadius: BorderRadius.all(
-                  Radius.circular(40.0),
-                ),
-                clipBehavior: Clip.hardEdge,
-              ),
+              getUserAvatarWidget(userList[index], 30),
               Flexible(
                 child: Container(
                   child: Column(
@@ -366,8 +326,7 @@ class _BodyLayoutState extends State<BodyLayout> {
       CubeDialog newDialog =
           CubeDialog(CubeDialogType.GROUP, occupantsIds: users.toList());
       List<CubeUser> usersToAdd = users
-          .map((id) =>
-              userList.firstWhere((user) => user.id == id))
+          .map((id) => userList.firstWhere((user) => user.id == id))
           .toList();
       Navigator.push(
         context,
@@ -380,12 +339,10 @@ class _BodyLayoutState extends State<BodyLayout> {
       CubeDialog newDialog =
           CubeDialog(CubeDialogType.PRIVATE, occupantsIds: users.toList());
       createDialog(newDialog).then((createdDialog) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ChatDialogScreen(currentUser, createdDialog),
-          ),
-        );
+        Navigator.pushReplacementNamed(context, 'chat_dialog', arguments: {
+          USER_ARG_NAME: currentUser,
+          DIALOG_ARG_NAME: createdDialog
+        });
       }).catchError((error) {
         _processCreateDialogError(error);
       });

@@ -65,8 +65,8 @@ class SharedPrefs {
     return user;
   }
 
-  deleteUser() {
-    prefs.clear();
+  Future<bool> deleteUser() {
+    return prefs.clear();
   }
 
   saveSubscriptionToken(String token) {
@@ -85,11 +85,11 @@ class SharedPrefs {
     return prefs.getInt(prefSubscriptionId) ?? 0;
   }
 
-  saveSelectedDialogId(String dialogId){
+  saveSelectedDialogId(String dialogId) {
     prefs.setString(prefSelectedDialogId, dialogId);
   }
 
-  String? getSelectedDialogId(){
+  String? getSelectedDialogId() {
     return prefs.getString(prefSelectedDialogId);
   }
 }

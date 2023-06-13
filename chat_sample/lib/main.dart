@@ -18,6 +18,7 @@ import 'src/select_dialog_screen.dart';
 import 'src/settings_screen.dart';
 import 'src/utils/configs.dart' as config;
 import 'src/utils/consts.dart';
+import 'src/utils/platform_utils.dart' as platformUtils;
 import 'src/utils/pref_util.dart';
 
 Future<void> main() async {
@@ -60,8 +61,11 @@ class _AppState extends State<App> with WidgetsBindingObserver {
         switch (name) {
           case 'chat_dialog':
             pageRout = MaterialPageRoute(
-                builder: (context) => ChatDialogScreen(
-                    args![USER_ARG_NAME], args[DIALOG_ARG_NAME]));
+                builder: (context) => platformUtils.isDesktop()
+                    ? ChatDialogResizableScreen(
+                        args![USER_ARG_NAME], args[DIALOG_ARG_NAME])
+                    : ChatDialogScreen(
+                        args![USER_ARG_NAME], args[DIALOG_ARG_NAME]));
             break;
 
           case 'chat_dialog_resizable':
@@ -80,8 +84,10 @@ class _AppState extends State<App> with WidgetsBindingObserver {
 
           case 'select_dialog':
             pageRout = MaterialPageRoute<bool>(
-                builder: (context) =>
-                    SelectDialogScreen(args![USER_ARG_NAME], null, null));
+                builder: (context) => platformUtils.isDesktop()
+                    ? ChatDialogResizableScreen(
+                        args![USER_ARG_NAME], args[DIALOG_ARG_NAME])
+                    : SelectDialogScreen(args![USER_ARG_NAME], null, null));
 
             break;
 

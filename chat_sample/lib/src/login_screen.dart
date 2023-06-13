@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:flutter/material.dart';
@@ -157,17 +156,24 @@ class LoginPageState extends State<LoginPage> {
           children: <Widget>[
             Container(
               child: TextField(
+                keyboardType: TextInputType.text,
                 controller: _loginFilter,
                 decoration: InputDecoration(labelText: 'Login'),
               ),
             ),
             Container(
               child: TextField(
+                keyboardType: TextInputType.visiblePassword,
                 controller: _passwordFilter,
                 decoration: InputDecoration(labelText: 'Password'),
                 obscureText: true,
                 enableSuggestions: false,
                 autocorrect: false,
+                onSubmitted: (_) {
+                  _form == FormType.login
+                      ? _loginPressed()
+                      : _createAccountPressed();
+                },
               ),
             )
           ],
@@ -193,14 +199,11 @@ class LoginPageState extends State<LoginPage> {
                         'Don\'t have an account? Tap here to register.'),
                     onPressed: _formChange,
                   ),
-                  TextButton(
-                    child: new Text('Delete user?'),
-                    onPressed: _deleteUserPressed,
-                  ),
                 ],
               ),
             )
           : Container(
+              margin: EdgeInsets.only(top: 8),
               child: Column(
                 children: <Widget>[
                   ElevatedButton(
@@ -227,36 +230,6 @@ class LoginPageState extends State<LoginPage> {
     print('create an user with $_login and $_password');
     _signInCC(context,
         CubeUser(login: _login, password: _password, fullName: _login));
-  }
-
-  void _deleteUserPressed() {
-    print('_deleteUserPressed $_login and $_password');
-    _userDelete();
-  }
-
-  void _userDelete() {
-    createSession(CubeUser(login: _login, password: _password))
-        .then((cubeSession) {
-      deleteUser(cubeSession.userId!).then((_) {
-        print("signOut success");
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text("Delete user"),
-                content: Text("succeeded"),
-                actions: <Widget>[
-                  TextButton(
-                    child: Text("OK"),
-                    onPressed: () => Navigator.of(context).pop(),
-                  )
-                ],
-              );
-            });
-      });
-    }).catchError((exception) {
-      _processLoginError(exception);
-    });
   }
 
   _signInCC(BuildContext context, CubeUser user) async {
@@ -404,13 +377,7 @@ class LoginPageState extends State<LoginPage> {
   }
 
   void navigateToNextScreen(CubeUser cubeUser, CubeDialog? dialog) {
-    if (Platform.isWindows || Platform.isMacOS || Platform.isLinux) {
-      Navigator.pushReplacementNamed(
-        context,
-        'chat_dialog_resizable',
-        arguments: {USER_ARG_NAME: cubeUser, DIALOG_ARG_NAME: dialog},
-      );
-    } else if (dialog != null) {
+    if (dialog != null) {
       Navigator.pushReplacementNamed(context, 'chat_dialog',
           arguments: {USER_ARG_NAME: cubeUser, DIALOG_ARG_NAME: dialog});
     } else {

@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:chat_sample/src/widgets/common.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -156,9 +156,11 @@ class _BodyLayoutState extends State<BodyLayout> {
     if (_isDialogContinues && dialogList.isEmpty)
       return SizedBox.shrink();
     else if (dialogList.isEmpty)
-      return FittedBox(
-        fit: BoxFit.contain,
-        child: Text("No dialogs yet"),
+      return Center(
+        child: Text(
+          'No dialogs yet',
+          style: TextStyle(fontSize: 20),
+        ),
       );
     else
       return ListView.separated(
@@ -175,7 +177,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   Widget _getListItemTile(BuildContext context, int index) {
-    getDialogIcon() {
+    Widget getDialogIcon() {
       var dialog = dialogList[index].data;
       if (dialog.type == CubeDialogType.PRIVATE)
         return Icon(
@@ -192,33 +194,11 @@ class _BodyLayoutState extends State<BodyLayout> {
       }
     }
 
-    getDialogAvatarWidget() {
+    getDialogAvatar() {
       var dialog = dialogList[index].data;
-      if (dialog.photo == null) {
-        return CircleAvatar(
-            radius: 25, backgroundColor: greyColor3, child: getDialogIcon());
-      } else {
-        return CachedNetworkImage(
-          placeholder: (context, url) => Container(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-            ),
-            width: 40.0,
-            height: 40.0,
-            padding: EdgeInsets.all(70.0),
-            decoration: BoxDecoration(
-              color: greyColor2,
-              borderRadius: BorderRadius.all(
-                Radius.circular(8.0),
-              ),
-            ),
-          ),
-          imageUrl: dialogList[index].data.photo!,
-          width: 45.0,
-          height: 45.0,
-          fit: BoxFit.cover,
-        );
-      }
+
+      return getDialogAvatarWidget(dialog, 25,
+          placeholder: getDialogIcon(), errorWidget: getDialogIcon());
     }
 
     return Container(
@@ -231,7 +211,7 @@ class _BodyLayoutState extends State<BodyLayout> {
           child: Row(
             children: <Widget>[
               Material(
-                child: getDialogAvatarWidget(),
+                child: getDialogAvatar(),
                 borderRadius: BorderRadius.all(Radius.circular(25.0)),
                 clipBehavior: Clip.hardEdge,
               ),
@@ -254,7 +234,7 @@ class _BodyLayoutState extends State<BodyLayout> {
                       ),
                       Container(
                         child: Text(
-                          '${dialogList[index].data.lastMessage ?? 'Not available'}',
+                          '${dialogList[index].data.lastMessage ?? ''}',
                           style: TextStyle(
                               color: primaryColor,
                               overflow: TextOverflow.ellipsis),
@@ -288,7 +268,7 @@ class _BodyLayoutState extends State<BodyLayout> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${dialogList[index].data.lastMessageDateSent != null ? DateFormat('MMM dd').format(DateTime.fromMillisecondsSinceEpoch(dialogList[index].data.lastMessageDateSent! * 1000)) : 'Not available'}',
+                    '${DateFormat('MMM dd').format(dialogList[index].data.lastMessageDateSent != null ? DateTime.fromMillisecondsSinceEpoch(dialogList[index].data.lastMessageDateSent! * 1000) : dialogList[index].data.updatedAt!)}',
                     style: TextStyle(color: primaryColor),
                   ),
                   if (dialogList[index].data.unreadMessageCount != null &&
@@ -385,7 +365,7 @@ class _BodyLayoutState extends State<BodyLayout> {
           dateA = DateTime.fromMillisecondsSinceEpoch(
               a.data.lastMessageDateSent! * 1000);
         } else {
-          dateA = a.data.createdAt!;
+          dateA = a.data.updatedAt!;
         }
 
         DateTime dateB;
@@ -393,7 +373,7 @@ class _BodyLayoutState extends State<BodyLayout> {
           dateB = DateTime.fromMillisecondsSinceEpoch(
               b.data.lastMessageDateSent! * 1000);
         } else {
-          dateB = b.data.createdAt!;
+          dateB = b.data.updatedAt!;
         }
 
         if (dateA.isAfter(dateB)) {
