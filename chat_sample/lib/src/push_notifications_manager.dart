@@ -180,15 +180,16 @@ class PushNotificationsManager {
     });
   }
 
-  unsubscribe() {
-    SharedPrefs.instance.init().then((sharedPrefs) {
+  Future<void> unsubscribe() {
+    return SharedPrefs.instance.init().then((sharedPrefs) {
       int subscriptionId = sharedPrefs.getSubscriptionId();
       if (subscriptionId != 0) {
-        deleteSubscription(subscriptionId).then((voidResult) {
+        return deleteSubscription(subscriptionId).then((voidResult) {
           FirebaseMessaging.instance.deleteToken();
           sharedPrefs.saveSubscriptionId(0);
         });
       }
+      return Future.value();
     }).catchError((onError) {
       log('[unsubscribe] ERROR: $onError', PushNotificationsManager.TAG);
     });

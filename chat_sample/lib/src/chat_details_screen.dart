@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -136,23 +135,7 @@ class ContactScreenState extends ScreenState {
       return SizedBox.shrink();
     }
     return Stack(
-      children: <Widget>[
-        CircleAvatar(
-          backgroundImage:
-              contactUser!.avatar != null && contactUser!.avatar!.isNotEmpty
-                  ? NetworkImage(contactUser!.avatar!)
-                  : null,
-          backgroundColor: greyColor2,
-          radius: 50,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(55),
-            child: Text(
-              contactUser!.fullName!.substring(0, 2).toUpperCase(),
-              style: TextStyle(fontSize: 40),
-            ),
-          ),
-        ),
-      ],
+      children: <Widget>[getUserAvatarWidget(contactUser!, 50)],
     );
   }
 
@@ -237,30 +220,32 @@ class GroupScreenState extends ScreenState {
     return Scaffold(
       body: SingleChildScrollView(
         child: Center(
-        child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: 400),
-    child: Container(
-            alignment: Alignment.center,
-            padding: EdgeInsets.all(40),
-            child: Column(
-              children: [
-                _buildPhotoFields(),
-                _buildTextFields(),
-                _buildGroupFields(),
-                Container(
-                  margin: EdgeInsets.only(left: 8),
-                  child: Visibility(
-                    maintainSize: false,
-                    maintainAnimation: false,
-                    maintainState: false,
-                    visible: _isProgressContinues,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 400),
+            child: Container(
+                alignment: Alignment.center,
+                padding: EdgeInsets.all(40),
+                child: Column(
+                  children: [
+                    _buildPhotoFields(),
+                    _buildTextFields(),
+                    _buildGroupFields(),
+                    Container(
+                      margin: EdgeInsets.only(left: 8),
+                      child: Visibility(
+                        maintainSize: false,
+                        maintainAnimation: false,
+                        maintainState: false,
+                        visible: _isProgressContinues,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ],
-            )),),),
+                  ],
+                )),
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: "Update dialog",
@@ -278,17 +263,8 @@ class GroupScreenState extends ScreenState {
     if (_isProgressContinues) {
       return SizedBox.shrink();
     }
-    Widget avatarCircle = CircleAvatar(
-      backgroundImage:
-          _cubeDialog.photo != null && _cubeDialog.photo!.isNotEmpty
-              ? NetworkImage(_cubeDialog.photo!)
-              : null,
-      backgroundColor: greyColor2,
-      radius: 50,
-      child: getAvatarTextWidget(
-          _cubeDialog.photo != null && _cubeDialog.photo!.isNotEmpty,
-          _cubeDialog.name!.substring(0, 2).toUpperCase()),
-    );
+
+    Widget avatarCircle = getDialogAvatarWidget(_cubeDialog, 50);
 
     return new Stack(
       children: <Widget>[
@@ -348,6 +324,7 @@ class GroupScreenState extends ScreenState {
         children: <Widget>[
           Container(
             child: TextField(
+              autofocus: true,
               style: TextStyle(color: primaryColor, fontSize: 20.0),
               controller: _nameFilter,
               decoration: InputDecoration(labelText: 'Change group name'),
@@ -477,14 +454,7 @@ class GroupScreenState extends ScreenState {
     final user = _occupants.values.elementAt(index);
     Widget getUserAvatar() {
       if (user.avatar != null && user.avatar!.isNotEmpty) {
-        return CircleAvatar(
-          backgroundImage: NetworkImage(user.avatar!),
-          backgroundColor: greyColor2,
-          radius: 25.0,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(55),
-          ),
-        );
+        return getUserAvatarWidget(user, 25);
       } else {
         return Material(
           child: Icon(

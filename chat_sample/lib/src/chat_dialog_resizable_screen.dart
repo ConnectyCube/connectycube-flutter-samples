@@ -6,6 +6,10 @@ import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
+const double DIALOGS_LIST_WIDTH = 300;
+const double MIN_SCREEN_SIZE = 800;
+const double DIVIDER_WIDTH = 1;
+
 class ChatDialogResizableScreen extends StatelessWidget {
   static const String TAG = "SelectDialogScreen";
   final CubeUser currentUser;
@@ -57,22 +61,33 @@ class _BodyLayoutState extends State<BodyLayout> {
       child: Row(
         children: [
           if (isBigScreen || selectedDialog == null)
-            Expanded(
-              flex: 1,
-              child: SelectDialogScreen(currentUser, selectedDialog,
-                  (selectedDialog) {
-                setState(() {
-                  this.selectedDialog = null;
-                  Future.delayed(Duration(milliseconds: 50), () {
-                    setState(() {
-                      this.selectedDialog = selectedDialog;
+            LayoutBuilder(builder: (context, constraint) {
+              var width = MediaQuery.of(context).size.width;
+
+              return SizedBox(
+                width: isBigScreen
+                    ? width / 4 <= DIALOGS_LIST_WIDTH
+                        ? DIALOGS_LIST_WIDTH
+                        : width / 4
+                    : width,
+                child: SelectDialogScreen(currentUser, selectedDialog,
+                    (selectedDialog) {
+                  setState(() {
+                    this.selectedDialog = null;
+                    Future.delayed(Duration(milliseconds: 50), () {
+                      setState(() {
+                        this.selectedDialog = selectedDialog;
+                      });
                     });
                   });
-                });
-              }),
+                }),
+              );
+            }),
+          Visibility(
+            visible: isBigScreen,
+            child: VerticalDivider(
+              width: DIVIDER_WIDTH,
             ),
-          VerticalDivider(
-            width: 1,
           ),
           getSelectedDialog()
         ],
@@ -83,7 +98,6 @@ class _BodyLayoutState extends State<BodyLayout> {
   Widget getSelectedDialog() {
     if (selectedDialog != null) {
       return Flexible(
-        flex: 2,
         child: Stack(
           children: [
             ChatDialogScreen(currentUser, selectedDialog!),
@@ -126,10 +140,13 @@ class _BodyLayoutState extends State<BodyLayout> {
       );
     } else if (isBigScreen) {
       return Expanded(
-        flex: 2,
         child: Container(
+          margin: EdgeInsets.only(top: AppBar().preferredSize.height),
           child: Center(
-            child: Text('No dialog selected'),
+            child: Text(
+              'No dialog selected',
+              style: TextStyle(fontSize: 20),
+            ),
           ),
         ),
       );
@@ -138,5 +155,5 @@ class _BodyLayoutState extends State<BodyLayout> {
     }
   }
 
-  get isBigScreen => MediaQuery.of(context).size.width >= 800;
+  get isBigScreen => MediaQuery.of(context).size.width >= MIN_SCREEN_SIZE;
 }

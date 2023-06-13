@@ -3,6 +3,7 @@ import 'package:chat_sample/src/utils/api_utils.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
@@ -95,6 +96,8 @@ class ChatScreenState extends State<ChatScreen> {
 
   List<CubeMessage> oldMessages = [];
 
+  late FocusNode _editMessageFocusNode;
+
   ChatScreenState(this._cubeUser, this._cubeDialog);
 
   @override
@@ -107,6 +110,7 @@ class ChatScreenState extends State<ChatScreen> {
     listScrollController.addListener(onScrollChanged);
     connectivityStateSubscription =
         Connectivity().onConnectivityChanged.listen(onConnectivityChanged);
+    _editMessageFocusNode = createEditMessageFocusNode();
   }
 
   @override
@@ -304,7 +308,6 @@ class ChatScreenState extends State<ChatScreen> {
           ],
         ),
       ),
-
       onWillPop: onBackPress,
     );
   }
@@ -591,29 +594,7 @@ class ChatScreenState extends State<ChatScreen> {
               onLongPress: () => _reactOnMessage(message),
               child: Row(
                 children: <Widget>[
-                  Material(
-                    child: CircleAvatar(
-                      backgroundImage: _occupants[message.senderId]?.avatar !=
-                                  null &&
-                              _occupants[message.senderId]!.avatar!.isNotEmpty
-                          ? NetworkImage(_occupants[message.senderId]!.avatar!)
-                          : null,
-                      backgroundColor: greyColor2,
-                      radius: 30,
-                      child: getAvatarTextWidget(
-                        _occupants[message.senderId]?.avatar != null &&
-                            _occupants[message.senderId]!.avatar!.isNotEmpty,
-                        _occupants[message.senderId]
-                            ?.fullName
-                            ?.substring(0, 2)
-                            .toUpperCase(),
-                      ),
-                    ),
-                    borderRadius: BorderRadius.all(
-                      Radius.circular(18.0),
-                    ),
-                    clipBehavior: Clip.hardEdge,
-                  ),
+                  getUserAvatarWidget(_occupants[message.senderId], 30),
                   message.attachments?.isNotEmpty ?? false
                       ? Container(
                           child: Column(
@@ -800,6 +781,10 @@ class ChatScreenState extends State<ChatScreen> {
           Flexible(
             child: Container(
               child: TextField(
+                autofocus: true,
+                focusNode: _editMessageFocusNode,
+                keyboardType: TextInputType.multiline,
+                maxLines: null,
                 style: TextStyle(color: primaryColor, fontSize: 15.0),
                 controller: textEditingController,
                 decoration: InputDecoration.collapsed(
@@ -1014,7 +999,9 @@ class ChatScreenState extends State<ChatScreen> {
           return result.items;
         })
         .whenComplete(() {})
-        .catchError((onError) {});
+        .catchError((onError) {
+          return List<CubeMessage>.empty(growable: true);
+        });
   }
 
   Future<List<CubeMessage>> getMessagesBetweenDates(
@@ -1223,9 +1210,36 @@ class ChatScreenState extends State<ChatScreen> {
       }
     });
   }
+
+  FocusNode createEditMessageFocusNode() {
+    return FocusNode(
+      onKey: (FocusNode node, RawKeyEvent evt) {
+        if (!evt.isShiftPressed && evt.logicalKey == LogicalKeyboardKey.enter) {
+          if (evt is RawKeyDownEvent) {
+            onSendChatMessage(textEditingController.text);
+          }
+          _editMessageFocusNode.requestFocus();
+          return KeyEventResult.handled;
+        } else if (evt.logicalKey == LogicalKeyboardKey.enter) {
+          if (evt is RawKeyDownEvent) {
+            setState(() {
+              textEditingController.text = textEditingController.text + '\n';
+              textEditingController.selection = TextSelection.collapsed(
+                  offset: textEditingController.text.length);
+            });
+          }
+          _editMessageFocusNode.requestFocus();
+          return KeyEventResult.handled;
+        } else {
+          return KeyEventResult.ignored;
+        }
+      },
+    );
+  }
 }
 
-void showChatDetails(BuildContext context, CubeUser cubeUser, CubeDialog cubeDialog) async {
+void showChatDetails(
+    BuildContext context, CubeUser cubeUser, CubeDialog cubeDialog) async {
   log("_chatDetails= $cubeDialog");
   Navigator.push(
     context,

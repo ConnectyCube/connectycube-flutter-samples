@@ -125,6 +125,7 @@ class _BodyLayoutState extends State<BodyLayout> {
         children: <Widget>[
           new Container(
             child: new TextField(
+                autofocus: true,
                 textInputAction: TextInputAction.search,
                 decoration: new InputDecoration(labelText: 'Search users'),
                 onSubmitted: (value) {
@@ -178,27 +179,7 @@ class _BodyLayoutState extends State<BodyLayout> {
       child: TextButton(
         child: Row(
           children: <Widget>[
-            Material(
-              child: CircleAvatar(
-                radius: 30,
-                backgroundColor: Colors.white,
-                child: CircleAvatar(
-                  backgroundImage: userList[index].avatar != null &&
-                          userList[index].avatar!.isNotEmpty
-                      ? NetworkImage(userList[index].avatar!)
-                      : null,
-                  radius: 25,
-                  child: getAvatarTextWidget(
-                      userList[index].avatar != null &&
-                          userList[index].avatar!.isNotEmpty,
-                      userList[index].fullName!.substring(0, 2).toUpperCase()),
-                ),
-              ),
-              borderRadius: BorderRadius.all(
-                Radius.circular(40.0),
-              ),
-              clipBehavior: Clip.hardEdge,
-            ),
+            getUserAvatarWidget(userList[index], 30),
             Flexible(
               child: Container(
                 child: Column(

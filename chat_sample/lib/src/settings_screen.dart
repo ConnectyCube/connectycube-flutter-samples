@@ -11,7 +11,7 @@ import '../src/utils/pref_util.dart';
 import '../src/widgets/common.dart';
 
 class SettingsScreen extends StatelessWidget {
-  final CubeUser? currentUser;
+  final CubeUser currentUser;
 
   SettingsScreen(this.currentUser);
 
@@ -31,7 +31,7 @@ class SettingsScreen extends StatelessWidget {
 }
 
 class BodyLayout extends StatefulWidget {
-  final CubeUser? currentUser;
+  final CubeUser currentUser;
 
   BodyLayout(this.currentUser);
 
@@ -44,7 +44,7 @@ class BodyLayout extends StatefulWidget {
 class _BodyLayoutState extends State<BodyLayout> {
   static const String TAG = "_BodyLayoutState";
 
-  final CubeUser? currentUser;
+  final CubeUser currentUser;
   var _isUsersContinues = false;
   String? _avatarUrl = "";
   final TextEditingController _loginFilter = new TextEditingController();
@@ -55,16 +55,8 @@ class _BodyLayoutState extends State<BodyLayout> {
   _BodyLayoutState(this.currentUser) {
     _loginFilter.addListener(_loginListen);
     _nameFilter.addListener(_nameListen);
-    _nameFilter.text = currentUser!.fullName!;
-    _loginFilter.text = currentUser!.login!;
-  }
-
-  _searchUser(value) {
-    log("searchUser _user= $value");
-    if (value != null)
-      setState(() {
-        _isUsersContinues = true;
-      });
+    _nameFilter.text = currentUser.fullName!;
+    _loginFilter.text = currentUser.login!;
   }
 
   void _loginListen() {
@@ -120,18 +112,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   Widget _buildAvatarFields() {
-    Widget avatarCircle = CircleAvatar(
-      backgroundImage:
-          currentUser!.avatar != null && currentUser!.avatar!.isNotEmpty
-              ? NetworkImage(currentUser!.avatar!)
-              : null,
-      backgroundColor: greyColor2,
-      radius: 50,
-      child: getAvatarTextWidget(
-        currentUser!.avatar != null && currentUser!.avatar!.isNotEmpty,
-        currentUser!.fullName!.substring(0, 2).toUpperCase(),
-      ),
-    );
+    Widget avatarCircle = getUserAvatarWidget(currentUser, 50);
 
     return new Stack(
       children: <Widget>[
@@ -174,7 +155,7 @@ class _BodyLayoutState extends State<BodyLayout> {
     uploadImageFuture.then((cubeFile) {
       _avatarUrl = cubeFile.getPublicUrl();
       setState(() {
-        currentUser!.avatar = _avatarUrl;
+        currentUser.avatar = _avatarUrl;
       });
     }).catchError((exception) {
       _processUpdateUserError(exception);
@@ -213,7 +194,11 @@ class _BodyLayoutState extends State<BodyLayout> {
           new TextButton(
             child: new Text('Logout'),
             onPressed: _logout,
-          )
+          ),
+          TextButton(
+            child: new Text('Delete user?'),
+            onPressed: _deleteUserPressed,
+          ),
         ],
       ),
     );
@@ -225,7 +210,7 @@ class _BodyLayoutState extends State<BodyLayout> {
       Fluttertoast.showToast(msg: 'Nothing to save');
       return;
     }
-    var userToUpdate = CubeUser()..id = currentUser!.id;
+    var userToUpdate = CubeUser()..id = currentUser.id;
 
     if (_name.isNotEmpty) userToUpdate.fullName = _name;
     if (_login.isNotEmpty) userToUpdate.login = _login;
@@ -274,6 +259,52 @@ class _BodyLayoutState extends State<BodyLayout> {
                   CubeChatConnection.instance.destroy();
                   PushNotificationsManager.instance.unsubscribe();
                   SharedPrefs.instance.deleteUser();
+                  Navigator.pop(context); // cancel current screen
+                  _navigateToLoginScreen(context);
+                });
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteUserPressed() {
+    print('_deleteUserPressed $_login');
+    _userDelete();
+  }
+
+  void _userDelete() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Delete user"),
+          content: Text("Are you sure you want to delete current user?"),
+          actions: <Widget>[
+            TextButton(
+              child: Text("CANCEL"),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text("OK"),
+              onPressed: () async {
+                CubeChatConnection.instance.destroy();
+                await SharedPrefs.instance.deleteUser();
+
+                deleteUser(currentUser.id!).then(
+                  (voidValue) {
+                    Navigator.pop(context); // cancel current Dialog
+                  },
+                ).catchError(
+                  (onError) {
+                    Navigator.pop(context); // cancel current Dialog
+                  },
+                ).whenComplete(() async {
+                  await PushNotificationsManager.instance.unsubscribe();
                   Navigator.pop(context); // cancel current screen
                   _navigateToLoginScreen(context);
                 });

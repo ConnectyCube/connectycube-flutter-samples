@@ -1,14 +1,8 @@
-import 'dart:typed_data';
-
-import 'package:flutter/foundation.dart';
-import 'package:universal_io/io.dart';
-
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import 'chat_dialog_screen.dart';
 import '../src/utils/api_utils.dart';
 import '../src/utils/consts.dart';
 import '../src/widgets/common.dart';
@@ -54,8 +48,6 @@ class NewChatScreenState extends State<NewChatScreen> {
   final List<CubeUser?> users;
   final TextEditingController _nameFilter = new TextEditingController();
 
-  Uint8List? _image;
-
   NewChatScreenState(this.currentUser, this._cubeDialog, this.users);
 
   @override
@@ -96,15 +88,12 @@ class NewChatScreenState extends State<NewChatScreen> {
 
   _buildGroupFields() {
     getIcon() {
-      if (_image == null) {
-        return Icon(
-          Icons.photo_camera,
-          size: 45.0,
-          color: blueColor,
-        );
-      } else {
-        return Image.memory(_image!, width: 45.0, height: 45.0);
-      }
+      return getDialogAvatarWidget(_cubeDialog, 45,
+          placeholder: Icon(
+            Icons.add_a_photo,
+            size: 45.0,
+            color: blueColor,
+          ));
     }
 
     return Column(
@@ -116,11 +105,15 @@ class NewChatScreenState extends State<NewChatScreen> {
               elevation: 2.0,
               fillColor: Colors.white,
               child: getIcon(),
-              padding: EdgeInsets.all(10.0),
+              padding: EdgeInsets.all(0),
               shape: CircleBorder(),
+            ),
+            SizedBox(
+              width: 16,
             ),
             Flexible(
               child: TextField(
+                autofocus: true,
                 controller: _nameFilter,
                 decoration: InputDecoration(labelText: 'Group Name...'),
               ),
@@ -146,18 +139,9 @@ class NewChatScreenState extends State<NewChatScreen> {
 
     if (result == null) return;
 
-    var image;
-
-    if(kIsWeb){
-      image = result.files.single.bytes;
-    } else {
-      image = File(result.files.single.path!).readAsBytesSync();
-    }
-
     var uploadImageFuture = getUploadingImageFuture(result);
 
     uploadImageFuture.then((cubeFile) {
-      _image = image;
       var url = cubeFile.getPublicUrl();
       log("_createDialogImage url= $url");
       setState(() {
@@ -173,21 +157,7 @@ class NewChatScreenState extends State<NewChatScreen> {
       return Container(
         child: Column(
           children: <Widget>[
-            Material(
-              child: CircleAvatar(
-                backgroundImage: users[index]!.avatar != null &&
-                        users[index]!.avatar!.isNotEmpty
-                    ? NetworkImage(users[index]!.avatar!)
-                    : null,
-                radius: 25,
-                child: getAvatarTextWidget(
-                    users[index]!.avatar != null &&
-                        users[index]!.avatar!.isNotEmpty,
-                    users[index]!.fullName!.substring(0, 2).toUpperCase()),
-              ),
-              borderRadius: BorderRadius.all(Radius.circular(25.0)),
-              clipBehavior: Clip.hardEdge,
-            ),
+            getUserAvatarWidget(users[index]!, 25),
             Container(
               child: Column(
                 children: <Widget>[
@@ -242,12 +212,10 @@ class NewChatScreenState extends State<NewChatScreen> {
       showDialogMsg("Enter more than 4 character", context);
     } else {
       createDialog(_cubeDialog).then((createdDialog) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => ChatDialogScreen(currentUser, createdDialog),
-          ),
-        );
+        Navigator.pushReplacementNamed(context, 'chat_dialog', arguments: {
+          USER_ARG_NAME: currentUser,
+          DIALOG_ARG_NAME: createdDialog
+        });
       }).catchError((exception) {
         _processDialogError(exception);
       });
