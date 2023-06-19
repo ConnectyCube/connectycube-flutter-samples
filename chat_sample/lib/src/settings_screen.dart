@@ -19,6 +19,13 @@ class SettingsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.close, color: Colors.white),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          automaticallyImplyLeading: false,
           title: Text(
             'Settings',
             style: TextStyle(fontWeight: FontWeight.bold),

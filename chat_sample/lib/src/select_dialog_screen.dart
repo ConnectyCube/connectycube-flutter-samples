@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:chat_sample/src/widgets/common.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -8,9 +7,12 @@ import 'package:intl/intl.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import 'new_dialog_screen.dart';
-import '../src/utils/api_utils.dart';
-import '../src/utils/consts.dart';
+import 'create_dialog_flow.dart';
+import 'settings_screen.dart';
+import 'utils/api_utils.dart';
+import 'utils/consts.dart';
+import 'utils/platform_utils.dart';
+import 'widgets/common.dart';
 
 class SelectDialogScreen extends StatelessWidget {
   static const String TAG = "SelectDialogScreen";
@@ -51,8 +53,7 @@ class SelectDialogScreen extends StatelessWidget {
   }
 
   _openSettings(BuildContext context) {
-    Navigator.pushNamed(context, 'settings',
-        arguments: {USER_ARG_NAME: currentUser});
+    showModal(context: context, child: SettingsScreen(currentUser));
   }
 }
 
@@ -113,7 +114,7 @@ class _BodyLayoutState extends State<BodyLayout> {
       floatingActionButton: FloatingActionButton(
         heroTag: "New dialog",
         child: Icon(
-          Icons.chat,
+          Icons.add_comment,
           color: Colors.white,
         ),
         backgroundColor: Colors.blue,
@@ -123,12 +124,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   void _createNewDialog(BuildContext context) async {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CreateChatScreen(currentUser),
-      ),
-    ).then((value) => refresh());
+    showModal(context: context, child: CreateDialog(currentUser));
   }
 
   void _processGetDialogError(exception) {
@@ -207,86 +203,84 @@ class _BodyLayoutState extends State<BodyLayout> {
           ? Color.fromARGB(100, 168, 228, 160)
           : null,
       child: GestureDetector(
-        child: AbsorbPointer(
-          child: Row(
-            children: <Widget>[
-              Material(
-                child: getDialogAvatar(),
-                borderRadius: BorderRadius.all(Radius.circular(25.0)),
-                clipBehavior: Clip.hardEdge,
-              ),
-              Flexible(
-                child: Container(
-                  child: Column(
-                    children: <Widget>[
-                      Container(
-                        child: Text(
-                          '${dialogList[index].data.name ?? 'Not available'}',
-                          style: TextStyle(
-                              color: primaryColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 20.0,
-                              overflow: TextOverflow.ellipsis),
-                          maxLines: 1,
-                        ),
-                        alignment: Alignment.centerLeft,
-                        margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
-                      ),
-                      Container(
-                        child: Text(
-                          '${dialogList[index].data.lastMessage ?? ''}',
-                          style: TextStyle(
-                              color: primaryColor,
-                              overflow: TextOverflow.ellipsis),
-                          maxLines: 2,
-                        ),
-                        alignment: Alignment.centerLeft,
-                        margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
-                      ),
-                    ],
-                  ),
-                  margin: EdgeInsets.only(left: 20.0),
-                ),
-              ),
-              Visibility(
-                child: IconButton(
-                  iconSize: 25.0,
-                  icon: Icon(
-                    Icons.delete,
-                    color: themeColor,
-                  ),
-                  onPressed: () {
-                    _deleteDialog(context, dialogList[index].data);
-                  },
-                ),
-                maintainSize: true,
-                maintainAnimation: true,
-                maintainState: true,
-                visible: dialogList[index].isSelected,
-              ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${DateFormat('MMM dd').format(dialogList[index].data.lastMessageDateSent != null ? DateTime.fromMillisecondsSinceEpoch(dialogList[index].data.lastMessageDateSent! * 1000) : dialogList[index].data.updatedAt!)}',
-                    style: TextStyle(color: primaryColor),
-                  ),
-                  if (dialogList[index].data.unreadMessageCount != null &&
-                      dialogList[index].data.unreadMessageCount != 0)
+        behavior: HitTestBehavior.translucent,
+        child: Row(
+          children: <Widget>[
+            Material(
+              child: getDialogAvatar(),
+              borderRadius: BorderRadius.all(Radius.circular(25.0)),
+              clipBehavior: Clip.hardEdge,
+            ),
+            Flexible(
+              child: Container(
+                child: Column(
+                  children: <Widget>[
                     Container(
-                        padding:
-                            EdgeInsets.symmetric(vertical: 2, horizontal: 6),
-                        decoration: BoxDecoration(
-                            color: Colors.green,
-                            borderRadius: BorderRadius.circular(10.0)),
-                        child: Text(
-                          dialogList[index].data.unreadMessageCount.toString(),
-                          style: TextStyle(color: Colors.white),
-                        )),
-                ],
+                      child: Text(
+                        '${dialogList[index].data.name ?? 'Not available'}',
+                        style: TextStyle(
+                            color: primaryColor,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16.0,
+                            overflow: TextOverflow.ellipsis),
+                        maxLines: 1,
+                      ),
+                      alignment: Alignment.centerLeft,
+                      margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
+                    ),
+                    Container(
+                      child: Text(
+                        '${dialogList[index].data.lastMessage ?? ''}',
+                        style: TextStyle(
+                            color: primaryColor,
+                            overflow: TextOverflow.ellipsis),
+                        maxLines: 2,
+                      ),
+                      alignment: Alignment.centerLeft,
+                      margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
+                    ),
+                  ],
+                ),
+                margin: EdgeInsets.only(left: 20.0),
               ),
-            ],
-          ),
+            ),
+            Visibility(
+              child: IconButton(
+                iconSize: 25.0,
+                icon: Icon(
+                  Icons.delete,
+                  color: themeColor,
+                ),
+                onPressed: () {
+                  _deleteDialog(context, dialogList[index].data);
+                },
+              ),
+              maintainSize: true,
+              maintainAnimation: true,
+              maintainState: true,
+              visible: dialogList[index].isSelected,
+            ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${DateFormat('MMM dd').format(dialogList[index].data.lastMessageDateSent != null ? DateTime.fromMillisecondsSinceEpoch(dialogList[index].data.lastMessageDateSent! * 1000) : dialogList[index].data.updatedAt!)}',
+                  style: TextStyle(color: primaryColor),
+                ),
+                if (dialogList[index].data.unreadMessageCount != null &&
+                    dialogList[index].data.unreadMessageCount != 0)
+                  Container(
+                      padding: EdgeInsets.symmetric(vertical: 2, horizontal: 6),
+                      decoration: BoxDecoration(
+                          color: Colors.green,
+                          borderRadius: BorderRadius.circular(10.0)),
+                      child: Text(
+                        dialogList[index].data.unreadMessageCount.toString(),
+                        style: TextStyle(color: Colors.white),
+                      )),
+              ],
+            ),
+          ],
         ),
         onLongPress: () {
           setState(() {

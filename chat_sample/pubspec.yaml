@@ -11,8 +11,8 @@ dependencies:
     sdk: flutter
 
   connectycube_sdk: ^2.5.6
-#  connectycube_sdk:
-#      path: ../../flutter-sdk
+  #  connectycube_sdk:
+  #      path: ../../flutter-sdk
   shared_preferences: ^2.0.12
   file_picker: ^5.2.11
   fluttertoast: ^8.0.8
@@ -31,10 +31,16 @@ dependencies:
   path_provider: ^2.0.8
   package_info_plus: ^4.0.0
   uuid: ^3.0.6
+  modal_bottom_sheet: ^3.0.0-pre
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+dependency_overrides:
+  intl: ^0.18.1
 
 
 flutter:

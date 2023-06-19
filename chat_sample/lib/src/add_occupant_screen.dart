@@ -152,20 +152,28 @@ class _BodyLayoutState extends State<BodyLayout> {
           setState(() {
             clearValues();
             userList.addAll(users!.items);
+
+            if (users.items.isEmpty) {
+              userMsg = "Couldn't find user";
+            }
           });
-        }).catchError((onError) {
-          log("getusers catchError: $onError", TAG);
-          setState(() {
-            clearValues();
-            userMsg = "Couldn't find user";
-          });
-        });
+        }).catchError(
+          (onError) {
+            log("getusers catchError: $onError", TAG);
+            setState(() {
+              clearValues();
+              userMsg = "Couldn't find user";
+            });
+          },
+        );
       }
     }
     if (userList.isEmpty)
-      return FittedBox(
-        fit: BoxFit.contain,
-        child: Text(userMsg),
+      return Center(
+        child: Text(
+          userMsg,
+          style: TextStyle(fontSize: 20),
+        ),
       );
     else
       return ListView.builder(

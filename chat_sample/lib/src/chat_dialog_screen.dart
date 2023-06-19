@@ -1,25 +1,26 @@
 import 'dart:async';
-import 'package:chat_sample/src/utils/api_utils.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
-import 'package:universal_io/io.dart';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
+import 'package:universal_io/io.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import 'chat_details_screen.dart';
-import '../src/utils/consts.dart';
-import '../src/widgets/common.dart';
-import '../src/widgets/full_photo.dart';
-import '../src/widgets/loading.dart';
+import 'update_dialog_flow.dart';
+import 'utils/api_utils.dart';
+import 'utils/consts.dart';
+import 'utils/platform_utils.dart';
+import 'widgets/common.dart';
+import 'widgets/full_photo.dart';
+import 'widgets/loading.dart';
 
 class ChatDialogScreen extends StatelessWidget {
   final CubeUser _cubeUser;
@@ -1241,10 +1242,9 @@ class ChatScreenState extends State<ChatScreen> {
 void showChatDetails(
     BuildContext context, CubeUser cubeUser, CubeDialog cubeDialog) async {
   log("_chatDetails= $cubeDialog");
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => ChatDetailsScreen(cubeUser, cubeDialog),
-    ),
-  );
+
+  showModal(context: context, child: UpdateDialog(cubeUser, cubeDialog));
+
+  // Navigator.of(context).pushNamed('chat_details',
+  //     arguments: {USER_ARG_NAME: cubeUser, DIALOG_ARG_NAME: cubeDialog});
 }
