@@ -54,6 +54,8 @@ The app will automatically run on a selected iOS device or simulator.
 - Run command from the Terminal `flutter run -d windows`;
 ### Run on Web
 - Run command from the Terminal `flutter run -d chrome`;
+
+or follow the [link](https://connectycube.github.io/connectycube-flutter-samples/chat_sample/build/web) to take a look at the deployed version
 ### Run on Linux
 - Run command from the Terminal `flutter run -d linux`;
 

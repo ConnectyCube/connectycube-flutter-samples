@@ -1,4 +1,4 @@
-import 'package:chat_sample/src/utils/consts.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 
@@ -12,8 +12,7 @@ class FullPhoto extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          'FULL PHOTO',
-          style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+          'Full photo',
         ),
         centerTitle: true,
       ),

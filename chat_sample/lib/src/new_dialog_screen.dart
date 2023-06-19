@@ -2,53 +2,33 @@ import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_chat.dart';
 
-import '../src/new_group_dialog_screen.dart';
-import '../src/utils/api_utils.dart';
-import '../src/utils/consts.dart';
-import '../src/widgets/common.dart';
+import 'utils/api_utils.dart';
+import 'utils/consts.dart';
+import 'widgets/common.dart';
 
-class CreateChatScreen extends StatefulWidget {
+class CreateChatScreen extends StatelessWidget {
   final CubeUser _cubeUser;
 
   @override
-  State<StatefulWidget> createState() {
-    return _CreateChatScreenState(_cubeUser);
-  }
-
-  CreateChatScreen(this._cubeUser);
-}
-
-class _CreateChatScreenState extends State<CreateChatScreen> {
-  static const String TAG = "_CreateChatScreenState";
-  final CubeUser currentUser;
-
-  _CreateChatScreenState(this.currentUser);
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () => _onBackPressed(context),
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: true,
-          title: Text(
-            'Logged in as ${currentUser.login}',
-          ),
+    return Scaffold(
+      appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.close, color: Colors.white),
+          onPressed: () {
+            Navigator.of(context, rootNavigator: true).pop();
+          },
         ),
-        body: BodyLayout(currentUser),
+        automaticallyImplyLeading: false,
+        title: Text(
+          'Search users...',
+        ),
       ),
+      body: BodyLayout(_cubeUser),
     );
   }
 
-  Future<bool> _onBackPressed(BuildContext context) {
-    Navigator.pop(context);
-    return Future.value(false);
-  }
+  CreateChatScreen(this._cubeUser);
 }
 
 class BodyLayout extends StatefulWidget {
@@ -328,18 +308,17 @@ class _BodyLayoutState extends State<BodyLayout> {
       List<CubeUser> usersToAdd = users
           .map((id) => userList.firstWhere((user) => user.id == id))
           .toList();
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) =>
-              NewGroupDialogScreen(currentUser, newDialog, usersToAdd),
-        ),
-      );
+
+      Navigator.of(context).pushNamed('configure_group_dialog', arguments: {
+        USER_ARG_NAME: currentUser,
+        DIALOG_ARG_NAME: newDialog,
+        SELECTED_USERS_ARG_NAME: usersToAdd,
+      });
     } else {
       CubeDialog newDialog =
           CubeDialog(CubeDialogType.PRIVATE, occupantsIds: users.toList());
       createDialog(newDialog).then((createdDialog) {
-        Navigator.pushReplacementNamed(context, 'chat_dialog', arguments: {
+        Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil('chat_dialog', (route) => false, arguments: {
           USER_ARG_NAME: currentUser,
           DIALOG_ARG_NAME: createdDialog
         });

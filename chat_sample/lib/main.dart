@@ -20,6 +20,7 @@ import 'src/utils/configs.dart' as config;
 import 'src/utils/consts.dart';
 import 'src/utils/platform_utils.dart' as platformUtils;
 import 'src/utils/pref_util.dart';
+import 'src/utils/route_utils.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,6 +52,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
         primarySwatch: Colors.green,
       ),
       home: LoginScreen(),
+      navigatorKey: Navigation.mainNavigation,
       onGenerateRoute: (settings) {
         String? name = settings.name;
         Map<String, dynamic>? args =

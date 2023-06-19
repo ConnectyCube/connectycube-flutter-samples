@@ -156,6 +156,7 @@ class LoginPageState extends State<LoginPage> {
           children: <Widget>[
             Container(
               child: TextField(
+                autofocus: true,
                 keyboardType: TextInputType.text,
                 controller: _loginFilter,
                 decoration: InputDecoration(labelText: 'Login'),

@@ -19,8 +19,7 @@ class NewGroupDialogScreen extends StatelessWidget {
     return Scaffold(
         appBar: AppBar(
           title: Text(
-            'New Group',
-            style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold),
+            'Group configuration...',
           ),
           centerTitle: true,
         ),
@@ -201,18 +200,14 @@ class NewChatScreenState extends State<NewChatScreen> {
     showDialogError(exception, context);
   }
 
-  Future<bool> onBackPress() {
-    Navigator.pop(context);
-    return Future.value(false);
-  }
-
   _createDialog() {
     log("_createDialog _cubeDialog= $_cubeDialog");
     if (_cubeDialog.name == null || _cubeDialog.name!.length < 5) {
       showDialogMsg("Enter more than 4 character", context);
     } else {
       createDialog(_cubeDialog).then((createdDialog) {
-        Navigator.pushReplacementNamed(context, 'chat_dialog', arguments: {
+        Navigator.of(context, rootNavigator: true)
+            .pushNamedAndRemoveUntil('chat_dialog', (route) => false, arguments: {
           USER_ARG_NAME: currentUser,
           DIALOG_ARG_NAME: createdDialog
         });
