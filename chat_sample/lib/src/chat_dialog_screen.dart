@@ -17,7 +17,7 @@ import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'update_dialog_flow.dart';
 import 'utils/api_utils.dart';
 import 'utils/consts.dart';
-import 'utils/platform_utils.dart';
+import 'utils/platform_utils.dart' as platformUtils;
 import 'widgets/common.dart';
 import 'widgets/full_photo.dart';
 import 'widgets/loading.dart';
@@ -191,6 +191,7 @@ class ChatScreenState extends State<ChatScreen> {
       return;
     userStatus = _occupants[status.userId]?.fullName ??
         _occupants[status.userId]?.login ??
+        _occupants[status.userId]?.email ??
         '';
     if (userStatus.isEmpty) return;
     userStatus = "$userStatus is typing ...";
@@ -532,8 +533,7 @@ class ChatScreenState extends State<ChatScreen> {
                         // Text
                         ? Flexible(
                             child: Container(
-                              constraints:
-                                  BoxConstraints(minWidth: 0.0, maxWidth: 480),
+                              constraints: BoxConstraints(maxWidth: 480),
                               padding:
                                   EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
                               decoration: BoxDecoration(
@@ -782,7 +782,7 @@ class ChatScreenState extends State<ChatScreen> {
           Flexible(
             child: Container(
               child: TextField(
-                autofocus: true,
+                autofocus: platformUtils.isDesktop(),
                 focusNode: _editMessageFocusNode,
                 keyboardType: TextInputType.multiline,
                 maxLines: null,
@@ -1243,8 +1243,6 @@ void showChatDetails(
     BuildContext context, CubeUser cubeUser, CubeDialog cubeDialog) async {
   log("_chatDetails= $cubeDialog");
 
-  showModal(context: context, child: UpdateDialog(cubeUser, cubeDialog));
-
-  // Navigator.of(context).pushNamed('chat_details',
-  //     arguments: {USER_ARG_NAME: cubeUser, DIALOG_ARG_NAME: cubeDialog});
+  platformUtils.showModal(
+      context: context, child: UpdateDialog(cubeUser, cubeDialog));
 }

@@ -28,6 +28,14 @@
 				<string>com.googleusercontent.apps.786049777770-mcpccnipn06dc6ieka28eg6nstbj1qe7</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>app-1-786049777770-ios-93d28dab0a8a256e21ca13</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
@@ -66,7 +74,5 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<key>flutter_apns.disable_swizzling</key>
-    <true/>
 </dict>
 </plist>

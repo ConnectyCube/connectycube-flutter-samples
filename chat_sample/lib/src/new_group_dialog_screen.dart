@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import '../src/utils/api_utils.dart';
-import '../src/utils/consts.dart';
-import '../src/widgets/common.dart';
+import 'utils/api_utils.dart';
+import 'utils/consts.dart';
+import 'widgets/common.dart';
 
 class NewGroupDialogScreen extends StatelessWidget {
   final CubeUser currentUser;
@@ -162,7 +162,10 @@ class NewChatScreenState extends State<NewChatScreen> {
                 children: <Widget>[
                   Container(
                     child: Text(
-                      users[index]!.fullName!,
+                      users[index]!.fullName ??
+                          users[index]!.login ??
+                          users[index]!.email ??
+                          '???',
                       style: TextStyle(color: primaryColor),
                     ),
                     width: MediaQuery.of(context).size.width / 4,
@@ -206,8 +209,8 @@ class NewChatScreenState extends State<NewChatScreen> {
       showDialogMsg("Enter more than 4 character", context);
     } else {
       createDialog(_cubeDialog).then((createdDialog) {
-        Navigator.of(context, rootNavigator: true)
-            .pushNamedAndRemoveUntil('chat_dialog', (route) => false, arguments: {
+        Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
+            'chat_dialog', (route) => false, arguments: {
           USER_ARG_NAME: currentUser,
           DIALOG_ARG_NAME: createdDialog
         });

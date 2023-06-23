@@ -31,7 +31,7 @@ class SelectDialogScreen extends StatelessWidget {
         appBar: AppBar(
           automaticallyImplyLeading: false,
           title: Text(
-            'Logged in as ${currentUser.fullName}',
+            'Logged in as ${currentUser.fullName ?? currentUser.login ?? currentUser.email}',
           ),
           actions: <Widget>[
             IconButton(
@@ -143,7 +143,7 @@ class _BodyLayoutState extends State<BodyLayout> {
         setState(() {
           dialogList.clear();
           dialogList.addAll(
-              dialogs!.items.map((dialog) => ListItem(dialog)).toList());
+              dialogs?.items.map((dialog) => ListItem(dialog)).toList() ?? []);
         });
       }).catchError((exception) {
         _processGetDialogError(exception);
