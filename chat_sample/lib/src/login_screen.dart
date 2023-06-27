@@ -153,7 +153,7 @@ class LoginPageState extends State<LoginPage> {
     var loginType = sharedPrefs.getLoginType();
     var user = sharedPrefs.getUser();
     if ((user != null && loginType == null) || loginType != null) {
-      _loginToCCWithSavedUser(context, loginType!);
+      _loginToCCWithSavedUser(context, loginType ?? LoginType.login);
       return SizedBox.shrink();
     } else
       return new Column(
@@ -284,17 +284,21 @@ class LoginPageState extends State<LoginPage> {
 
   List<Widget> createCIPButtons() {
     return [
-      OutlinedButton.icon(
-        style: OutlinedButton.styleFrom(
-          minimumSize: Size(190, 36),
+      Visibility(
+        visible: platformUtils.isPhoneAuthSupported,
+        child: OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            minimumSize: Size(190, 36),
+          ),
+          icon: Icon(
+            Icons.dialpad,
+          ),
+          label: Text('By Phone number'),
+          onPressed: () {
+            platformUtils.showModal(
+                context: context, child: VerifyPhoneNumber());
+          },
         ),
-        icon: Icon(
-          Icons.dialpad,
-        ),
-        label: Text('By Phone number'),
-        onPressed: () {
-          platformUtils.showModal(context: context, child: VerifyPhoneNumber());
-        },
       ),
       SizedBox(
         height: 6,
@@ -313,7 +317,8 @@ class LoginPageState extends State<LoginPage> {
           style: TextStyle(color: Colors.blue.shade700),
         ),
         onPressed: () {
-          Fluttertoast.showToast(msg: 'Coming soon');
+          Fluttertoast.showToast(
+              msg: 'Coming soon', gravity: ToastGravity.BOTTOM);
         },
       ),
     ];

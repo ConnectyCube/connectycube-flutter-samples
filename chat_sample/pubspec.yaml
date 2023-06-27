@@ -33,6 +33,7 @@ dependencies:
   modal_bottom_sheet: ^3.0.0-pre
   firebase_ui_auth: ^1.4.3
   firebase_auth: ^4.6.3
+  flutter_app_badger: ^1.5.0
 
 dev_dependencies:
   flutter_test:

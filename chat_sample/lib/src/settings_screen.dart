@@ -214,7 +214,7 @@ class _BodyLayoutState extends State<BodyLayout> {
       child: new Column(
         children: <Widget>[
           SizedBox(
-            height: 4,
+            height: 6,
           ),
           ElevatedButton(
             style: OutlinedButton.styleFrom(
@@ -222,6 +222,9 @@ class _BodyLayoutState extends State<BodyLayout> {
             ),
             child: new Text('Save'),
             onPressed: _updateUser,
+          ),
+          SizedBox(
+            height: 6,
           ),
           OutlinedButton.icon(
             style: OutlinedButton.styleFrom(
@@ -232,6 +235,9 @@ class _BodyLayoutState extends State<BodyLayout> {
             ),
             label: Text('Logout'),
             onPressed: _logout,
+          ),
+          SizedBox(
+            height: 6,
           ),
           OutlinedButton.icon(
             style: OutlinedButton.styleFrom(

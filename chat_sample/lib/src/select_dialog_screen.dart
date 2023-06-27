@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:chat_sample/src/push_notifications_manager.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -321,6 +322,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   @override
   void initState() {
     super.initState();
+    refreshBadgeCount();
     msgSubscription =
         chatMessagesManager!.chatMessagesStream.listen(onReceiveMessage);
   }
@@ -338,6 +340,8 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   updateDialog(CubeMessage msg) {
+    refreshBadgeCount();
+
     ListItem<CubeDialog>? dialogItem =
         dialogList.firstWhereOrNull((dlg) => dlg.data.dialogId == msg.dialogId);
     if (dialogItem == null) return;

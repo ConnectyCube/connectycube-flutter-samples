@@ -13,6 +13,7 @@ import 'package:uuid/uuid.dart';
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 import 'utils/consts.dart';
+import 'utils/platform_utils.dart';
 import 'utils/pref_util.dart';
 
 class PushNotificationsManager {
@@ -194,36 +195,46 @@ class PushNotificationsManager {
   }
 }
 
-showNotification(RemoteMessage message) async {
+showNotification(RemoteMessage message) {
   log('[showNotification] message: ${message.data}',
       PushNotificationsManager.TAG);
   Map<String, dynamic> data = message.data;
 
-  const AndroidNotificationDetails androidPlatformChannelSpecifics =
-      AndroidNotificationDetails(
-    'messages_channel_id',
-    'Chat messages',
-    channelDescription: 'Chat messages will be received here',
-    importance: Importance.max,
-    priority: Priority.high,
-    showWhen: true,
-    color: Colors.green,
-  );
+  NotificationDetails buildNotificationDetails(
+    int? badge,
+    String threadIdentifier,
+  ) {
+    final DarwinNotificationDetails darwinNotificationDetails =
+        DarwinNotificationDetails(
+      badgeNumber: badge,
+      threadIdentifier: threadIdentifier,
+    );
 
-  // final int? badge = int.tryParse(data['badge'].toString());
-  // final String? threadId = data['ios_thread_id'].toString();
+    final AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'messages_channel_id',
+      'Chat messages',
+      channelDescription: 'Chat messages will be received here',
+      importance: Importance.max,
+      priority: Priority.high,
+      showWhen: true,
+      color: Colors.green,
+    );
 
-  const DarwinNotificationDetails iOSDetails = DarwinNotificationDetails(
-    badgeNumber: 0,
-  );
+    return NotificationDetails(
+        android: androidPlatformChannelSpecifics,
+        iOS: darwinNotificationDetails,
+        macOS: darwinNotificationDetails);
+  }
 
-  const NotificationDetails platformChannelSpecifics = NotificationDetails(
-      android: androidPlatformChannelSpecifics, iOS: iOSDetails);
+  var badge = int.tryParse(data['badge'].toString());
+  var threadId = data['ios_thread_id'] ?? data['dialog_id'] ?? 'ios_thread_id';
+
   FlutterLocalNotificationsPlugin().show(
     6543,
     "Chat sample",
     data['message'].toString(),
-    platformChannelSpecifics,
+    buildNotificationDetails(badge, threadId),
     payload: jsonEncode(data),
   );
 }
@@ -233,6 +244,9 @@ Future<void> onBackgroundMessage(RemoteMessage message) async {
   log('[onBackgroundMessage] message: ${message.data}',
       PushNotificationsManager.TAG);
   showNotification(message);
+  if(!Platform.isIOS) {
+    updateBadgeCount(int.tryParse(message.data['badge'].toString()));
+  }
   return Future.value();
 }
 
