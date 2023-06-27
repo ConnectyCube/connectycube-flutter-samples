@@ -1,5 +1,7 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:universal_io/io.dart';
 
@@ -59,3 +61,17 @@ void showModal({
         });
   }
 }
+
+void updateBadgeCount(int? count) {
+  FlutterAppBadger.isAppBadgeSupported().then((isBadgesSupported) {
+    if (isBadgesSupported) {
+      if (count == null || count == 0) {
+        FlutterAppBadger.removeBadge();
+      } else {
+        FlutterAppBadger.updateBadgeCount(count);
+      }
+    }
+  });
+}
+
+bool get isPhoneAuthSupported => kIsWeb || !isDesktop();

@@ -212,7 +212,10 @@ class ContactScreenState extends ScreenState {
               width: 1.0, // Underline width
             ))),
             child: Text(
-              contactUser!.fullName!,
+              contactUser!.fullName ??
+                  contactUser!.login ??
+                  contactUser!.email ??
+                  '',
               style: TextStyle(
                 color: primaryColor,
                 fontSize: 20, // Text colour here

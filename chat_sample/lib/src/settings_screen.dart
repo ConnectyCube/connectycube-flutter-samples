@@ -1,14 +1,15 @@
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import '../src/push_notifications_manager.dart';
-import '../src/utils/api_utils.dart';
-import '../src/utils/consts.dart';
-import '../src/utils/pref_util.dart';
-import '../src/widgets/common.dart';
+import 'push_notifications_manager.dart';
+import 'utils/api_utils.dart';
+import 'utils/consts.dart';
+import 'utils/pref_util.dart';
+import 'widgets/common.dart';
 
 class SettingsScreen extends StatelessWidget {
   final CubeUser currentUser;
@@ -56,14 +57,18 @@ class _BodyLayoutState extends State<BodyLayout> {
   String? _avatarUrl = "";
   final TextEditingController _loginFilter = new TextEditingController();
   final TextEditingController _nameFilter = new TextEditingController();
+  final TextEditingController _emailFilter = new TextEditingController();
   String _login = "";
   String _name = "";
+  String _email = "";
 
   _BodyLayoutState(this.currentUser) {
     _loginFilter.addListener(_loginListen);
     _nameFilter.addListener(_nameListen);
-    _nameFilter.text = currentUser.fullName!;
-    _loginFilter.text = currentUser.login!;
+    _emailFilter.addListener(_emailListen);
+    _nameFilter.text = currentUser.fullName ?? '';
+    _loginFilter.text = currentUser.login ?? '';
+    _emailFilter.text = currentUser.email ?? '';
   }
 
   void _loginListen() {
@@ -79,6 +84,14 @@ class _BodyLayoutState extends State<BodyLayout> {
       _name = "";
     } else {
       _name = _nameFilter.text.trim();
+    }
+  }
+
+  void _emailListen() {
+    if (_emailFilter.text.isEmpty) {
+      _email = "";
+    } else {
+      _email = _emailFilter.text.trim();
     }
   }
 
@@ -185,6 +198,12 @@ class _BodyLayoutState extends State<BodyLayout> {
               decoration: InputDecoration(labelText: 'Change login'),
             ),
           ),
+          Container(
+            child: TextField(
+              controller: _emailFilter,
+              decoration: InputDecoration(labelText: 'Change e-mail'),
+            ),
+          ),
         ],
       ),
     );
@@ -194,16 +213,45 @@ class _BodyLayoutState extends State<BodyLayout> {
     return new Container(
       child: new Column(
         children: <Widget>[
-          new TextButton(
+          SizedBox(
+            height: 6,
+          ),
+          ElevatedButton(
+            style: OutlinedButton.styleFrom(
+              minimumSize: Size(120, 36),
+            ),
             child: new Text('Save'),
             onPressed: _updateUser,
           ),
-          new TextButton(
-            child: new Text('Logout'),
+          SizedBox(
+            height: 6,
+          ),
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              minimumSize: Size(160, 36),
+            ),
+            icon: Icon(
+              Icons.logout,
+            ),
+            label: Text('Logout'),
             onPressed: _logout,
           ),
-          TextButton(
-            child: new Text('Delete user?'),
+          SizedBox(
+            height: 6,
+          ),
+          OutlinedButton.icon(
+            style: OutlinedButton.styleFrom(
+              foregroundColor: Colors.red.shade300,
+              minimumSize: Size(160, 36),
+            ),
+            icon: Icon(
+              Icons.delete,
+              color: Colors.red,
+            ),
+            label: Text(
+              'Delete user',
+              style: TextStyle(color: Colors.red),
+            ),
             onPressed: _deleteUserPressed,
           ),
         ],
@@ -212,8 +260,12 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   void _updateUser() {
-    print('_updateUser user with $_login and $_name');
-    if (_login.isEmpty && _name.isEmpty && _avatarUrl!.isEmpty) {
+    print(
+        '_updateUser user with login: $_login, name: $_name, e-mail: $_email');
+    if (_login.isEmpty &&
+        _name.isEmpty &&
+        _avatarUrl!.isEmpty &&
+        _email.isEmpty) {
       Fluttertoast.showToast(msg: 'Nothing to save');
       return;
     }
@@ -221,6 +273,7 @@ class _BodyLayoutState extends State<BodyLayout> {
 
     if (_name.isNotEmpty) userToUpdate.fullName = _name;
     if (_login.isNotEmpty) userToUpdate.login = _login;
+    if (_email.isNotEmpty) userToUpdate.email = _email;
     if (_avatarUrl!.isNotEmpty) userToUpdate.avatar = _avatarUrl;
     setState(() {
       _isUsersContinues = true;
@@ -265,6 +318,8 @@ class _BodyLayoutState extends State<BodyLayout> {
                 ).whenComplete(() {
                   CubeChatConnection.instance.destroy();
                   PushNotificationsManager.instance.unsubscribe();
+                  FirebaseAuth.instance.currentUser
+                      ?.unlink(PhoneAuthProvider.PROVIDER_ID);
                   SharedPrefs.instance.deleteUser();
                   Navigator.pop(context); // cancel current screen
                   _navigateToLoginScreen(context);
@@ -278,7 +333,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   void _deleteUserPressed() {
-    print('_deleteUserPressed $_login');
+    print('_deleteUserPressed ${_login.isNotEmpty ? _login : _email}');
     _userDelete();
   }
 

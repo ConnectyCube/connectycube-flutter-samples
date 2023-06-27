@@ -4,7 +4,10 @@ This README introduces [ConnectyCube](https://connectycube.com) Chat code sample
 
 The project contains the following features implemented:
 
-- User authorization
+- User authorization:
+  - By login;
+  - By e-mail;
+  - By Phone number (on supported platforms - Android, iOS, Web);
 - Users search
 - Chat dialogs creation
 - 1-1 messaging

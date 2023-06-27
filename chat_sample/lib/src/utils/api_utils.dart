@@ -8,6 +8,9 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:universal_io/io.dart';
 
+import '../push_notifications_manager.dart';
+import 'platform_utils.dart';
+
 void showDialogError(exception, context) {
   showDialog(
       context: context,
@@ -75,4 +78,10 @@ Future<CubeFile> getUploadingImageFuture(FilePickerResult result) async {
       log("uploadImageFile progress= $progress");
     });
   }
+}
+
+refreshBadgeCount(){
+  getUnreadMessagesCount().then((result) {
+    updateBadgeCount(result['total']);
+  });
 }

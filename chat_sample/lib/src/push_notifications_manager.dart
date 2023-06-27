@@ -1,19 +1,19 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter_apns_only/flutter_apns_only.dart';
-import 'package:package_info_plus/package_info_plus.dart';
-import 'package:universal_io/io.dart';
 
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-
-import 'package:connectycube_sdk/connectycube_sdk.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:universal_io/io.dart';
 import 'package:uuid/uuid.dart';
 
+import 'package:connectycube_sdk/connectycube_sdk.dart';
+
 import 'utils/consts.dart';
+import 'utils/platform_utils.dart';
 import 'utils/pref_util.dart';
 
 class PushNotificationsManager {
@@ -35,6 +35,7 @@ class PushNotificationsManager {
   Future<dynamic> Function(String? payload)? onNotificationClicked;
 
   init() async {
+    log('[init]', TAG);
     FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
 
     await firebaseMessaging.requestPermission(
@@ -57,19 +58,31 @@ class PushNotificationsManager {
             macOS: DarwinInitializationSettings());
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
+      onDidReceiveNotificationResponse:
+          (NotificationResponse notificationResponse) {
+        log('[onDidReceiveNotificationResponse] payload: ${notificationResponse.payload}',
+            TAG);
+        var data = notificationResponse.payload;
+        if (data != null) {
+          if (onNotificationClicked != null) {
+            onNotificationClicked?.call(data);
+          } else {
+            String? dialogId = jsonDecode(data)['dialog_id'];
+            SharedPrefs.instance.saveSelectedDialogId(dialogId ?? '');
+          }
+        }
+      },
+      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
 
     String? token;
-    if (Platform.isAndroid || kIsWeb) {
+    if (Platform.isAndroid || kIsWeb || Platform.isIOS || Platform.isMacOS) {
       firebaseMessaging.getToken().then((token) {
         log('[getToken] token: $token', TAG);
         subscribe(token);
       }).catchError((onError) {
         log('[getToken] onError: $onError', TAG);
       });
-    } else if (Platform.isIOS || Platform.isMacOS) {
-      token = await firebaseMessaging.getAPNSToken();
-      log('[getAPNSToken] token: $token', TAG);
     }
 
     if (!isEmpty(token)) {
@@ -85,36 +98,11 @@ class PushNotificationsManager {
       showNotification(remoteMessage);
     });
 
-    FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
-
     // TODO test after fix https://github.com/FirebaseExtended/flutterfire/issues/4898
     FirebaseMessaging.onMessageOpenedApp.listen((remoteMessage) {
       log('[onMessageOpenedApp] remoteMessage: $remoteMessage', TAG);
       onNotificationClicked?.call(jsonEncode(remoteMessage.data));
     });
-
-    if (Platform.isIOS) {
-      final connector = ApnsPushConnectorOnly();
-
-      connector.configureApns(
-        onLaunch: (message) async {
-          log('[onLaunch] message.payload: ${message.payload}', TAG);
-          var selectedDialogId = message.payload['data']['dialog_id'];
-          if (selectedDialogId != null) {
-            SharedPrefs.instance.init().then((prefs) {
-              prefs.saveSelectedDialogId(selectedDialogId);
-            });
-          }
-        },
-        onResume: (message) async {
-          log('[onResume] message.payload: ${message.payload}', TAG);
-          onNotificationClicked?.call(jsonEncode(message.payload['data']));
-        },
-        onMessage: (message) async {
-          log('[onResume] message.payload: ${message.payload}', TAG);
-        },
-      );
-    }
   }
 
   subscribe(String? token) async {
@@ -134,12 +122,9 @@ class PushNotificationsManager {
     parameters.environment =
         isProduction ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
 
-    if (Platform.isAndroid || kIsWeb) {
+    if (Platform.isAndroid || kIsWeb || Platform.isIOS || Platform.isMacOS) {
       parameters.channel = NotificationsChannels.GCM;
       parameters.platform = CubePlatform.ANDROID;
-    } else if (Platform.isIOS || Platform.isMacOS) {
-      parameters.channel = NotificationsChannels.APNS;
-      parameters.platform = CubePlatform.IOS;
     }
 
     var deviceInfoPlugin = DeviceInfoPlugin();
@@ -210,28 +195,46 @@ class PushNotificationsManager {
   }
 }
 
-showNotification(RemoteMessage message) async {
+showNotification(RemoteMessage message) {
   log('[showNotification] message: ${message.data}',
       PushNotificationsManager.TAG);
   Map<String, dynamic> data = message.data;
 
-  const AndroidNotificationDetails androidPlatformChannelSpecifics =
-      AndroidNotificationDetails(
-    'messages_channel_id',
-    'Chat messages',
-    channelDescription: 'Chat messages will be received here',
-    importance: Importance.max,
-    priority: Priority.high,
-    showWhen: true,
-    color: Colors.green,
-  );
-  const NotificationDetails platformChannelSpecifics =
-      NotificationDetails(android: androidPlatformChannelSpecifics);
+  NotificationDetails buildNotificationDetails(
+    int? badge,
+    String threadIdentifier,
+  ) {
+    final DarwinNotificationDetails darwinNotificationDetails =
+        DarwinNotificationDetails(
+      badgeNumber: badge,
+      threadIdentifier: threadIdentifier,
+    );
+
+    final AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'messages_channel_id',
+      'Chat messages',
+      channelDescription: 'Chat messages will be received here',
+      importance: Importance.max,
+      priority: Priority.high,
+      showWhen: true,
+      color: Colors.green,
+    );
+
+    return NotificationDetails(
+        android: androidPlatformChannelSpecifics,
+        iOS: darwinNotificationDetails,
+        macOS: darwinNotificationDetails);
+  }
+
+  var badge = int.tryParse(data['badge'].toString());
+  var threadId = data['ios_thread_id'] ?? data['dialog_id'] ?? 'ios_thread_id';
+
   FlutterLocalNotificationsPlugin().show(
     6543,
     "Chat sample",
     data['message'].toString(),
-    platformChannelSpecifics,
+    buildNotificationDetails(badge, threadId),
     payload: jsonEncode(data),
   );
 }
@@ -241,6 +244,9 @@ Future<void> onBackgroundMessage(RemoteMessage message) async {
   log('[onBackgroundMessage] message: ${message.data}',
       PushNotificationsManager.TAG);
   showNotification(message);
+  if(!Platform.isIOS) {
+    updateBadgeCount(int.tryParse(message.data['badge'].toString()));
+  }
   return Future.value();
 }
 
@@ -258,7 +264,7 @@ Future<dynamic> onNotificationSelected(String? payload, BuildContext? context) {
       Map<String, dynamic> payloadObject = jsonDecode(payload);
       String? dialogId = payloadObject['dialog_id'];
 
-      log("getNotificationAppLaunchDetails, dialog_id: $dialogId",
+      log("[onSelectNotification] dialog_id: $dialogId",
           PushNotificationsManager.TAG);
 
       getDialogs({'id': dialogId}).then((dialogs) {
@@ -273,4 +279,9 @@ Future<dynamic> onNotificationSelected(String? payload, BuildContext? context) {
   } else {
     return Future.value();
   }
+}
+
+@pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse notificationResponse) {
+  log('[notificationTapBackground] payload: ${notificationResponse.payload}');
 }
