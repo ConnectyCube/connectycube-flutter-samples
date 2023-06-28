@@ -6,6 +6,7 @@ import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:universal_io/io.dart';
 
 import '../managers/push_notifications_manager.dart';
@@ -55,8 +56,8 @@ Future<Map<int, CubeUser>> getUsersByIds(Set<int> ids) async {
   Completer<Map<int, CubeUser>> completer = Completer();
   Map<int, CubeUser> users = HashMap();
   try {
-    var result = await (getAllUsersByIds(ids)
-        as FutureOr<PagedResult<CubeUser>>);
+    var result =
+        await (getAllUsersByIds(ids) as FutureOr<PagedResult<CubeUser>>);
     users.addAll(Map.fromIterable(result.items,
         key: (item) => item.id, value: (item) => item));
   } catch (ex) {
@@ -66,22 +67,27 @@ Future<Map<int, CubeUser>> getUsersByIds(Set<int> ids) async {
   return completer.future;
 }
 
-
 Future<CubeFile> getUploadingImageFuture(FilePickerResult result) async {
   // there possible to upload the file as an array of bytes, but here showed two ways just as an example
-  if(kIsWeb){
-     return uploadRawFile(result.files.single.bytes!, result.files.single.name, isPublic: true, onProgress: (progress) {
+  if (kIsWeb) {
+    return uploadRawFile(result.files.single.bytes!, result.files.single.name,
+        isPublic: true, onProgress: (progress) {
       log("uploadImageFile progress= $progress");
     });
   } else {
-    return uploadFile(File(result.files.single.path!), isPublic: true, onProgress: (progress) {
+    return uploadFile(File(result.files.single.path!), isPublic: true,
+        onProgress: (progress) {
       log("uploadImageFile progress= $progress");
     });
   }
 }
 
-refreshBadgeCount(){
-  getUnreadMessagesCount().then((result) {
-    updateBadgeCount(result['total']);
+refreshBadgeCount() {
+  FlutterAppBadger.isAppBadgeSupported().then((isBadgesSupported) {
+    if (isBadgesSupported) {
+      getUnreadMessagesCount().then((result) {
+        updateBadgeCount(result['total']);
+      });
+    }
   });
 }
