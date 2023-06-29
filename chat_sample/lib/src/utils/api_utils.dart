@@ -8,7 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:universal_io/io.dart';
 
-import '../push_notifications_manager.dart';
+import '../managers/push_notifications_manager.dart';
 import 'platform_utils.dart';
 
 void showDialogError(exception, context) {

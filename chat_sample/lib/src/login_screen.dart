@@ -8,8 +8,8 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 import '../firebase_options.dart';
+import 'managers/push_notifications_manager.dart';
 import 'phone_auth_flow.dart';
-import 'push_notifications_manager.dart';
 import 'utils/api_utils.dart';
 import 'utils/consts.dart';
 import 'utils/platform_utils.dart' as platformUtils;

@@ -5,7 +5,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import 'push_notifications_manager.dart';
+import 'managers/push_notifications_manager.dart';
 import 'utils/api_utils.dart';
 import 'utils/consts.dart';
 import 'utils/pref_util.dart';
