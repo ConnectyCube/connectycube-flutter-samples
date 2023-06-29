@@ -2,6 +2,8 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:connectycube_sdk/connectycube_chat.dart';
 import 'package:flutter/material.dart';
 
+import '../utils/consts.dart';
+
 Widget getAvatarTextWidget(bool condition, String? text, {double? fontSize}) {
   if (condition)
     return SizedBox.shrink();
@@ -56,4 +58,61 @@ Widget getAvatarWidget(String? imageUrl, String? name, double radius,
       ),
     ),
   );
+}
+
+Widget getMessageStateWidget(MessageState? state) {
+  var result;
+
+  switch (state) {
+    case MessageState.read:
+      result = Stack(children: <Widget>[
+        Icon(
+          Icons.check_rounded,
+          size: 15.0,
+          color: Colors.green,
+        ),
+        Padding(
+          padding: EdgeInsets.only(left: 4,),
+          child: Icon(
+            Icons.check_rounded,
+            size: 15.0,
+            color: Colors.green,
+          ),
+        )
+      ]);
+
+      break;
+    case MessageState.delivered:
+      result = Stack(children: <Widget>[
+        Icon(
+          Icons.check_rounded,
+          size: 15.0,
+          color: greyColor,
+        ),
+        Padding(
+          padding: EdgeInsets.only(left: 4),
+          child: Icon(
+            Icons.check_rounded,
+            size: 15.0,
+            color: greyColor,
+          ),
+        )
+      ]);
+
+      break;
+    case MessageState.sent:
+      result = Icon(
+        Icons.check_rounded,
+        size: 15.0,
+        color: greyColor,
+      );
+
+      break;
+    default:
+      result = SizedBox.shrink();
+
+      break;
+  }
+
+  return result;
 }

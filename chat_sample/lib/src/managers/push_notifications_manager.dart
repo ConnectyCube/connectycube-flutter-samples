@@ -12,9 +12,9 @@ import 'package:uuid/uuid.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import 'utils/consts.dart';
-import 'utils/platform_utils.dart';
-import 'utils/pref_util.dart';
+import '../utils/consts.dart';
+import '../utils/platform_utils.dart';
+import '../utils/pref_util.dart';
 
 class PushNotificationsManager {
   static const TAG = "PushNotificationsManager";

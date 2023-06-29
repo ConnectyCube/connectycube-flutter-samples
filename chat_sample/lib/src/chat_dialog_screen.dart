@@ -14,6 +14,7 @@ import 'package:universal_io/io.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
+import 'managers/chat_manager.dart';
 import 'update_dialog_flow.dart';
 import 'utils/api_utils.dart';
 import 'utils/consts.dart';
@@ -252,6 +253,10 @@ class ChatScreenState extends State<ChatScreen> {
     addMessageToListView(message);
     listScrollController.animateTo(0.0,
         duration: Duration(milliseconds: 300), curve: Curves.easeOut);
+    if (_cubeDialog.type == CubeDialogType.PRIVATE) {
+      ChatManager.instance.sentMessagesController
+          .add(message..dialogId = _cubeDialog.dialogId);
+    }
   }
 
   updateReadDeliveredStatusMessage(MessageStatus status, bool isRead) {
@@ -333,6 +338,9 @@ class ChatScreenState extends State<ChatScreen> {
         } else {
           _unreadMessages.add(message);
         }
+
+        ChatManager.instance.readMessagesController.add(MessageStatus(
+            _cubeUser.id!, message.messageId!, _cubeDialog.dialogId!));
       }
     }
 
@@ -362,45 +370,13 @@ class ChatScreenState extends State<ChatScreen> {
 
       if (messageIsRead()) {
         log("[getReadDeliveredWidget] if messageIsRead");
-        return Stack(children: <Widget>[
-          Icon(
-            Icons.check,
-            size: 15.0,
-            color: blueColor,
-          ),
-          Padding(
-            padding: EdgeInsets.only(left: 8),
-            child: Icon(
-              Icons.check,
-              size: 15.0,
-              color: blueColor,
-            ),
-          )
-        ]);
+        return getMessageStateWidget(MessageState.read);
       } else if (messageIsDelivered()) {
         log("[getReadDeliveredWidget] if messageIsDelivered");
-        return Stack(children: <Widget>[
-          Icon(
-            Icons.check,
-            size: 15.0,
-            color: greyColor,
-          ),
-          Padding(
-            padding: EdgeInsets.only(left: 8),
-            child: Icon(
-              Icons.check,
-              size: 15.0,
-              color: greyColor,
-            ),
-          )
-        ]);
+        return getMessageStateWidget(MessageState.delivered);
       } else {
         log("[getReadDeliveredWidget] sent");
-        return Icon(
-          Icons.check,
-          size: 15.0,
-          color: greyColor,
-        );
+        return getMessageStateWidget(MessageState.sent);
       }
     }
 

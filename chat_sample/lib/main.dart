@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:firebase_ui_auth/firebase_ui_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -15,7 +14,7 @@ import 'src/chat_details_screen.dart';
 import 'src/chat_dialog_screen.dart';
 import 'src/chat_dialog_resizable_screen.dart';
 import 'src/login_screen.dart';
-import 'src/push_notifications_manager.dart';
+import 'src/managers/push_notifications_manager.dart';
 import 'src/select_dialog_screen.dart';
 import 'src/settings_screen.dart';
 import 'src/utils/auth_utils.dart';

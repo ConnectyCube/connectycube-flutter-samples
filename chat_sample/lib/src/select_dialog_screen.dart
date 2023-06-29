@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:chat_sample/src/push_notifications_manager.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -9,6 +8,7 @@ import 'package:intl/intl.dart';
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 import 'create_dialog_flow.dart';
+import 'managers/chat_manager.dart';
 import 'settings_screen.dart';
 import 'utils/api_utils.dart';
 import 'utils/consts.dart';
@@ -81,10 +81,16 @@ class _BodyLayoutState extends State<BodyLayout> {
   var _isDialogContinues = true;
 
   StreamSubscription<CubeMessage>? msgSubscription;
+  StreamSubscription<MessageStatus>? msgDeliveringSubscription;
+  StreamSubscription<MessageStatus>? msgReadingSubscription;
+  StreamSubscription<MessageStatus>? msgLocalReadingSubscription;
+  StreamSubscription<CubeMessage>? msgSendingSubscription;
   final ChatMessagesManager? chatMessagesManager =
       CubeChatConnection.instance.chatMessagesManager;
   Function(CubeDialog)? onDialogSelectedCallback;
   CubeDialog? selectedDialog;
+
+  Map<String, Set<String>> unreadMessages = {};
 
   _BodyLayoutState(
       this.currentUser, this.selectedDialog, this.onDialogSelectedCallback);
@@ -93,7 +99,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        padding: EdgeInsets.only(bottom: 16, top: 16),
+        padding: EdgeInsets.only(top: 2),
         child: Column(
           children: [
             Visibility(
@@ -166,7 +172,7 @@ class _BodyLayoutState extends State<BodyLayout> {
         separatorBuilder: (context, index) {
           return Divider(
             thickness: 1,
-            indent: 40,
+            indent: 68,
             height: 1,
           );
         },
@@ -207,18 +213,14 @@ class _BodyLayoutState extends State<BodyLayout> {
         behavior: HitTestBehavior.translucent,
         child: Row(
           children: <Widget>[
-            Material(
-              child: getDialogAvatar(),
-              borderRadius: BorderRadius.all(Radius.circular(25.0)),
-              clipBehavior: Clip.hardEdge,
-            ),
+            getDialogAvatar(),
             Flexible(
               child: Container(
                 child: Column(
                   children: <Widget>[
                     Container(
                       child: Text(
-                        '${dialogList[index].data.name ?? 'Not available'}',
+                        '${dialogList[index].data.name ?? 'Unknown dialog'}',
                         style: TextStyle(
                             color: primaryColor,
                             fontWeight: FontWeight.bold,
@@ -227,7 +229,6 @@ class _BodyLayoutState extends State<BodyLayout> {
                         maxLines: 1,
                       ),
                       alignment: Alignment.centerLeft,
-                      margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
                     ),
                     Container(
                       child: Text(
@@ -238,11 +239,10 @@ class _BodyLayoutState extends State<BodyLayout> {
                         maxLines: 2,
                       ),
                       alignment: Alignment.centerLeft,
-                      margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
                     ),
                   ],
                 ),
-                margin: EdgeInsets.only(left: 20.0),
+                margin: EdgeInsets.only(left: 8.0),
               ),
             ),
             Visibility(
@@ -256,21 +256,28 @@ class _BodyLayoutState extends State<BodyLayout> {
                   _deleteDialog(context, dialogList[index].data);
                 },
               ),
-              maintainSize: true,
               maintainAnimation: true,
               maintainState: true,
               visible: dialogList[index].isSelected,
             ),
             Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  '${DateFormat('MMM dd').format(dialogList[index].data.lastMessageDateSent != null ? DateTime.fromMillisecondsSinceEpoch(dialogList[index].data.lastMessageDateSent! * 1000) : dialogList[index].data.updatedAt!)}',
-                  style: TextStyle(color: primaryColor),
+                Row(
+                  children: [
+                    getMessageStateWidget(
+                        dialogList[index].data.lastMessageState),
+                    Text(
+                      '${DateFormat('MMM dd').format(dialogList[index].data.lastMessageDateSent != null ? DateTime.fromMillisecondsSinceEpoch(dialogList[index].data.lastMessageDateSent! * 1000) : dialogList[index].data.updatedAt!)}',
+                      style: TextStyle(color: primaryColor),
+                    ),
+                  ],
                 ),
                 if (dialogList[index].data.unreadMessageCount != null &&
                     dialogList[index].data.unreadMessageCount != 0)
-                  Container(
+                  Padding(
+                    padding: EdgeInsets.only(top: 4),
+                    child: Container(
                       padding: EdgeInsets.symmetric(vertical: 2, horizontal: 6),
                       decoration: BoxDecoration(
                           color: Colors.green,
@@ -278,7 +285,9 @@ class _BodyLayoutState extends State<BodyLayout> {
                       child: Text(
                         dialogList[index].data.unreadMessageCount.toString(),
                         style: TextStyle(color: Colors.white),
-                      )),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ],
@@ -292,7 +301,7 @@ class _BodyLayoutState extends State<BodyLayout> {
           _selectDialog(context, dialogList[index].data);
         },
       ),
-      padding: EdgeInsets.all(10),
+      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
     );
   }
 
@@ -325,6 +334,16 @@ class _BodyLayoutState extends State<BodyLayout> {
     refreshBadgeCount();
     msgSubscription =
         chatMessagesManager!.chatMessagesStream.listen(onReceiveMessage);
+    msgDeliveringSubscription = CubeChatConnection
+        .instance.messagesStatusesManager?.deliveredStream
+        .listen(onMessageDelivered);
+    msgReadingSubscription = CubeChatConnection
+        .instance.messagesStatusesManager?.readStream
+        .listen(onMessageRead);
+    msgLocalReadingSubscription =
+        ChatManager.instance.readMessagesStream.listen(onMessageRead);
+    msgSendingSubscription =
+        ChatManager.instance.sentMessagesStream.listen(onReceiveMessage);
   }
 
   @override
@@ -332,6 +351,10 @@ class _BodyLayoutState extends State<BodyLayout> {
     super.dispose();
     log("dispose", TAG);
     msgSubscription?.cancel();
+    msgDeliveringSubscription?.cancel();
+    msgReadingSubscription?.cancel();
+    msgLocalReadingSubscription?.cancel();
+    msgSendingSubscription?.cancel();
   }
 
   void onReceiveMessage(CubeMessage message) {
@@ -348,12 +371,22 @@ class _BodyLayoutState extends State<BodyLayout> {
 
     setState(() {
       dialogItem.data.lastMessage = msg.body;
+      dialogItem.data.lastMessageId = msg.messageId;
 
       if (msg.senderId != currentUser.id) {
         dialogItem.data.unreadMessageCount =
             dialogItem.data.unreadMessageCount == null
                 ? 1
                 : dialogItem.data.unreadMessageCount! + 1;
+
+        unreadMessages[msg.dialogId!] = <String>[
+          ...unreadMessages[msg.dialogId] ?? [],
+          msg.messageId!
+        ].toSet();
+
+        dialogItem.data.lastMessageState = null;
+      } else {
+        dialogItem.data.lastMessageState = MessageState.sent;
       }
 
       dialogItem.data.lastMessageDateSent = msg.dateSent;
@@ -383,5 +416,52 @@ class _BodyLayoutState extends State<BodyLayout> {
         }
       });
     });
+  }
+
+  void onMessageDelivered(MessageStatus messageStatus) {
+    _updateLastMessageState(messageStatus, MessageState.delivered);
+  }
+
+  void onMessageRead(MessageStatus messageStatus) {
+    _updateLastMessageState(messageStatus, MessageState.read);
+
+    if (messageStatus.userId == currentUser.id &&
+        unreadMessages.containsKey(messageStatus.dialogId)) {
+      if (unreadMessages[messageStatus.dialogId]
+              ?.remove(messageStatus.messageId) ??
+          false) {
+        setState(() {
+          var dialog = dialogList
+              .firstWhereOrNull(
+                  (dlg) => dlg.data.dialogId == messageStatus.dialogId)
+              ?.data;
+
+          if (dialog == null) return;
+
+          dialog.unreadMessageCount = dialog.unreadMessageCount == null ||
+                  dialog.unreadMessageCount == 0
+              ? 0
+              : dialog.unreadMessageCount! - 1;
+        });
+      }
+    }
+  }
+
+  void _updateLastMessageState(
+      MessageStatus messageStatus, MessageState state) {
+    var dialog = dialogList
+        .firstWhereOrNull((dlg) => dlg.data.dialogId == messageStatus.dialogId)
+        ?.data;
+
+    if (dialog == null) return;
+
+    if (messageStatus.messageId == dialog.lastMessageId &&
+        messageStatus.userId != currentUser.id) {
+      if (dialog.lastMessageState != state) {
+        setState(() {
+          dialog.lastMessageState = state;
+        });
+      }
+    }
   }
 }
