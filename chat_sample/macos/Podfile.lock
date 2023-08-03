@@ -8,6 +8,8 @@ PODS:
     - FlutterMacOS
   - emoji_picker_flutter (0.0.1):
     - FlutterMacOS
+  - facebook_auth_desktop (0.0.3):
+    - FlutterMacOS
   - Firebase/Auth (10.10.0):
     - Firebase/CoreOnly
     - FirebaseAuth (~> 10.10.0)
@@ -59,6 +61,8 @@ PODS:
   - flutter_app_badger (1.3.0):
     - FlutterMacOS
   - flutter_local_notifications (0.0.1):
+    - FlutterMacOS
+  - flutter_secure_storage_macos (6.1.1):
     - FlutterMacOS
   - flutter_webrtc (0.9.31):
     - FlutterMacOS
@@ -114,11 +118,13 @@ DEPENDENCIES:
   - desktop_webview_auth (from `Flutter/ephemeral/.symlinks/plugins/desktop_webview_auth/macos`)
   - device_info_plus (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos`)
   - emoji_picker_flutter (from `Flutter/ephemeral/.symlinks/plugins/emoji_picker_flutter/macos`)
+  - facebook_auth_desktop (from `Flutter/ephemeral/.symlinks/plugins/facebook_auth_desktop/macos`)
   - firebase_auth (from `Flutter/ephemeral/.symlinks/plugins/firebase_auth/macos`)
   - firebase_core (from `Flutter/ephemeral/.symlinks/plugins/firebase_core/macos`)
   - firebase_messaging (from `Flutter/ephemeral/.symlinks/plugins/firebase_messaging/macos`)
   - flutter_app_badger (from `Flutter/ephemeral/.symlinks/plugins/flutter_app_badger/macos`)
   - flutter_local_notifications (from `Flutter/ephemeral/.symlinks/plugins/flutter_local_notifications/macos`)
+  - flutter_secure_storage_macos (from `Flutter/ephemeral/.symlinks/plugins/flutter_secure_storage_macos/macos`)
   - flutter_webrtc (from `Flutter/ephemeral/.symlinks/plugins/flutter_webrtc/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - package_info_plus (from `Flutter/ephemeral/.symlinks/plugins/package_info_plus/macos`)
@@ -153,6 +159,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos
   emoji_picker_flutter:
     :path: Flutter/ephemeral/.symlinks/plugins/emoji_picker_flutter/macos
+  facebook_auth_desktop:
+    :path: Flutter/ephemeral/.symlinks/plugins/facebook_auth_desktop/macos
   firebase_auth:
     :path: Flutter/ephemeral/.symlinks/plugins/firebase_auth/macos
   firebase_core:
@@ -163,6 +171,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_app_badger/macos
   flutter_local_notifications:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_local_notifications/macos
+  flutter_secure_storage_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/flutter_secure_storage_macos/macos
   flutter_webrtc:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_webrtc/macos
   FlutterMacOS:
@@ -181,6 +191,7 @@ SPEC CHECKSUMS:
   desktop_webview_auth: 9bba53a29c9bc6a4ff621fd0ebfbb18856c4dada
   device_info_plus: 5401765fde0b8d062a2f8eb65510fb17e77cf07f
   emoji_picker_flutter: 533634326b1c5de9a181ba14b9758e6dfe967a20
+  facebook_auth_desktop: 0ec755e3b01669ec14776af18b6945671a788916
   Firebase: facd334e557a979bd03a0b58d90fd56b52b8aba0
   firebase_auth: ff29d8b08bd40ea857980c5e838c48ba3c535f7c
   firebase_core: 33b1cfa8f29afeada24bacee69c3b27e7292346b
@@ -193,6 +204,7 @@ SPEC CHECKSUMS:
   FirebaseMessaging: 8a3b9a8b98ce72a42d22e69865cf662e38d2d6f5
   flutter_app_badger: 55a64b179f8438e89d574320c77b306e327a1730
   flutter_local_notifications: 3805ca215b2fb7f397d78b66db91f6a747af52e4
+  flutter_secure_storage_macos: d56e2d218c1130b262bef8b4a7d64f88d7f9c9ea
   flutter_webrtc: 9903b25f3648e335a40952058b14225e7b0df88d
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a

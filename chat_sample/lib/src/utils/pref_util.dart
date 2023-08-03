@@ -95,6 +95,7 @@ class SharedPrefs {
   }
 
   saveLoginType(LoginType loginType) {
+    log('[saveLoginType] $loginType', 'SharedPrefs');
     prefs.setString(prefLoginType, describeEnum(loginType));
   }
 

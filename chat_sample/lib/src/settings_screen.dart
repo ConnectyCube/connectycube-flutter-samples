@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
@@ -320,6 +321,7 @@ class _BodyLayoutState extends State<BodyLayout> {
                   PushNotificationsManager.instance.unsubscribe();
                   FirebaseAuth.instance.currentUser
                       ?.unlink(PhoneAuthProvider.PROVIDER_ID);
+                  FacebookAuth.instance.logOut();
                   SharedPrefs.instance.deleteUser();
                   Navigator.pop(context); // cancel current screen
                   _navigateToLoginScreen(context);

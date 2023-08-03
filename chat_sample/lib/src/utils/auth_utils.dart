@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
@@ -15,6 +16,22 @@ Future<CubeSession> createPhoneAuthSession() async {
       DefaultFirebaseOptions.currentPlatform.projectId,
       phoneAuthIdToken,
     ).then((_) {
+      return CubeSessionManager.instance.activeSession!;
+    });
+  });
+}
+
+Future<CubeSession> createFacebookAuthSession() async {
+  final AccessToken? accessToken = await FacebookAuth.instance.accessToken;
+  if (accessToken == null) {
+    return createSession();
+  }
+
+  return createSession().then((cubeSession) {
+    return signInUsingSocialProvider(
+      CubeProvider.FACEBOOK,
+      accessToken.token,
+    ).then((cubeUser) {
       return CubeSessionManager.instance.activeSession!;
     });
   });

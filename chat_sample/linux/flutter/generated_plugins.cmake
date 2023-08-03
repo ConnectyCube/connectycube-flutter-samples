@@ -5,6 +5,7 @@
 list(APPEND FLUTTER_PLUGIN_LIST
   desktop_webview_auth
   emoji_picker_flutter
+  flutter_secure_storage_linux
   flutter_webrtc
 )
 

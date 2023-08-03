@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:universal_io/io.dart';
 
-import '../managers/push_notifications_manager.dart';
 import 'platform_utils.dart';
 
 void showDialogError(exception, context) {
@@ -18,7 +17,7 @@ void showDialogError(exception, context) {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text("Error"),
-          content: Text("Something went wrong $exception"),
+          content: Text("Something went wrong: $exception"),
           actions: <Widget>[
             TextButton(
               child: Text("OK"),

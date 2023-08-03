@@ -7,6 +7,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   desktop_webview_auth
   emoji_picker_flutter
   firebase_core
+  flutter_secure_storage_windows
   flutter_webrtc
 )
 

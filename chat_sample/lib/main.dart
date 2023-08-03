@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:universal_io/io.dart';
 
 import 'firebase_options.dart';
@@ -35,6 +36,15 @@ Future<void> main() async {
     );
 
     FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
+
+    if (kIsWeb || defaultTargetPlatform == TargetPlatform.macOS) {
+      await FacebookAuth.i.webAndDesktopInitialize(
+        appId: '786550356345266',
+        cookie: true,
+        xfbml: true,
+        version: 'v16.0',
+      );
+    }
   }
 
   runApp(App());
@@ -131,14 +141,25 @@ class _AppState extends State<App> with WidgetsBindingObserver {
         onSessionRestore: () async {
       SharedPrefs sharedPrefs = await SharedPrefs.instance.init();
 
-      if (LoginType.phone == sharedPrefs.getLoginType()) {
-        return createPhoneAuthSession();
-      }
+      var loginType = sharedPrefs.getLoginType();
 
-      return createSession(sharedPrefs.getUser());
+      switch (loginType) {
+        case LoginType.phone:
+          return createPhoneAuthSession();
+        case LoginType.facebook:
+          return createFacebookAuthSession();
+
+        case LoginType.login:
+        case LoginType.email:
+          return createSession(sharedPrefs.getUser());
+
+        default:
+          return createSession(sharedPrefs.getUser());
+      }
     });
 
-    // setEndpoints("", ""); // set custom API and Char server domains
+    setEndpoints(config.API_ENDPOINT,
+        config.CHAT_ENDPOINT); // set custom API and Char server domains
 
     connectivityStateSubscription =
         Connectivity().onConnectivityChanged.listen((connectivityType) {
@@ -187,12 +208,17 @@ class _AppState extends State<App> with WidgetsBindingObserver {
 
         if (user != null) {
           if (!CubeChatConnection.instance.isAuthenticated()) {
-            if (LoginType.phone == sharedPrefs.getLoginType()) {
-              if(CubeSessionManager.instance.isActiveSessionValid()){
-                user.password = CubeSessionManager.instance.activeSession?.token;
-              } else {
+            var loginType = sharedPrefs.getLoginType();
+            if (loginType != LoginType.login && loginType != LoginType.email) {
+              if (CubeSessionManager.instance.isActiveSessionValid()) {
+                user.password =
+                    CubeSessionManager.instance.activeSession?.token;
+              } else if (LoginType.phone == loginType) {
                 var phoneAuthSession = await createPhoneAuthSession();
                 user.password = phoneAuthSession.token;
+              } else if (LoginType.facebook == loginType) {
+                var facebookAuthSession = await createFacebookAuthSession();
+                user.password = facebookAuthSession.token;
               }
             }
             CubeChatConnection.instance.login(user);
