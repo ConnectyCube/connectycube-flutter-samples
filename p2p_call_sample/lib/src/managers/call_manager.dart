@@ -30,6 +30,7 @@ class CallManager {
   BuildContext? context;
   MediaStream? localMediaStream;
   Map<int, MediaStream> remoteStreams = {};
+  Function(bool, String)? onMicMuted;
 
   init(BuildContext context) {
     this.context = context;
@@ -46,7 +47,8 @@ class CallManager {
   }
 
   destroy() {
-    P2PClient.instance.destroy();
+    _callClient?.destroy();
+    _callClient = null;
   }
 
   void _initCustomMediaConfigs() {
@@ -81,7 +83,8 @@ class CallManager {
         acceptCall(_currentCall!.sessionId, false);
       } else if (callState == CallState.UNKNOWN ||
           callState == CallState.PENDING) {
-        if (callState == CallState.UNKNOWN && (Platform.isIOS || Platform.isAndroid)) {
+        if (callState == CallState.UNKNOWN &&
+            (Platform.isIOS || Platform.isAndroid)) {
           ConnectycubeFlutterCallKit.setCallState(
               sessionId: _currentCall!.sessionId, callState: CallState.PENDING);
         }
@@ -93,11 +96,11 @@ class CallManager {
         localMediaStream = localStream;
       };
 
-      _currentCall?.onRemoteStreamReceived = (session, userId, stream){
+      _currentCall?.onRemoteStreamReceived = (session, userId, stream) {
         remoteStreams[userId] = stream;
       };
 
-      _currentCall?.onRemoteStreamRemoved = (session, userId, stream){
+      _currentCall?.onRemoteStreamRemoved = (session, userId, stream) {
         remoteStreams.remove(userId);
       };
     };
@@ -225,9 +228,8 @@ class CallManager {
     CreateEventParams params = _getCallEventParameters(currentCall);
     params.parameters[PARAM_SIGNAL_TYPE] = SIGNAL_TYPE_START_CALL;
     params.parameters[PARAM_IOS_VOIP] = 1;
-    params.parameters[PARAM_EXPIRATION] =
-        DateTime.now().millisecondsSinceEpoch ~/ 1000 +
-            RTCConfig.instance.noAnswerTimeout;
+    params.parameters[PARAM_EXPIRATION] = 0;
+    params.parameters['ios_push_type'] = 'voip';
 
     createEvent(params.getEventForRequest()).then((cubeEvent) {
       log("Event for offliners created: $cubeEvent");
@@ -261,7 +263,8 @@ class CallManager {
         reject(uuid, true);
       },
       onMuteCall: (mute, uuid) {
-        _currentCall?.setMicrophoneMute(mute);
+        log("[onMicMuted] mute: $mute, uuid: $uuid", TAG);
+        onMicMuted?.call(mute, uuid);
       },
     );
   }
@@ -282,5 +285,9 @@ class CallManager {
     }
 
     return Future.value(CallState.UNKNOWN);
+  }
+
+  void muteCall(String sessionId, bool mute) {
+    CallKitManager.instance.muteCall(sessionId, mute);
   }
 }

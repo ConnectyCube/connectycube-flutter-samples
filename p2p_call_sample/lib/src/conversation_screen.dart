@@ -23,6 +23,7 @@ class ConversationCallScreen extends StatefulWidget {
 }
 
 class _ConversationCallScreenState extends State<ConversationCallScreen>
+    with WidgetsBindingObserver
     implements RTCSessionStateCallback<P2PSession> {
   static const String TAG = "_ConversationCallScreenState";
   final P2PSession _callSession;
@@ -49,29 +50,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   void initState() {
     super.initState();
 
-    if (CallManager.instance.localMediaStream != null) {
-      primaryRenderer = MapEntry(_currentUserId, RTCVideoRenderer());
-      primaryRenderer!.value.initialize().then((value) {
-        primaryRenderer?.value.srcObject =
-            CallManager.instance.localMediaStream;
-      });
-      CallManager.instance.localMediaStream = null;
-    }
-
-    if (CallManager.instance.remoteStreams.isNotEmpty) {
-      minorRenderers.addEntries([
-        ...CallManager.instance.remoteStreams.entries.map((mediaStreamEntry) {
-          var videoRenderer = RTCVideoRenderer();
-          videoRenderer.initialize().then((value) {
-            videoRenderer.srcObject = mediaStreamEntry.value;
-          });
-
-          return MapEntry(mediaStreamEntry.key, videoRenderer);
-        })
-      ]);
-      CallManager.instance.remoteStreams
-          .clear(); //TODO VT check concurrency issue
-    }
+    _initAlreadyReceivedStreams();
 
     _callSession.onLocalStreamReceived = _addLocalMediaStream;
     _callSession.onRemoteStreamReceived = _addRemoteMediaStream;
@@ -86,6 +65,16 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     } else {
       _callSession.startCall();
     }
+
+    CallManager.instance.onMicMuted = (muted, sessionId) {
+      log("[onMicMuted] muted: $muted, sessionId: $sessionId", TAG);
+      setState(() {
+        _isMicMute = muted;
+        _callSession.setMicrophoneMute(_isMicMute);
+      });
+    };
+
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
@@ -379,7 +368,6 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
   Widget _buildPrivateCallLayout(Orientation orientation) {
     return Container(
-      // margin: MediaQuery.of(context).padding,
       child: Stack(children: [
         if (primaryRenderer != null) _buildPrimaryVideoView(orientation),
         if (minorRenderers.isNotEmpty)
@@ -387,8 +375,12 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
               alignment: Alignment.topRight,
               child: Padding(
                 padding: orientation == Orientation.portrait
-                    ? EdgeInsets.only(top: 40, right: 20)
-                    : EdgeInsets.only(right: 20, top: 20),
+                    ? EdgeInsets.only(
+                        top: MediaQuery.of(context).padding.top + 10,
+                        right: MediaQuery.of(context).padding.right + 10)
+                    : EdgeInsets.only(
+                        right: MediaQuery.of(context).padding.right + 10,
+                        top: MediaQuery.of(context).padding.top + 10),
                 child: buildItems(
                         minorRenderers,
                         orientation == Orientation.portrait
@@ -453,117 +445,103 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
               });
             },
             child: AbsorbPointer(
-              child: SizedBox(
+              child: Container(
                 width: itemWidth,
                 height: itemHeight,
-                child: Padding(
-                  padding: EdgeInsets.all(4),
-                  child: Stack(
-                    children: [
-                      Container(
-                        margin: EdgeInsets.all(4),
-                        decoration: ShapeDecoration(
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(2.0),
-                          ),
-                        ),
-                        child: Stack(
-                          children: [
-                            StreamBuilder<CubeMicLevelEvent>(
-                              stream: _statsReportsManager.micLevelStream
-                                  .where((event) => event.userId == entry.key),
-                              builder: (context, snapshot) {
-                                var width = !snapshot.hasData
-                                    ? 0
-                                    : snapshot.data!.micLevel * 4;
+                padding: EdgeInsets.all(4),
+                child: Stack(
+                  children: [
+                    StreamBuilder<CubeMicLevelEvent>(
+                      stream: _statsReportsManager.micLevelStream
+                          .where((event) => event.userId == entry.key),
+                      builder: (context, snapshot) {
+                        var width =
+                            !snapshot.hasData ? 0 : snapshot.data!.micLevel * 4;
 
-                                return Container(
-                                  decoration: ShapeDecoration(
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(2.0),
-                                      side: BorderSide(
-                                          width: width.toDouble(),
-                                          color: Colors.green,
-                                          strokeAlign: 1.0),
-                                    ),
-                                  ),
-                                );
-                              },
+                        return Container(
+                          decoration: ShapeDecoration(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6.0),
+                              side: BorderSide(
+                                  width: width.toDouble(),
+                                  color: Colors.green,
+                                  strokeAlign: 1.0),
                             ),
-                            RTCVideoView(
-                              entry.value,
-                              objectFit: RTCVideoViewObjectFit
-                                  .RTCVideoViewObjectFitCover,
-                              mirror: entry.key == _currentUserId &&
-                                  _isFrontCameraUsed &&
-                                  _enableScreenSharing,
-                            ),
-                          ],
-                        ),
+                          ),
+                        );
+                      },
+                    ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(6.0),
+                      child: RTCVideoView(
+                        entry.value,
+                        objectFit:
+                            RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                        mirror: entry.key == _currentUserId &&
+                            _isFrontCameraUsed &&
+                            _enableScreenSharing,
                       ),
-                      if (entry.key != _currentUserId)
-                        Align(
-                            alignment: Alignment.topCenter,
-                            child: Container(
-                              margin: EdgeInsets.only(top: 8),
-                              child: ClipRRect(
-                                borderRadius:
-                                    BorderRadius.all(Radius.circular(12)),
-                                child: Container(
-                                  padding: EdgeInsets.all(6),
-                                  color: Colors.black26,
-                                  child: StreamBuilder<CubeVideoBitrateEvent>(
-                                    stream: _statsReportsManager
-                                        .videoBitrateStream
-                                        .where((event) =>
-                                            event.userId == entry.key),
-                                    builder: (context, snapshot) {
-                                      if (!snapshot.hasData) {
-                                        return Text(
-                                          '0 kbits/sec',
-                                          style: TextStyle(color: Colors.white),
-                                        );
-                                      } else {
-                                        var videoBitrateForUser =
-                                            snapshot.data!;
-                                        return Text(
-                                          '${videoBitrateForUser.bitRate} kbits/sec',
-                                          style: TextStyle(color: Colors.white),
-                                        );
-                                      }
-                                    },
-                                  ),
+                    ),
+                    if (entry.key != _currentUserId)
+                      Align(
+                          alignment: Alignment.topCenter,
+                          child: Container(
+                            margin: EdgeInsets.only(top: 8),
+                            child: ClipRRect(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(12)),
+                              child: Container(
+                                padding: EdgeInsets.all(6),
+                                color: Colors.black26,
+                                child: StreamBuilder<CubeVideoBitrateEvent>(
+                                  stream: _statsReportsManager
+                                      .videoBitrateStream
+                                      .where(
+                                          (event) => event.userId == entry.key),
+                                  builder: (context, snapshot) {
+                                    if (!snapshot.hasData) {
+                                      return Text(
+                                        '0 kbits/sec',
+                                        style: TextStyle(color: Colors.white),
+                                      );
+                                    } else {
+                                      var videoBitrateForUser = snapshot.data!;
+                                      return Text(
+                                        '${videoBitrateForUser.bitRate} kbits/sec',
+                                        style: TextStyle(color: Colors.white),
+                                      );
+                                    }
+                                  },
                                 ),
                               ),
-                            )),
-                      Align(
-                        alignment: Alignment.bottomCenter,
-                        child: Container(
-                          margin: EdgeInsets.only(bottom: 8),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.all(Radius.circular(12)),
-                            child: Container(
-                              padding: EdgeInsets.all(6),
-                              color: Colors.black26,
-                              child: Text(
-                                entry.key ==
-                                        CubeChatConnection
-                                            .instance.currentUser?.id
-                                    ? 'Me'
-                                    : users
-                                            .where(
-                                                (user) => user.id == entry.key)
-                                            .first
-                                            .fullName ??
-                                        'Unknown',
-                                style: TextStyle(color: Colors.white),
-                              ),
+                            ),
+                          )),
+                    Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        margin: EdgeInsets.only(bottom: 8),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.all(Radius.circular(12)),
+                          child: Container(
+                            padding: EdgeInsets.all(6),
+                            color: Colors.black26,
+                            child: Text(
+                              entry.key ==
+                                      CubeChatConnection
+                                          .instance.currentUser?.id
+                                  ? 'Me'
+                                  : users
+                                          .where((user) => user.id == entry.key)
+                                          .first
+                                          .fullName ??
+                                      'Unknown',
+                              style: TextStyle(color: Colors.white),
                             ),
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -583,11 +561,38 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
               _enableScreenSharing,
         ),
         Align(
+          alignment: Alignment.centerLeft,
+          child: StreamBuilder<CubeMicLevelEvent>(
+            stream: _statsReportsManager.micLevelStream
+                .where((event) => event.userId == primaryRenderer!.key),
+            builder: (context, snapshot) {
+              return Padding(
+                  padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).padding.top + 50,
+                      left: MediaQuery.of(context).padding.left + 15,
+                      bottom: MediaQuery.of(context).padding.bottom + 100),
+                  child: RotatedBox(
+                    quarterTurns: -1,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: 200),
+                      child: LinearProgressIndicator(
+                        value: !snapshot.hasData ? 0 : snapshot.data!.micLevel,
+                      ),
+                    ),
+                  ));
+            },
+          ),
+        ),
+        Align(
           alignment: Alignment.topLeft,
           child: Padding(
             padding: orientation == Orientation.portrait
-                ? EdgeInsets.only(top: 40, left: 20)
-                : EdgeInsets.only(left: 20, top: 20),
+                ? EdgeInsets.only(
+                    top: MediaQuery.of(context).padding.top + 10,
+                    left: MediaQuery.of(context).padding.left + 10)
+                : EdgeInsets.only(
+                    left: MediaQuery.of(context).padding.left + 10,
+                    top: MediaQuery.of(context).padding.top + 10),
             child: FloatingActionButton(
               elevation: 0,
               heroTag: "ToggleScreenFit",
@@ -608,7 +613,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
             alignment: Alignment.topCenter,
             child: Container(
               margin:
-                  EdgeInsets.only(top: MediaQuery.of(context).padding.top + 8),
+                  EdgeInsets.only(top: MediaQuery.of(context).padding.top + 10),
               child: ClipRRect(
                 borderRadius: BorderRadius.all(Radius.circular(12)),
                 child: Container(
@@ -651,7 +656,10 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
 
   Widget _getActionsPanel() {
     return Container(
-      margin: EdgeInsets.only(bottom: 16, left: 8, right: 8),
+      margin: EdgeInsets.only(
+          bottom: MediaQuery.of(context).padding.bottom + 8,
+          left: MediaQuery.of(context).padding.left + 8,
+          right: MediaQuery.of(context).padding.right + 8),
       child: ClipRRect(
         borderRadius: BorderRadius.only(
             bottomLeft: Radius.circular(32),
@@ -796,6 +804,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     setState(() {
       _isMicMute = !_isMicMute;
       _callSession.setMicrophoneMute(_isMicMute);
+      CallManager.instance.muteCall(_callSession.sessionId, _isMicMute);
     });
   }
 
@@ -1035,5 +1044,50 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   @override
   void onDisconnectedFromUser(P2PSession session, int userId) {
     log("onDisconnectedFromUser userId= $userId");
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    log('[didChangeAppLifecycleState] state: $state');
+
+    if (AppLifecycleState.resumed == state) {}
+  }
+
+  void _initAlreadyReceivedStreams() {
+    if (CallManager.instance.remoteStreams.isNotEmpty) {
+      minorRenderers.addEntries([
+        ...CallManager.instance.remoteStreams.entries.map((mediaStreamEntry) {
+          var videoRenderer = RTCVideoRenderer();
+          videoRenderer.initialize().then((value) {
+            videoRenderer.srcObject = mediaStreamEntry.value;
+          });
+
+          return MapEntry(mediaStreamEntry.key, videoRenderer);
+        })
+      ]);
+      // CallManager.instance.remoteStreams
+      //     .clear(); //TODO VT check concurrency issue
+    }
+
+    createLocalRenderer() {
+      var renderer = MapEntry(_currentUserId, RTCVideoRenderer());
+      renderer.value.initialize().then((value) {
+        renderer.value.srcObject = CallManager.instance.localMediaStream;
+      });
+
+      return renderer;
+    }
+
+    if (CallManager.instance.localMediaStream != null) {
+      if (minorRenderers.isNotEmpty) {
+        var tempPrimaryRenderer = minorRenderers.entries.first;
+        primaryRenderer = tempPrimaryRenderer;
+        minorRenderers.remove(tempPrimaryRenderer.key);
+        minorRenderers.addEntries([createLocalRenderer()]);
+      } else {
+        primaryRenderer = createLocalRenderer();
+        // CallManager.instance.localMediaStream = null;
+      }
+    }
   }
 }

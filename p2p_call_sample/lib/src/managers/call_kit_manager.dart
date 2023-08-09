@@ -53,7 +53,14 @@ class CallKitManager {
   /// Event Listener Callbacks for 'connectycube_flutter_call_kit'
   ///
   Future<void> _onCallMuted(bool mute, String uuid) async {
+    log('[_onCallMuted] mute: $mute, uuid: $uuid', TAG);
+    // [mute] - `true` - the call was muted on the CallKit screen, `false` - the call was unmuted
+    // [uuid] - the id of the muted/unmuted call
     onMuteCall.call(mute, uuid);
+  }
+
+  void muteCall(String sessionId, bool mute) {
+    ConnectycubeFlutterCallKit.reportCallMuted(sessionId: sessionId, muted: mute);
   }
 
   Future<void> _onCallAccepted(CallEvent callEvent) async {
