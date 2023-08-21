@@ -30,6 +30,7 @@ class CallManager {
   BuildContext? context;
   MediaStream? localMediaStream;
   Map<int, MediaStream> remoteStreams = {};
+  Function(bool, String)? onMicMuted;
 
   init(BuildContext context) {
     this.context = context;
@@ -46,7 +47,8 @@ class CallManager {
   }
 
   destroy() {
-    P2PClient.instance.destroy();
+    _callClient?.destroy();
+    _callClient = null;
   }
 
   void _initCustomMediaConfigs() {
@@ -81,7 +83,8 @@ class CallManager {
         acceptCall(_currentCall!.sessionId, false);
       } else if (callState == CallState.UNKNOWN ||
           callState == CallState.PENDING) {
-        if (callState == CallState.UNKNOWN) {
+        if (callState == CallState.UNKNOWN &&
+            (Platform.isIOS || Platform.isAndroid)) {
           ConnectycubeFlutterCallKit.setCallState(
               sessionId: _currentCall!.sessionId, callState: CallState.PENDING);
         }
@@ -93,20 +96,29 @@ class CallManager {
         localMediaStream = localStream;
       };
 
-      _currentCall?.onRemoteStreamReceived = (session, userId, stream){
+      _currentCall?.onRemoteStreamReceived = (session, userId, stream) {
         remoteStreams[userId] = stream;
       };
 
-      _currentCall?.onRemoteStreamRemoved = (session, userId, stream){
+      _currentCall?.onRemoteStreamRemoved = (session, userId, stream) {
         remoteStreams.remove(userId);
       };
     };
 
-    _callClient!.onSessionClosed = (callSession) {
+    _callClient!.onSessionClosed = (callSession) async {
       if (_currentCall != null &&
           _currentCall!.sessionId == callSession.sessionId) {
         _currentCall = null;
+        localMediaStream?.getTracks().forEach((track) async {
+          await track.stop();
+        });
+        await localMediaStream?.dispose();
         localMediaStream = null;
+
+        remoteStreams.forEach((key, value) async {
+          await value.dispose();
+        });
+
         remoteStreams.clear();
         CallKitManager.instance.processCallFinished(callSession.sessionId);
       }
@@ -116,6 +128,8 @@ class CallManager {
   void startNewCall(
       BuildContext context, int callType, Set<int> opponents) async {
     if (opponents.isEmpty) return;
+
+    Helper.setAppleAudioIOMode(AppleAudioIOMode.localAndRemote);
 
     P2PSession callSession =
         _callClient!.createCallSession(callType, opponents);
@@ -147,10 +161,10 @@ class CallManager {
 
     if (_currentCall != null) {
       if (context != null) {
-        // if (AppLifecycleState.resumed !=
-        //     WidgetsBinding.instance.lifecycleState) {
-        //   _currentCall?.acceptCall();
-        // }
+        if (AppLifecycleState.resumed !=
+            WidgetsBinding.instance.lifecycleState) {
+          _currentCall?.acceptCall();
+        }
 
         if (!fromCallkit) {
           ConnectycubeFlutterCallKit.reportCallAccepted(sessionId: sessionId);
@@ -163,6 +177,8 @@ class CallManager {
           ),
         );
       }
+
+      Helper.setAppleAudioIOMode(AppleAudioIOMode.localAndRemote);
     }
   }
 
@@ -216,9 +232,8 @@ class CallManager {
     CreateEventParams params = _getCallEventParameters(currentCall);
     params.parameters[PARAM_SIGNAL_TYPE] = SIGNAL_TYPE_START_CALL;
     params.parameters[PARAM_IOS_VOIP] = 1;
-    params.parameters[PARAM_EXPIRATION] =
-        DateTime.now().millisecondsSinceEpoch ~/ 1000 +
-            RTCConfig.instance.noAnswerTimeout;
+    params.parameters[PARAM_EXPIRATION] = 0;
+    params.parameters['ios_push_type'] = 'voip';
 
     createEvent(params.getEventForRequest()).then((cubeEvent) {
       log("Event for offliners created: $cubeEvent");
@@ -252,7 +267,7 @@ class CallManager {
         reject(uuid, true);
       },
       onMuteCall: (mute, uuid) {
-        _currentCall?.setMicrophoneMute(mute);
+        onMicMuted?.call(mute, uuid);
       },
     );
   }
@@ -273,5 +288,9 @@ class CallManager {
     }
 
     return Future.value(CallState.UNKNOWN);
+  }
+
+  void muteCall(String sessionId, bool mute) {
+    CallKitManager.instance.muteCall(sessionId, mute);
   }
 }

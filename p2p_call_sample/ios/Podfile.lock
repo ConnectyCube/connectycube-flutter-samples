@@ -1,21 +1,23 @@
 PODS:
-  - connectycube_flutter_call_kit (2.2.4):
+  - connectycube_flutter_call_kit (2.3.0):
     - Flutter
   - device_info_plus (0.0.1):
     - Flutter
   - Flutter (1.0.0)
-  - flutter_webrtc (0.9.20):
+  - flutter_webrtc (0.9.36):
     - Flutter
-    - WebRTC-SDK (= 104.5112.09)
+    - WebRTC-SDK (= 114.5735.02)
   - package_info_plus (0.4.5):
     - Flutter
-  - path_provider_ios (0.0.1):
+  - path_provider_foundation (0.0.1):
     - Flutter
+    - FlutterMacOS
   - permission_handler_apple (9.0.4):
     - Flutter
-  - shared_preferences_ios (0.0.1):
+  - shared_preferences_foundation (0.0.1):
     - Flutter
-  - WebRTC-SDK (104.5112.09)
+    - FlutterMacOS
+  - WebRTC-SDK (114.5735.02)
 
 DEPENDENCIES:
   - connectycube_flutter_call_kit (from `.symlinks/plugins/connectycube_flutter_call_kit/ios`)
@@ -23,9 +25,9 @@ DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_webrtc (from `.symlinks/plugins/flutter_webrtc/ios`)
   - package_info_plus (from `.symlinks/plugins/package_info_plus/ios`)
-  - path_provider_ios (from `.symlinks/plugins/path_provider_ios/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
-  - shared_preferences_ios (from `.symlinks/plugins/shared_preferences_ios/ios`)
+  - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
 
 SPEC REPOS:
   trunk:
@@ -42,23 +44,23 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_webrtc/ios"
   package_info_plus:
     :path: ".symlinks/plugins/package_info_plus/ios"
-  path_provider_ios:
-    :path: ".symlinks/plugins/path_provider_ios/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
   permission_handler_apple:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
-  shared_preferences_ios:
-    :path: ".symlinks/plugins/shared_preferences_ios/ios"
+  shared_preferences_foundation:
+    :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
 
 SPEC CHECKSUMS:
-  connectycube_flutter_call_kit: 038f42559fc4f2ee60f4c1027385c40f873451ba
-  device_info_plus: e5c5da33f982a436e103237c0c85f9031142abed
+  connectycube_flutter_call_kit: e1e6bcf89ce9b3f1e7a0fdd70e9471260fc222ef
+  device_info_plus: 7545d84d8d1b896cb16a4ff98c19f07ec4b298ea
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  flutter_webrtc: 15c5fb4ea324f3178ff97c0f02b9467b85977e42
-  package_info_plus: 6c92f08e1f853dc01228d6f553146438dafcd14e
-  path_provider_ios: 14f3d2fd28c4fdb42f44e0f751d12861c43cee02
+  flutter_webrtc: 1944895d4e908c4bc722929dc4b9f8620d8e1b2f
+  package_info_plus: fd030dabf36271f146f1f3beacd48f564b0f17f7
+  path_provider_foundation: eaf5b3e458fc0e5fbb9940fb09980e853fe058b8
   permission_handler_apple: 44366e37eaf29454a1e7b1b7d736c2cceaeb17ce
-  shared_preferences_ios: 548a61f8053b9b8a49ac19c1ffbc8b92c50d68ad
-  WebRTC-SDK: 3fa5c6fa717314fade68bffed85737484a28ad0b
+  shared_preferences_foundation: e2dae3258e06f44cc55f49d42024fd8dd03c590c
+  WebRTC-SDK: dd913fd31cfbf1d43b9a22d83f4c6354c960c623
 
 PODFILE CHECKSUM: 8196edc167340adcdf3df4a5328ca28f02c26198
 
