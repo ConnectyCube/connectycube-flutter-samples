@@ -67,7 +67,6 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     }
 
     CallManager.instance.onMicMuted = (muted, sessionId) {
-      log("[onMicMuted] muted: $muted, sessionId: $sessionId", TAG);
       setState(() {
         _isMicMute = muted;
         _callSession.setMicrophoneMute(_isMicMute);

@@ -267,7 +267,6 @@ class CallManager {
         reject(uuid, true);
       },
       onMuteCall: (mute, uuid) {
-        log("[onMicMuted] mute: $mute, uuid: $uuid", TAG);
         onMicMuted?.call(mute, uuid);
       },
     );
