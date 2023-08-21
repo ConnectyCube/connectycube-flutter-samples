@@ -1,10 +1,11 @@
-import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:p2p_call_sample/src/utils/configs.dart';
 import 'package:universal_io/io.dart';
 import 'package:web_browser_detect/web_browser_detect.dart';
+
+import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 import 'login_screen.dart';
 import 'managers/call_manager.dart';
@@ -23,7 +24,6 @@ class ConversationCallScreen extends StatefulWidget {
 }
 
 class _ConversationCallScreenState extends State<ConversationCallScreen>
-    with WidgetsBindingObserver
     implements RTCSessionStateCallback<P2PSession> {
   static const String TAG = "_ConversationCallScreenState";
   final P2PSession _callSession;
@@ -31,7 +31,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   final CubeStatsReportsManager _statsReportsManager =
       CubeStatsReportsManager();
   bool _isCameraEnabled = true;
-  bool _isSpeakerEnabled = true;
+  bool _isSpeakerEnabled = Platform.isIOS ? false : true;
   bool _isMicMute = false;
   bool _isFrontCameraUsed = true;
   final int _currentUserId = CubeChatConnection.instance.currentUser!.id!;
@@ -73,8 +73,6 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
         _callSession.setMicrophoneMute(_isMicMute);
       });
     };
-
-    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
@@ -1044,13 +1042,6 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
   @override
   void onDisconnectedFromUser(P2PSession session, int userId) {
     log("onDisconnectedFromUser userId= $userId");
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    log('[didChangeAppLifecycleState] state: $state');
-
-    if (AppLifecycleState.resumed == state) {}
   }
 
   void _initAlreadyReceivedStreams() {
