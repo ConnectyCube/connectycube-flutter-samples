@@ -350,7 +350,10 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
           trackId: trackId);
 
       if (primaryRenderer?.key == currentUserId ||
-          primaryRenderer?.key == userId) {
+          primaryRenderer?.key == userId ||
+          ((primaryRenderer?.value.srcObject?.getVideoTracks().isEmpty ??
+                  false) &&
+              stream.getVideoTracks().isNotEmpty)) {
         _updatePrimaryUser(userId, true);
       }
     });
@@ -1014,7 +1017,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
       if (newMediaStream.getVideoTracks().isNotEmpty) {
         _callSession
             .addMediaTrack(newMediaStream.getVideoTracks().first)
-            .then((_) {
+            .whenComplete(() {
           log('The track added successfully', TAG);
           setState(() {
             _isCameraEnabled = true;
