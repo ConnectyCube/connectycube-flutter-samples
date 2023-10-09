@@ -318,60 +318,42 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     log("onLayerChanged userId: $userId, layer: $layer", TAG);
   }
 
-  void _addMediaStream(int userId, bool isLocalStream, MediaStream stream,
+  Future<void> _addMediaStream(
+      int userId, bool isLocalStream, MediaStream stream,
       {String? trackId}) async {
-    log("_addMediaStream for user $userId", TAG);
-    if (primaryRenderer == null || primaryRenderer!.key == currentUserId) {
-      if (primaryRenderer == null) {
-        primaryRenderer = MapEntry(userId, RTCVideoRenderer());
-        await primaryRenderer!.value.initialize();
+    if (primaryRenderer == null) {
+      primaryRenderer = MapEntry(userId, RTCVideoRenderer());
+      await primaryRenderer!.value.initialize();
 
-        setState(() {
-          _setSourceForRenderer(primaryRenderer!.value, stream, isLocalStream,
-              trackId: trackId);
-        });
-      } else {
-        var newRender = RTCVideoRenderer();
-        await newRender.initialize();
-
-        _setSourceForRenderer(newRender, stream, isLocalStream,
+      setState(() {
+        _setSourceForRenderer(primaryRenderer!.value, stream, isLocalStream,
             trackId: trackId);
+      });
 
-        setState(() {
-          minorRenderers.addEntries([primaryRenderer!]);
-
-          primaryRenderer = MapEntry(userId, newRender);
-        });
-      }
-
-      _chooseOpponentsStreamsQuality({primaryRenderer!.key: StreamType.high});
-    } else {
-      var newRender = primaryRenderer?.value;
-
-      if (newRender != null && userId == primaryRenderer?.key) {
-        _setSourceForRenderer(newRender, stream, isLocalStream,
-            trackId: trackId);
-
-        return;
-      }
-
-      newRender = minorRenderers[userId];
-
-      if (newRender == null) {
-        newRender = RTCVideoRenderer();
-        await newRender.initialize();
-      }
-
-      _setSourceForRenderer(newRender, stream, isLocalStream, trackId: trackId);
-
-      if (!minorRenderers.containsKey(userId)) {
-        _chooseOpponentsStreamsQuality({userId: StreamType.low});
-
-        setState(() {
-          minorRenderers[userId] = newRender!;
-        });
-      }
+      return;
     }
+
+    if (primaryRenderer?.key == userId) {
+      _setSourceForRenderer(primaryRenderer!.value, stream, isLocalStream,
+          trackId: trackId);
+
+      return;
+    }
+
+    if (minorRenderers[userId] == null) {
+      minorRenderers[userId] = RTCVideoRenderer();
+      await minorRenderers[userId]?.initialize();
+    }
+
+    setState(() {
+      _setSourceForRenderer(minorRenderers[userId]!, stream, isLocalStream,
+          trackId: trackId);
+
+      if (primaryRenderer?.key == currentUserId ||
+          primaryRenderer?.key == userId) {
+        _updatePrimaryUser(userId, true);
+      }
+    });
   }
 
   _setSourceForRenderer(
@@ -444,27 +426,29 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   void _updatePrimaryUser(int userId, bool force) {
-    if (userId == primaryRenderer!.key ||
-        (userId == currentUserId && !force) ||
-        layoutMode == LayoutMode.grid) return;
+    if (layoutMode != LayoutMode.speaker ||
+        !minorRenderers.containsKey(userId) ||
+        userId == primaryRenderer?.key ||
+        (userId == currentUserId && !force)) return;
 
     _chooseOpponentsStreamsQuality({
       userId: StreamType.high,
       primaryRenderer!.key: StreamType.low,
     });
 
-    setState(() {
+    if (primaryRenderer?.key != userId) {
       minorRenderers.addEntries([primaryRenderer!]);
-      primaryRenderer =
-          minorRenderers.entries.where((entry) => entry.key == userId).first;
-      minorRenderers.remove(userId);
-    });
+    }
+
+    primaryRenderer = MapEntry(userId, minorRenderers.remove(userId)!);
   }
 
   void _onSpeakerChanged(int userId) {
     if (userId == currentUserId || layoutMode != LayoutMode.speaker) return;
 
-    _updatePrimaryUser(userId, false);
+    setState(() {
+      _updatePrimaryUser(userId, false);
+    });
   }
 
   @override
@@ -717,7 +701,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     renderers.forEach((key, value) {
       if (value.srcObject?.getVideoTracks().isNotEmpty ?? false) {
         videoItems.add(GestureDetector(
-          onTap: () => _updatePrimaryUser(key, true),
+          onTap: () => setState(() => _updatePrimaryUser(key, true)),
           child: SizedBox(
             width: itemWidth,
             height: itemHeight,
@@ -991,8 +975,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              content:
-                  const Text('Are you sure you want to switch to the Video call?'),
+              content: const Text(
+                  'Are you sure you want to start the sharing of your video?'),
               actions: <Widget>[
                 TextButton(
                   style: TextButton.styleFrom(

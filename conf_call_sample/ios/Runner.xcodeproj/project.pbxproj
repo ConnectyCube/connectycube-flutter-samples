@@ -252,13 +252,13 @@
 				TargetAttributes = {
 					97C146ED1CF9000F007C117D = {
 						CreatedOnToolsVersion = 7.3.1;
-						DevelopmentTeam = 92G479T7LY;
+						DevelopmentTeam = 6B6Z335W9Z;
 						LastSwiftMigration = 1100;
 						ProvisioningStyle = Automatic;
 					};
 					A534AF4728912C96003E435B = {
 						CreatedOnToolsVersion = 13.4.1;
-						DevelopmentTeam = 92G479T7LY;
+						DevelopmentTeam = 6B6Z335W9Z;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -491,7 +491,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = 92G479T7LY;
+				DEVELOPMENT_TEAM = 6B6Z335W9Z;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -504,7 +504,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.connectycube.flutter.conferenceCallSample;
+				PRODUCT_BUNDLE_IDENTIFIER = com.connectycube.flutter.conferenceCallSample.val;
 				PRODUCT_NAME = ConferenceCallsSample;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -630,7 +630,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = 92G479T7LY;
+				DEVELOPMENT_TEAM = 6B6Z335W9Z;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -643,7 +643,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.connectycube.flutter.conferenceCallSample;
+				PRODUCT_BUNDLE_IDENTIFIER = com.connectycube.flutter.conferenceCallSample.val;
 				PRODUCT_NAME = ConferenceCallsSample;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -664,7 +664,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
-				DEVELOPMENT_TEAM = 92G479T7LY;
+				DEVELOPMENT_TEAM = 6B6Z335W9Z;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -677,7 +677,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Flutter",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.connectycube.flutter.conferenceCallSample;
+				PRODUCT_BUNDLE_IDENTIFIER = com.connectycube.flutter.conferenceCallSample.val;
 				PRODUCT_NAME = ConferenceCallsSample;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -698,7 +698,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Conference Calls Sample (Screen Sharing)/Conference Calls Sample (Screen Sharing).entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 0.3.1;
-				DEVELOPMENT_TEAM = 92G479T7LY;
+				DEVELOPMENT_TEAM = 6B6Z335W9Z;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Conference Calls Sample (Screen Sharing)/Info.plist";
@@ -709,7 +709,7 @@
 				MARKETING_VERSION = 0.3.1;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.conferenceCallSample.Conference-Calls-Sample-Screen-Sharing";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.conferenceCallSample.val.Conference-Calls-Sample-Screen-Sharing.val";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
@@ -732,7 +732,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Conference Calls Sample (Screen Sharing)/Conference Calls Sample (Screen Sharing).entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 0.3.1;
-				DEVELOPMENT_TEAM = 92G479T7LY;
+				DEVELOPMENT_TEAM = 6B6Z335W9Z;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Conference Calls Sample (Screen Sharing)/Info.plist";
@@ -742,7 +742,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MARKETING_VERSION = 0.3.1;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.conferenceCallSample.Conference-Calls-Sample-Screen-Sharing";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.conferenceCallSample.val.Conference-Calls-Sample-Screen-Sharing.val";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -763,7 +763,7 @@
 				CODE_SIGN_ENTITLEMENTS = "Conference Calls Sample (Screen Sharing)/Conference Calls Sample (Screen Sharing).entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 0.3.1;
-				DEVELOPMENT_TEAM = 92G479T7LY;
+				DEVELOPMENT_TEAM = 6B6Z335W9Z;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Conference Calls Sample (Screen Sharing)/Info.plist";
@@ -773,7 +773,7 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				MARKETING_VERSION = 0.3.1;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.conferenceCallSample.Conference-Calls-Sample-Screen-Sharing";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.conferenceCallSample.val.Conference-Calls-Sample-Screen-Sharing.val";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
