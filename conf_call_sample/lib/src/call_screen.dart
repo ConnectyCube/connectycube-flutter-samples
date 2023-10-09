@@ -35,50 +35,63 @@ class IncomingCallScreen extends StatelessWidget {
     return WillPopScope(
       onWillPop: () => _onBackPressed(context),
       child: Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.all(36),
-                child: Text(_callName, style: TextStyle(fontSize: 36)),
-              ),
-              Padding(
-                padding: EdgeInsets.all(36),
-                child: Text(_getCallTitle(), style: TextStyle(fontSize: 28)),
-              ),
-              Row(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Padding(
-                    padding: EdgeInsets.only(right: 36),
-                    child: FloatingActionButton(
-                      heroTag: "RejectCall",
-                      child: Icon(
-                        Icons.call_end,
-                        color: Colors.white,
+        body: Container(
+          margin:
+              EdgeInsets.only(top: MediaQuery.of(context).padding.top + 120),
+          child: Align(
+            alignment: Alignment.topCenter,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Text(_callName, style: TextStyle(fontSize: 28)),
+                ),
+                Padding(
+                  padding: EdgeInsets.all(8),
+                  child: Text(_getCallTitle(), style: TextStyle(fontSize: 20)),
+                ),
+                Expanded(
+                  child: SizedBox(),
+                  flex: 1,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(
+                      bottom: MediaQuery.of(context).padding.bottom + 80),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Padding(
+                        padding: EdgeInsets.only(right: 36),
+                        child: FloatingActionButton(
+                          heroTag: "RejectCall",
+                          child: Icon(
+                            Icons.call_end,
+                            color: Colors.white,
+                          ),
+                          backgroundColor: Colors.red,
+                          onPressed: () => _rejectCall(context),
+                        ),
                       ),
-                      backgroundColor: Colors.red,
-                      onPressed: () => _rejectCall(context),
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.only(left: 36),
-                    child: FloatingActionButton(
-                      heroTag: "AcceptCall",
-                      child: Icon(
-                        _callType == CallType.VIDEO_CALL
-                            ? Icons.videocam
-                            : Icons.call,
-                        color: Colors.white,
+                      Padding(
+                        padding: EdgeInsets.only(left: 36),
+                        child: FloatingActionButton(
+                          heroTag: "AcceptCall",
+                          child: Icon(
+                            _callType == CallType.VIDEO_CALL
+                                ? Icons.videocam
+                                : Icons.call,
+                            color: Colors.white,
+                          ),
+                          backgroundColor: Colors.green,
+                          onPressed: () => _acceptCall(context, _callType),
+                        ),
                       ),
-                      backgroundColor: Colors.green,
-                      onPressed: () => _acceptCall(context, _callType),
-                    ),
+                    ],
                   ),
-                ],
-              ),
-            ],
+                )
+              ],
+            ),
           ),
         ),
       ),
@@ -621,80 +634,82 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     return buildItems(allRenderers, itemWidth, itemHeight);
   }
 
-  Widget _buildPrimaryVideoView(Orientation orientation) {
-    return Stack(
+  Widget _buildCallInfoLayout() {
+    return Column(
       children: [
-        GestureDetector(
-          onDoubleTap: () => _switchPrimaryVideoFit(),
-          child: RTCVideoView(
-            primaryRenderer!.value,
-            objectFit: primaryVideoFit,
-            mirror: primaryRenderer!.key == currentUserId &&
-                _isFrontCameraUsed &&
-                _enableScreenSharing,
+        Text(
+          _getCallName(),
+          style: TextStyle(
+            fontSize: 24,
+            color: Colors.white,
+            decoration: TextDecoration.none,
+            shadows: [
+              Shadow(
+                color: Colors.grey.shade900,
+                offset: Offset(2, 1),
+                blurRadius: 12,
+              ),
+            ],
           ),
         ),
-        Align(
-          alignment: Alignment.topCenter,
-          child: Container(
-            margin:
-                EdgeInsets.only(top: MediaQuery.of(context).padding.top + 48),
-            child: Column(
-              children: [
-                Text(
-                  _getCallName(),
-                  style: TextStyle(
-                    fontSize: 24,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        color: Colors.grey.shade900,
-                        offset: Offset(2, 1),
-                        blurRadius: 12,
-                      ),
-                    ],
-                  ),
-                ),
-                Text(
-                  _callStatus,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white,
-                    shadows: [
-                      Shadow(
-                        color: Colors.grey.shade900,
-                        offset: Offset(2, 1),
-                        blurRadius: 12,
-                      ),
-                    ],
-                  ),
-                ),
-                StreamBuilder<int>(
-                    stream: _callTimer.durationStream,
-                    builder: (context, snapshot) {
-                      return Text(
-                        snapshot.hasData
-                            ? formatHHMMSS(snapshot.data!)
-                            : '00:00',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              color: Colors.grey.shade900,
-                              offset: Offset(2, 1),
-                              blurRadius: 12,
-                            ),
-                          ],
-                        ),
-                      );
-                    })
-              ],
-            ),
+        Text(
+          _callStatus,
+          style: TextStyle(
+            fontSize: 14,
+            color: Colors.white,
+            decoration: TextDecoration.none,
+            shadows: [
+              Shadow(
+                color: Colors.grey.shade900,
+                offset: Offset(2, 1),
+                blurRadius: 12,
+              ),
+            ],
           ),
         ),
+        StreamBuilder<int>(
+            stream: _callTimer.durationStream,
+            builder: (context, snapshot) {
+              return Text(
+                snapshot.hasData ? formatHHMMSS(snapshot.data!) : '00:00',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.white,
+                  decoration: TextDecoration.none,
+                  shadows: [
+                    Shadow(
+                      color: Colors.grey.shade900,
+                      offset: Offset(2, 1),
+                      blurRadius: 12,
+                    ),
+                  ],
+                ),
+              );
+            })
       ],
     );
+  }
+
+  Widget _buildPrimaryVideoView(Orientation orientation) {
+    return Stack(children: [
+      GestureDetector(
+        onDoubleTap: () => _switchPrimaryVideoFit(),
+        child: RTCVideoView(
+          primaryRenderer!.value,
+          objectFit: primaryVideoFit,
+          mirror: primaryRenderer!.key == currentUserId &&
+              _isFrontCameraUsed &&
+              _enableScreenSharing,
+        ),
+      ),
+      Align(
+        alignment: Alignment.topCenter,
+        child: Container(
+            margin:
+                EdgeInsets.only(top: MediaQuery.of(context).padding.top + 48),
+            child: _buildCallInfoLayout()),
+      ),
+    ]);
   }
 
   List<Widget> buildItems(Map<int, RTCVideoRenderer> renderers,
@@ -1229,26 +1244,11 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   Widget _buildAudioCallLayout() {
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          Padding(
-            padding: EdgeInsets.only(bottom: 18),
-            child: Text(
-              _getCallName(),
-              style: TextStyle(fontSize: 22),
-            ),
-          ),
-          Padding(
-            padding: EdgeInsets.only(bottom: 4),
-            child: Text(
-              _callStatus,
-              style: TextStyle(fontSize: 12),
-            ),
-          ),
-        ],
-      ),
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Container(
+          margin: EdgeInsets.only(top: MediaQuery.of(context).padding.top + 48),
+          child: _buildCallInfoLayout()),
     );
   }
 
