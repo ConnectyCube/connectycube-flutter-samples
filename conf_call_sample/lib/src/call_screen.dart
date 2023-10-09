@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:io';
 
+import 'package:conf_call_sample/src/utils/duration_timer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -11,14 +13,17 @@ import 'utils/call_manager.dart';
 import 'utils/configs.dart';
 import 'utils/platform_utils.dart';
 import 'utils/speakers_manager.dart';
-import 'utils/video_config.dart';
+import 'utils/string_utils.dart';
 
 class IncomingCallScreen extends StatelessWidget {
   static const String TAG = "IncomingCallScreen";
   final String _meetingId;
   final List<int> _participantIds;
+  final int _callType;
+  final String _callName;
 
-  IncomingCallScreen(this._meetingId, this._participantIds);
+  IncomingCallScreen(
+      this._meetingId, this._participantIds, this._callType, this._callName);
 
   @override
   Widget build(BuildContext context) {
@@ -36,16 +41,11 @@ class IncomingCallScreen extends StatelessWidget {
             children: <Widget>[
               Padding(
                 padding: EdgeInsets.all(36),
+                child: Text(_callName, style: TextStyle(fontSize: 36)),
+              ),
+              Padding(
+                padding: EdgeInsets.all(36),
                 child: Text(_getCallTitle(), style: TextStyle(fontSize: 28)),
-              ),
-              Padding(
-                padding: EdgeInsets.only(top: 36, bottom: 8),
-                child: Text("Members:", style: TextStyle(fontSize: 20)),
-              ),
-              Padding(
-                padding: EdgeInsets.only(bottom: 86),
-                child: Text(_participantIds.join(", "),
-                    style: TextStyle(fontSize: 18)),
               ),
               Row(
                 mainAxisSize: MainAxisSize.min,
@@ -67,11 +67,13 @@ class IncomingCallScreen extends StatelessWidget {
                     child: FloatingActionButton(
                       heroTag: "AcceptCall",
                       child: Icon(
-                        Icons.call,
+                        _callType == CallType.VIDEO_CALL
+                            ? Icons.videocam
+                            : Icons.call,
                         color: Colors.white,
                       ),
                       backgroundColor: Colors.green,
-                      onPressed: () => _acceptCall(context),
+                      onPressed: () => _acceptCall(context, _callType),
                     ),
                   ),
                 ],
@@ -84,18 +86,19 @@ class IncomingCallScreen extends StatelessWidget {
   }
 
   _getCallTitle() {
-    String callType = "Video";
+    String callType = _callType == CallType.VIDEO_CALL ? "Video" : 'Audio';
     return "Incoming $callType call";
   }
 
-  void _acceptCall(BuildContext context) async {
+  void _acceptCall(BuildContext context, int callType) async {
     ConferenceSession callSession = await ConferenceClient.instance
-        .createCallSession(CubeChatConnection.instance.currentUser!.id!);
+        .createCallSession(CubeChatConnection.instance.currentUser!.id!,
+            callType: callType);
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => ConversationCallScreen(
-            callSession, _meetingId, _participantIds, true),
+            callSession, _meetingId, _participantIds, true, _callName),
       ),
     );
   }
@@ -115,21 +118,24 @@ class ConversationCallScreen extends StatefulWidget {
   final String _meetingId;
   final List<int> opponents;
   final bool _isIncoming;
+  final String _callName;
 
   @override
   State<StatefulWidget> createState() {
     return _ConversationCallScreenState(
-        _callSession, _meetingId, opponents, _isIncoming);
+        _callSession, _meetingId, opponents, _isIncoming, _callName);
   }
 
-  ConversationCallScreen(
-      this._callSession, this._meetingId, this.opponents, this._isIncoming);
+  ConversationCallScreen(this._callSession, this._meetingId, this.opponents,
+      this._isIncoming, this._callName);
 }
 
 class _ConversationCallScreenState extends State<ConversationCallScreen> {
   static const String TAG = "_ConversationCallScreenState";
+  static final LayoutMode DEFAULT_LAYOUT_MODE = LayoutMode.speaker;
   final ConferenceSession _callSession;
   CallManager _callManager = CallManager.instance;
+  final String _callName;
   final bool _isIncoming;
   final String _meetingId;
   final List<int> _opponents;
@@ -137,7 +143,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
       CubeStatsReportsManager();
   final SpeakersManager _speakersManager = SpeakersManager();
 
-  LayoutMode layoutMode = LayoutMode.speaker;
+  LayoutMode layoutMode = DEFAULT_LAYOUT_MODE;
+  String _callStatus = 'Waiting...';
   bool _isCameraEnabled = true;
   bool _isSpeakerEnabled = true;
   bool _isMicMute = false;
@@ -146,18 +153,23 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   RTCVideoViewObjectFit primaryVideoFit =
       RTCVideoViewObjectFit.RTCVideoViewObjectFitCover;
   final int currentUserId = CubeChatConnection.instance.currentUser!.id!;
+  DurationTimer _callTimer = DurationTimer();
 
   MapEntry<int, RTCVideoRenderer>? primaryRenderer;
   Map<int, RTCVideoRenderer> minorRenderers = {};
 
-  _ConversationCallScreenState(
-      this._callSession, this._meetingId, this._opponents, this._isIncoming)
-      : _enableScreenSharing = !_callSession.startScreenSharing;
+  _ConversationCallScreenState(this._callSession, this._meetingId,
+      this._opponents, this._isIncoming, this._callName)
+      : _enableScreenSharing = !_callSession.startScreenSharing,
+        _isCameraEnabled = _callSession.callType == CallType.VIDEO_CALL {
+    if (_opponents.length == 1) {
+      layoutMode = LayoutMode.private;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
-    _initCustomMediaConfigs();
     _statsReportsManager.init(_callSession);
     _speakersManager.init(_statsReportsManager, _onSpeakerChanged);
     _callManager.onReceiveRejectCall = _onReceiveRejectCall;
@@ -175,12 +187,18 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     _callSession.joinDialog(_meetingId, ((publishers) {
       log("join session= $publishers", TAG);
 
+      if (publishers.isNotEmpty) {
+        setState(() {
+          _callStatus = 'Connected';
+          _startCallTimer();
+        });
+      }
+
       if (!_isIncoming) {
-        _callManager.startCall(
-            _meetingId, _opponents, _callSession.currentUserId);
+        _callManager.startCall(_meetingId, _opponents,
+            _callSession.currentUserId, _callSession.callType, _callName);
       }
     }), conferenceRole: ConferenceRole.PUBLISHER);
-    // }), conferenceRole: ConferenceRole.LISTENER);
   }
 
   @override
@@ -266,6 +284,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     if (_callSession.allActivePublishers.length < 1) {
       _callManager.stopCall();
       _callSession.leave();
+      _stopCallTimer();
     }
   }
 
@@ -273,6 +292,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     log("_onSessionClosed", TAG);
     _statsReportsManager.dispose();
     Navigator.pop(context);
+    _stopCallTimer();
   }
 
   void onPublishersReceived(publishers) {
@@ -370,80 +390,25 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
         }
       });
     }
+
+    if (publishers.isNotEmpty) {
+      setState(() {
+        _callStatus = 'Connected';
+        _startCallTimer();
+      });
+    }
   }
 
   List<Widget> renderSpeakerModeViews(Orientation orientation) {
     List<Widget> streamsExpanded = [];
 
-    if (primaryRenderer != null) {
+    if (primaryRenderer != null &&
+        (primaryRenderer?.value.srcObject?.getVideoTracks().isNotEmpty ??
+            false)) {
       streamsExpanded.add(
         Expanded(
           flex: 3,
-          child: Stack(
-            children: [
-              RTCVideoView(
-                primaryRenderer!.value,
-                objectFit: primaryVideoFit,
-                mirror: primaryRenderer!.key == currentUserId &&
-                    _isFrontCameraUsed &&
-                    _enableScreenSharing,
-              ),
-              Align(
-                alignment: Alignment.topRight,
-                child: Padding(
-                  padding: orientation == Orientation.portrait
-                      ? EdgeInsets.only(top: 40, right: 20)
-                      : EdgeInsets.only(right: 20, top: 20),
-                  child: FloatingActionButton(
-                    elevation: 0,
-                    heroTag: "ToggleScreenFit",
-                    child: Icon(
-                      primaryVideoFit ==
-                              RTCVideoViewObjectFit.RTCVideoViewObjectFitCover
-                          ? Icons.zoom_in_map
-                          : Icons.zoom_out_map,
-                      color: Colors.white,
-                    ),
-                    onPressed: () => _switchPrimaryVideoFit(),
-                    backgroundColor: Colors.black38,
-                  ),
-                ),
-              ),
-              if (primaryRenderer!.key != currentUserId)
-                Align(
-                  alignment: Alignment.topCenter,
-                  child: Container(
-                    margin: EdgeInsets.only(
-                        top: MediaQuery.of(context).padding.top + 8),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.all(Radius.circular(12)),
-                      child: Container(
-                        padding: EdgeInsets.all(6),
-                        color: Colors.black26,
-                        child: StreamBuilder<CubeVideoBitrateEvent>(
-                          stream: _statsReportsManager.videoBitrateStream.where(
-                              (event) => event.userId == primaryRenderer!.key),
-                          builder: (context, snapshot) {
-                            if (!snapshot.hasData) {
-                              return Text(
-                                '0 kbits/sec',
-                                style: TextStyle(color: Colors.white),
-                              );
-                            } else {
-                              var videoBitrateForUser = snapshot.data!;
-                              return Text(
-                                '${videoBitrateForUser.bitRate} kbits/sec',
-                                style: TextStyle(color: Colors.white),
-                              );
-                            }
-                          },
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
+          child: _buildPrimaryVideoView(orientation),
         ),
       );
     }
@@ -461,7 +426,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
 
     var minorItems = buildItems(minorRenderers, itemWidth, itemHeight);
 
-    if (minorRenderers.isNotEmpty) {
+    if (minorItems.isNotEmpty) {
       var membersList = Expanded(
         flex: 1,
         child: ListView(
@@ -497,7 +462,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   void _onSpeakerChanged(int userId) {
-    if (userId == currentUserId) return;
+    if (userId == currentUserId || layoutMode != LayoutMode.speaker) return;
 
     _updatePrimaryUser(userId, false);
   }
@@ -509,69 +474,50 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
       child: Stack(
         children: [
           Scaffold(
-            backgroundColor: Colors.grey,
-            body: _isVideoCall()
+            backgroundColor: Colors.green.shade100,
+            body: _isVideoTracksPresent()
                 ? OrientationBuilder(
                     builder: (context, orientation) {
-                      return layoutMode == LayoutMode.speaker
-                          ? _buildSpeakerModLayout(orientation)
-                          : _buildGridModLayout(orientation);
+                      return layoutMode == LayoutMode.private
+                          ? _buildPrivateCallLayout(orientation)
+                          : layoutMode == LayoutMode.speaker
+                              ? _buildSpeakerModLayout(orientation)
+                              : _buildGridModLayout(orientation);
                     },
                   )
-                : Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Padding(
-                          padding: EdgeInsets.only(bottom: 24),
-                          child: Text(
-                            "Audio call",
-                            style: TextStyle(fontSize: 28),
-                          ),
-                        ),
-                        Padding(
-                          padding: EdgeInsets.only(bottom: 12),
-                          child: Text(
-                            "Members:",
-                            style: TextStyle(
-                                fontSize: 20, fontStyle: FontStyle.italic),
-                          ),
-                        ),
-                        Text(
-                          _callSession.allActivePublishers.join(", "),
-                          style: TextStyle(fontSize: 20),
-                        ),
-                      ],
-                    ),
-                  ),
+                : _buildAudioCallLayout(),
           ),
           Align(
             alignment: Alignment.bottomCenter,
             child: _getActionsPanel(),
           ),
-          OrientationBuilder(
-            builder: (context, orientation) {
-              return Align(
-                alignment: Alignment.topLeft,
-                child: Container(
-                  margin: orientation == Orientation.portrait
-                      ? EdgeInsets.only(top: 40, left: 20)
-                      : EdgeInsets.only(left: 40, top: 20),
-                  child: FloatingActionButton(
-                    elevation: 0,
-                    heroTag: "ToggleScreenMode",
-                    child: Icon(
-                      layoutMode == LayoutMode.speaker
-                          ? Icons.grid_view_rounded
-                          : Icons.view_sidebar_rounded,
-                      color: Colors.white,
+          Visibility(
+            visible:
+                layoutMode != LayoutMode.private && _isVideoTracksPresent(),
+            child: OrientationBuilder(
+              builder: (context, orientation) {
+                return Align(
+                  alignment: Alignment.topLeft,
+                  child: Container(
+                    margin: orientation == Orientation.portrait
+                        ? EdgeInsets.only(top: 40, left: 20)
+                        : EdgeInsets.only(left: 40, top: 20),
+                    child: FloatingActionButton(
+                      elevation: 0,
+                      heroTag: "ToggleScreenMode",
+                      child: Icon(
+                        layoutMode == LayoutMode.speaker
+                            ? Icons.grid_view_rounded
+                            : Icons.view_sidebar_rounded,
+                        color: Colors.white,
+                      ),
+                      onPressed: () => _switchLayoutMode(),
+                      backgroundColor: Colors.black38,
                     ),
-                    onPressed: () => _switchLayoutMode(),
-                    backgroundColor: Colors.black38,
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -601,6 +547,42 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     });
   }
 
+  Widget _buildPrivateCallLayout(Orientation orientation) {
+    List<Widget> videoItems = [];
+
+    if (primaryRenderer != null &&
+        (primaryRenderer?.value.srcObject?.getVideoTracks().isNotEmpty ??
+            false)) {
+      videoItems.add(_buildPrimaryVideoView(orientation));
+    }
+
+    var minorItem = buildItems(
+            minorRenderers,
+            orientation == Orientation.portrait
+                ? MediaQuery.of(context).size.width / 3
+                : MediaQuery.of(context).size.width / 4,
+            orientation == Orientation.portrait
+                ? MediaQuery.of(context).size.height / 4
+                : MediaQuery.of(context).size.height / 2.5)
+        .firstOrNull;
+
+    if (minorItem != null) {
+      videoItems.add(Align(
+          alignment: Alignment.topRight,
+          child: Padding(
+              padding: orientation == Orientation.portrait
+                  ? EdgeInsets.only(
+                      top: MediaQuery.of(context).padding.top + 10,
+                      right: MediaQuery.of(context).padding.right + 10)
+                  : EdgeInsets.only(
+                      right: MediaQuery.of(context).padding.right + 10,
+                      top: MediaQuery.of(context).padding.top + 10),
+              child: minorItem)));
+    }
+
+    return Stack(children: videoItems);
+  }
+
   Widget _buildSpeakerModLayout(Orientation orientation) {
     return Center(
       child: Container(
@@ -625,7 +607,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
           mainAxisSpacing: 0,
           childAspectRatio: 4 / 3,
         ),
-        padding: EdgeInsets.all(8),
+        padding: EdgeInsets.all(4),
         scrollDirection: Axis.vertical,
         children: _buildGridItems(orientation),
       ),
@@ -652,130 +634,142 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     return buildItems(allRenderers, itemWidth, itemHeight);
   }
 
+  Widget _buildPrimaryVideoView(Orientation orientation) {
+    return Stack(
+      children: [
+        GestureDetector(
+          onDoubleTap: () => _switchPrimaryVideoFit(),
+          child: RTCVideoView(
+            primaryRenderer!.value,
+            objectFit: primaryVideoFit,
+            mirror: primaryRenderer!.key == currentUserId &&
+                _isFrontCameraUsed &&
+                _enableScreenSharing,
+          ),
+        ),
+        Align(
+          alignment: Alignment.topCenter,
+          child: Container(
+            margin:
+                EdgeInsets.only(top: MediaQuery.of(context).padding.top + 48),
+            child: Column(
+              children: [
+                Text(
+                  _getCallName(),
+                  style: TextStyle(
+                    fontSize: 24,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        color: Colors.grey.shade900,
+                        offset: Offset(2, 1),
+                        blurRadius: 12,
+                      ),
+                    ],
+                  ),
+                ),
+                Text(
+                  _callStatus,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        color: Colors.grey.shade900,
+                        offset: Offset(2, 1),
+                        blurRadius: 12,
+                      ),
+                    ],
+                  ),
+                ),
+                StreamBuilder<int>(
+                    stream: _callTimer.durationStream,
+                    builder: (context, snapshot) {
+                      return Text(
+                        snapshot.hasData
+                            ? formatHHMMSS(snapshot.data!)
+                            : '00:00',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              color: Colors.grey.shade900,
+                              offset: Offset(2, 1),
+                              blurRadius: 12,
+                            ),
+                          ],
+                        ),
+                      );
+                    })
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   List<Widget> buildItems(Map<int, RTCVideoRenderer> renderers,
       double itemWidth, double itemHeight) {
-    return renderers.entries
-        .map(
-          (entry) => GestureDetector(
-            onDoubleTap: () => _updatePrimaryUser(entry.key, true),
-            child: SizedBox(
-              width: itemWidth,
-              height: itemHeight,
-              child: Padding(
-                padding: EdgeInsets.all(4),
-                child: Stack(
-                  children: [
-                    Container(
-                      margin: EdgeInsets.all(4),
-                      decoration: ShapeDecoration(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(2.0),
-                          side: BorderSide(
-                            width: 4,
-                            color: Colors.white70,
-                          ),
-                        ),
-                      ),
-                      child: Stack(
-                        children: [
-                          StreamBuilder<CubeMicLevelEvent>(
-                            stream: _statsReportsManager.micLevelStream
-                                .where((event) => event.userId == entry.key),
-                            builder: (context, snapshot) {
-                              var width = !snapshot.hasData
-                                  ? 0
-                                  : snapshot.data!.micLevel * 4;
+    var videoItems = <Widget>[];
 
-                              return Container(
-                                decoration: ShapeDecoration(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(2.0),
-                                    side: BorderSide(
-                                        width: width.toDouble(),
-                                        color: Colors.green,
-                                        strokeAlign: 1.0),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                          RTCVideoView(
-                            entry.value,
-                            objectFit: RTCVideoViewObjectFit
-                                .RTCVideoViewObjectFitCover,
-                            mirror: entry.key == currentUserId &&
-                                _isFrontCameraUsed &&
-                                _enableScreenSharing,
-                          ),
-                        ],
-                      ),
+    renderers.forEach((key, value) {
+      if (value.srcObject?.getVideoTracks().isNotEmpty ?? false) {
+        videoItems.add(GestureDetector(
+          onTap: () => _updatePrimaryUser(key, true),
+          child: SizedBox(
+            width: itemWidth,
+            height: itemHeight,
+            child: Padding(
+              padding: EdgeInsets.all(6),
+              child: Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(12.0),
+                    child: RTCVideoView(
+                      value,
+                      objectFit:
+                          RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                      mirror: key == currentUserId &&
+                          _isFrontCameraUsed &&
+                          _enableScreenSharing,
                     ),
-                    if (entry.key != currentUserId)
-                      Align(
-                          alignment: Alignment.topCenter,
-                          child: Container(
-                            margin: EdgeInsets.only(top: 8),
-                            child: ClipRRect(
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(12)),
-                              child: Container(
-                                padding: EdgeInsets.all(6),
-                                color: Colors.black26,
-                                child: StreamBuilder<CubeVideoBitrateEvent>(
-                                  stream: _statsReportsManager
-                                      .videoBitrateStream
-                                      .where(
-                                          (event) => event.userId == entry.key),
-                                  builder: (context, snapshot) {
-                                    if (!snapshot.hasData) {
-                                      return Text(
-                                        '0 kbits/sec',
-                                        style: TextStyle(color: Colors.white),
-                                      );
-                                    } else {
-                                      var videoBitrateForUser = snapshot.data!;
-                                      return Text(
-                                        '${videoBitrateForUser.bitRate} kbits/sec',
-                                        style: TextStyle(color: Colors.white),
-                                      );
-                                    }
-                                  },
-                                ),
-                              ),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      margin: EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        key == CubeChatConnection.instance.currentUser?.id
+                            ? 'Me'
+                            : users
+                                    .where((user) => user.id == key)
+                                    .first
+                                    .fullName ??
+                                'Unknown',
+                        style: TextStyle(
+                          color: Colors.white,
+                          shadows: [
+                            Shadow(
+                              color: Colors.black,
+                              offset: Offset(2, 1),
+                              blurRadius: 8,
                             ),
-                          )),
-                    Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        margin: EdgeInsets.only(bottom: 8),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.all(Radius.circular(12)),
-                          child: Container(
-                            padding: EdgeInsets.all(6),
-                            color: Colors.black26,
-                            child: Text(
-                              entry.key ==
-                                      CubeChatConnection
-                                          .instance.currentUser?.id
-                                  ? 'Me'
-                                  : users
-                                          .where((user) => user.id == entry.key)
-                                          .first
-                                          .fullName ??
-                                      'Unknown',
-                              style: TextStyle(color: Colors.white),
-                            ),
-                          ),
+                          ],
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
-        )
-        .toList();
+        ));
+      }
+    });
+
+    return videoItems;
   }
 
   Widget _getActionsPanel() {
@@ -833,6 +827,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
                 overlayOpacity: 0.5,
                 children: [
                   SpeedDialChild(
+                    visible: _isLocalVideoPresented(),
                     child: Icon(
                       _enableScreenSharing
                           ? Icons.screen_share
@@ -875,7 +870,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
                     onTap: () => _switchAudioInput(),
                   ),
                   SpeedDialChild(
-                    visible: _enableScreenSharing,
+                    visible: _isLocalVideoPresented() && _enableScreenSharing,
                     child: Icon(
                       Icons.cameraswitch,
                       color: _isVideoEnabled() ? Colors.white : Colors.grey,
@@ -912,6 +907,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   _endCall() {
     _callManager.stopCall();
     _callSession.leave();
+    _stopCallTimer();
   }
 
   Future<bool> _onBackPressed(BuildContext context) {
@@ -990,11 +986,60 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   _toggleCamera() {
-    if (!_isVideoCall()) return;
+    if (!_isVideoCall()) {
+      showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              content:
+                  const Text('Are you sure you want to switch to the Video call?'),
+              actions: <Widget>[
+                TextButton(
+                  style: TextButton.styleFrom(
+                    textStyle: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  child: const Text('No'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    textStyle: Theme.of(context).textTheme.labelLarge,
+                  ),
+                  child: const Text('Yes'),
+                  onPressed: () {
+                    _addVideoTrack();
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          });
+    } else {
+      setState(() {
+        _isCameraEnabled = !_isCameraEnabled;
+        _callSession.setVideoEnabled(_isCameraEnabled);
+      });
+    }
+  }
 
-    setState(() {
-      _isCameraEnabled = !_isCameraEnabled;
-      _callSession.setVideoEnabled(_isCameraEnabled);
+  _addVideoTrack() {
+    navigator.mediaDevices
+        .getUserMedia({'video': getVideoConfig()}).then((newMediaStream) {
+      if (newMediaStream.getVideoTracks().isNotEmpty) {
+        _callSession
+            .addMediaTrack(newMediaStream.getVideoTracks().first)
+            .then((_) {
+          log('The track added successfully', TAG);
+          setState(() {
+            _isCameraEnabled = true;
+            _callSession.callType = CallType.VIDEO_CALL;
+          });
+        }).catchError((onError) {
+          log('Error during adding the track. Error: $onError', TAG);
+        });
+      }
     });
   }
 
@@ -1164,11 +1209,81 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     }
   }
 
-  void _initCustomMediaConfigs() {
-    RTCMediaConfig mediaConfig = RTCMediaConfig.instance;
-    mediaConfig.minHeight = HD_VIDEO.height;
-    mediaConfig.minWidth = HD_VIDEO.width;
+  bool _isVideoTracksPresent() {
+    var hasMinorVideo = false;
+    minorRenderers.forEach((key, value) {
+      if (value.srcObject?.getVideoTracks().isNotEmpty ?? false) {
+        hasMinorVideo = true;
+      }
+    });
+
+    return primaryRenderer != null &&
+            (primaryRenderer?.value.srcObject?.getVideoTracks().isNotEmpty ??
+                false) ||
+        hasMinorVideo;
+  }
+
+  bool _isLocalVideoPresented() {
+    if (primaryRenderer?.key == currentUserId) {
+      return primaryRenderer?.value.srcObject?.getVideoTracks().isNotEmpty ??
+          false;
+    }
+
+    var isLocalVideoPresented = false;
+
+    minorRenderers.forEach((userId, renderer) {
+      if (userId == currentUserId &&
+          (renderer.srcObject?.getVideoTracks().isNotEmpty ?? false)) {
+        isLocalVideoPresented = true;
+      }
+    });
+
+    return isLocalVideoPresented;
+  }
+
+  Widget _buildAudioCallLayout() {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          Padding(
+            padding: EdgeInsets.only(bottom: 18),
+            child: Text(
+              _getCallName(),
+              style: TextStyle(fontSize: 22),
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.only(bottom: 4),
+            child: Text(
+              _callStatus,
+              style: TextStyle(fontSize: 12),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getCallName() {
+    if (_isIncoming) return _callName;
+
+    if (_opponents.length > 1) return 'Group call';
+
+    var opponent = users.firstWhere(
+        (savedUser) => savedUser.id == _opponents.first,
+        orElse: () => CubeUser(fullName: 'Unknown user'));
+
+    return opponent.fullName ?? 'Unknown user';
+  }
+
+  _startCallTimer() {
+    _callTimer.start();
+  }
+
+  _stopCallTimer() {
+    _callTimer.stop();
   }
 }
 
-enum LayoutMode { speaker, grid }
+enum LayoutMode { speaker, grid, private }

@@ -129,7 +129,16 @@ class _BodyLayoutState extends State<BodyLayout> {
                     color: Colors.white,
                   ),
                   backgroundColor: Colors.blue,
-                  onPressed: () => _startCall(_selectedUsers),
+                  onPressed: () => _startCall(_selectedUsers, CallType.VIDEO_CALL),
+                ),
+                FloatingActionButton(
+                  heroTag: "AudioCall",
+                  child: Icon(
+                    Icons.call,
+                    color: Colors.white,
+                  ),
+                  backgroundColor: Colors.green,
+                  onPressed: () => _startCall(_selectedUsers, CallType.AUDIO_CALL),
                 ),
               ],
             ),
@@ -184,8 +193,8 @@ class _BodyLayoutState extends State<BodyLayout> {
   void _initCalls() {
     _callClient = ConferenceClient.instance;
     _callManager = CallManager.instance;
-    _callManager.onReceiveNewCall = (meetingId, participantIds) {
-      _showIncomingCallScreen(meetingId, participantIds);
+    _callManager.onReceiveNewCall = (meetingId, participantIds, callType, callName) {
+      _showIncomingCallScreen(meetingId, participantIds, callType, callName);
     };
 
     _callManager.onCloseCall = () {
@@ -193,7 +202,7 @@ class _BodyLayoutState extends State<BodyLayout> {
     };
   }
 
-  void _startCall(Set<int> opponents) async {
+  void _startCall(Set<int> opponents, int callType) async {
     if (opponents.isEmpty) return;
 
     var attendees = opponents.map((entry) {
@@ -212,24 +221,24 @@ class _BodyLayoutState extends State<BodyLayout> {
     createMeeting(meeting).then((createdMeeting) async {
       _currentCall = await _callClient.createCallSession(
         createdMeeting.hostId!,
-        callType: CallType.VIDEO_CALL,
+        callType: callType,
       );
 
       Navigator.push(
         context,
         MaterialPageRoute(
           builder: (context) => ConversationCallScreen(_currentCall!,
-              createdMeeting.meetingId!, opponents.toList(), false),
+              createdMeeting.meetingId!, opponents.toList(), false, '${_currentUser.fullName ?? 'Unknown User'}${opponents.length > 1 ? ' (in Group call)' : ''}' ),
         ),
       );
     });
   }
 
-  void _showIncomingCallScreen(String meetingId, List<int> participantIds) {
+  void _showIncomingCallScreen(String meetingId, List<int> participantIds, int callType, String callName) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => IncomingCallScreen(meetingId, participantIds),
+        builder: (context) => IncomingCallScreen(meetingId, participantIds, callType, callName),
       ),
     );
   }

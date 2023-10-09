@@ -38,12 +38,14 @@ class CallManager {
           .split(',')
           .map((id) => int.parse(id))
           .toList();
+      var callType = int.tryParse(properties["callType"]?.toString() ?? '') ?? CallType.VIDEO_CALL;
+      var callName = properties["callName"] ?? cubeMessage.senderId?.toString() ?? 'Unknown Caller';
       if (_meetingId == null) {
         _meetingId = meetingId;
         _initiatorId = cubeMessage.senderId;
         _participantIds = participantIds;
         if (onReceiveNewCall != null) {
-          onReceiveNewCall!(meetingId!, participantIds);
+          onReceiveNewCall!(meetingId!, participantIds, callType, callName);
         }
       }
     } else if (properties.containsKey("callAccepted")) {
@@ -66,11 +68,11 @@ class CallManager {
     }
   }
 
-  startCall(String meetingId, List<int> participantIds, int currentUserId) {
+  startCall(String meetingId, List<int> participantIds, int currentUserId, int callType, String callName) {
     _initiatorId = currentUserId;
     _participantIds = participantIds;
     _meetingId = meetingId;
-    sendCallMessage(meetingId, participantIds);
+    sendCallMessage(meetingId, participantIds, callType, callName);
     startNoAnswerTimers(participantIds);
   }
 
@@ -89,12 +91,14 @@ class CallManager {
     _clearProperties();
   }
 
-  sendCallMessage(String meetingId, List<int> participantIds) {
+  sendCallMessage(String meetingId, List<int> participantIds, int callType, String callName) {
     List<CubeMessage> callMsgList =
         _buildCallMessages(meetingId, participantIds);
     callMsgList.forEach((callMsg) {
       callMsg.properties['callStart'] = '1';
       callMsg.properties['participantIds'] = participantIds.join(',');
+      callMsg.properties['callType'] = callType.toString();
+      callMsg.properties['callName'] = callName;
     });
     callMsgList
         .forEach((msg) => _systemMessagesManager!.sendSystemMessage(msg));
@@ -168,7 +172,7 @@ class CallManager {
 
   _clearNoAnswerTimers({int id = 0}) {
     if (id != 0) {
-      _answerUserTimers[id]!.cancel();
+      _answerUserTimers[id]?.cancel();
       _answerUserTimers.remove(id);
     } else {
       _answerUserTimers.forEach((participantId, timer) => timer.cancel());
@@ -191,7 +195,7 @@ class CallManager {
   }
 }
 
-typedef void NewCallCallback(String meetingId, List<int> participantIds);
+typedef void NewCallCallback(String meetingId, List<int> participantIds, int callType, String callName);
 typedef void CloseCall();
 typedef void RejectCallCallback(
     String meetingId, int participantId, bool isBusy);
