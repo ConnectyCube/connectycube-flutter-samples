@@ -4,11 +4,11 @@ PODS:
   - Flutter (1.0.0)
   - flutter_webrtc (0.9.36):
     - Flutter
-    - WebRTC-SDK (= 114.5735.02)
+    - WebRTC-SDK (= 114.5735.08)
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - WebRTC-SDK (114.5735.02)
+  - WebRTC-SDK (114.5735.08)
 
 DEPENDENCIES:
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
@@ -33,10 +33,10 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   device_info_plus: 7545d84d8d1b896cb16a4ff98c19f07ec4b298ea
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
-  flutter_webrtc: 1944895d4e908c4bc722929dc4b9f8620d8e1b2f
+  flutter_webrtc: 55df3aaa802114dad390191a46c2c8d535751268
   path_provider_foundation: eaf5b3e458fc0e5fbb9940fb09980e853fe058b8
-  WebRTC-SDK: dd913fd31cfbf1d43b9a22d83f4c6354c960c623
+  WebRTC-SDK: c24d2a6c9f571f2ed42297cb8ffba9557093142b
 
-PODFILE CHECKSUM: 7368163408c647b7eb699d0d788ba6718e18fb8d
+PODFILE CHECKSUM: 4e8f8b2be68aeea4c0d5beb6ff1e79fface1d048
 
 COCOAPODS: 1.11.3

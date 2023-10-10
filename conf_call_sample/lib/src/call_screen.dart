@@ -375,7 +375,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   _setSourceForRenderer(
       RTCVideoRenderer renderer, MediaStream stream, bool isLocalStream,
       {String? trackId}) {
-    isLocalStream
+    isLocalStream || kIsWeb
         ? renderer.srcObject = stream
         : renderer.setSrcObject(stream: stream, trackId: trackId);
   }
@@ -442,10 +442,12 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   void _updatePrimaryUser(int userId, bool force) {
-    if (layoutMode != LayoutMode.speaker ||
+    if (layoutMode == LayoutMode.grid ||
         !minorRenderers.containsKey(userId) ||
         userId == primaryRenderer?.key ||
-        (userId == currentUserId && !force)) return;
+        (userId == currentUserId && !force) ||
+        (minorRenderers[userId]?.srcObject?.getVideoTracks().isEmpty ?? false))
+      return;
 
     _chooseOpponentsStreamsQuality({
       userId: StreamType.high,
@@ -1038,8 +1040,6 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
             _isCameraEnabled = true;
             _callSession.callType = CallType.VIDEO_CALL;
           });
-        }).catchError((onError) {
-          log('Error during adding the track. Error: $onError', TAG);
         });
       }
     });
