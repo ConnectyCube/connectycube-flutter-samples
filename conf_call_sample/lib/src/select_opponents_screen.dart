@@ -1,3 +1,4 @@
+import 'package:conf_call_sample/src/utils/pref_util.dart';
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
@@ -61,6 +62,7 @@ class SelectOpponentsScreen extends StatelessWidget {
                 signOut().then(
                   (voidValue) {
                     CubeChatConnection.instance.destroy();
+                    SharedPrefs.deleteUserData();
                     Navigator.pop(context); // cancel current Dialog
                     _navigateToLoginScreen(context);
                   },
@@ -97,9 +99,6 @@ class BodyLayout extends StatefulWidget {
 class _BodyLayoutState extends State<BodyLayout> {
   Set<int> _selectedUsers = {};
   final CubeUser _currentUser;
-  late CallManager _callManager;
-  late ConferenceClient _callClient;
-  ConferenceSession? _currentCall;
 
   _BodyLayoutState(this._currentUser);
 
@@ -183,25 +182,17 @@ class _BodyLayoutState extends State<BodyLayout> {
     super.initState();
 
     initForegroundService();
+    checkSystemAlertWindowPermission(context);
+    requestNotificationsPermission();
+    CallManager.instance.context = context;
 
-    CubeSettings.instance.onSessionRestore = () {
-      return createSession(_currentUser);
-    };
-
-    _initConferenceConfig();
     _initCalls();
   }
 
   void _initCalls() {
-    _callClient = ConferenceClient.instance;
-    _callManager = CallManager.instance;
-    _callManager.onReceiveNewCall =
-        (meetingId, participantIds, callType, callName) {
-      _showIncomingCallScreen(meetingId, participantIds, callType, callName);
-    };
-
-    _callManager.onCloseCall = () {
-      _currentCall = null;
+    CallManager.instance.onReceiveNewCall =
+        (callId, meetingId, initiatorId, participantIds, callType, callName) {
+      _showIncomingCallScreen(callId, meetingId, initiatorId, participantIds, callType, callName);
     };
   }
 
@@ -222,7 +213,7 @@ class _BodyLayoutState extends State<BodyLayout> {
       attendees: attendees,
     );
     createMeeting(meeting).then((createdMeeting) async {
-      _currentCall = await _callClient.createCallSession(
+      var callSession = await ConferenceClient.instance.createCallSession(
         createdMeeting.hostId!,
         callType: callType,
       );
@@ -231,7 +222,8 @@ class _BodyLayoutState extends State<BodyLayout> {
         context,
         MaterialPageRoute(
           builder: (context) => ConversationCallScreen(
-              _currentCall!,
+              _currentUser,
+              callSession,
               createdMeeting.meetingId!,
               opponents.toList(),
               false,
@@ -241,18 +233,14 @@ class _BodyLayoutState extends State<BodyLayout> {
     });
   }
 
-  void _showIncomingCallScreen(String meetingId, List<int> participantIds,
+  void _showIncomingCallScreen(String callId, String meetingId, int initiatorId, List<int> participantIds,
       int callType, String callName) {
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) =>
-            IncomingCallScreen(meetingId, participantIds, callType, callName),
+            IncomingCallScreen(_currentUser, callId, meetingId, initiatorId, participantIds, callType, callName),
       ),
     );
-  }
-
-  void _initConferenceConfig() {
-    ConferenceConfig.instance.url = utils.SERVER_ENDPOINT;
   }
 }

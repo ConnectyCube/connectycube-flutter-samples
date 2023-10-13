@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 import 'select_opponents_screen.dart';
+import 'utils/call_manager.dart';
 import 'utils/configs.dart' as utils;
+import 'utils/pref_util.dart';
 
 class LoginScreen extends StatelessWidget {
   static const String TAG = "LoginScreen";
@@ -30,6 +32,19 @@ class BodyState extends State<BodyLayout> {
 
   bool _isLoginContinues = false;
   int? _selectedUserId;
+
+  @override
+  void initState() {
+    super.initState();
+
+    SharedPrefs.getUser().then((savedUser) {
+      if (savedUser != null) {
+        _loginToCC(context, savedUser, savedUser: true);
+      }
+    });
+
+    CallManager.startCallIfNeed(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -97,7 +112,7 @@ class BodyState extends State<BodyLayout> {
     );
   }
 
-  _loginToCC(BuildContext context, CubeUser user) {
+  _loginToCC(BuildContext context, CubeUser user, {bool savedUser = false}) {
     if (_isLoginContinues) return;
 
     setState(() {
@@ -106,11 +121,20 @@ class BodyState extends State<BodyLayout> {
     });
 
     if (CubeSessionManager.instance.isActiveSessionValid() &&
+        CubeChatConnection.instance.chatConnectionState ==
+            CubeChatConnectionState.Ready &&
+        CubeChatConnection.instance.currentUser?.id == user.id) {
+      _goSelectOpponentsScreen(context, user);
+    } else if (CubeSessionManager.instance.isActiveSessionValid() &&
         CubeSessionManager.instance.activeSession?.userId != null &&
         CubeSessionManager.instance.activeSession?.userId == user.id) {
       _loginToCubeChat(context, user);
     } else {
       createSession(user).then((cubeSession) {
+        if (!savedUser) {
+          SharedPrefs.saveNewUser(user);
+          CallManager.instance.init(context);
+        }
         _loginToCubeChat(context, user);
       }).catchError((onError) {
         _processLoginError(onError);
@@ -120,11 +144,13 @@ class BodyState extends State<BodyLayout> {
 
   void _loginToCubeChat(BuildContext context, CubeUser user) {
     CubeChatConnection.instance.login(user).then((cubeUser) {
-      setState(() {
-        _isLoginContinues = false;
-        _selectedUserId = 0;
-      });
-      _goSelectOpponentsScreen(context, cubeUser);
+      if (mounted) {
+        setState(() {
+          _isLoginContinues = false;
+          _selectedUserId = 0;
+        });
+        _goSelectOpponentsScreen(context, cubeUser);
+      }
     }).catchError((onError) {
       _processLoginError(onError);
     });
@@ -132,6 +158,7 @@ class BodyState extends State<BodyLayout> {
 
   void _processLoginError(exception) {
     log("Login error $exception", TAG);
+    if (!mounted) return;
 
     setState(() {
       _isLoginContinues = false;
@@ -155,11 +182,13 @@ class BodyState extends State<BodyLayout> {
   }
 
   void _goSelectOpponentsScreen(BuildContext context, CubeUser cubeUser) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SelectOpponentsScreen(cubeUser),
-      ),
-    );
+    if (!CallManager.instance.hasActiveCall()) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SelectOpponentsScreen(cubeUser),
+        ),
+      );
+    }
   }
 }

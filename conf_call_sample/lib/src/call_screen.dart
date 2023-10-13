@@ -9,6 +9,7 @@ import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:web_browser_detect/web_browser_detect.dart';
 
+import 'select_opponents_screen.dart';
 import 'utils/call_manager.dart';
 import 'utils/configs.dart';
 import 'utils/platform_utils.dart';
@@ -17,19 +18,34 @@ import 'utils/string_utils.dart';
 
 class IncomingCallScreen extends StatelessWidget {
   static const String TAG = "IncomingCallScreen";
+  final CubeUser _currentUser;
+  final String _callId;
   final String _meetingId;
+  final int _initiatorId;
   final List<int> _participantIds;
   final int _callType;
   final String _callName;
 
-  IncomingCallScreen(
-      this._meetingId, this._participantIds, this._callType, this._callName);
+  IncomingCallScreen(this._currentUser, this._callId, this._meetingId,
+      this._initiatorId, this._participantIds, this._callType, this._callName);
 
   @override
   Widget build(BuildContext context) {
     CallManager.instance.onCloseCall = () {
       log("onCloseCall", TAG);
       Navigator.pop(context);
+    };
+
+    CallManager.instance.onCallAccepted = (meetingId) {
+      if (meetingId == _meetingId) {
+        Navigator.pop(context);
+      }
+    };
+
+    CallManager.instance.onCallRejected = (meetingId) {
+      if (meetingId == _meetingId) {
+        Navigator.pop(context);
+      }
     };
 
     return WillPopScope(
@@ -104,20 +120,12 @@ class IncomingCallScreen extends StatelessWidget {
   }
 
   void _acceptCall(BuildContext context, int callType) async {
-    ConferenceSession callSession = await ConferenceClient.instance
-        .createCallSession(CubeChatConnection.instance.currentUser!.id!,
-            callType: callType);
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ConversationCallScreen(
-            callSession, _meetingId, _participantIds, true, _callName),
-      ),
-    );
+    CallManager.instance.startNewIncomingCall(context, _currentUser, _callId,
+        _meetingId, callType, _callName, _initiatorId, _participantIds, false);
   }
 
   void _rejectCall(BuildContext context) {
-    CallManager.instance.reject(_meetingId, false);
+    CallManager.instance.reject(_callId, _meetingId, false, _initiatorId, false);
     Navigator.pop(context);
   }
 
@@ -127,6 +135,7 @@ class IncomingCallScreen extends StatelessWidget {
 }
 
 class ConversationCallScreen extends StatefulWidget {
+  final CubeUser _currentUser;
   final ConferenceSession _callSession;
   final String _meetingId;
   final List<int> opponents;
@@ -135,17 +144,18 @@ class ConversationCallScreen extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return _ConversationCallScreenState(
-        _callSession, _meetingId, opponents, _isIncoming, _callName);
+    return _ConversationCallScreenState(_currentUser, _callSession, _meetingId,
+        opponents, _isIncoming, _callName);
   }
 
-  ConversationCallScreen(this._callSession, this._meetingId, this.opponents,
-      this._isIncoming, this._callName);
+  ConversationCallScreen(this._currentUser, this._callSession, this._meetingId,
+      this.opponents, this._isIncoming, this._callName);
 }
 
 class _ConversationCallScreenState extends State<ConversationCallScreen> {
   static const String TAG = "_ConversationCallScreenState";
   static final LayoutMode DEFAULT_LAYOUT_MODE = LayoutMode.speaker;
+  final CubeUser _currentUser;
   final ConferenceSession _callSession;
   CallManager _callManager = CallManager.instance;
   final String _callName;
@@ -165,16 +175,17 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   bool _isFrontCameraUsed = true;
   RTCVideoViewObjectFit primaryVideoFit =
       RTCVideoViewObjectFit.RTCVideoViewObjectFitCover;
-  final int currentUserId = CubeChatConnection.instance.currentUser!.id!;
+  final int currentUserId;
   DurationTimer _callTimer = DurationTimer();
 
   MapEntry<int, RTCVideoRenderer>? primaryRenderer;
   Map<int, RTCVideoRenderer> minorRenderers = {};
 
-  _ConversationCallScreenState(this._callSession, this._meetingId,
-      this._opponents, this._isIncoming, this._callName)
+  _ConversationCallScreenState(this._currentUser, this._callSession,
+      this._meetingId, this._opponents, this._isIncoming, this._callName)
       : _enableScreenSharing = !_callSession.startScreenSharing,
-        _isCameraEnabled = _callSession.callType == CallType.VIDEO_CALL {
+        _isCameraEnabled = _callSession.callType == CallType.VIDEO_CALL,
+        currentUserId = _currentUser.id! {
     if (_opponents.length == 1) {
       layoutMode = LayoutMode.private;
     }
@@ -185,8 +196,10 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     super.initState();
     _statsReportsManager.init(_callSession);
     _speakersManager.init(_statsReportsManager, _onSpeakerChanged);
+
     _callManager.onReceiveRejectCall = _onReceiveRejectCall;
     _callManager.onCloseCall = _onCloseCall;
+    _callManager.onCallMuted = _onCallMuted;
 
     _callSession.onLocalStreamReceived = _addLocalMediaStream;
     _callSession.onRemoteStreamTrackReceived = _addRemoteMediaStream;
@@ -208,7 +221,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
       }
 
       if (!_isIncoming) {
-        _callManager.startCall(_meetingId, _opponents,
+        _callManager.startNewOutgoingCall(_meetingId, _opponents,
             _callSession.currentUserId, _callSession.callType, _callName);
       }
     }), conferenceRole: ConferenceRole.PUBLISHER);
@@ -294,7 +307,9 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   void _closeSessionIfLast() {
+    log("[_closeSessionIfLast]", TAG);
     if (_callSession.allActivePublishers.length < 1) {
+      log("[_closeSessionIfLast] 1", TAG);
       _callManager.stopCall();
       _callSession.leave();
       _stopCallTimer();
@@ -302,10 +317,16 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   void _onSessionClosed(session) {
-    log("_onSessionClosed", TAG);
+    log("[_onSessionClosed]", TAG);
     _statsReportsManager.dispose();
-    Navigator.pop(context);
     _stopCallTimer();
+
+    log("[_onSessionClosed] 2", TAG);
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => SelectOpponentsScreen(_currentUser),
+      ),
+    );
   }
 
   void onPublishersReceived(publishers) {
@@ -745,7 +766,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
                     child: Container(
                       margin: EdgeInsets.only(bottom: 8),
                       child: Text(
-                        key == CubeChatConnection.instance.currentUser?.id
+                        key == currentUserId
                             ? 'Me'
                             : users
                                     .where((user) => user.id == key)
@@ -930,6 +951,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     setState(() {
       _isMicMute = !_isMicMute;
       _callSession.setMicrophoneMute(_isMicMute);
+      CallManager.instance.muteMic(_meetingId, _isMicMute);
     });
   }
 
@@ -1270,6 +1292,15 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
 
   _stopCallTimer() {
     _callTimer.stop();
+  }
+
+  void _onCallMuted(String meetingId, bool isMuted) {
+    if (meetingId == _meetingId) {
+      setState(() {
+        _isMicMute = isMuted;
+        _callSession.setMicrophoneMute(isMuted);
+      });
+    }
   }
 }
 
