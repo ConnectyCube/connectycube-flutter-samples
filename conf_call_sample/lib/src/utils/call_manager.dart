@@ -1,19 +1,20 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:conf_call_sample/src/utils/consts.dart';
-import 'package:conf_call_sample/src/utils/pref_util.dart';
-import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
-import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'package:flutter/material.dart';
 import 'package:universal_io/io.dart';
 import 'package:uuid/uuid.dart';
 
-import '../call_screen.dart';
+import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
+import 'package:connectycube_sdk/connectycube_sdk.dart';
+
+import '../conversation_call_screen.dart';
 import 'callkit_manager.dart';
+import 'consts.dart';
+import 'pref_util.dart';
 import 'push_notifications_manager.dart';
 
-const NO_ANSWER_TIMER_INTERVAL = 30;
+const NO_ANSWER_TIMER_INTERVAL = 60;
 
 class CallManager {
   static final String TAG = 'CallManager';
@@ -120,7 +121,7 @@ class CallManager {
   stopCall() {
     _clearNoAnswerTimers();
 
-    if(_meetingId == null) return;
+    if (_meetingId == null) return;
 
     sendEndCallMessage(
         _meetingsCalls[_meetingId!]!, _meetingId!, _participantIds!);
@@ -302,7 +303,8 @@ class CallManager {
     };
 
     params.notificationType = NotificationType.PUSH;
-    params.environment = CubeEnvironment.DEVELOPMENT; // TODO use `DEVELOPMENT` for testing purposes
+    params.environment = CubeEnvironment
+        .DEVELOPMENT; // TODO use `DEVELOPMENT` for testing purposes
     // params.environment = kReleaseMode ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT; // TODO use real in your app
     params.usersIds = opponentsIds.toList();
 
@@ -339,8 +341,10 @@ class CallManager {
     String callName,
     int callerId,
     List<int> opponentsIds,
-    bool fromCallKit,
-  ) async {
+    bool fromCallKit, {
+    MediaStream? initialLocalMediaStream,
+    bool isFrontCameraUsed = true,
+  }) async {
     this.context = context;
 
     setActiveCall(callId, meetingId, callerId, opponentsIds);
@@ -357,7 +361,15 @@ class CallManager {
       context,
       MaterialPageRoute(
         builder: (context) => ConversationCallScreen(
-            currentUser, callSession, meetingId, opponentsIds, true, callName),
+          currentUser,
+          callSession,
+          meetingId,
+          opponentsIds,
+          true,
+          callName,
+          initialLocalMediaStream: initialLocalMediaStream,
+          isFrontCameraUsed: isFrontCameraUsed,
+        ),
       ),
     );
   }

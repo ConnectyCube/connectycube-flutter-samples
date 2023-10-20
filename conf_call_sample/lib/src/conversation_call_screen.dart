@@ -16,124 +16,6 @@ import 'utils/platform_utils.dart';
 import 'utils/speakers_manager.dart';
 import 'utils/string_utils.dart';
 
-class IncomingCallScreen extends StatelessWidget {
-  static const String TAG = "IncomingCallScreen";
-  final CubeUser _currentUser;
-  final String _callId;
-  final String _meetingId;
-  final int _initiatorId;
-  final List<int> _participantIds;
-  final int _callType;
-  final String _callName;
-
-  IncomingCallScreen(this._currentUser, this._callId, this._meetingId,
-      this._initiatorId, this._participantIds, this._callType, this._callName);
-
-  @override
-  Widget build(BuildContext context) {
-    CallManager.instance.onCloseCall = () {
-      log("onCloseCall", TAG);
-      Navigator.pop(context);
-    };
-
-    CallManager.instance.onCallAccepted = (meetingId) {
-      if (meetingId == _meetingId) {
-        Navigator.pop(context);
-      }
-    };
-
-    CallManager.instance.onCallRejected = (meetingId) {
-      if (meetingId == _meetingId) {
-        Navigator.pop(context);
-      }
-    };
-
-    return WillPopScope(
-      onWillPop: () => _onBackPressed(context),
-      child: Scaffold(
-        body: Container(
-          margin:
-              EdgeInsets.only(top: MediaQuery.of(context).padding.top + 120),
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Padding(
-                  padding: EdgeInsets.all(8),
-                  child: Text(_callName, style: TextStyle(fontSize: 28)),
-                ),
-                Padding(
-                  padding: EdgeInsets.all(8),
-                  child: Text(_getCallTitle(), style: TextStyle(fontSize: 20)),
-                ),
-                Expanded(
-                  child: SizedBox(),
-                  flex: 1,
-                ),
-                Padding(
-                  padding: EdgeInsets.only(
-                      bottom: MediaQuery.of(context).padding.bottom + 80),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      Padding(
-                        padding: EdgeInsets.only(right: 36),
-                        child: FloatingActionButton(
-                          heroTag: "RejectCall",
-                          child: Icon(
-                            Icons.call_end,
-                            color: Colors.white,
-                          ),
-                          backgroundColor: Colors.red,
-                          onPressed: () => _rejectCall(context),
-                        ),
-                      ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 36),
-                        child: FloatingActionButton(
-                          heroTag: "AcceptCall",
-                          child: Icon(
-                            _callType == CallType.VIDEO_CALL
-                                ? Icons.videocam
-                                : Icons.call,
-                            color: Colors.white,
-                          ),
-                          backgroundColor: Colors.green,
-                          onPressed: () => _acceptCall(context, _callType),
-                        ),
-                      ),
-                    ],
-                  ),
-                )
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  _getCallTitle() {
-    String callType = _callType == CallType.VIDEO_CALL ? "Video" : 'Audio';
-    return "Incoming $callType call";
-  }
-
-  void _acceptCall(BuildContext context, int callType) async {
-    CallManager.instance.startNewIncomingCall(context, _currentUser, _callId,
-        _meetingId, callType, _callName, _initiatorId, _participantIds, false);
-  }
-
-  void _rejectCall(BuildContext context) {
-    CallManager.instance.reject(_callId, _meetingId, false, _initiatorId, false);
-    Navigator.pop(context);
-  }
-
-  Future<bool> _onBackPressed(BuildContext context) {
-    return Future.value(false);
-  }
-}
-
 class ConversationCallScreen extends StatefulWidget {
   final CubeUser _currentUser;
   final ConferenceSession _callSession;
@@ -142,14 +24,26 @@ class ConversationCallScreen extends StatefulWidget {
   final bool _isIncoming;
   final String _callName;
 
+  MediaStream? initialLocalMediaStream;
+  bool isFrontCameraUsed;
+
   @override
   State<StatefulWidget> createState() {
-    return _ConversationCallScreenState(_currentUser, _callSession, _meetingId,
-        opponents, _isIncoming, _callName);
+    return _ConversationCallScreenState(
+      _currentUser,
+      _callSession,
+      _meetingId,
+      opponents,
+      _isIncoming,
+      _callName,
+      initialLocalMediaStream: initialLocalMediaStream,
+      isFrontCameraUsed: isFrontCameraUsed,
+    );
   }
 
   ConversationCallScreen(this._currentUser, this._callSession, this._meetingId,
-      this.opponents, this._isIncoming, this._callName);
+      this.opponents, this._isIncoming, this._callName,
+      {this.initialLocalMediaStream, this.isFrontCameraUsed = true});
 }
 
 class _ConversationCallScreenState extends State<ConversationCallScreen> {
@@ -165,6 +59,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   final CubeStatsReportsManager _statsReportsManager =
       CubeStatsReportsManager();
   final SpeakersManager _speakersManager = SpeakersManager();
+  MediaStream? initialLocalMediaStream;
 
   LayoutMode layoutMode = DEFAULT_LAYOUT_MODE;
   String _callStatus = 'Waiting...';
@@ -182,12 +77,23 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   Map<int, RTCVideoRenderer> minorRenderers = {};
 
   _ConversationCallScreenState(this._currentUser, this._callSession,
-      this._meetingId, this._opponents, this._isIncoming, this._callName)
+      this._meetingId, this._opponents, this._isIncoming, this._callName,
+      {this.initialLocalMediaStream, bool isFrontCameraUsed = true})
       : _enableScreenSharing = !_callSession.startScreenSharing,
         _isCameraEnabled = _callSession.callType == CallType.VIDEO_CALL,
-        currentUserId = _currentUser.id! {
+        currentUserId = _currentUser.id!,
+        _isFrontCameraUsed = isFrontCameraUsed {
     if (_opponents.length == 1) {
       layoutMode = LayoutMode.private;
+    }
+
+    if (initialLocalMediaStream != null) {
+      _isMicMute =
+          !(initialLocalMediaStream?.getAudioTracks().firstOrNull?.enabled ??
+              false);
+      _isCameraEnabled =
+          initialLocalMediaStream?.getVideoTracks().firstOrNull?.enabled ??
+              false;
     }
   }
 
@@ -210,6 +116,11 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     _callSession.onSubStreamChanged = onSubStreamChanged;
     _callSession.onLayerChanged = onLayerChanged;
 
+    if (initialLocalMediaStream != null) {
+      _callSession.localStream = initialLocalMediaStream;
+      _addLocalMediaStream(initialLocalMediaStream!);
+    }
+
     _callSession.joinDialog(_meetingId, ((publishers) {
       log("join session= $publishers", TAG);
 
@@ -219,6 +130,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
           _startCallTimer();
         });
       }
+
+      _callSession.setMaxBandwidth(0);
 
       if (!_isIncoming) {
         _callManager.startNewOutgoingCall(_meetingId, _opponents,
@@ -261,7 +174,6 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
 
   Future<void> _addLocalMediaStream(MediaStream stream) async {
     log("_addLocalMediaStream", TAG);
-    _callSession.setMaxBandwidth(0);
 
     _addMediaStream(currentUserId, true, stream);
   }
@@ -362,6 +274,10 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
       setState(() {
         _setSourceForRenderer(primaryRenderer!.value, stream, isLocalStream,
             trackId: trackId);
+
+        _chooseOpponentsStreamsQuality({
+          userId: StreamType.high,
+        });
       });
 
       return;
@@ -370,6 +286,10 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     if (primaryRenderer?.key == userId) {
       _setSourceForRenderer(primaryRenderer!.value, stream, isLocalStream,
           trackId: trackId);
+
+      _chooseOpponentsStreamsQuality({
+        userId: StreamType.high,
+      });
 
       return;
     }

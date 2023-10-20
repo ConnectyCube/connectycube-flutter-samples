@@ -1,12 +1,13 @@
-import 'package:conf_call_sample/src/utils/pref_util.dart';
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import 'call_screen.dart';
+import 'conversation_call_screen.dart';
+import 'incoming_call_screen.dart';
 import 'utils/configs.dart' as utils;
 import 'utils/call_manager.dart';
 import 'utils/platform_utils.dart';
+import 'utils/pref_util.dart';
 
 class SelectOpponentsScreen extends StatelessWidget {
   final CubeUser currentUser;

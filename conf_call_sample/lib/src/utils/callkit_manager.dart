@@ -72,11 +72,6 @@ class CallKitManager {
     onMuteCall.call(mute, callId);
   }
 
-  void muteCall(String sessionId, bool mute) {
-    ConnectycubeFlutterCallKit.reportCallMuted(
-        sessionId: sessionId, muted: mute);
-  }
-
   Future<void> _onCallAccepted(CallEvent callEvent) async {
     onCallAccepted.call(callEvent);
   }
@@ -101,7 +96,6 @@ class CallKitManager {
           return ConnectycubeFlutterCallKit.getCallData(sessionId: lastCallId)
               .then((callData) {
             if (callData == null) return null;
-
 
             return CallEvent(
               sessionId: callData['session_id'].toString(),
