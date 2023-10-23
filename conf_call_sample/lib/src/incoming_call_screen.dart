@@ -270,13 +270,12 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
 
   @override
   void dispose() {
-    // _localMediaStream?.getTracks().forEach((track) async {
-    //   await track.stop();
-    // });
-    // _localMediaStream?.dispose();
-
     _localVideoRenderer?.srcObject = null;
     _localVideoRenderer?.dispose();
+
+    _callManager.onCloseCall = null;
+    _callManager.onCallAccepted = null;
+    _callManager.onCallRejected = null;
 
     super.dispose();
   }
@@ -288,9 +287,6 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
 
   void _onCallAccepted(String meetingId) {
     log('[_onCallAccepted]', TAG);
-    if (meetingId == _meetingId) {
-      // Navigator.pop(context);
-    }
   }
 
   void _onCallRejected(String meetingId) {

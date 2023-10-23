@@ -30,6 +30,7 @@ class CallManager {
   List<int>? _participantIds;
   int? _initiatorId;
   Map<String, String> _meetingsCalls = {};
+  InternalCallState? _currentCallState;
 
   var _answerUserTimers = Map<int, Timer>();
 
@@ -58,8 +59,13 @@ class CallManager {
 
   parseCallMessage(CubeMessage cubeMessage) {
     log("parseCallMessage cubeMessage= $cubeMessage");
+
+    if (cubeMessage.senderId == CubeChatConnection.instance.currentUser?.id)
+      return;
+
     final properties = cubeMessage.properties;
     var meetingId = properties["meetingId"];
+    var callId = properties["callId"]!;
 
     if (properties.containsKey("callStart")) {
       var participantIds = properties["participantIds"]!
@@ -71,8 +77,8 @@ class CallManager {
       var callName = properties["callName"] ??
           cubeMessage.senderId?.toString() ??
           'Unknown Caller';
-      var callId = properties["callId"]!;
       if (_meetingId == null) {
+        _currentCallState = InternalCallState.NEW;
         onReceiveNewCall?.call(callId, meetingId!, cubeMessage.senderId!,
             participantIds, callType, callName);
       }
@@ -88,9 +94,8 @@ class CallManager {
         handleRejectCall(cubeMessage.senderId!, isBusy);
       }
     } else if (properties.containsKey("callEnd")) {
-      if (_meetingId == meetingId) {
-        _clearCall(cubeMessage.senderId!);
-      }
+      processCallFinishedByParticipant(
+          cubeMessage.senderId!, callId, meetingId!);
     }
   }
 
@@ -100,6 +105,7 @@ class CallManager {
     _participantIds = participantIds;
     _meetingId = meetingId;
     _meetingsCalls[_meetingId!] = Uuid().v4();
+    _currentCallState = InternalCallState.NEW;
     sendCallMessage(_meetingsCalls[_meetingId!]!, meetingId, participantIds,
         callType, callName);
     startNoAnswerTimers(participantIds);
@@ -109,6 +115,7 @@ class CallManager {
 
   reject(String callId, String meetingId, bool isBusy, int initiatorId,
       bool fromCallKit) {
+    _currentCallState = InternalCallState.REJECTED;
     sendRejectMessage(callId, meetingId, isBusy, initiatorId);
 
     if (!fromCallKit) {
@@ -119,6 +126,8 @@ class CallManager {
   }
 
   stopCall() {
+    _currentCallState = InternalCallState.FINISHED;
+
     _clearNoAnswerTimers();
 
     if (_meetingId == null) return;
@@ -127,6 +136,18 @@ class CallManager {
         _meetingsCalls[_meetingId!]!, _meetingId!, _participantIds!);
     CallKitManager.instance.processCallFinished(_meetingsCalls[_meetingId!]!);
     _clearCallData();
+  }
+
+  processCallFinishedByParticipant(
+      int userId, String callId, String meetingId) {
+    if (_meetingId == null) {
+      _currentCallState = InternalCallState.FINISHED;
+
+      onCloseCall?.call();
+      CallKitManager.instance.processCallFinished(callId);
+    } else if (_meetingId == meetingId) {
+      _clearCall(userId);
+    }
   }
 
   sendCallMessage(String callId, String meetingId, List<int> participantIds,
@@ -225,14 +246,25 @@ class CallManager {
   }
 
   _clearCall(int participantId) {
-    _participantIds!.remove(participantId);
-    if (_participantIds!.isEmpty || participantId == _initiatorId) {
+    _participantIds?.remove(participantId);
+    if ((_participantIds?.isEmpty ?? false) || participantId == _initiatorId) {
+      if (_meetingId != null) {
+        CallKitManager.instance
+            .processCallFinished(_meetingsCalls[_meetingId!]!);
+      }
+
       _clearCallData();
+      _currentCallState = InternalCallState.FINISHED;
+
       onCloseCall?.call();
     }
   }
 
   _onCallAccepted(CallEvent callEvent) async {
+    log('[_onCallAccepted] _currentCallState: $_currentCallState', TAG);
+
+    if (_currentCallState == InternalCallState.ACCEPTED) return;
+
     var savedUser = await SharedPrefs.getUser();
     if (savedUser == null) return;
 
@@ -252,14 +284,18 @@ class CallManager {
   }
 
   _onCallEnded(CallEvent callEvent) {
+    log('[_onCallEnded] _currentCallState: $_currentCallState', TAG);
+
+    if (_currentCallState == InternalCallState.FINISHED) return;
+
     var meetingId = callEvent.userInfo?['meetingId'];
     if (meetingId == null) return;
 
-    if (_meetingId == null) {
+    if (_currentCallState == InternalCallState.ACCEPTED) {
+      stopCall();
+    } else {
       reject(callEvent.sessionId, meetingId, false, callEvent.callerId, true);
       onCallRejected?.call(meetingId);
-    } else {
-      stopCall();
     }
   }
 
@@ -346,8 +382,12 @@ class CallManager {
     bool isFrontCameraUsed = true,
   }) async {
     this.context = context;
+    _currentCallState = InternalCallState.ACCEPTED;
 
-    setActiveCall(callId, meetingId, callerId, opponentsIds);
+    var participants = Set<int>.from([...opponentsIds, callerId]);
+    participants.removeWhere((userId) => userId == currentUser.id!);
+
+    setActiveCall(callId, meetingId, callerId, participants.toList());
 
     if (fromCallKit) {
       onCallAccepted?.call(meetingId);
@@ -418,6 +458,8 @@ List<CubeMessage> buildCallMessages(
     return msg;
   }).toList();
 }
+
+enum InternalCallState { NEW, REJECTED, ACCEPTED, FINISHED }
 
 typedef void NewCallCallback(String callId, String meetingId, int initiatorId,
     List<int> participantIds, int callType, String callName);
