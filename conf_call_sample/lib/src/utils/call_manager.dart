@@ -30,7 +30,7 @@ class CallManager {
   List<int>? _participantIds;
   int? _initiatorId;
   Map<String, String> _meetingsCalls = {};
-  InternalCallState? _currentCallState;
+  InternalCallState? currentCallState;
 
   var _answerUserTimers = Map<int, Timer>();
 
@@ -78,7 +78,7 @@ class CallManager {
           cubeMessage.senderId?.toString() ??
           'Unknown Caller';
       if (_meetingId == null) {
-        _currentCallState = InternalCallState.NEW;
+        currentCallState = InternalCallState.NEW;
         onReceiveNewCall?.call(callId, meetingId!, cubeMessage.senderId!,
             participantIds, callType, callName);
       }
@@ -105,7 +105,7 @@ class CallManager {
     _participantIds = participantIds;
     _meetingId = meetingId;
     _meetingsCalls[_meetingId!] = Uuid().v4();
-    _currentCallState = InternalCallState.NEW;
+    currentCallState = InternalCallState.NEW;
     sendCallMessage(_meetingsCalls[_meetingId!]!, meetingId, participantIds,
         callType, callName);
     startNoAnswerTimers(participantIds);
@@ -115,7 +115,7 @@ class CallManager {
 
   reject(String callId, String meetingId, bool isBusy, int initiatorId,
       bool fromCallKit) {
-    _currentCallState = InternalCallState.REJECTED;
+    currentCallState = InternalCallState.REJECTED;
     sendRejectMessage(callId, meetingId, isBusy, initiatorId);
 
     if (!fromCallKit) {
@@ -145,7 +145,7 @@ class CallManager {
   processCallFinishedByParticipant(
       int userId, String callId, String meetingId) {
     if (_meetingId == null) {
-      _currentCallState = InternalCallState.FINISHED;
+      currentCallState = InternalCallState.FINISHED;
 
       onCloseCall?.call();
       CallKitManager.instance.processCallFinished(callId);
@@ -258,16 +258,16 @@ class CallManager {
       }
 
       _clearCallData();
-      _currentCallState = InternalCallState.FINISHED;
+      currentCallState = InternalCallState.FINISHED;
 
       onCloseCall?.call();
     }
   }
 
   _onCallAccepted(CallEvent callEvent) async {
-    log('[_onCallAccepted] _currentCallState: $_currentCallState', TAG);
+    log('[_onCallAccepted] _currentCallState: $currentCallState', TAG);
 
-    if (_currentCallState == InternalCallState.ACCEPTED) return;
+    if (currentCallState == InternalCallState.ACCEPTED) return;
 
     var savedUser = await SharedPrefs.getUser();
     if (savedUser == null) return;
@@ -287,10 +287,10 @@ class CallManager {
         true);
   }
 
-  _onCallEnded(CallEvent callEvent) {
-    log('[_onCallEnded] _currentCallState: $_currentCallState', TAG);
+  _onCallEnded(CallEvent callEvent) async {
+    log('[_onCallEnded] _currentCallState: $currentCallState', TAG);
 
-    if (_currentCallState == InternalCallState.FINISHED) return;
+    if (currentCallState == InternalCallState.FINISHED) return;
 
     var savedUser = await SharedPrefs.getUser();
     if (savedUser == null) return;
@@ -298,7 +298,7 @@ class CallManager {
     var meetingId = callEvent.userInfo?['meetingId'];
     if (meetingId == null) return;
 
-    if (_currentCallState == InternalCallState.ACCEPTED) {
+    if (currentCallState == InternalCallState.ACCEPTED) {
       stopCall(savedUser);
     } else {
       reject(callEvent.sessionId, meetingId, false, callEvent.callerId, true);
@@ -389,7 +389,7 @@ class CallManager {
     bool isFrontCameraUsed = true,
   }) async {
     this.context = context;
-    _currentCallState = InternalCallState.ACCEPTED;
+    currentCallState = InternalCallState.ACCEPTED;
 
     var participants = Set<int>.from([...opponentsIds, callerId]);
     participants.removeWhere((userId) => userId == currentUser.id!);
@@ -404,8 +404,7 @@ class CallManager {
 
     ConferenceSession callSession = await ConferenceClient.instance
         .createCallSession(currentUser.id!, callType: callType);
-    Navigator.pushReplacement(
-      context,
+    Navigator.of(context, rootNavigator: true).pushReplacement(
       MaterialPageRoute(
         builder: (context) => ConversationCallScreen(
           currentUser,

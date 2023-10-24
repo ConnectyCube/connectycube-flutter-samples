@@ -82,7 +82,7 @@ class SelectOpponentsScreen extends StatelessWidget {
   }
 
   _navigateToLoginScreen(BuildContext context) {
-    Navigator.pop(context);
+    Navigator.of(context, rootNavigator: true).pop();
   }
 }
 
@@ -98,6 +98,8 @@ class BodyLayout extends StatefulWidget {
 }
 
 class _BodyLayoutState extends State<BodyLayout> {
+  static final String TAG = 'SelectOpponentsScreen';
+
   Set<int> _selectedUsers = {};
   final CubeUser _currentUser;
 
@@ -191,9 +193,11 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   void _initCalls() {
+    log('[initState]', TAG);
     CallManager.instance.onReceiveNewCall =
         (callId, meetingId, initiatorId, participantIds, callType, callName) {
-      _showIncomingCallScreen(callId, meetingId, initiatorId, participantIds, callType, callName);
+      _showIncomingCallScreen(
+          callId, meetingId, initiatorId, participantIds, callType, callName);
     };
   }
 
@@ -219,8 +223,7 @@ class _BodyLayoutState extends State<BodyLayout> {
         callType: callType,
       );
 
-      Navigator.push(
-        context,
+      Navigator.of(context, rootNavigator: true).push(
         MaterialPageRoute(
           builder: (context) => ConversationCallScreen(
               _currentUser,
@@ -234,13 +237,14 @@ class _BodyLayoutState extends State<BodyLayout> {
     });
   }
 
-  void _showIncomingCallScreen(String callId, String meetingId, int initiatorId, List<int> participantIds,
-      int callType, String callName) {
-    Navigator.push(
-      context,
+  void _showIncomingCallScreen(String callId, String meetingId, int initiatorId,
+      List<int> participantIds, int callType, String callName) {
+    log('[_showIncomingCallScreen]', TAG);
+
+    Navigator.of(context, rootNavigator: true).push(
       MaterialPageRoute(
-        builder: (context) =>
-            IncomingCallScreen(_currentUser, callId, meetingId, initiatorId, participantIds, callType, callName),
+        builder: (context) => IncomingCallScreen(_currentUser, callId,
+            meetingId, initiatorId, participantIds, callType, callName),
       ),
     );
   }

@@ -14,7 +14,10 @@ Project contains the following features implemented:
 - Screen sharing
 - Opponents' mic level monitoring
 - Opponents' video bitrate monitoring
-- Speaker/grid modes (the Simulcast feature is applied)
+- Speaker/grid/private modes (the Simulcast feature is applied)
+- CallKit
+- Pre-join screen for video calls
+- Switching from audio call to video without reconnection
 
 ## Documentation
 
@@ -56,6 +59,21 @@ The app will automatically run on the selected iOS device or simulator.
 - Run command from the Terminal `flutter run -d windows`;
 ### Run on Linux
 - Run command from the Terminal `flutter run -d linux`;
+
+## Config for the CallKit feature
+The CallKit feature is enabled by default in current version. 
+
+The push notification feature is used for implementation the participants notification about the 
+new call event. Do the next for configuration:
+
+1. Create your own app in the ConnectyCube admin panel (if not created yet);
+2. Create a project in the Firebase developer console (if not created yet);
+3. Add the Server API key from the Firebase developer console to the ConnectyCube admin panel for the Android platform ([short guide](https://developers.connectycube.com/flutter/push-notifications?id=android));
+4. Add Apple certificate for the iOS platform ([short guide, how to generate and set it to the admin panel](https://developers.connectycube.com/ios/push-notifications?id=create-apns-certificate)). But instead of an APNS certificate, you should choose a VoIP certificate;
+5. Add `google-services.json` file from the Firebase developer console to the Android app by path `conf_call_sample/android/app/`
+6. Configure file `conf_call_sample/lib/src/utils/configs.dart` with your endpoints from the 1st. point of this guide;
+7. Create users in the ConnectyCube admin panel and add them to the configure file `conf_call_sample/lib/src/utils/configs.dart`
+8. Build and run the app as usual;
 
 ## Can't build yourself?
 

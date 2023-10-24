@@ -1,3 +1,4 @@
+import 'package:conf_call_sample/src/select_opponents_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:universal_io/io.dart';
@@ -47,6 +48,8 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
   @override
   void initState() {
     super.initState();
+    log('[initState]', TAG);
+
     _callManager.onCloseCall = _onCallClosed;
     _callManager.onCallAccepted = _onCallAccepted;
     _callManager.onCallRejected = _onCallRejected;
@@ -54,6 +57,12 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
 
   @override
   Widget build(BuildContext context) {
+    log('[build]', TAG);
+    if (_callManager.currentCallState != InternalCallState.NEW) {
+      closeScreen();
+      return SizedBox.shrink();
+    }
+
     return WillPopScope(
       onWillPop: () => _onBackPressed(context),
       child: Scaffold(
@@ -225,8 +234,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
                                       color: Colors.white,
                                     ),
                                     backgroundColor: Colors.green,
-                                    onPressed: () =>
-                                        _acceptCall(_callType),
+                                    onPressed: () => _acceptCall(_callType),
                                   ),
                                 ),
                               ],
@@ -244,24 +252,28 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
   }
 
   _getCallTitle() {
+    log('[_getCallTitle]', TAG);
     String callType = _callType == CallType.VIDEO_CALL ? "Video" : 'Audio';
     return "Incoming $callType call";
   }
 
   void _acceptCall(int callType) async {
+    log('[_acceptCall]', TAG);
     _callManager.startNewIncomingCall(context, _currentUser, _callId,
         _meetingId, callType, _callName, _initiatorId, _participantIds, false,
-        initialLocalMediaStream: _localMediaStream, isFrontCameraUsed: _isFrontCameraSelected);
+        initialLocalMediaStream: _localMediaStream,
+        isFrontCameraUsed: _isFrontCameraSelected);
   }
 
   void _rejectCall() {
+    log('[_rejectCall]', TAG);
     _localMediaStream?.getTracks().forEach((track) async {
       await track.stop();
     });
     _localMediaStream?.dispose();
 
     _callManager.reject(_callId, _meetingId, false, _initiatorId, false);
-    Navigator.pop(context);
+    closeScreen();
   }
 
   Future<bool> _onBackPressed(BuildContext context) {
@@ -270,6 +282,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
 
   @override
   void dispose() {
+    log('[dispose]', TAG);
     _localVideoRenderer?.srcObject = null;
     _localVideoRenderer?.dispose();
 
@@ -282,7 +295,12 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
 
   void _onCallClosed() {
     log('[_onCallClosed]', TAG);
-    Navigator.pop(context);
+    _localMediaStream?.getTracks().forEach((track) async {
+      await track.stop();
+    });
+    _localMediaStream?.dispose();
+
+    closeScreen();
   }
 
   void _onCallAccepted(String meetingId) {
@@ -297,11 +315,12 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
       });
       _localMediaStream?.dispose();
 
-      Navigator.pop(context);
+      closeScreen();
     }
   }
 
   Future<MediaStream?> _getLocalMediaStream() {
+    log('[_getLocalMediaStream]', TAG);
     if (_callType == CallType.AUDIO_CALL) return Future.value(null);
     if (_localMediaStream != null) return Future.value(_localMediaStream);
 
@@ -315,6 +334,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
   }
 
   Map<String, dynamic> getMediaConstraints() {
+    log('[getMediaConstraints]', TAG);
     final Map<String, dynamic> mediaConstraints = {
       'audio': getAudioConfig(),
     };
@@ -327,6 +347,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
   }
 
   Future<RTCVideoRenderer> getVideoRenderer(MediaStream? mediaStream) {
+    log('[getVideoRenderer]', TAG);
     if (_localVideoRenderer != null) return Future.value(_localVideoRenderer);
 
     var videoRenderer = RTCVideoRenderer();
@@ -457,5 +478,9 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
     } catch (error) {
       return Future.error(error);
     }
+  }
+
+  closeScreen() {
+    Navigator.of(context, rootNavigator: true).pop();
   }
 }

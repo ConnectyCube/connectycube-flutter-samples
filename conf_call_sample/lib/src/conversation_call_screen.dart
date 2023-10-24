@@ -234,7 +234,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     _stopCallTimer();
 
     log("[_onSessionClosed] 2", TAG);
-    Navigator.of(context).pushReplacement(
+    Navigator.of(context, rootNavigator: true).pushReplacement(
       MaterialPageRoute(
         builder: (context) => SelectOpponentsScreen(_currentUser),
       ),
