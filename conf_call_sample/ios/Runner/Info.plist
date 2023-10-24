@@ -29,9 +29,9 @@
 	<key>NSMicrophoneUsageDescription</key>
 	<string>$(PRODUCT_NAME) Microphone Usage!</string>
 	<key>RTCAppGroupIdentifier</key>
-	<string>group.com.connectycube.flutter</string>
+	<string>group.com.connectycube.flutter.val</string>
 	<key>RTCScreenSharingExtension</key>
-	<string>com.connectycube.flutter.conferenceCallSample.Conference-Calls-Sample-Screen-Sharing</string>
+	<string>com.connectycube.flutter.conferenceCallSample.val.Conference-Calls-Sample-Screen-Sharing.val</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>audio</string>
