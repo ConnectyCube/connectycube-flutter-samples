@@ -68,6 +68,12 @@ class CallKitManager {
     }
   }
 
+  Future<void> sendEndCallPushNotification(String callId, List<int> participants) async {
+    if (Platform.isAndroid || Platform.isIOS) {
+      sendPushAboutEndingCall(callId, participants);
+    }
+  }
+
   Future<void> _onCallMuted(bool mute, String callId) async {
     onMuteCall.call(mute, callId);
   }
@@ -171,3 +177,25 @@ Future<void> sendPushAboutRejectFromKilledState(
 
   return createEvent(params.getEventForRequest());
 }
+
+Future<void> sendPushAboutEndingCall(
+    String callId,
+    List<int> participants,
+
+    ) {
+  CreateEventParams params = CreateEventParams();
+  params.parameters[PARAM_SESSION_ID] = callId;
+  params.parameters['message'] = 'End call';
+  params.parameters[PARAM_SIGNAL_TYPE] = SIGNAL_TYPE_END_CALL;
+
+  params.notificationType = NotificationType.PUSH;
+  params.environment =
+  kReleaseMode ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
+  params.usersIds = participants;
+
+  return createEvent(params.getEventForRequest());
+}
+
+
+
+

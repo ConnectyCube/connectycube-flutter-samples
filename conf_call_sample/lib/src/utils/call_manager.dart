@@ -125,8 +125,8 @@ class CallManager {
     _clearCallData();
   }
 
-  stopCall() {
-    _currentCallState = InternalCallState.FINISHED;
+  stopCall(CubeUser currentUser) {
+    currentCallState = InternalCallState.FINISHED;
 
     _clearNoAnswerTimers();
 
@@ -134,6 +134,10 @@ class CallManager {
 
     sendEndCallMessage(
         _meetingsCalls[_meetingId!]!, _meetingId!, _participantIds!);
+    if (_initiatorId == currentUser.id) {
+      CallKitManager.instance.sendEndCallPushNotification(
+          _meetingsCalls[_meetingId!]!, _participantIds!);
+    }
     CallKitManager.instance.processCallFinished(_meetingsCalls[_meetingId!]!);
     _clearCallData();
   }
@@ -288,11 +292,14 @@ class CallManager {
 
     if (_currentCallState == InternalCallState.FINISHED) return;
 
+    var savedUser = await SharedPrefs.getUser();
+    if (savedUser == null) return;
+
     var meetingId = callEvent.userInfo?['meetingId'];
     if (meetingId == null) return;
 
     if (_currentCallState == InternalCallState.ACCEPTED) {
-      stopCall();
+      stopCall(savedUser);
     } else {
       reject(callEvent.sessionId, meetingId, false, callEvent.callerId, true);
       onCallRejected?.call(meetingId);
