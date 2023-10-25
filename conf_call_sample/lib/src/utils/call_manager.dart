@@ -18,6 +18,7 @@ const NO_ANSWER_TIMER_INTERVAL = 60;
 
 class CallManager {
   static final String TAG = 'CallManager';
+  bool isInitialized = false;
   SystemMessagesManager? _systemMessagesManager;
   NewCallCallback? onReceiveNewCall;
   CloseCall? onCloseCall;
@@ -47,6 +48,9 @@ class CallManager {
   init(BuildContext context) {
     log('[init]', TAG);
     this.context = context;
+
+    if (isInitialized) return;
+
     if (Platform.isAndroid || Platform.isIOS) {
       PushNotificationsManager.instance.init();
       CallKitManager.instance.init(
@@ -54,7 +58,10 @@ class CallManager {
           onCallEnded: _onCallEnded,
           onMuteCall: _onMuteCall);
     }
+
     _initSignalingListener();
+
+    isInitialized = true;
   }
 
   parseCallMessage(CubeMessage cubeMessage) {
@@ -358,8 +365,7 @@ class CallManager {
     initSignalingListener() {
       _systemMessagesManager =
           CubeChatConnection.instance.systemMessagesManager;
-      _systemMessagesManager?.systemMessagesStream
-          .listen((cubeMessage) => parseCallMessage(cubeMessage));
+      _systemMessagesManager?.systemMessagesStream.listen(parseCallMessage);
     }
 
     if (CubeChatConnection.instance.currentUser != null &&
