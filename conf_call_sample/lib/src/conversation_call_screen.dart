@@ -222,15 +222,14 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     log("[_closeSessionIfLast]", TAG);
     if (_callSession.allActivePublishers.length < 1) {
       log("[_closeSessionIfLast] 1", TAG);
-      _callManager.stopCall(_currentUser);
       _callSession.leave();
-      _stopCallTimer();
     }
   }
 
   void _onSessionClosed(session) {
     log("[_onSessionClosed]", TAG);
     _statsReportsManager.dispose();
+    _callManager.stopCall(_currentUser);
     _stopCallTimer();
 
     log("[_onSessionClosed] 2", TAG);
