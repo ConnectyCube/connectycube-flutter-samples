@@ -1,4 +1,3 @@
-import 'package:connectycube_sdk/connectycube_core.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -57,34 +56,32 @@ Future<void> checkSystemAlertWindowPermission(BuildContext context) async {
         showDialog(
           context: context,
           builder: (BuildContext context) {
-            return Expanded(
-              child: AlertDialog(
-                title: Text('Permission required'),
-                content: Text(
-                    'For accepting the calls in the background you should provide access to show System Alerts from the background. Would you like to do it now?'),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Permission.systemAlertWindow.request().then((status) {
-                        if (status.isGranted) {
-                          Navigator.of(context).pop();
-                        }
-                      });
-                    },
-                    child: Text(
-                      'Allow',
-                    ),
+            return AlertDialog(
+              title: Text('Permission required'),
+              content: Text(
+                  'For accepting the calls in the background you should provide access to show System Alerts from the background. Would you like to do it now?'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Permission.systemAlertWindow.request().then((status) {
+                      if (status.isGranted) {
+                        Navigator.of(context).pop();
+                      }
+                    });
+                  },
+                  child: Text(
+                    'Allow',
                   ),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(
-                      'Later',
-                    ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    'Later',
                   ),
-                ],
-              ),
+                ),
+              ],
             );
           },
         );

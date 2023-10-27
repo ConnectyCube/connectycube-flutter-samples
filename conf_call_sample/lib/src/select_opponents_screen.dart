@@ -107,6 +107,7 @@ class _BodyLayoutState extends State<BodyLayout> {
 
   @override
   Widget build(BuildContext context) {
+    log('[build]', TAG);
     return Container(
         padding: EdgeInsets.all(48),
         child: Column(
@@ -115,9 +116,7 @@ class _BodyLayoutState extends State<BodyLayout> {
               "Select users to start call:",
               style: TextStyle(fontSize: 22),
             ),
-            Expanded(
-              child: _getOpponentsList(),
-            ),
+            _getOpponentsList(),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
@@ -151,12 +150,15 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   Widget _getOpponentsList() {
+    log('[_getOpponentsList]', TAG);
     CubeUser? currentUser = _currentUser;
     final users =
         utils.users.where((user) => user.id != currentUser.id).toList();
     return ListView.builder(
+      shrinkWrap: true,
       itemCount: users.length,
       itemBuilder: (context, index) {
+        log('[itemBuilder] index $index', TAG);
         return Card(
           child: CheckboxListTile(
             title: Center(
@@ -166,6 +168,7 @@ class _BodyLayoutState extends State<BodyLayout> {
             ),
             value: _selectedUsers.contains(users[index].id),
             onChanged: ((checked) {
+              log('[CheckboxListTile][onChanged]', TAG);
               setState(() {
                 if (checked!) {
                   _selectedUsers.add(users[index].id!);
@@ -183,6 +186,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   @override
   void initState() {
     super.initState();
+    log('[initState]', TAG);
 
     initForegroundService();
     checkSystemAlertWindowPermission(context);
@@ -193,7 +197,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   void _initCalls() {
-    log('[initState]', TAG);
+    log('[_initCalls]', TAG);
     CallManager.instance.onReceiveNewCall =
         (callId, meetingId, initiatorId, participantIds, callType, callName) {
       _showIncomingCallScreen(
@@ -202,6 +206,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   void _startCall(Set<int> opponents, int callType) async {
+    log('[_startCall] call type $callType', TAG);
     if (opponents.isEmpty) return;
 
     var attendees = opponents.map((entry) {
