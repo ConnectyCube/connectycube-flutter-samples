@@ -104,14 +104,14 @@ class CallKitManager {
             if (callData == null) return null;
 
             return CallEvent(
-              sessionId: callData['session_id'].toString(),
-              callType: int.parse(callData['call_type'].toString()),
-              callerId: int.parse(callData['caller_id'].toString()),
-              callerName: callData['caller_name'] as String,
+              sessionId: callData[PARAM_SESSION_ID].toString(),
+              callType: int.parse(callData[PARAM_CALL_TYPE].toString()),
+              callerId: int.parse(callData[PARAM_CALLER_ID].toString()),
+              callerName: callData[PARAM_CALLER_NAME] as String,
               opponentsIds:
-              (callData['call_opponents'] as String).split(',').map(int.parse).toSet(),
-              userInfo: callData['user_info'] != null
-                  ? Map<String, String>.from(jsonDecode(callData['user_info']))
+              (callData[PARAM_CALL_OPPONENTS] as String).split(',').map(int.parse).toSet(),
+              userInfo: callData[PARAM_USER_INFO] != null
+                  ? Map<String, String>.from(jsonDecode(callData[PARAM_USER_INFO]))
                   : null,
             );;
           });
@@ -127,7 +127,7 @@ Future<void> onCallRejectedWhenTerminated(CallEvent callEvent) async {
   print(
       '[PushNotificationsManager][onCallRejectedWhenTerminated] callEvent: $callEvent');
 
-  var meetingId = callEvent.userInfo?['meetingId'];
+  var meetingId = callEvent.userInfo?[PARAM_MEETING_ID];
   if (meetingId == null) return;
 
   initConnectycubeContextLess();
@@ -135,8 +135,8 @@ Future<void> onCallRejectedWhenTerminated(CallEvent callEvent) async {
   var callMsgList =
       buildCallMessages(callEvent.sessionId, meetingId, [callEvent.callerId]);
   callMsgList.forEach((callMsg) {
-    callMsg.properties['callRejected'] = '1';
-    callMsg.properties['busy'] = 'false';
+    callMsg.properties[SIGNAL_TYPE_REJECT_CALL] = '1';
+    callMsg.properties[PARAM_BUSY] = 'false';
   });
 
   callMsgList
@@ -152,7 +152,7 @@ Future<void> onCallRejectedWhenTerminated(CallEvent callEvent) async {
     PARAM_CALLER_ID: callEvent.callerId,
     PARAM_CALLER_NAME: callEvent.callerName,
     PARAM_CALL_OPPONENTS: callEvent.opponentsIds.join(','),
-    PARAM_USER_INFO: {'meetingId': meetingId},
+    PARAM_USER_INFO: {PARAM_MEETING_ID: meetingId},
   }, callEvent.callerId);
 
   return Future.wait([...sendRejectCallMessage, sendPushAboutReject])
@@ -167,7 +167,7 @@ Future<void> sendPushAboutRejectFromKilledState(
 ) {
   CreateEventParams params = CreateEventParams();
   params.parameters = parameters;
-  params.parameters['message'] = "Reject call";
+  params.parameters[PARAM_MESSAGE] = "Reject call";
   params.parameters[PARAM_SIGNAL_TYPE] = SIGNAL_TYPE_REJECT_CALL;
 
   params.notificationType = NotificationType.PUSH;
@@ -185,7 +185,7 @@ Future<void> sendPushAboutEndingCall(
     ) {
   CreateEventParams params = CreateEventParams();
   params.parameters[PARAM_SESSION_ID] = callId;
-  params.parameters['message'] = 'End call';
+  params.parameters[PARAM_MESSAGE] = 'End call';
   params.parameters[PARAM_SIGNAL_TYPE] = SIGNAL_TYPE_END_CALL;
 
   params.notificationType = NotificationType.PUSH;

@@ -12,6 +12,7 @@ import 'package:web_browser_detect/web_browser_detect.dart';
 import 'select_opponents_screen.dart';
 import 'utils/call_manager.dart';
 import 'utils/configs.dart';
+import 'utils/consts.dart';
 import 'utils/platform_utils.dart';
 import 'utils/speakers_manager.dart';
 import 'utils/string_utils.dart';
@@ -75,6 +76,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
 
   MapEntry<int, RTCVideoRenderer>? primaryRenderer;
   Map<int, RTCVideoRenderer> minorRenderers = {};
+  Map<int, Map<String, bool>> participantsMediaConfigs = {};
+  bool _primaryUserForciblySelected = false;
 
   _ConversationCallScreenState(this._currentUser, this._callSession,
       this._meetingId, this._opponents, this._isIncoming, this._callName,
@@ -95,6 +98,11 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
           initialLocalMediaStream?.getVideoTracks().firstOrNull?.enabled ??
               false;
     }
+
+    participantsMediaConfigs[currentUserId] = {
+      PARAM_IS_MIC_ENABLED: !_isMicMute,
+      PARAM_IS_CAMERA_ENABLED: _isCameraEnabled
+    };
   }
 
   @override
@@ -104,8 +112,11 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     _speakersManager.init(_statsReportsManager, _onSpeakerChanged);
 
     _callManager.onReceiveRejectCall = _onReceiveRejectCall;
+    _callManager.onReceiveAcceptCall = _onReceiveAcceptCall;
     _callManager.onCloseCall = _onCloseCall;
     _callManager.onCallMuted = _onCallMuted;
+    _callManager.getMediaState = _getMediaState;
+    _callManager.onParticipantMediaUpdated = _onParticipantMediaUpdated;
 
     _callSession.onLocalStreamReceived = _addLocalMediaStream;
     _callSession.onRemoteStreamTrackReceived = _addRemoteMediaStream;
@@ -124,18 +135,18 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     _callSession.joinDialog(_meetingId, ((publishers) {
       log("join session= $publishers", TAG);
 
-      if (publishers.isNotEmpty) {
-        setState(() {
-          _callStatus = 'Connected';
-          _startCallTimer();
-        });
-      }
+      _callManager.requestParticipantsMediaConfig(publishers);
 
       _callSession.setMaxBandwidth(0);
 
       if (!_isIncoming) {
         _callManager.startNewOutgoingCall(_meetingId, _opponents,
             _callSession.currentUserId, _callSession.callType, _callName);
+      } else {
+        setState(() {
+          _callStatus = 'Connected';
+          _startCallTimer();
+        });
       }
     }), conferenceRole: ConferenceRole.PUBLISHER);
   }
@@ -170,6 +181,15 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
 
   void _onReceiveRejectCall(String meetingId, int participantId, bool isBusy) {
     log("_onReceiveRejectCall got reject from user $participantId", TAG);
+  }
+
+  void _onReceiveAcceptCall(int participantId) {
+    log('[_onReceiveAcceptCall] from user $participantId', TAG);
+
+    setState(() {
+      _callStatus = 'Connected';
+      _startCallTimer();
+    });
   }
 
   Future<void> _addLocalMediaStream(MediaStream stream) async {
@@ -330,25 +350,38 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     }
 
     if (publishers.isNotEmpty) {
-      setState(() {
-        _callStatus = 'Connected';
-        _startCallTimer();
-      });
+      _callManager.requestParticipantsMediaConfig(publishers);
     }
   }
 
   List<Widget> renderSpeakerModeViews(Orientation orientation) {
+    log("[renderSpeakerModeViews]", TAG);
     List<Widget> streamsExpanded = [];
 
-    if (primaryRenderer != null &&
-        (primaryRenderer?.value.srcObject?.getVideoTracks().isNotEmpty ??
-            false)) {
-      streamsExpanded.add(
-        Expanded(
-          flex: 3,
-          child: _buildPrimaryVideoView(orientation),
-        ),
-      );
+    addPrimaryVideoView() {
+      if (canShowVideo(
+          primaryRenderer?.key, primaryRenderer?.value.srcObject)) {
+        streamsExpanded.add(
+          Expanded(
+            flex: 3,
+            child: _buildPrimaryVideoView(orientation),
+          ),
+        );
+      }
+    }
+
+    var minorUserWithEnabledVideo = getMinorUserWithEnabledVideo();
+
+    if ((primaryRenderer?.key != currentUserId ||
+            (primaryRenderer?.key == currentUserId &&
+                (_primaryUserForciblySelected ||
+                    minorUserWithEnabledVideo == null))) &&
+        canShowVideo(primaryRenderer?.key, primaryRenderer?.value.srcObject)) {
+      addPrimaryVideoView();
+    } else if (minorUserWithEnabledVideo != null) {
+      _updatePrimaryUser(minorUserWithEnabledVideo, true);
+      _primaryUserForciblySelected = false;
+      addPrimaryVideoView();
     }
 
     var itemHeight;
@@ -382,12 +415,12 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   void _updatePrimaryUser(int userId, bool force) {
+    log("[_updatePrimaryUser] userId: $userId, force: $force", TAG);
     if (layoutMode == LayoutMode.grid ||
         !minorRenderers.containsKey(userId) ||
         userId == primaryRenderer?.key ||
         (userId == currentUserId && !force) ||
-        (minorRenderers[userId]?.srcObject?.getVideoTracks().isEmpty ?? false))
-      return;
+        getMinorUserWithEnabledVideo() == null) return;
 
     _chooseOpponentsStreamsQuality({
       userId: StreamType.high,
@@ -399,13 +432,18 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     }
 
     primaryRenderer = MapEntry(userId, minorRenderers.remove(userId)!);
+    _primaryUserForciblySelected = force;
   }
 
   void _onSpeakerChanged(int userId) {
+    log("[_updatePrimaryUser] userId: $userId, currentUserId: $currentUserId",
+        TAG);
     if (userId == currentUserId || layoutMode != LayoutMode.speaker) return;
 
     setState(() {
-      _updatePrimaryUser(userId, false);
+      if (canShowVideo(userId, minorRenderers[userId]?.srcObject)) {
+        _updatePrimaryUser(userId, false);
+      }
     });
   }
 
@@ -490,13 +528,44 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   Widget _buildPrivateCallLayout(Orientation orientation) {
+    log("[_buildPrivateCallLayout]", TAG);
     List<Widget> videoItems = [];
 
-    if (primaryRenderer != null &&
-        (primaryRenderer?.value.srcObject?.getVideoTracks().isNotEmpty ??
-            false)) {
-      videoItems.add(_buildPrimaryVideoView(orientation));
+    addPrimaryVideoView() {
+      if (canShowVideo(
+          primaryRenderer?.key, primaryRenderer?.value.srcObject)) {
+        videoItems.add(_buildPrimaryVideoView(orientation));
+      }
     }
+
+    var minorUserWithEnabledVideo = getMinorUserWithEnabledVideo();
+
+    if ((primaryRenderer?.key != currentUserId ||
+            (primaryRenderer?.key == currentUserId &&
+                (_primaryUserForciblySelected ||
+                    minorUserWithEnabledVideo == null))) &&
+        canShowVideo(primaryRenderer?.key, primaryRenderer?.value.srcObject)) {
+      addPrimaryVideoView();
+    } else if (minorUserWithEnabledVideo != null) {
+      _updatePrimaryUser(minorUserWithEnabledVideo, true);
+      _primaryUserForciblySelected = false;
+      addPrimaryVideoView();
+    }
+
+    videoItems.add(
+      Align(
+        alignment: Alignment.topCenter,
+        child: OrientationBuilder(
+          builder: (context, orientation) {
+            return Container(
+                margin: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 48,
+                ),
+                child: _buildCallInfoLayout());
+          },
+        ),
+      ),
+    );
 
     var minorItem = buildItems(
             minorRenderers,
@@ -527,16 +596,24 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
 
   Widget _buildSpeakerModLayout(Orientation orientation) {
     return Center(
-      child: Container(
-        child: orientation == Orientation.portrait
+        child: Container(
+      child: Stack(children: [
+        orientation == Orientation.portrait
             ? Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: renderSpeakerModeViews(orientation))
             : Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: renderSpeakerModeViews(orientation)),
-      ),
-    );
+        Align(
+            alignment: Alignment.topCenter,
+            child: Container(
+                margin: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 48,
+                ),
+                child: _buildCallInfoLayout())),
+      ]),
+    ));
   }
 
   Widget _buildGridModLayout(Orientation orientation) {
@@ -644,13 +721,6 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
               _enableScreenSharing,
         ),
       ),
-      Align(
-        alignment: Alignment.topCenter,
-        child: Container(
-            margin:
-                EdgeInsets.only(top: MediaQuery.of(context).padding.top + 48),
-            child: _buildCallInfoLayout()),
-      ),
     ]);
   }
 
@@ -659,57 +729,65 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     var videoItems = <Widget>[];
 
     renderers.forEach((key, value) {
-      if (value.srcObject?.getVideoTracks().isNotEmpty ?? false) {
-        videoItems.add(GestureDetector(
-          onTap: () => setState(() => _updatePrimaryUser(key, true)),
-          child: SizedBox(
-            width: itemWidth,
-            height: itemHeight,
-            child: Padding(
-              padding: EdgeInsets.all(6),
-              child: Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12.0),
-                    child: RTCVideoView(
-                      value,
-                      objectFit:
-                          RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
-                      mirror: key == currentUserId &&
-                          _isFrontCameraUsed &&
-                          _enableScreenSharing,
-                    ),
-                  ),
-                  Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      margin: EdgeInsets.only(bottom: 8),
-                      child: Text(
-                        key == currentUserId
-                            ? 'Me'
-                            : users
-                                    .where((user) => user.id == key)
-                                    .first
-                                    .fullName ??
-                                'Unknown',
-                        style: TextStyle(
-                          color: Colors.white,
-                          shadows: [
-                            Shadow(
-                              color: Colors.black,
-                              offset: Offset(2, 1),
-                              blurRadius: 8,
-                            ),
-                          ],
+      if ((value.srcObject?.getVideoTracks().isNotEmpty ?? false) &&
+          (participantsMediaConfigs[key]?[PARAM_IS_CAMERA_ENABLED] ?? true)) {
+        videoItems.add(
+          GestureDetector(
+            onTap: () => setState(() {
+              log("[onTap] userId: $key", TAG);
+              _updatePrimaryUser(key, true);
+            }),
+            child: AbsorbPointer(
+              child: SizedBox(
+                width: itemWidth,
+                height: itemHeight,
+                child: Padding(
+                  padding: EdgeInsets.all(6),
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12.0),
+                        child: RTCVideoView(
+                          value,
+                          objectFit:
+                              RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
+                          mirror: key == currentUserId &&
+                              _isFrontCameraUsed &&
+                              _enableScreenSharing,
                         ),
                       ),
-                    ),
+                      Align(
+                        alignment: Alignment.bottomCenter,
+                        child: Container(
+                          margin: EdgeInsets.only(bottom: 8),
+                          child: Text(
+                            key == currentUserId
+                                ? 'Me'
+                                : users
+                                        .where((user) => user.id == key)
+                                        .first
+                                        .fullName ??
+                                    'Unknown',
+                            style: TextStyle(
+                              color: Colors.white,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black,
+                                  offset: Offset(2, 1),
+                                  blurRadius: 8,
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
             ),
           ),
-        ));
+        );
       }
     });
 
@@ -870,7 +948,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     setState(() {
       _isMicMute = !_isMicMute;
       _callSession.setMicrophoneMute(_isMicMute);
-      CallManager.instance.muteMic(_meetingId, _isMicMute);
+      _callManager.muteMic(_meetingId, _isMicMute);
+      notifyParticipantsMediaUpdated();
     });
   }
 
@@ -965,6 +1044,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
       setState(() {
         _isCameraEnabled = !_isCameraEnabled;
         _callSession.setVideoEnabled(_isCameraEnabled);
+        notifyParticipantsMediaUpdated();
       });
     }
   }
@@ -980,6 +1060,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
           setState(() {
             _isCameraEnabled = true;
             _callSession.callType = CallType.VIDEO_CALL;
+            notifyParticipantsMediaUpdated();
           });
         });
       }
@@ -1220,6 +1301,61 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
         _callSession.setMicrophoneMute(isMuted);
       });
     }
+  }
+
+  bool canShowVideo(int? userId, MediaStream? mediaStream) {
+    if (userId == null || mediaStream == null) return false;
+
+    if (mediaStream.getVideoTracks().isEmpty) return false;
+
+    var hasEnabledVideo = false;
+
+    mediaStream.getVideoTracks().forEach((videoTrack) {
+      if (!hasEnabledVideo && videoTrack.enabled) {
+        hasEnabledVideo = true;
+      }
+    });
+
+    return hasEnabledVideo &&
+        (participantsMediaConfigs[userId]?[PARAM_IS_CAMERA_ENABLED] ?? false);
+  }
+
+  int? getMinorUserWithEnabledVideo() {
+    var resultUserId = -1;
+
+    minorRenderers.forEach((userId, renderer) {
+      if ((resultUserId == -1 || resultUserId == currentUserId) &&
+          canShowVideo(userId, renderer.srcObject)) {
+        resultUserId = userId;
+      }
+    });
+
+    return resultUserId == -1 ? null : resultUserId;
+  }
+
+  Map<String, bool> _getMediaState() {
+    return {
+      PARAM_IS_MIC_ENABLED: !_isMicMute,
+      PARAM_IS_CAMERA_ENABLED: _isCameraEnabled
+    };
+  }
+
+  void _onParticipantMediaUpdated(int userId, Map<String, bool> mediaConfig) {
+    setState(() {
+      participantsMediaConfigs[userId] = mediaConfig;
+    });
+  }
+
+  void notifyParticipantsMediaUpdated() {
+    participantsMediaConfigs[currentUserId] = {
+      PARAM_IS_MIC_ENABLED: !_isMicMute,
+      PARAM_IS_CAMERA_ENABLED: _isCameraEnabled
+    };
+
+    _callManager.notifyParticipantsMediaUpdated({
+      PARAM_IS_MIC_ENABLED: !_isMicMute,
+      PARAM_IS_CAMERA_ENABLED: _isCameraEnabled
+    });
   }
 }
 

@@ -23,6 +23,7 @@ class CallManager {
   NewCallCallback? onReceiveNewCall;
   CloseCall? onCloseCall;
   RejectCallCallback? onReceiveRejectCall;
+  AcceptCallCallback? onReceiveAcceptCall;
   CallActionCallback? onCallAccepted;
   CallActionCallback? onCallRejected;
   MuteCallCallback? onCallMuted;
@@ -32,6 +33,8 @@ class CallManager {
   int? _initiatorId;
   Map<String, String> _meetingsCalls = {};
   InternalCallState? currentCallState;
+  Map<String, bool> Function()? getMediaState;
+  MediaStateUpdatedCallback? onParticipantMediaUpdated;
 
   var _answerUserTimers = Map<int, Timer>();
 
@@ -71,17 +74,18 @@ class CallManager {
       return;
 
     final properties = cubeMessage.properties;
-    var meetingId = properties["meetingId"];
-    var callId = properties["callId"]!;
+    var meetingId = properties[PARAM_MEETING_ID];
+    var callId = properties[PARAM_SESSION_ID]!;
 
-    if (properties.containsKey("callStart")) {
-      var participantIds = properties["participantIds"]!
+    if (properties.containsKey(SIGNAL_TYPE_START_CALL)) {
+      var participantIds = properties[PARAM_CALL_OPPONENTS]!
           .split(',')
           .map((id) => int.parse(id))
           .toList();
-      var callType = int.tryParse(properties["callType"]?.toString() ?? '') ??
-          CallType.VIDEO_CALL;
-      var callName = properties["callName"] ??
+      var callType =
+          int.tryParse(properties[PARAM_CALL_TYPE]?.toString() ?? '') ??
+              CallType.VIDEO_CALL;
+      var callName = properties[PARAM_CALLER_NAME] ??
           cubeMessage.senderId?.toString() ??
           'Unknown Caller';
       if (_meetingId == null) {
@@ -89,20 +93,34 @@ class CallManager {
         onReceiveNewCall?.call(callId, meetingId!, cubeMessage.senderId!,
             participantIds, callType, callName);
       }
-    } else if (properties.containsKey("callAccepted")) {
+    } else if (properties.containsKey(SIGNAL_TYPE_ACCEPT_CALL)) {
       if (_meetingId == meetingId) {
-        _clearNoAnswerTimers(id: cubeMessage.senderId!);
+        handleAcceptCall(cubeMessage.senderId!);
       }
-    } else if (properties.containsKey("callRejected")) {
-      bool isBusy = properties["busy"] == 'true';
+    } else if (properties.containsKey(SIGNAL_TYPE_REJECT_CALL)) {
+      bool isBusy = properties[PARAM_BUSY] == 'true';
       if (_meetingId == meetingId) {
-        onReceiveRejectCall?.call(meetingId!, cubeMessage.senderId!, isBusy);
-
-        handleRejectCall(cubeMessage.senderId!, isBusy);
+        handleRejectCall(meetingId!, cubeMessage.senderId!, isBusy);
       }
-    } else if (properties.containsKey("callEnd")) {
+    } else if (properties.containsKey(SIGNAL_TYPE_END_CALL)) {
       processCallFinishedByParticipant(
           cubeMessage.senderId!, callId, meetingId!);
+    } else if (properties.containsKey(SIGNAL_TYPE_UPDATE_MEDIA_STATE)) {
+      if (_meetingId == meetingId &&
+          properties.containsKey(PARAM_MEDIA_CONFIG)) {
+        var mediaConfig =
+            Map<String, bool>.from(jsonDecode(properties[PARAM_MEDIA_CONFIG]!));
+        onParticipantMediaUpdated?.call(cubeMessage.senderId!, mediaConfig);
+      }
+    } else if (properties.containsKey(SIGNAL_TYPE_REQUEST_MEDIA_STATE)) {
+      if (_meetingId == meetingId) {
+        var mediaConfig = getMediaState?.call();
+
+        if (mediaConfig != null) {
+          sendMediaUpdatedMessage(
+              callId, meetingId!, [cubeMessage.senderId!], mediaConfig);
+        }
+      }
     }
   }
 
@@ -166,10 +184,10 @@ class CallManager {
     List<CubeMessage> callMsgList =
         buildCallMessages(callId, meetingId, participantIds);
     callMsgList.forEach((callMsg) {
-      callMsg.properties['callStart'] = '1';
-      callMsg.properties['participantIds'] = participantIds.join(',');
-      callMsg.properties['callType'] = callType.toString();
-      callMsg.properties['callName'] = callName;
+      callMsg.properties[SIGNAL_TYPE_START_CALL] = '1';
+      callMsg.properties[PARAM_CALL_OPPONENTS] = participantIds.join(',');
+      callMsg.properties[PARAM_CALL_TYPE] = callType.toString();
+      callMsg.properties[PARAM_CALLER_NAME] = callName;
     });
     callMsgList
         .forEach((msg) => sendSystemMessage(msg.recipientId!, msg.properties));
@@ -179,7 +197,7 @@ class CallManager {
     List<CubeMessage> callMsgList =
         buildCallMessages(callId, meetingId, [participantId]);
     callMsgList.forEach((callMsg) {
-      callMsg.properties['callAccepted'] = '1';
+      callMsg.properties[SIGNAL_TYPE_ACCEPT_CALL] = '1';
     });
     callMsgList
         .forEach((msg) => sendSystemMessage(msg.recipientId!, msg.properties));
@@ -190,8 +208,8 @@ class CallManager {
     List<CubeMessage> callMsgList =
         buildCallMessages(callId, meetingId, [participantId]);
     callMsgList.forEach((callMsg) {
-      callMsg.properties['callRejected'] = '1';
-      callMsg.properties['busy'] = isBusy.toString();
+      callMsg.properties[SIGNAL_TYPE_REJECT_CALL] = '1';
+      callMsg.properties[PARAM_BUSY] = isBusy.toString();
     });
     callMsgList
         .forEach((msg) => sendSystemMessage(msg.recipientId!, msg.properties));
@@ -202,7 +220,30 @@ class CallManager {
     List<CubeMessage> callMsgList =
         buildCallMessages(callId, meetingId, participantIds);
     callMsgList.forEach((callMsg) {
-      callMsg.properties['callEnd'] = '1';
+      callMsg.properties[SIGNAL_TYPE_END_CALL] = '1';
+    });
+    callMsgList
+        .forEach((msg) => sendSystemMessage(msg.recipientId!, msg.properties));
+  }
+
+  sendMediaUpdatedMessage(String callId, String meetingId,
+      List<int> participantIds, Map<String, bool> mediaConfig) {
+    List<CubeMessage> callMsgList =
+        buildCallMessages(callId, meetingId, participantIds);
+    callMsgList.forEach((callMsg) {
+      callMsg.properties[SIGNAL_TYPE_UPDATE_MEDIA_STATE] = '1';
+      callMsg.properties[PARAM_MEDIA_CONFIG] = jsonEncode(mediaConfig);
+    });
+    callMsgList
+        .forEach((msg) => sendSystemMessage(msg.recipientId!, msg.properties));
+  }
+
+  sendRequestMediaConfigMessage(
+      String callId, String meetingId, List<int> participantIds) {
+    List<CubeMessage> callMsgList =
+        buildCallMessages(callId, meetingId, participantIds);
+    callMsgList.forEach((callMsg) {
+      callMsg.properties[SIGNAL_TYPE_REQUEST_MEDIA_STATE] = '1';
     });
     callMsgList
         .forEach((msg) => sendSystemMessage(msg.recipientId!, msg.properties));
@@ -214,9 +255,11 @@ class CallManager {
 
   handleAcceptCall(int participantId) {
     _clearNoAnswerTimers(id: participantId);
+    onReceiveAcceptCall?.call(participantId);
   }
 
-  handleRejectCall(int participantId, isBusy) {
+  handleRejectCall(String meetingId, int participantId, isBusy) {
+    onReceiveRejectCall?.call(meetingId, participantId, isBusy);
     _clearNoAnswerTimers(id: participantId);
     _clearCall(participantId);
   }
@@ -279,7 +322,7 @@ class CallManager {
     var savedUser = await SharedPrefs.getUser();
     if (savedUser == null) return;
 
-    var meetingId = callEvent.userInfo?['meetingId'];
+    var meetingId = callEvent.userInfo?[PARAM_MEETING_ID];
     if (meetingId == null) return;
 
     CallManager.instance.startNewIncomingCall(
@@ -302,7 +345,7 @@ class CallManager {
     var savedUser = await SharedPrefs.getUser();
     if (savedUser == null) return;
 
-    var meetingId = callEvent.userInfo?['meetingId'];
+    var meetingId = callEvent.userInfo?[PARAM_MEETING_ID];
     if (meetingId == null) return;
 
     if (currentCallState == InternalCallState.ACCEPTED) {
@@ -349,7 +392,7 @@ class CallManager {
       PARAM_CALLER_ID: callerId,
       PARAM_CALLER_NAME: callName,
       PARAM_CALL_OPPONENTS: opponentsIds.join(','),
-      PARAM_USER_INFO: jsonEncode({'meetingId': meetingId}),
+      PARAM_USER_INFO: jsonEncode({PARAM_MEETING_ID: meetingId}),
     };
 
     params.notificationType = NotificationType.PUSH;
@@ -402,6 +445,8 @@ class CallManager {
 
     setActiveCall(callId, meetingId, callerId, participants.toList());
 
+    sendAcceptMessage(callId, meetingId, callerId);
+
     if (fromCallKit) {
       onCallAccepted?.call(meetingId);
     } else {
@@ -432,7 +477,7 @@ class CallManager {
 
     CallKitManager.instance.getCallToStart().then((callToStart) async {
       if (callToStart != null && callToStart.userInfo != null) {
-        var meetingId = callToStart.userInfo!['meetingId']!;
+        var meetingId = callToStart.userInfo![PARAM_MEETING_ID]!;
 
         CallManager.instance.startNewIncomingCall(
             context,
@@ -459,6 +504,23 @@ class CallManager {
     _initiatorId = initiatorId;
     _participantIds = participantIds;
   }
+
+  void notifyParticipantsMediaUpdated(Map<String, bool> mediaConfig) {
+    if (_meetingId == null) return;
+
+    sendMediaUpdatedMessage(_meetingsCalls[_meetingId]!, _meetingId!,
+        _participantIds!, mediaConfig);
+  }
+
+  void requestParticipantsMediaConfig(List<int?> participants) {
+    if (_meetingId == null) return;
+    participants.removeWhere((userId) => userId == null);
+
+    if (participants.isEmpty) return;
+
+    sendRequestMediaConfigMessage(
+        _meetingsCalls[_meetingId]!, _meetingId!, List<int>.from(participants));
+  }
 }
 
 List<CubeMessage> buildCallMessages(
@@ -466,7 +528,7 @@ List<CubeMessage> buildCallMessages(
   return participantIds.map((userId) {
     var msg = CubeMessage();
     msg.recipientId = userId;
-    msg.properties = {'meetingId': meetingId, 'callId': callId};
+    msg.properties = {PARAM_MEETING_ID: meetingId, PARAM_SESSION_ID: callId};
     return msg;
   }).toList();
 }
@@ -478,6 +540,9 @@ typedef void NewCallCallback(String callId, String meetingId, int initiatorId,
 typedef void CloseCall();
 typedef void RejectCallCallback(
     String meetingId, int participantId, bool isBusy);
+typedef void AcceptCallCallback(int participantId);
 typedef void CallActionCallback(String meetingId);
 typedef void UserNotAnswerCallback(int participantId);
 typedef void MuteCallCallback(String meetingId, bool isMuted);
+typedef void MediaStateUpdatedCallback(
+    int userId, Map<String, bool> mediaConfig);
