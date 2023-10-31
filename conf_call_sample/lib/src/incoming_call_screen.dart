@@ -1,3 +1,4 @@
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:conf_call_sample/src/select_opponents_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -41,6 +42,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
   bool _isMicMute = false;
   MediaStream? _localMediaStream;
   RTCVideoRenderer? _localVideoRenderer;
+  AssetsAudioPlayer _ringtonePlayer = AssetsAudioPlayer.newPlayer();
 
   _IncomingCallScreenState(this._currentUser, this._callId, this._meetingId,
       this._initiatorId, this._participantIds, this._callType, this._callName);
@@ -53,6 +55,8 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
     _callManager.onCloseCall = _onCallClosed;
     _callManager.onCallAccepted = _onCallAccepted;
     _callManager.onCallRejected = _onCallRejected;
+
+    _playRingtone();
   }
 
   @override
@@ -289,6 +293,8 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
     _callManager.onCloseCall = null;
     _callManager.onCallAccepted = null;
     _callManager.onCallRejected = null;
+    
+    _stopRingtone();
 
     super.dispose();
   }
@@ -482,5 +488,16 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
 
   closeScreen() {
     Navigator.of(context, rootNavigator: true).pop();
+  }
+
+  void _playRingtone() {
+    _ringtonePlayer.open(
+      Audio("assets/audio/calling.mp3"),
+      loopMode: LoopMode.single
+    );
+  }
+
+  void _stopRingtone() {
+    _ringtonePlayer.stop();
   }
 }

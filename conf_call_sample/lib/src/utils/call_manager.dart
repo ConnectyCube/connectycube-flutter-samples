@@ -340,7 +340,8 @@ class CallManager {
   _onCallEnded(CallEvent callEvent) async {
     log('[_onCallEnded] _currentCallState: $currentCallState', TAG);
 
-    if (currentCallState == InternalCallState.FINISHED) return;
+    if (currentCallState == InternalCallState.FINISHED ||
+        currentCallState == InternalCallState.REJECTED) return;
 
     var savedUser = await SharedPrefs.getUser();
     if (savedUser == null) return;

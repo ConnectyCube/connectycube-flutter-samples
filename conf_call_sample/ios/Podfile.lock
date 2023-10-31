@@ -1,4 +1,8 @@
 PODS:
+  - assets_audio_player (0.0.1):
+    - Flutter
+  - assets_audio_player_web (0.0.1):
+    - Flutter
   - connectycube_flutter_call_kit (2.3.0):
     - Flutter
   - device_info_plus (0.0.1):
@@ -20,6 +24,8 @@ PODS:
   - WebRTC-SDK (114.5735.08)
 
 DEPENDENCIES:
+  - assets_audio_player (from `.symlinks/plugins/assets_audio_player/ios`)
+  - assets_audio_player_web (from `.symlinks/plugins/assets_audio_player_web/ios`)
   - connectycube_flutter_call_kit (from `.symlinks/plugins/connectycube_flutter_call_kit/ios`)
   - device_info_plus (from `.symlinks/plugins/device_info_plus/ios`)
   - Flutter (from `Flutter`)
@@ -34,6 +40,10 @@ SPEC REPOS:
     - WebRTC-SDK
 
 EXTERNAL SOURCES:
+  assets_audio_player:
+    :path: ".symlinks/plugins/assets_audio_player/ios"
+  assets_audio_player_web:
+    :path: ".symlinks/plugins/assets_audio_player_web/ios"
   connectycube_flutter_call_kit:
     :path: ".symlinks/plugins/connectycube_flutter_call_kit/ios"
   device_info_plus:
@@ -52,6 +62,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
 
 SPEC CHECKSUMS:
+  assets_audio_player: edee322b9cb625571b830b35872ead1a295fd917
+  assets_audio_player_web: 19826380c44375761aa0b9053665c1e3fbc3b86b
   connectycube_flutter_call_kit: e1e6bcf89ce9b3f1e7a0fdd70e9471260fc222ef
   device_info_plus: 7545d84d8d1b896cb16a4ff98c19f07ec4b298ea
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854

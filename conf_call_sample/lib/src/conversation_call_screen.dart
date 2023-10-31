@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:conf_call_sample/src/utils/duration_timer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -81,6 +82,9 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   WidgetPosition _minorWidgetPosition = WidgetPosition.topRight;
   bool _isWidgetMoving = false;
 
+  AssetsAudioPlayer _ringtonePlayer = AssetsAudioPlayer.newPlayer();
+
+
   _ConversationCallScreenState(this._currentUser, this._callSession,
       this._meetingId, this._opponents, this._isIncoming, this._callName,
       {this.initialLocalMediaStream, bool isFrontCameraUsed = true})
@@ -144,6 +148,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
       if (!_isIncoming) {
         _callManager.startNewOutgoingCall(_meetingId, _opponents,
             _callSession.currentUserId, _callSession.callType, _callName);
+        _playDialing();
       } else {
         setState(() {
           _callStatus = 'Connected';
@@ -174,6 +179,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
         log('Error $e');
       }
     });
+
+    _playStoppingCall();
   }
 
   void _onCloseCall() {
@@ -191,6 +198,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     setState(() {
       _callStatus = 'Connected';
       _startCallTimer();
+      _stopDialing();
     });
   }
 
@@ -1447,6 +1455,24 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     }
 
     return Offset(dxPosition, dyPosition);
+  }
+
+  void _playDialing() {
+    _ringtonePlayer.open(
+        Audio("assets/audio/dialing.mp3"),
+        loopMode: LoopMode.single
+    );
+  }
+
+  void _stopDialing() {
+    _ringtonePlayer.stop();
+  }
+
+  void _playStoppingCall() {
+    _ringtonePlayer.open(
+        Audio("assets/audio/end_call.mp3"),
+        loopMode: LoopMode.none
+    );
   }
 }
 
