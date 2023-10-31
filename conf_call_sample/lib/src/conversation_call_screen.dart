@@ -24,9 +24,8 @@ class ConversationCallScreen extends StatefulWidget {
   final List<int> opponents;
   final bool _isIncoming;
   final String _callName;
-
-  MediaStream? initialLocalMediaStream;
-  bool isFrontCameraUsed;
+  final MediaStream? initialLocalMediaStream;
+  final bool isFrontCameraUsed;
 
   @override
   State<StatefulWidget> createState() {
@@ -78,6 +77,9 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   Map<int, RTCVideoRenderer> minorRenderers = {};
   Map<int, Map<String, bool>> participantsMediaConfigs = {};
   bool _primaryUserForciblySelected = false;
+  Offset _minorWidgetOffset = Offset(0, 0);
+  WidgetPosition _minorWidgetPosition = WidgetPosition.topRight;
+  bool _isWidgetMoving = false;
 
   _ConversationCallScreenState(this._currentUser, this._callSession,
       this._meetingId, this._opponents, this._isIncoming, this._callName,
@@ -567,28 +569,29 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
       ),
     );
 
+    var width = calculateMinorVideoViewWidth(orientation);
+    var height = calculateMinorVideoViewHeight(orientation);
+
     var minorItem = buildItems(
-            minorRenderers,
-            orientation == Orientation.portrait
-                ? MediaQuery.of(context).size.width / 3
-                : MediaQuery.of(context).size.width / 4,
-            orientation == Orientation.portrait
-                ? MediaQuery.of(context).size.height / 4
-                : MediaQuery.of(context).size.height / 2.5)
-        .firstOrNull;
+      minorRenderers,
+      width,
+      height,
+    ).firstOrNull;
 
     if (minorItem != null) {
-      videoItems.add(Align(
-          alignment: Alignment.topRight,
-          child: Padding(
-              padding: orientation == Orientation.portrait
-                  ? EdgeInsets.only(
-                      top: MediaQuery.of(context).padding.top + 10,
-                      right: MediaQuery.of(context).padding.right + 10)
-                  : EdgeInsets.only(
-                      right: MediaQuery.of(context).padding.right + 10,
-                      top: MediaQuery.of(context).padding.top + 10),
-              child: minorItem)));
+      var widgetOffset = getOffsetForPosition(_minorWidgetPosition);
+
+      if (_isWidgetMoving) {
+        widgetOffset = _minorWidgetOffset;
+      }
+
+      videoItems.add(
+        Positioned(
+          top: widgetOffset.dy - height / 2,
+          left: widgetOffset.dx - width / 2,
+          child: minorItem,
+        ),
+      );
     }
 
     return Stack(children: videoItems);
@@ -733,6 +736,9 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
           (participantsMediaConfigs[key]?[PARAM_IS_CAMERA_ENABLED] ?? true)) {
         videoItems.add(
           GestureDetector(
+            onPanUpdate: (details) =>
+                _onPanUpdate(context, details, _minorWidgetOffset),
+            onPanEnd: (details) => _onPanEnd(context, details),
             onTap: () => setState(() {
               log("[onTap] userId: $key", TAG);
               _updatePrimaryUser(key, true);
@@ -792,6 +798,28 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     });
 
     return videoItems;
+  }
+
+  void _onPanUpdate(
+      BuildContext context, DragUpdateDetails details, Offset offset) {
+    log('_onPanUpdate', TAG);
+    if (layoutMode != LayoutMode.private) return;
+
+    setState(() {
+      _isWidgetMoving = true;
+      _minorWidgetOffset = details.globalPosition;
+    });
+  }
+
+  void _onPanEnd(BuildContext context, DragEndDetails details) {
+    log('_onPanEnd', TAG);
+    if (layoutMode != LayoutMode.private) return;
+
+    setState(() {
+      _isWidgetMoving = false;
+      _minorWidgetPosition =
+          calculateMinorVideoViewPosition(_minorWidgetOffset);
+    });
   }
 
   Widget _getActionsPanel() {
@@ -1357,6 +1385,71 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
       PARAM_IS_CAMERA_ENABLED: _isCameraEnabled
     });
   }
+
+  WidgetPosition calculateMinorVideoViewPosition(Offset initialPosition) {
+    var isRight = false;
+    if (initialPosition.dx > MediaQuery.of(context).size.width / 2) {
+      isRight = true;
+    }
+
+    var isBottom = false;
+    if (initialPosition.dy > MediaQuery.of(context).size.height / 2) {
+      isBottom = true;
+    }
+
+    var position = WidgetPosition.topRight;
+
+    if (isRight && isBottom) {
+      position = WidgetPosition.bottomRight;
+    } else if (!isRight && isBottom) {
+      position = WidgetPosition.bottomLeft;
+    } else if (!isRight && !isBottom) {
+      position = WidgetPosition.topLeft;
+    }
+
+    return position;
+  }
+
+  double calculateMinorVideoViewWidth(Orientation orientation) {
+    return orientation == Orientation.portrait
+        ? MediaQuery.of(context).size.width / 3
+        : MediaQuery.of(context).size.width / 4;
+  }
+
+  double calculateMinorVideoViewHeight(Orientation orientation) {
+    return orientation == Orientation.portrait
+        ? MediaQuery.of(context).size.height / 4
+        : MediaQuery.of(context).size.height / 2.5;
+  }
+
+  Offset getOffsetForPosition(WidgetPosition position) {
+    var orientation = MediaQuery.of(context).orientation;
+
+    var width = calculateMinorVideoViewWidth(orientation);
+    var height = calculateMinorVideoViewHeight(orientation);
+
+    var dxPosition = 0.0;
+    if (position == WidgetPosition.topRight ||
+        position == WidgetPosition.bottomRight) {
+      dxPosition = MediaQuery.of(context).size.width -
+          (width / 2 + MediaQuery.of(context).padding.right + 10);
+    } else {
+      dxPosition = width / 2 + MediaQuery.of(context).padding.left + 10;
+    }
+
+    var dyPosition = 0.0;
+    if (position == WidgetPosition.bottomRight ||
+        position == WidgetPosition.bottomLeft) {
+      dyPosition = MediaQuery.of(context).size.height -
+          (height / 2 + MediaQuery.of(context).padding.bottom + 10);
+    } else {
+      dyPosition = height / 2 + MediaQuery.of(context).padding.top + 10;
+    }
+
+    return Offset(dxPosition, dyPosition);
+  }
 }
 
 enum LayoutMode { speaker, grid, private }
+
+enum WidgetPosition { topLeft, topRight, bottomLeft, bottomRight }
