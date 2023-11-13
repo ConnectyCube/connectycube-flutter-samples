@@ -1,5 +1,4 @@
 import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:conf_call_sample/src/select_opponents_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:universal_io/io.dart';
@@ -63,6 +62,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
   Widget build(BuildContext context) {
     log('[build]', TAG);
     if (_callManager.currentCallState != InternalCallState.NEW) {
+
       closeScreen();
       return SizedBox.shrink();
     }
