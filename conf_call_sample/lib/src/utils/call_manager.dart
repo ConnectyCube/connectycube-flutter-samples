@@ -125,7 +125,7 @@ class CallManager {
   }
 
   startNewOutgoingCall(String meetingId, List<int> participantIds,
-      int currentUserId, int callType, String callName) {
+      int currentUserId, int callType, String callName, String? callPhoto) {
     _initiatorId = currentUserId;
     _participantIds = participantIds;
     _meetingId = meetingId;
@@ -135,7 +135,7 @@ class CallManager {
         callType, callName);
     startNoAnswerTimers(participantIds);
     _sendStartCallSignalForOffliners(_meetingsCalls[_meetingId!]!, meetingId,
-        callType, callName, currentUserId, participantIds.toSet());
+        callType, callName, callPhoto, currentUserId, participantIds.toSet());
   }
 
   reject(String callId, String meetingId, bool isBusy, int initiatorId,
@@ -368,9 +368,9 @@ class CallManager {
   }
 
   void _sendStartCallSignalForOffliners(String sessionId, String meetingId,
-      int callType, String callName, int callerId, Set<int> opponentsIds) {
+      int callType, String callName, String? callPhoto, int callerId, Set<int> opponentsIds) {
     CreateEventParams params = _getCallEventParameters(
-        sessionId, meetingId, callType, callName, callerId, opponentsIds);
+        sessionId, meetingId, callType, callName, callPhoto, callerId, opponentsIds);
     params.parameters[PARAM_SIGNAL_TYPE] = SIGNAL_TYPE_START_CALL;
     params.parameters[PARAM_IOS_VOIP] = 1;
     params.parameters[PARAM_EXPIRATION] = 0;
@@ -383,7 +383,7 @@ class CallManager {
   }
 
   CreateEventParams _getCallEventParameters(String sessionId, String meetingId,
-      int callType, String callName, int callerId, Set<int> opponentsIds) {
+      int callType, String callName, String? callPhoto, int callerId, Set<int> opponentsIds) {
     CreateEventParams params = CreateEventParams();
     params.parameters = {
       'message':
@@ -393,7 +393,10 @@ class CallManager {
       PARAM_CALLER_ID: callerId,
       PARAM_CALLER_NAME: callName,
       PARAM_CALL_OPPONENTS: opponentsIds.join(','),
-      PARAM_USER_INFO: jsonEncode({PARAM_MEETING_ID: meetingId}),
+      PARAM_PHOTO_URL: callPhoto,
+      PARAM_USER_INFO: jsonEncode({
+        PARAM_MEETING_ID: meetingId,
+      }),
     };
 
     params.notificationType = NotificationType.PUSH;

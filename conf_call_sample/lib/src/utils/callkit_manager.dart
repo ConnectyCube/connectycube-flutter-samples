@@ -40,10 +40,9 @@ class CallKitManager {
       onCallAccepted: _onCallAccepted,
       onCallRejected: _onCallRejected,
       icon: Platform.isAndroid ? 'default_avatar' : 'CallKitIcon',
-        notificationIcon: 'ic_notification',
         color: '#07711e',
-        ringtone:
-        Platform.isAndroid ? 'custom_ringtone' : 'Resources/ringtones/custom_ringtone.caf'
+        // ringtone:
+        // Platform.isAndroid ? 'custom_ringtone' : 'Resources/ringtones/custom_ringtone.caf'
     );
     ConnectycubeFlutterCallKit.onCallRejectedWhenTerminated =
         onCallRejectedWhenTerminated;

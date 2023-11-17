@@ -10,6 +10,7 @@ final String PARAM_USER_INFO = 'user_info';
 final String PARAM_MEETING_ID = 'meeting_id';
 final String PARAM_MESSAGE = 'message';
 final String PARAM_BUSY = 'busy';
+final String PARAM_PHOTO_URL = 'photo_url';
 
 final String SIGNAL_TYPE_START_CALL = 'startCall';
 final String SIGNAL_TYPE_END_CALL = 'endCall';

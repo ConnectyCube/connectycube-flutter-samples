@@ -147,7 +147,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
 
       if (!_isIncoming) {
         _callManager.startNewOutgoingCall(_meetingId, _opponents,
-            _callSession.currentUserId, _callSession.callType, _callName);
+            _callSession.currentUserId, _callSession.callType, _callName, _currentUser.avatar);
         _playDialing();
       } else {
         setState(() {

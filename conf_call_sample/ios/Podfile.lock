@@ -3,7 +3,7 @@ PODS:
     - Flutter
   - assets_audio_player_web (0.0.1):
     - Flutter
-  - connectycube_flutter_call_kit (2.3.0):
+  - connectycube_flutter_call_kit (2.4.0):
     - Flutter
   - device_info_plus (0.0.1):
     - Flutter
@@ -64,7 +64,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   assets_audio_player: edee322b9cb625571b830b35872ead1a295fd917
   assets_audio_player_web: 19826380c44375761aa0b9053665c1e3fbc3b86b
-  connectycube_flutter_call_kit: e1e6bcf89ce9b3f1e7a0fdd70e9471260fc222ef
+  connectycube_flutter_call_kit: 692344e6077ea17dfef31008aaac3b2b24491668
   device_info_plus: 7545d84d8d1b896cb16a4ff98c19f07ec4b298ea
   Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   flutter_webrtc: 55df3aaa802114dad390191a46c2c8d535751268

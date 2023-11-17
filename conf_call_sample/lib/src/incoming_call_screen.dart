@@ -54,18 +54,17 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
     _callManager.onCloseCall = _onCallClosed;
     _callManager.onCallAccepted = _onCallAccepted;
     _callManager.onCallRejected = _onCallRejected;
-
-    _playRingtone();
   }
 
   @override
   Widget build(BuildContext context) {
     log('[build]', TAG);
     if (_callManager.currentCallState != InternalCallState.NEW) {
-
       closeScreen();
       return SizedBox.shrink();
     }
+
+    _playRingtone();
 
     return WillPopScope(
       onWillPop: () => _onBackPressed(context),
@@ -293,7 +292,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
     _callManager.onCloseCall = null;
     _callManager.onCallAccepted = null;
     _callManager.onCallRejected = null;
-    
+
     _stopRingtone();
 
     super.dispose();
@@ -491,10 +490,8 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
   }
 
   void _playRingtone() {
-    _ringtonePlayer.open(
-      Audio("assets/audio/calling.mp3"),
-      loopMode: LoopMode.single
-    );
+    _ringtonePlayer.open(Audio("assets/audio/calling.mp3"),
+        loopMode: LoopMode.single);
   }
 
   void _stopRingtone() {
