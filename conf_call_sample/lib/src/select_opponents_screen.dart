@@ -192,6 +192,7 @@ class _BodyLayoutState extends State<BodyLayout> {
     checkSystemAlertWindowPermission(context);
     requestNotificationsPermission();
     CallManager.instance.context = context;
+    requestFullScreenIntentsPermission(context);
 
     _initCalls();
   }

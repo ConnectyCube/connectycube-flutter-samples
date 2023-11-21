@@ -1,3 +1,5 @@
+import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
+import 'package:connectycube_sdk/connectycube_calls.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -97,4 +99,53 @@ requestNotificationsPermission() async {
       await Permission.notification.request();
     }
   }
+}
+
+requestFullScreenIntentsPermission(BuildContext context) async {
+  if (!Platform.isAndroid) return;
+
+  var androidInfo = await DeviceInfoPlugin().androidInfo;
+  var sdkInt = androidInfo.version.sdkInt;
+
+  if (sdkInt < 34) return;
+
+  ConnectycubeFlutterCallKit.canUseFullScreenIntent()
+      .then((canUseFullScreenIntent) {
+    log('[requestFullScreenIntentsPermission] canUseFullScreenIntent: $canUseFullScreenIntent',
+        'platform_utils');
+
+    if (!canUseFullScreenIntent) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Full Screen notifications Permission required'),
+            content: Text(
+                'To display an Incoming call on the Lock screen, you must grant access to the Lock screen. Would you like to do it now?'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  ConnectycubeFlutterCallKit.provideFullScreenIntentAccess()
+                      .then((_) {
+                    Navigator.of(context).pop();
+                  });
+                },
+                child: Text(
+                  'Grant',
+                ),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text(
+                  'Later',
+                ),
+              ),
+            ],
+          );
+        },
+      );
+    }
+  });
 }
