@@ -84,7 +84,6 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
 
   AssetsAudioPlayer _ringtonePlayer = AssetsAudioPlayer.newPlayer();
 
-
   _ConversationCallScreenState(this._currentUser, this._callSession,
       this._meetingId, this._opponents, this._isIncoming, this._callName,
       {this.initialLocalMediaStream, bool isFrontCameraUsed = true})
@@ -146,8 +145,13 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
       _callSession.setMaxBandwidth(0);
 
       if (!_isIncoming) {
-        _callManager.startNewOutgoingCall(_meetingId, _opponents,
-            _callSession.currentUserId, _callSession.callType, _callName, _currentUser.avatar);
+        _callManager.startNewOutgoingCall(
+            _meetingId,
+            _opponents,
+            _callSession.currentUserId,
+            _callSession.callType,
+            _callName,
+            _currentUser.avatar);
         _playDialing();
       } else {
         setState(() {
@@ -263,11 +267,20 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     _stopCallTimer();
 
     log("[_onSessionClosed] 2", TAG);
-    Navigator.of(context, rootNavigator: true).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => SelectOpponentsScreen(_currentUser),
-      ),
-    );
+    var navigator = Navigator.of(context);
+    if (navigator.canPop()) {
+      log("[_onSessionClosed] navigator.canPop()", TAG);
+      Navigator.of(context).popUntil((route) {
+        return route.isFirst;
+      });
+    } else {
+      log("[_onSessionClosed] !navigator.canPop()", TAG);
+      navigator.pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => SelectOpponentsScreen(_currentUser),
+        ),
+      );
+    }
   }
 
   void onPublishersReceived(publishers) {
@@ -1458,10 +1471,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   void _playDialing() {
-    _ringtonePlayer.open(
-        Audio("assets/audio/dialing.mp3"),
-        loopMode: LoopMode.single
-    );
+    _ringtonePlayer.open(Audio("assets/audio/dialing.mp3"),
+        loopMode: LoopMode.single);
   }
 
   void _stopDialing() {
@@ -1469,10 +1480,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   void _playStoppingCall() {
-    _ringtonePlayer.open(
-        Audio("assets/audio/end_call.mp3"),
-        loopMode: LoopMode.none
-    );
+    _ringtonePlayer.open(Audio("assets/audio/end_call.mp3"),
+        loopMode: LoopMode.none);
   }
 }
 

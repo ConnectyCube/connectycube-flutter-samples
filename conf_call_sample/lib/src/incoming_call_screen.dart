@@ -486,7 +486,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
   }
 
   closeScreen() {
-    Navigator.of(context, rootNavigator: true).pop();
+    Navigator.of(context).pop();
   }
 
   void _playRingtone() {

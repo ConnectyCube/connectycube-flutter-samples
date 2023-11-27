@@ -57,12 +57,12 @@ initConnectycube() {
     },
   );
 
-  // setEndpoints('https://', '');
+  setEndpoints(config.API_ENDPOINT, config.CHAT_ENDPOINT);
 
-  ConferenceConfig.instance.url = config.SERVER_ENDPOINT;
+  ConferenceConfig.instance.url = config.CONF_SERVER_ENDPOINT;
 }
 
-initConnectycubeContextLess() {
+initConnectycubeContextLess() async {
   CubeSettings.instance.applicationId = config.APP_ID;
   CubeSettings.instance.authorizationKey = config.AUTH_KEY;
   CubeSettings.instance.authorizationSecret = config.AUTH_SECRET;
@@ -71,4 +71,9 @@ initConnectycubeContextLess() {
       return createSession(savedUser);
     });
   };
+
+  CubeSettings.instance.apiEndpoint = config.API_ENDPOINT;
+  CubeSettings.instance.chatEndpoint = config.CHAT_ENDPOINT;
+
+  ConferenceConfig.instance.url = config.CONF_SERVER_ENDPOINT;
 }

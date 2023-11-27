@@ -4,6 +4,7 @@ import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 import 'conversation_call_screen.dart';
 import 'incoming_call_screen.dart';
+import 'login_screen.dart';
 import 'utils/configs.dart' as utils;
 import 'utils/call_manager.dart';
 import 'utils/platform_utils.dart';
@@ -40,7 +41,7 @@ class SelectOpponentsScreen extends StatelessWidget {
   }
 
   Future<bool> _onBackPressed() {
-    return Future.value(false);
+    return Future.value(true);
   }
 
   _logOut(BuildContext context) {
@@ -82,7 +83,11 @@ class SelectOpponentsScreen extends StatelessWidget {
   }
 
   _navigateToLoginScreen(BuildContext context) {
-    Navigator.of(context, rootNavigator: true).pop();
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => LoginScreen(),
+      ),
+    );
   }
 }
 
@@ -229,7 +234,7 @@ class _BodyLayoutState extends State<BodyLayout> {
         callType: callType,
       );
 
-      Navigator.of(context, rootNavigator: true).push(
+      Navigator.of(context).push(
         MaterialPageRoute(
           builder: (context) => ConversationCallScreen(
               _currentUser,
@@ -247,7 +252,7 @@ class _BodyLayoutState extends State<BodyLayout> {
       List<int> participantIds, int callType, String callName) {
     log('[_showIncomingCallScreen]', TAG);
 
-    Navigator.of(context, rootNavigator: true).push(
+    Navigator.of(context).push(
       MaterialPageRoute(
         builder: (context) => IncomingCallScreen(_currentUser, callId,
             meetingId, initiatorId, participantIds, callType, callName),

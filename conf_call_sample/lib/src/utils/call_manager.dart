@@ -50,7 +50,6 @@ class CallManager {
 
   init(BuildContext context) {
     log('[init]', TAG);
-    this.context = context;
 
     if (isInitialized) return;
 
@@ -326,15 +325,17 @@ class CallManager {
     if (meetingId == null) return;
 
     CallManager.instance.startNewIncomingCall(
-        context,
-        savedUser,
-        callEvent.sessionId,
-        meetingId,
-        callEvent.callType,
-        callEvent.callerName,
-        callEvent.callerId,
-        callEvent.opponentsIds.toList(),
-        true);
+      context,
+      savedUser,
+      callEvent.sessionId,
+      meetingId,
+      callEvent.callType,
+      callEvent.callerName,
+      callEvent.callerId,
+      callEvent.opponentsIds.toList(),
+      true,
+      cleanNavigation: false,
+    );
   }
 
   _onCallEnded(CallEvent callEvent) async {
@@ -367,10 +368,17 @@ class CallManager {
     });
   }
 
-  void _sendStartCallSignalForOffliners(String sessionId, String meetingId,
-      int callType, String callName, String? callPhoto, int callerId, Set<int> opponentsIds) {
-    CreateEventParams params = _getCallEventParameters(
-        sessionId, meetingId, callType, callName, callPhoto, callerId, opponentsIds);
+  void _sendStartCallSignalForOffliners(
+    String sessionId,
+    String meetingId,
+    int callType,
+    String callName,
+    String? callPhoto,
+    int callerId,
+    Set<int> opponentsIds,
+  ) {
+    CreateEventParams params = _getCallEventParameters(sessionId, meetingId,
+        callType, callName, callPhoto, callerId, opponentsIds);
     params.parameters[PARAM_SIGNAL_TYPE] = SIGNAL_TYPE_START_CALL;
     params.parameters[PARAM_IOS_VOIP] = 1;
     params.parameters[PARAM_EXPIRATION] = 0;
@@ -382,8 +390,15 @@ class CallManager {
     });
   }
 
-  CreateEventParams _getCallEventParameters(String sessionId, String meetingId,
-      int callType, String callName, String? callPhoto, int callerId, Set<int> opponentsIds) {
+  CreateEventParams _getCallEventParameters(
+    String sessionId,
+    String meetingId,
+    int callType,
+    String callName,
+    String? callPhoto,
+    int callerId,
+    Set<int> opponentsIds,
+  ) {
     CreateEventParams params = CreateEventParams();
     params.parameters = {
       'message':
@@ -438,10 +453,10 @@ class CallManager {
     int callerId,
     List<int> opponentsIds,
     bool fromCallKit, {
+    bool cleanNavigation = true,
     MediaStream? initialLocalMediaStream,
     bool isFrontCameraUsed = true,
   }) async {
-    this.context = context;
     currentCallState = InternalCallState.ACCEPTED;
 
     var participants = Set<int>.from([...opponentsIds, callerId]);
@@ -459,20 +474,25 @@ class CallManager {
 
     ConferenceSession callSession = await ConferenceClient.instance
         .createCallSession(currentUser.id!, callType: callType);
-    Navigator.of(context, rootNavigator: true).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => ConversationCallScreen(
-          currentUser,
-          callSession,
-          meetingId,
-          opponentsIds,
-          true,
-          callName,
-          initialLocalMediaStream: initialLocalMediaStream,
-          isFrontCameraUsed: isFrontCameraUsed,
-        ),
+
+    var route = MaterialPageRoute(
+      builder: (context) => ConversationCallScreen(
+        currentUser,
+        callSession,
+        meetingId,
+        opponentsIds,
+        true,
+        callName,
+        initialLocalMediaStream: initialLocalMediaStream,
+        isFrontCameraUsed: isFrontCameraUsed,
       ),
     );
+
+    if (cleanNavigation) {
+      Navigator.of(context).pushReplacement(route);
+    } else {
+      Navigator.of(context).push(route);
+    }
   }
 
   static Future<void> startCallIfNeed(BuildContext context) async {
