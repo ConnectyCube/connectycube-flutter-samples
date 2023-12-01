@@ -9,8 +9,6 @@ import 'package:universal_io/io.dart';
 import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import '../../main.dart';
-import '../utils/consts.dart';
 import '../utils/pref_util.dart';
 
 class PushNotificationsManager {
@@ -59,7 +57,8 @@ class PushNotificationsManager {
     CreateSubscriptionParameters parameters = CreateSubscriptionParameters();
     parameters.pushToken = token;
 
-    parameters.environment = CubeEnvironment.DEVELOPMENT; // TODO used `DEVELOPMENT` environment for testing purposes
+    parameters.environment = CubeEnvironment
+        .DEVELOPMENT; // TODO used `DEVELOPMENT` environment for testing purposes
     // parameters.environment = kReleaseMode ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT; // TODO use actual environment in the real app
 
     if (Platform.isAndroid) {

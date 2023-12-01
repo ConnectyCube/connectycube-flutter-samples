@@ -1,7 +1,8 @@
 import 'dart:async';
 
-import 'package:connectycube_sdk/connectycube_chat.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 const String prefUserLogin = "pref_user_login";
 const String prefUserPsw = "pref_user_psw";

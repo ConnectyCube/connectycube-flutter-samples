@@ -1,11 +1,11 @@
-import 'package:conf_call_sample/src/utils/call_manager.dart';
+import 'package:conf_call_sample/src/managers/call_manager.dart';
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 import 'src/utils/configs.dart' as config;
-import 'src/login_screen.dart';
 import 'src/utils/pref_util.dart';
+import 'src/screens/login_screen.dart';
 
 void main() => runApp(App());
 

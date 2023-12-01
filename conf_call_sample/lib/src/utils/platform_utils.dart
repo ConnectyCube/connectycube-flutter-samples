@@ -1,11 +1,12 @@
-import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
-import 'package:connectycube_sdk/connectycube_calls.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_background/flutter_background.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:universal_io/io.dart';
+
+import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
+import 'package:connectycube_sdk/connectycube_calls.dart';
 
 Future<bool> initForegroundService() async {
   if (Platform.isAndroid) {

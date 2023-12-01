@@ -8,10 +8,10 @@ import 'package:uuid/uuid.dart';
 import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import '../conversation_call_screen.dart';
+import '../screens/conversation_call_screen.dart';
+import '../utils/consts.dart';
+import '../utils/pref_util.dart';
 import 'callkit_manager.dart';
-import 'consts.dart';
-import 'pref_util.dart';
 import 'push_notifications_manager.dart';
 
 const NO_ANSWER_TIMER_INTERVAL = 60;

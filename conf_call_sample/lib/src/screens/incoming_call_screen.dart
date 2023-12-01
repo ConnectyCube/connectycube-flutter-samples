@@ -5,7 +5,7 @@ import 'package:universal_io/io.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import 'utils/call_manager.dart';
+import '../managers/call_manager.dart';
 
 class IncomingCallScreen extends StatefulWidget {
   static const String TAG = "IncomingCallScreen";

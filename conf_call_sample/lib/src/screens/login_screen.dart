@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
+import '../managers/call_manager.dart';
+import '../utils/configs.dart' as utils;
+import '../utils/pref_util.dart';
 import 'select_opponents_screen.dart';
-import 'utils/call_manager.dart';
-import 'utils/configs.dart' as utils;
-import 'utils/pref_util.dart';
 
 class LoginScreen extends StatelessWidget {
   static const String TAG = "LoginScreen";

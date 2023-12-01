@@ -7,8 +7,8 @@ import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 import '../../main.dart';
+import '../utils/consts.dart';
 import 'call_manager.dart';
-import 'consts.dart';
 
 class CallKitManager {
   static CallKitManager get instance => _getInstance();
@@ -40,9 +40,9 @@ class CallKitManager {
       onCallAccepted: _onCallAccepted,
       onCallRejected: _onCallRejected,
       icon: Platform.isAndroid ? 'default_avatar' : 'CallKitIcon',
-        color: '#07711e',
-        // ringtone:
-        // Platform.isAndroid ? 'custom_ringtone' : 'Resources/ringtones/custom_ringtone.caf'
+      color: '#07711e',
+      // ringtone:
+      // Platform.isAndroid ? 'custom_ringtone' : 'Resources/ringtones/custom_ringtone.caf'
     );
     ConnectycubeFlutterCallKit.onCallRejectedWhenTerminated =
         onCallRejectedWhenTerminated;
@@ -67,7 +67,8 @@ class CallKitManager {
     }
   }
 
-  Future<void> sendEndCallPushNotification(String callId, List<int> participants) async {
+  Future<void> sendEndCallPushNotification(
+      String callId, List<int> participants) async {
     if (Platform.isAndroid || Platform.isIOS) {
       sendPushAboutEndingCall(callId, participants);
     }
@@ -107,12 +108,16 @@ class CallKitManager {
               callType: int.parse(callData[PARAM_CALL_TYPE].toString()),
               callerId: int.parse(callData[PARAM_CALLER_ID].toString()),
               callerName: callData[PARAM_CALLER_NAME] as String,
-              opponentsIds:
-              (callData[PARAM_CALL_OPPONENTS] as String).split(',').map(int.parse).toSet(),
+              opponentsIds: (callData[PARAM_CALL_OPPONENTS] as String)
+                  .split(',')
+                  .map(int.parse)
+                  .toSet(),
               userInfo: callData[PARAM_USER_INFO] != null
-                  ? Map<String, String>.from(jsonDecode(callData[PARAM_USER_INFO]))
+                  ? Map<String, String>.from(
+                      jsonDecode(callData[PARAM_USER_INFO]))
                   : null,
-            );;
+            );
+            ;
           });
         }
         return null;
@@ -178,10 +183,9 @@ Future<void> sendPushAboutRejectFromKilledState(
 }
 
 Future<void> sendPushAboutEndingCall(
-    String callId,
-    List<int> participants,
-
-    ) {
+  String callId,
+  List<int> participants,
+) {
   CreateEventParams params = CreateEventParams();
   params.parameters[PARAM_SESSION_ID] = callId;
   params.parameters[PARAM_MESSAGE] = 'End call';
@@ -189,12 +193,8 @@ Future<void> sendPushAboutEndingCall(
 
   params.notificationType = NotificationType.PUSH;
   params.environment =
-  kReleaseMode ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
+      kReleaseMode ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
   params.usersIds = participants;
 
   return createEvent(params.getEventForRequest());
 }
-
-
-
-
