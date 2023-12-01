@@ -28,6 +28,7 @@ ConnectyCube Conference Calls API documentation - [https://developers.connectycu
 ## Screenshots
 
 <kbd><img alt="Flutter Conference Calls code sample, select users" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/select_opponents_screen.png" height="440" /></kbd> 
+<kbd><img alt="Flutter Conference Calls code sample, video chat private" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen_private.png" height="440" /></kbd></kbd> 
 <kbd><img alt="Flutter Conference Calls code sample, video chat" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen_group.png" height="440" /></kbd></kbd> 
 <kbd><img alt="Flutter Conference Calls code sample, video chat (macOS)" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen_macos.png" height="440" /></kbd>
 
