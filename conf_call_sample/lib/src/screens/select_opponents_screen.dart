@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import 'call_screen.dart';
-import 'utils/configs.dart' as utils;
-import 'utils/call_manager.dart';
-import 'utils/platform_utils.dart';
+import '../managers/call_manager.dart';
+import '../utils/configs.dart' as utils;
+import '../utils/platform_utils.dart';
+import '../utils/pref_util.dart';
+import 'conversation_call_screen.dart';
+import 'incoming_call_screen.dart';
+import 'login_screen.dart';
 
 class SelectOpponentsScreen extends StatelessWidget {
   final CubeUser currentUser;
@@ -38,7 +41,7 @@ class SelectOpponentsScreen extends StatelessWidget {
   }
 
   Future<bool> _onBackPressed() {
-    return Future.value(false);
+    return Future.value(true);
   }
 
   _logOut(BuildContext context) {
@@ -61,6 +64,7 @@ class SelectOpponentsScreen extends StatelessWidget {
                 signOut().then(
                   (voidValue) {
                     CubeChatConnection.instance.destroy();
+                    SharedPrefs.deleteUserData();
                     Navigator.pop(context); // cancel current Dialog
                     _navigateToLoginScreen(context);
                   },
@@ -79,7 +83,11 @@ class SelectOpponentsScreen extends StatelessWidget {
   }
 
   _navigateToLoginScreen(BuildContext context) {
-    Navigator.pop(context);
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(
+        builder: (context) => LoginScreen(),
+      ),
+    );
   }
 }
 
@@ -95,16 +103,16 @@ class BodyLayout extends StatefulWidget {
 }
 
 class _BodyLayoutState extends State<BodyLayout> {
+  static final String TAG = 'SelectOpponentsScreen';
+
   Set<int> _selectedUsers = {};
   final CubeUser _currentUser;
-  late CallManager _callManager;
-  late ConferenceClient _callClient;
-  ConferenceSession? _currentCall;
 
   _BodyLayoutState(this._currentUser);
 
   @override
   Widget build(BuildContext context) {
+    log('[build]', TAG);
     return Container(
         padding: EdgeInsets.all(48),
         child: Column(
@@ -113,15 +121,10 @@ class _BodyLayoutState extends State<BodyLayout> {
               "Select users to start call:",
               style: TextStyle(fontSize: 22),
             ),
-            Expanded(
-              child: _getOpponentsList(),
-            ),
+            _getOpponentsList(),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
-                Container(
-                  width: 24,
-                ),
                 FloatingActionButton(
                   heroTag: "VideoCall",
                   child: Icon(
@@ -129,7 +132,21 @@ class _BodyLayoutState extends State<BodyLayout> {
                     color: Colors.white,
                   ),
                   backgroundColor: Colors.blue,
-                  onPressed: () => _startCall(_selectedUsers),
+                  onPressed: () =>
+                      _startCall(_selectedUsers, CallType.VIDEO_CALL),
+                ),
+                Container(
+                  width: 32,
+                ),
+                FloatingActionButton(
+                  heroTag: "AudioCall",
+                  child: Icon(
+                    Icons.call,
+                    color: Colors.white,
+                  ),
+                  backgroundColor: Colors.green,
+                  onPressed: () =>
+                      _startCall(_selectedUsers, CallType.AUDIO_CALL),
                 ),
               ],
             ),
@@ -138,12 +155,15 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   Widget _getOpponentsList() {
+    log('[_getOpponentsList]', TAG);
     CubeUser? currentUser = _currentUser;
     final users =
         utils.users.where((user) => user.id != currentUser.id).toList();
     return ListView.builder(
+      shrinkWrap: true,
       itemCount: users.length,
       itemBuilder: (context, index) {
+        log('[itemBuilder] index $index', TAG);
         return Card(
           child: CheckboxListTile(
             title: Center(
@@ -153,6 +173,7 @@ class _BodyLayoutState extends State<BodyLayout> {
             ),
             value: _selectedUsers.contains(users[index].id),
             onChanged: ((checked) {
+              log('[CheckboxListTile][onChanged]', TAG);
               setState(() {
                 if (checked!) {
                   _selectedUsers.add(users[index].id!);
@@ -170,30 +191,28 @@ class _BodyLayoutState extends State<BodyLayout> {
   @override
   void initState() {
     super.initState();
+    log('[initState]', TAG);
 
     initForegroundService();
+    checkSystemAlertWindowPermission(context);
+    requestNotificationsPermission();
+    CallManager.instance.context = context;
+    requestFullScreenIntentsPermission(context);
 
-    CubeSettings.instance.onSessionRestore = () {
-      return createSession(_currentUser);
-    };
-
-    _initConferenceConfig();
     _initCalls();
   }
 
   void _initCalls() {
-    _callClient = ConferenceClient.instance;
-    _callManager = CallManager.instance;
-    _callManager.onReceiveNewCall = (meetingId, participantIds) {
-      _showIncomingCallScreen(meetingId, participantIds);
-    };
-
-    _callManager.onCloseCall = () {
-      _currentCall = null;
+    log('[_initCalls]', TAG);
+    CallManager.instance.onReceiveNewCall =
+        (callId, meetingId, initiatorId, participantIds, callType, callName) {
+      _showIncomingCallScreen(
+          callId, meetingId, initiatorId, participantIds, callType, callName);
     };
   }
 
-  void _startCall(Set<int> opponents) async {
+  void _startCall(Set<int> opponents, int callType) async {
+    log('[_startCall] call type $callType', TAG);
     if (opponents.isEmpty) return;
 
     var attendees = opponents.map((entry) {
@@ -210,31 +229,34 @@ class _BodyLayoutState extends State<BodyLayout> {
       attendees: attendees,
     );
     createMeeting(meeting).then((createdMeeting) async {
-      _currentCall = await _callClient.createCallSession(
+      var callSession = await ConferenceClient.instance.createCallSession(
         createdMeeting.hostId!,
-        callType: CallType.VIDEO_CALL,
+        callType: callType,
       );
 
-      Navigator.push(
-        context,
+      Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (context) => ConversationCallScreen(_currentCall!,
-              createdMeeting.meetingId!, opponents.toList(), false),
+          builder: (context) => ConversationCallScreen(
+              _currentUser,
+              callSession,
+              createdMeeting.meetingId!,
+              opponents.toList(),
+              false,
+              '${_currentUser.fullName ?? 'Unknown User'}${opponents.length > 1 ? ' (in Group call)' : ''}'),
         ),
       );
     });
   }
 
-  void _showIncomingCallScreen(String meetingId, List<int> participantIds) {
-    Navigator.push(
-      context,
+  void _showIncomingCallScreen(String callId, String meetingId, int initiatorId,
+      List<int> participantIds, int callType, String callName) {
+    log('[_showIncomingCallScreen]', TAG);
+
+    Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => IncomingCallScreen(meetingId, participantIds),
+        builder: (context) => IncomingCallScreen(_currentUser, callId,
+            meetingId, initiatorId, participantIds, callType, callName),
       ),
     );
-  }
-
-  void _initConferenceConfig() {
-    ConferenceConfig.instance.url = utils.SERVER_ENDPOINT;
   }
 }

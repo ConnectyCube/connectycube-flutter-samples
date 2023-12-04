@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
+import '../managers/call_manager.dart';
+import '../utils/configs.dart' as utils;
+import '../utils/pref_util.dart';
 import 'select_opponents_screen.dart';
-import 'utils/configs.dart' as utils;
 
 class LoginScreen extends StatelessWidget {
   static const String TAG = "LoginScreen";
@@ -32,7 +34,27 @@ class BodyState extends State<BodyLayout> {
   int? _selectedUserId;
 
   @override
+  void initState() {
+    super.initState();
+    log("initState", TAG);
+
+    _loginWithSavedUserIfExist();
+
+    CallManager.startCallIfNeed(context);
+  }
+
+  void _loginWithSavedUserIfExist() {
+    SharedPrefs.getUser().then((savedUser) {
+      if (savedUser != null) {
+        _loginToCC(context, savedUser, savedUser: true);
+      }
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    log("build", TAG);
+
     return Padding(
       padding: EdgeInsets.all(48),
       child: Column(
@@ -53,6 +75,7 @@ class BodyState extends State<BodyLayout> {
   }
 
   Widget _getUsersList(BuildContext context) {
+    log("[_getUsersList]", TAG);
     final users = utils.users;
 
     return ListView.builder(
@@ -97,8 +120,17 @@ class BodyState extends State<BodyLayout> {
     );
   }
 
-  _loginToCC(BuildContext context, CubeUser user) {
+  _loginToCC(BuildContext context, CubeUser user, {bool savedUser = false}) {
+    log('[_loginToCC]', TAG);
     if (_isLoginContinues) return;
+
+    if (CubeSessionManager.instance.isActiveSessionValid() &&
+        CubeChatConnection.instance.chatConnectionState ==
+            CubeChatConnectionState.Ready &&
+        CubeChatConnection.instance.currentUser?.id == user.id) {
+      _goSelectOpponentsScreen(context, user);
+      return;
+    }
 
     setState(() {
       _isLoginContinues = true;
@@ -111,6 +143,10 @@ class BodyState extends State<BodyLayout> {
       _loginToCubeChat(context, user);
     } else {
       createSession(user).then((cubeSession) {
+        if (!savedUser) {
+          SharedPrefs.saveNewUser(user);
+          CallManager.instance.init(context);
+        }
         _loginToCubeChat(context, user);
       }).catchError((onError) {
         _processLoginError(onError);
@@ -119,12 +155,15 @@ class BodyState extends State<BodyLayout> {
   }
 
   void _loginToCubeChat(BuildContext context, CubeUser user) {
+    log('[_loginToCubeChat]', TAG);
     CubeChatConnection.instance.login(user).then((cubeUser) {
-      setState(() {
-        _isLoginContinues = false;
-        _selectedUserId = 0;
-      });
-      _goSelectOpponentsScreen(context, cubeUser);
+      if (mounted) {
+        setState(() {
+          _isLoginContinues = false;
+          _selectedUserId = 0;
+        });
+        _goSelectOpponentsScreen(context, cubeUser);
+      }
     }).catchError((onError) {
       _processLoginError(onError);
     });
@@ -132,6 +171,7 @@ class BodyState extends State<BodyLayout> {
 
   void _processLoginError(exception) {
     log("Login error $exception", TAG);
+    if (!mounted) return;
 
     setState(() {
       _isLoginContinues = false;
@@ -155,11 +195,37 @@ class BodyState extends State<BodyLayout> {
   }
 
   void _goSelectOpponentsScreen(BuildContext context, CubeUser cubeUser) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => SelectOpponentsScreen(cubeUser),
-      ),
-    );
+    if (!CallManager.instance.hasActiveCall()) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => SelectOpponentsScreen(cubeUser),
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    log("[dispose]", TAG);
+
+    super.dispose();
+  }
+
+  @override
+  void deactivate() {
+    super.deactivate();
+    log("[deactivate]", TAG);
+  }
+
+  @override
+  void activate() {
+    super.activate();
+    log("[activate]", TAG);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    log("[didChangeDependencies]", TAG);
   }
 }

@@ -17,6 +17,8 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
@@ -47,5 +49,15 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+
+        <meta-data
+            android:name="com.connectycube.flutter.connectycube_flutter_call_kit.audio_call_notification_icon"
+            android:resource="@drawable/ic_notification_audio_call" />
+        <meta-data
+            android:name="com.connectycube.flutter.connectycube_flutter_call_kit.video_call_notification_icon"
+            android:resource="@drawable/ic_notification_video_call" />
+        <meta-data
+            android:name="com.connectycube.flutter.connectycube_flutter_call_kit.app_notification_icon"
+            android:resource="@drawable/ic_notification" />
     </application>
 </manifest>
