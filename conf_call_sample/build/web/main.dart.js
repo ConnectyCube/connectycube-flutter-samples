@@ -47096,7 +47096,7 @@ a3v(){var s,r=this,q=A.al_()
 q=q.gpp(q)
 s=r.e.CW
 s===$&&A.c()
-A.a2A(new A.a2u(q+"/conversation?meeting_id="+r.x+"&call_type="+s.b+"&initiator_id="+A.j(r.d.a))).X(new A.aom(r),t.P)}}
+A.a2A(new A.a2u(q+"/connectycube-flutter-samples/conf_call_sample/build/web/conversation?meeting_id="+r.x+"&call_type="+s.b+"&initiator_id="+A.j(r.d.a))).X(new A.aom(r),t.P)}}
 A.apb.prototype={
 $1(a){var s,r,q,p,o,n,m,l,k,j,i
 A.R("join session= "+A.j(a),"_ConversationCallScreenState")
