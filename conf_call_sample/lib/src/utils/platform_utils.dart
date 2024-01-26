@@ -8,6 +8,10 @@ import 'package:universal_io/io.dart';
 import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
 import 'package:connectycube_sdk/connectycube_calls.dart';
 
+import 'platform_configuration.dart'
+    if (dart.library.html) 'platform_configuration_web.dart'
+    if (dart.library.io) 'platform_configuration_noweb.dart';
+
 Future<bool> initForegroundService() async {
   if (Platform.isAndroid) {
     final androidConfig = FlutterBackgroundAndroidConfig(
@@ -149,4 +153,12 @@ requestFullScreenIntentsPermission(BuildContext context) async {
       );
     }
   });
+}
+
+void configurePlatform() {
+  configureNavigation();
+}
+
+String getAppHost(){
+  return getHostUrl();
 }

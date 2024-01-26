@@ -25,6 +25,7 @@ class SpeakerViewLayout extends StatefulWidget {
   final Function(MapEntry<int, RTCVideoRenderer>? primaryRenderer,
       Map<int, RTCVideoRenderer> minorRenderers) onRenderersChanged;
   final CubeStatsReportsManager statsReportsManager;
+  final Future<String> Function(int userId)? getUserName;
 
   SpeakerViewLayout({
     super.key,
@@ -42,6 +43,7 @@ class SpeakerViewLayout extends StatefulWidget {
     required this.participantsMediaConfigs,
     required this.onRenderersChanged,
     required this.statsReportsManager,
+    this.getUserName,
   });
 
   @override
@@ -79,7 +81,6 @@ class _SpeakerViewLayoutState extends State<SpeakerViewLayout> {
   @override
   void didUpdateWidget(SpeakerViewLayout oldWidget) {
     super.didUpdateWidget(oldWidget);
-    log("[didUpdateWidget]", TAG);
     _primaryRenderer = widget.primaryRenderer;
     _minorRenderers = widget.minorRenderers;
     _primaryVideoFit = widget.primaryVideoFit;
@@ -258,13 +259,7 @@ class _SpeakerViewLayoutState extends State<SpeakerViewLayout> {
                         mirror: key == widget.currentUserId &&
                             widget.isFrontCameraUsed &&
                             !widget.isScreenSharingEnabled,
-                        name: key == widget.currentUserId
-                            ? 'Me'
-                            : widget.participants
-                                    .where((user) => user.id == key)
-                                    .first
-                                    .fullName ??
-                                'Unknown',
+                        getUserName: widget.getUserName?.call(key),
                         onTap: () => setState(
                           () {
                             log("[onTap] userId: $key", TAG);

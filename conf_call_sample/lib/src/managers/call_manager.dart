@@ -8,7 +8,6 @@ import 'package:uuid/uuid.dart';
 import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import '../screens/conversation_call_screen.dart';
 import '../utils/consts.dart';
 import '../utils/pref_util.dart';
 import 'callkit_manager.dart';
@@ -255,6 +254,9 @@ class CallManager {
   handleAcceptCall(int participantId) {
     _clearNoAnswerTimers(id: participantId);
     onReceiveAcceptCall?.call(participantId);
+    if (!(_participantIds?.contains(participantId) ?? false)) {
+      _participantIds?.add(participantId);
+    }
   }
 
   handleRejectCall(String meetingId, int participantId, isBusy) {
@@ -475,23 +477,23 @@ class CallManager {
     ConferenceSession callSession = await ConferenceClient.instance
         .createCallSession(currentUser.id!, callType: callType);
 
-    var route = MaterialPageRoute(
-      builder: (context) => ConversationCallScreen(
-        currentUser,
-        callSession,
-        meetingId,
-        opponentsIds,
-        true,
-        callName,
-        initialLocalMediaStream: initialLocalMediaStream,
-        isFrontCameraUsed: isFrontCameraUsed,
-      ),
-    );
+    var arguments = {
+      ARG_USER: currentUser,
+      ARG_CALL_SESSION: callSession,
+      ARG_MEETING_ID: meetingId,
+      ARG_OPPONENTS: opponentsIds,
+      ARG_IS_INCOMING: true,
+      ARG_CALL_NAME: callName,
+      ARG_INITIAL_LOCAL_MEDIA_STREAM: initialLocalMediaStream,
+      ARG_IS_FRONT_CAMERA_USED: isFrontCameraUsed
+    };
 
     if (cleanNavigation) {
-      Navigator.of(context).pushReplacement(route);
+      Navigator.of(context)
+          .pushReplacementNamed(CONVERSATION_SCREEN, arguments: arguments);
     } else {
-      Navigator.of(context).push(route);
+      Navigator.of(context)
+          .pushNamed(CONVERSATION_SCREEN, arguments: arguments);
     }
   }
 

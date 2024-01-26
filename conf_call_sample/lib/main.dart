@@ -1,13 +1,23 @@
-import 'package:conf_call_sample/src/managers/call_manager.dart';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import 'src/utils/configs.dart' as config;
-import 'src/utils/pref_util.dart';
+import 'src/managers/call_manager.dart';
+import 'src/screens/conversation_call_screen.dart';
+import 'src/screens/incoming_call_screen.dart';
 import 'src/screens/login_screen.dart';
+import 'src/screens/select_opponents_screen.dart';
+import 'src/utils/configs.dart' as config;
+import 'src/utils/consts.dart';
+import 'src/utils/platform_utils.dart';
+import 'src/utils/pref_util.dart';
 
-void main() => runApp(App());
+void main() {
+  configurePlatform();
+  runApp(App());
+}
 
 class App extends StatefulWidget {
   @override
@@ -26,6 +36,112 @@ class _AppState extends State<App> {
         primarySwatch: Colors.green,
       ),
       home: LoginScreen(),
+      onGenerateRoute: (settings) {
+        String? routeName = settings.name;
+        String? name = routeName?.split('?').firstOrNull;
+        Map<String, dynamic>? args =
+            settings.arguments as Map<String, dynamic>?;
+
+        MaterialPageRoute? pageRout;
+
+        name = name?.replaceFirst('/', '');
+
+        log('[build] routeName: $routeName, args: $args', 'App');
+        log('[build] name: $name, args: $args', 'App');
+
+        switch (name) {
+          case LOGIN_SCREEN:
+            log('[build] try to go $LOGIN_SCREEN screen, args: $args', 'App');
+
+            pageRout = MaterialPageRoute(builder: (context) => LoginScreen());
+            break;
+
+          case CONVERSATION_SCREEN:
+            log('[build] try to go $CONVERSATION_SCREEN screen, args: $args',
+                'App');
+            if (args == null) {
+              var uri = Uri.tryParse('$routeName');
+              if (uri != null) {
+                var params = uri.queryParameters;
+
+                log('[build] params: $params', 'App');
+
+                var meetingId = params[ARG_MEETING_ID];
+                var callType = int.tryParse(params[ARG_CALL_TYPE] ?? '');
+                var callerId =
+                    int.tryParse(params[ARG_INITIATOR_ID] ?? '') ?? -1;
+
+                if (meetingId != null) {
+                  pageRout = MaterialPageRoute(builder: (context) {
+                    return FutureBuilder(
+                        future: prepareConversationScreen(
+                            meetingId, callerId, callType),
+                        builder: (context, snapshot) {
+                          if (!snapshot.hasData || snapshot.data == null) {
+                            return Container();
+                          } else {
+                            return snapshot.data!;
+                          }
+                        });
+                  });
+                }
+              }
+            } else {
+              pageRout = MaterialPageRoute(
+                  builder: (context) => ConversationCallScreen(
+                        args[ARG_USER],
+                        args[ARG_CALL_SESSION],
+                        args[ARG_MEETING_ID],
+                        args[ARG_OPPONENTS],
+                        args[ARG_IS_INCOMING],
+                        args[ARG_CALL_NAME],
+                        initialLocalMediaStream:
+                            args[ARG_INITIAL_LOCAL_MEDIA_STREAM],
+                        isFrontCameraUsed: args[ARG_IS_FRONT_CAMERA_USED],
+                        isSharedCall: args[ARG_IS_SHARED_CALL],
+                      ));
+            }
+            break;
+
+          case SELECT_OPPONENTS_SCREEN:
+            log('[build] try to go $SELECT_OPPONENTS_SCREEN screen, args: $args',
+                'App');
+            if (args != null) {
+              pageRout = MaterialPageRoute(
+                  builder: (context) => SelectOpponentsScreen(args[ARG_USER]));
+            }
+
+            break;
+
+          case INCOMING_CALL_SCREEN:
+            log('[build] try to go $INCOMING_CALL_SCREEN screen, args: $args',
+                'App');
+            if (args != null) {
+              pageRout = MaterialPageRoute(
+                  builder: (context) => IncomingCallScreen(
+                      args[ARG_USER],
+                      args[ARG_CALL_ID],
+                      args[ARG_MEETING_ID],
+                      args[ARG_INITIATOR_ID],
+                      args[ARG_OPPONENTS],
+                      args[ARG_CALL_TYPE],
+                      args[ARG_CALL_NAME]));
+            }
+
+            break;
+
+          default:
+            log('[build] try to go \'default\' screen, args: $args', 'App');
+            pageRout = MaterialPageRoute(builder: (context) => LoginScreen());
+
+            break;
+        }
+
+        log('[build] pageRout == null: ${pageRout == null}', 'App');
+
+        return pageRout ??
+            MaterialPageRoute(builder: (context) => LoginScreen());
+      },
     );
   }
 
@@ -38,9 +154,52 @@ class _AppState extends State<App> {
 
   void initCallManager(BuildContext context) {
     SharedPrefs.getUser().then((savedUser) {
-      if(savedUser != null){
+      if (savedUser != null) {
         CallManager.instance.init(context);
       }
+    });
+  }
+
+  Future<Widget> prepareConversationScreen(
+      String meetingId, int callerId, int? callType) async {
+    var currentUser = await SharedPrefs.getUser();
+
+    if (currentUser == null) {
+      currentUser = await createSession(CubeUser(
+              isGuest: true, fullName: 'Guest ${Random().nextInt(1024)}'))
+          .then((session) {
+        CubeChatConnection.instance
+            .login(CubeUser(id: session.user!.id!, password: session.token))
+            .then((value) {
+          log('[prepareConversationScreen] CHAT login SUCCESS', 'App');
+          SharedPrefs.saveNewUser(session.user!..password = session.token);
+          SharedPrefs.saveSession(session);
+        });
+
+        return session.user;
+      });
+    }
+
+    return ConferenceClient.instance
+        .createCallSession(
+      currentUser!.id!,
+      callType: callType ?? CallType.VIDEO_CALL,
+    )
+        .then((confSession) {
+      CallManager.instance.init(context);
+      CallManager.instance.currentCallState = InternalCallState.ACCEPTED;
+      CallManager.instance.setActiveCall('', meetingId, callerId, []);
+      CallManager.instance.sendAcceptMessage('', meetingId, callerId);
+
+      return ConversationCallScreen(
+        currentUser!,
+        confSession,
+        meetingId,
+        [],
+        true,
+        'Shared conference',
+        isSharedCall: true,
+      );
     });
   }
 }
@@ -51,7 +210,17 @@ initConnectycube() {
     config.AUTH_KEY,
     config.AUTH_SECRET,
     onSessionRestore: () {
-      return SharedPrefs.getUser().then((savedUser) {
+      return SharedPrefs.getUser().then((savedUser) async {
+        if (savedUser?.isGuest ?? false) {
+          return SharedPrefs.getSession().then((savedSession) {
+            if (savedSession != null) {
+              CubeSessionManager.instance.activeSession = savedSession;
+              return savedSession;
+            } else {
+              return createSession(savedUser);
+            }
+          });
+        }
         return createSession(savedUser);
       });
     },

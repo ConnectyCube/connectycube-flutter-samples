@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.connectycube.flutter.conference_call_sample",
+      "sha256_cert_fingerprints": [
+        "EF:3D:DB:9F:3E:21:28:9C:21:9F:52:38:C6:CB:0F:44:0D:73:65:CE:06:73:7E:14:17:1A:E6:A5:8C:A4:CB:DD"
+      ]
+    }
+  }
+]

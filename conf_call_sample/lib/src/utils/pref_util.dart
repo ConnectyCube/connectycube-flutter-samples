@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -9,6 +10,9 @@ const String prefUserPsw = "pref_user_psw";
 const String prefUserName = "pref_user_name";
 const String prefUserId = "pref_user_id";
 const String prefUserAvatar = "pref_user_avatar";
+const String prefUserIsGuest = "pref_user_is_guest";
+const String prefUserCreatedAt = "pref_user_created_at";
+const String prefSession = "pref_session";
 const String prefSubscriptionToken = "pref_subscription_token";
 const String prefSubscriptionId = "pref_subscription_id";
 
@@ -26,6 +30,34 @@ class SharedPrefs {
     return completer.future;
   }
 
+  static Future<bool> saveSession(CubeSession cubeSession) {
+    return getPrefs().then((prefs) {
+      return prefs.setString(prefSession, jsonEncode(cubeSession));
+    });
+  }
+
+  static Future<CubeSession?> getSession() {
+    return getPrefs().then((prefs) {
+      var sessionJsonString = prefs.getString(prefSession);
+      if (sessionJsonString == null) return null;
+
+      var cubeSession = CubeSession.fromJson(jsonDecode(sessionJsonString));
+
+      var sessionExpirationDate = cubeSession.tokenExpirationDate;
+      if (sessionExpirationDate?.isBefore(DateTime.now()) ?? true) {
+        prefs.remove(prefSession);
+        return null;
+      }
+      return cubeSession;
+    });
+  }
+
+  static Future<bool> deleteSessionData() {
+    return getPrefs().then((prefs) {
+      return prefs.remove(prefSession);
+    });
+  }
+
   static Future<bool> saveNewUser(CubeUser cubeUser) {
     return getPrefs().then((prefs) {
       prefs.clear();
@@ -35,6 +67,9 @@ class SharedPrefs {
       prefs.setInt(prefUserId, cubeUser.id!);
       if (cubeUser.avatar != null)
         prefs.setString(prefUserAvatar, cubeUser.avatar!);
+      prefs.setBool(prefUserIsGuest, cubeUser.isGuest ?? false);
+      prefs.setInt(
+          prefUserCreatedAt, cubeUser.createdAt?.millisecondsSinceEpoch ?? -1);
 
       return Future.value(true);
     });
@@ -58,13 +93,31 @@ class SharedPrefs {
   static Future<CubeUser?> getUser() {
     return getPrefs().then((prefs) {
       if (prefs.getString(prefUserLogin) == null) return Future.value();
-      var user = CubeUser();
-      user.login = prefs.getString(prefUserLogin);
-      user.password = prefs.getString(prefUserPsw);
-      user.fullName = prefs.getString(prefUserName);
-      user.id = prefs.getInt(prefUserId);
-      user.avatar = prefs.getString(prefUserAvatar);
-      return Future.value(user);
+
+      var userIsGuest = prefs.getBool(prefUserIsGuest) ?? false;
+      var userCreatedAt = prefs.getInt(prefUserCreatedAt) ?? -1;
+
+      if (userIsGuest && userCreatedAt != -1) {
+        var currentDate = DateTime.now().millisecondsSinceEpoch;
+
+        var lifeTime = currentDate - (userCreatedAt + 2 * 60 * 60 * 1000);
+        var day = 24 * 60 * 60 * 1000;
+
+        if (lifeTime >= day) {
+          return null;
+        }
+      }
+
+      var user = CubeUser()
+        ..login = prefs.getString(prefUserLogin)
+        ..password = prefs.getString(prefUserPsw)
+        ..fullName = prefs.getString(prefUserName)
+        ..id = prefs.getInt(prefUserId)
+        ..avatar = prefs.getString(prefUserAvatar)
+        ..isGuest = userIsGuest
+        ..createdAt = DateTime.fromMillisecondsSinceEpoch(userCreatedAt);
+
+      return user;
     });
   }
 
