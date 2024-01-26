@@ -4,11 +4,9 @@ import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 import '../managers/call_manager.dart';
 import '../utils/configs.dart' as utils;
+import '../utils/consts.dart';
 import '../utils/platform_utils.dart';
 import '../utils/pref_util.dart';
-import 'conversation_call_screen.dart';
-import 'incoming_call_screen.dart';
-import 'login_screen.dart';
 
 class SelectOpponentsScreen extends StatelessWidget {
   final CubeUser currentUser;
@@ -64,6 +62,7 @@ class SelectOpponentsScreen extends StatelessWidget {
                 signOut().then(
                   (voidValue) {
                     CubeChatConnection.instance.destroy();
+                    SharedPrefs.deleteSessionData();
                     SharedPrefs.deleteUserData();
                     Navigator.pop(context); // cancel current Dialog
                     _navigateToLoginScreen(context);
@@ -83,11 +82,7 @@ class SelectOpponentsScreen extends StatelessWidget {
   }
 
   _navigateToLoginScreen(BuildContext context) {
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => LoginScreen(),
-      ),
-    );
+    Navigator.of(context).pushReplacementNamed(LOGIN_SCREEN);
   }
 }
 
@@ -113,45 +108,86 @@ class _BodyLayoutState extends State<BodyLayout> {
   @override
   Widget build(BuildContext context) {
     log('[build]', TAG);
-    return Container(
-        padding: EdgeInsets.all(48),
-        child: Column(
-          children: [
-            Text(
-              "Select users to start call:",
-              style: TextStyle(fontSize: 22),
-            ),
-            _getOpponentsList(),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                FloatingActionButton(
-                  heroTag: "VideoCall",
-                  child: Icon(
-                    Icons.videocam,
-                    color: Colors.white,
+    return SingleChildScrollView(
+      child: Container(
+        padding: EdgeInsets.only(top: 48, bottom: 24, left: 8, right: 8),
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 400),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  startSharedCall();
+                },
+                child: Container(
+                  width: 400,
+                  height: 48,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.share,
+                        size: 18,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Start shared call',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ],
                   ),
-                  backgroundColor: Colors.blue,
-                  onPressed: () =>
-                      _startCall(_selectedUsers, CallType.VIDEO_CALL),
                 ),
-                Container(
-                  width: 32,
-                ),
-                FloatingActionButton(
-                  heroTag: "AudioCall",
-                  child: Icon(
-                    Icons.call,
-                    color: Colors.white,
+              ),
+              SizedBox(height: 16),
+              Text(
+                'or',
+                style: TextStyle(fontSize: 18),
+              ),
+              SizedBox(height: 16),
+              Text(
+                "Select users to start call:",
+                style: TextStyle(fontSize: 18),
+              ),
+              SizedBox(height: 8),
+              _getOpponentsList(),
+              SizedBox(height: 16),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  FloatingActionButton(
+                    heroTag: "VideoCall",
+                    child: Icon(
+                      _selectedUsers.isNotEmpty
+                          ? Icons.videocam
+                          : Icons.video_call,
+                      color: Colors.white,
+                    ),
+                    backgroundColor: Colors.blue,
+                    onPressed: () =>
+                        _startCall(_selectedUsers, CallType.VIDEO_CALL),
                   ),
-                  backgroundColor: Colors.green,
-                  onPressed: () =>
-                      _startCall(_selectedUsers, CallType.AUDIO_CALL),
-                ),
-              ],
-            ),
-          ],
-        ));
+                  SizedBox(width: 32),
+                  FloatingActionButton(
+                    heroTag: "AudioCall",
+                    child: Icon(
+                      _selectedUsers.isNotEmpty ? Icons.call : Icons.add_call,
+                      color: Colors.white,
+                    ),
+                    backgroundColor: Colors.green,
+                    onPressed: () =>
+                        _startCall(_selectedUsers, CallType.AUDIO_CALL),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _getOpponentsList() {
@@ -213,7 +249,6 @@ class _BodyLayoutState extends State<BodyLayout> {
 
   void _startCall(Set<int> opponents, int callType) async {
     log('[_startCall] call type $callType', TAG);
-    if (opponents.isEmpty) return;
 
     var attendees = opponents.map((entry) {
       return CubeMeetingAttendee(userId: entry);
@@ -226,7 +261,9 @@ class _BodyLayoutState extends State<BodyLayout> {
       name: 'Conference Call',
       startDate: startDate,
       endDate: endDate,
-      attendees: attendees,
+      attendees: attendees.isEmpty
+          ? [CubeMeetingAttendee(userId: _currentUser.id)]
+          : attendees,
     );
     createMeeting(meeting).then((createdMeeting) async {
       var callSession = await ConferenceClient.instance.createCallSession(
@@ -234,17 +271,17 @@ class _BodyLayoutState extends State<BodyLayout> {
         callType: callType,
       );
 
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (context) => ConversationCallScreen(
-              _currentUser,
-              callSession,
-              createdMeeting.meetingId!,
-              opponents.toList(),
-              false,
-              '${_currentUser.fullName ?? 'Unknown User'}${opponents.length > 1 ? ' (in Group call)' : ''}'),
-        ),
-      );
+      Navigator.of(context).pushNamed(CONVERSATION_SCREEN, arguments: {
+        ARG_USER: _currentUser,
+        ARG_CALL_SESSION: callSession,
+        ARG_MEETING_ID: createdMeeting.meetingId!,
+        ARG_OPPONENTS: opponents.toList(),
+        ARG_IS_INCOMING: false,
+        ARG_CALL_NAME: opponents.isEmpty
+            ? 'Shared conference'
+            : '${_currentUser.fullName ?? 'Unknown User'}${opponents.length > 1 ? ' (in Group call)' : ''}',
+        ARG_IS_SHARED_CALL: opponents.isEmpty
+      });
     });
   }
 
@@ -252,11 +289,44 @@ class _BodyLayoutState extends State<BodyLayout> {
       List<int> participantIds, int callType, String callName) {
     log('[_showIncomingCallScreen]', TAG);
 
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => IncomingCallScreen(_currentUser, callId,
-            meetingId, initiatorId, participantIds, callType, callName),
-      ),
+    Navigator.of(context).pushNamed(
+      INCOMING_CALL_SCREEN,
+      arguments: {
+        ARG_USER: _currentUser,
+        ARG_CALL_ID: callId,
+        ARG_MEETING_ID: meetingId,
+        ARG_INITIATOR_ID: initiatorId,
+        ARG_OPPONENTS: participantIds,
+        ARG_CALL_TYPE: callType,
+        ARG_CALL_NAME: callName,
+      },
+    );
+  }
+
+  startSharedCall() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Create Shared Conference'),
+          content: Text(
+              'The shared Video conference will be created. Any user can join it by link.'),
+          actions: <Widget>[
+            TextButton(
+              child: Text("Cancel"),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                _startCall({}, CallType.VIDEO_CALL);
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 }

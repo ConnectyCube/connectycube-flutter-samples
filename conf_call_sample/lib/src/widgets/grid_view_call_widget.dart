@@ -16,6 +16,7 @@ class GridViewLayout extends StatefulWidget {
   final Function(MapEntry<int, RTCVideoRenderer>? primaryRenderer,
       Map<int, RTCVideoRenderer> minorRenderers) onRenderersChanged;
   final CubeStatsReportsManager statsReportsManager;
+  final Future<String> Function(int userId)? getUserName;
 
   GridViewLayout({
     super.key,
@@ -28,6 +29,7 @@ class GridViewLayout extends StatefulWidget {
     required this.participantsMediaConfigs,
     required this.onRenderersChanged,
     required this.statsReportsManager,
+    this.getUserName,
   });
 
   @override
@@ -54,7 +56,6 @@ class _GridViewLayoutState extends State<GridViewLayout> {
   @override
   void didUpdateWidget(GridViewLayout oldWidget) {
     super.didUpdateWidget(oldWidget);
-    log("[didUpdateWidget]", TAG);
     _primaryRenderer = widget.primaryRenderer;
     _minorRenderers = widget.minorRenderers;
   }
@@ -135,13 +136,7 @@ class _GridViewLayoutState extends State<GridViewLayout> {
                     mirror: key == widget.currentUserId &&
                         widget.isFrontCameraUsed &&
                         !widget.isScreenSharingEnabled,
-                    name: key == widget.currentUserId
-                        ? 'Me'
-                        : widget.participants
-                                .where((user) => user.id == key)
-                                .first
-                                .fullName ??
-                            'Unknown',
+                    getUserName: widget.getUserName?.call(key),
                   ),
                 );
               },

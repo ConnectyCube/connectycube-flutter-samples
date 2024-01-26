@@ -8,7 +8,7 @@ class MinorVideo extends StatelessWidget {
   final RTCVideoRenderer renderer;
   final RTCVideoViewObjectFit objectFit;
   final bool mirror;
-  final String? name;
+  final Future<String>? getUserName;
   final Function()? onTap;
   final Function(DragUpdateDetails details)? onPanUpdate;
   final Function(DragEndDetails details)? onPanEnd;
@@ -19,7 +19,7 @@ class MinorVideo extends StatelessWidget {
     required this.height,
     required this.renderer,
     required this.mirror,
-    this.name,
+    this.getUserName,
     this.objectFit = RTCVideoViewObjectFit.RTCVideoViewObjectFitCover,
     this.onTap,
     this.onPanUpdate,
@@ -47,23 +47,28 @@ class MinorVideo extends StatelessWidget {
                 ),
               ),
               Visibility(
-                visible: name != null && name!.isNotEmpty,
+                visible: getUserName != null,
                 child: Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
                     margin: EdgeInsets.only(bottom: 8),
-                    child: Text(
-                      name ?? 'Unknown',
-                      style: TextStyle(
-                        color: Colors.white,
-                        shadows: [
-                          Shadow(
-                            color: Colors.black,
-                            offset: Offset(2, 1),
-                            blurRadius: 8,
+                    child: FutureBuilder<String>(
+                      future: getUserName ?? Future.value(''),
+                      builder: (context, snapshot) {
+                        return Text(
+                          snapshot.data ?? 'Unknown user',
+                          style: TextStyle(
+                            color: Colors.white,
+                            shadows: [
+                              Shadow(
+                                color: Colors.black,
+                                offset: Offset(2, 1),
+                                blurRadius: 8,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                   ),
                 ),

@@ -1,11 +1,14 @@
+import 'dart:async';
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 import '../managers/call_manager.dart';
 import '../utils/configs.dart' as utils;
+import '../utils/consts.dart';
 import '../utils/pref_util.dart';
-import 'select_opponents_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   static const String TAG = "LoginScreen";
@@ -33,11 +36,15 @@ class BodyState extends State<BodyLayout> {
   bool _isLoginContinues = false;
   int? _selectedUserId;
 
+  StreamSubscription<CubeChatConnectionState>? _connectionStareSubscription;
+  Function()? _successChatLoginCallback;
+
   @override
   void initState() {
     super.initState();
     log("initState", TAG);
 
+    _initChatConnectionListener();
     _loginWithSavedUserIfExist();
 
     CallManager.startCallIfNeed(context);
@@ -46,7 +53,22 @@ class BodyState extends State<BodyLayout> {
   void _loginWithSavedUserIfExist() {
     SharedPrefs.getUser().then((savedUser) {
       if (savedUser != null) {
-        _loginToCC(context, savedUser, savedUser: true);
+        if (savedUser.isGuest ?? false) {
+          SharedPrefs.getSession().then((savedSession) {
+            if (savedSession != null) {
+              CubeSessionManager.instance.activeSession = savedSession;
+
+              setState(() {
+                _isLoginContinues = true;
+                _selectedUserId = 0;
+              });
+
+              _loginToCubeChat(context, savedUser, successCallback: () {});
+            }
+          });
+        } else {
+          _loginToCC(context, savedUser, savedUser: true);
+        }
       }
     });
   }
@@ -55,21 +77,68 @@ class BodyState extends State<BodyLayout> {
   Widget build(BuildContext context) {
     log("build", TAG);
 
-    return Padding(
-      padding: EdgeInsets.all(48),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            "Select user to login:",
-            style: TextStyle(
-              fontSize: 22,
-            ),
+    return SingleChildScrollView(
+      child: Container(
+        padding: EdgeInsets.only(top: 48, bottom: 24, left: 8, right: 8),
+        alignment: Alignment.topCenter,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(maxWidth: 400),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton(
+                onPressed: () {
+                  loginAsGuest();
+                },
+                child: Container(
+                  width: 400,
+                  height: 48,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Visibility(
+                        visible: !_isLoginContinues,
+                        child: Icon(
+                          Icons.add,
+                          size: 18,
+                        ),
+                      ),
+                      Visibility(
+                          visible: _isLoginContinues && _selectedUserId == 0,
+                          child: SizedBox(
+                              width: 18,
+                              height: 18,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2.0,
+                              ))),
+                      SizedBox(width: 8),
+                      Text(
+                        'Login as Guest',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SizedBox(height: 16),
+              Text(
+                'or',
+                style: TextStyle(fontSize: 18),
+              ),
+              SizedBox(height: 16),
+              Text(
+                "Select user to login:",
+                style: TextStyle(
+                  fontSize: 22,
+                ),
+              ),
+              _getUsersList(context),
+            ],
           ),
-          Expanded(
-            child: _getUsersList(context),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -79,6 +148,7 @@ class BodyState extends State<BodyLayout> {
     final users = utils.users;
 
     return ListView.builder(
+      shrinkWrap: true,
       itemCount: users.length,
       itemBuilder: (context, index) {
         return Card(
@@ -154,19 +224,11 @@ class BodyState extends State<BodyLayout> {
     }
   }
 
-  void _loginToCubeChat(BuildContext context, CubeUser user) {
+  void _loginToCubeChat(BuildContext context, CubeUser user,
+      {Function()? successCallback}) {
     log('[_loginToCubeChat]', TAG);
-    CubeChatConnection.instance.login(user).then((cubeUser) {
-      if (mounted) {
-        setState(() {
-          _isLoginContinues = false;
-          _selectedUserId = 0;
-        });
-        _goSelectOpponentsScreen(context, cubeUser);
-      }
-    }).catchError((onError) {
-      _processLoginError(onError);
-    });
+    _successChatLoginCallback = successCallback;
+    CubeChatConnection.instance.login(user);
   }
 
   void _processLoginError(exception) {
@@ -175,7 +237,7 @@ class BodyState extends State<BodyLayout> {
 
     setState(() {
       _isLoginContinues = false;
-      _selectedUserId = 0;
+      _selectedUserId = -1;
     });
 
     showDialog(
@@ -196,10 +258,9 @@ class BodyState extends State<BodyLayout> {
 
   void _goSelectOpponentsScreen(BuildContext context, CubeUser cubeUser) {
     if (!CallManager.instance.hasActiveCall()) {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => SelectOpponentsScreen(cubeUser),
-        ),
+      Navigator.of(context).pushReplacementNamed(
+        SELECT_OPPONENTS_SCREEN,
+        arguments: {ARG_USER: cubeUser},
       );
     }
   }
@@ -207,6 +268,7 @@ class BodyState extends State<BodyLayout> {
   @override
   void dispose() {
     log("[dispose]", TAG);
+    _connectionStareSubscription?.cancel();
 
     super.dispose();
   }
@@ -227,5 +289,45 @@ class BodyState extends State<BodyLayout> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     log("[didChangeDependencies]", TAG);
+  }
+
+  void loginAsGuest() {
+    setState(() {
+      _isLoginContinues = true;
+      _selectedUserId = 0;
+    });
+    createSession(CubeUser(
+            isGuest: true, fullName: 'Guest ${Random().nextInt(1024)}'))
+        .then((session) {
+      session.user!.password = session.token;
+      _loginToCubeChat(context, session.user!, successCallback: () {
+        SharedPrefs.saveNewUser(session.user!);
+        SharedPrefs.saveSession(session);
+      });
+    }).catchError((onError) {
+      _processLoginError(onError);
+    });
+  }
+
+  void _initChatConnectionListener() {
+    log("[_initChatConnectionListener]", TAG);
+    _connectionStareSubscription =
+        CubeChatConnection.instance.connectionStateStream.listen((state) {
+      log("[_initChatConnectionListener] state: $state", TAG);
+      if (state == CubeChatConnectionState.Ready) {
+        _successChatLoginCallback?.call();
+
+        if (mounted) {
+          setState(() {
+            _isLoginContinues = false;
+            _selectedUserId = -1;
+          });
+          _goSelectOpponentsScreen(
+              context, CubeChatConnection.instance.currentUser!);
+        }
+      } else if (state == CubeChatConnectionState.AuthenticationFailure) {
+        _processLoginError(null);
+      }
+    });
   }
 }

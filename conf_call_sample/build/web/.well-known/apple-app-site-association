@@ -1,0 +1,17 @@
+{
+  "applinks": {
+    "apps": [
+    ],
+    "details": [
+      {
+        "appIDs": [
+          "6B6Z335W9Z.com.connectycube.flutter.conferenceCallSample.val"
+        ],
+        "appID": "6B6Z335W9Z.com.connectycube.flutter.conferenceCallSample.val",
+        "paths": [
+          "/conversation"
+        ]
+      }
+    ]
+  }
+}

@@ -2,23 +2,24 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:assets_audio_player/assets_audio_player.dart';
-import 'package:conf_call_sample/src/utils/duration_timer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 import '../managers/call_manager.dart';
 import '../utils/configs.dart';
 import '../utils/consts.dart';
+import '../utils/duration_timer.dart';
 import '../utils/media_utils.dart';
 import '../utils/platform_utils.dart';
+import '../utils/users_utils.dart';
 import '../widgets/call_controls_widget.dart';
 import '../widgets/call_info_widget.dart';
 import '../widgets/grid_view_call_widget.dart';
 import '../widgets/private_call_widget.dart';
 import '../widgets/speaker_view_call_widget.dart';
-import 'select_opponents_screen.dart';
 
 class ConversationCallScreen extends StatefulWidget {
   final CubeUser _currentUser;
@@ -28,7 +29,8 @@ class ConversationCallScreen extends StatefulWidget {
   final bool _isIncoming;
   final String _callName;
   final MediaStream? initialLocalMediaStream;
-  final bool isFrontCameraUsed;
+  final bool? isFrontCameraUsed;
+  final bool? isSharedCall;
 
   @override
   State<StatefulWidget> createState() {
@@ -41,12 +43,15 @@ class ConversationCallScreen extends StatefulWidget {
       _callName,
       initialLocalMediaStream: initialLocalMediaStream,
       isFrontCameraUsed: isFrontCameraUsed,
+      isSharedCall: isSharedCall,
     );
   }
 
   ConversationCallScreen(this._currentUser, this._callSession, this._meetingId,
       this.opponents, this._isIncoming, this._callName,
-      {this.initialLocalMediaStream, this.isFrontCameraUsed = true});
+      {this.initialLocalMediaStream,
+      this.isFrontCameraUsed = true,
+      this.isSharedCall = false});
 }
 
 class _ConversationCallScreenState extends State<ConversationCallScreen> {
@@ -70,6 +75,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   bool _isMicMute = false;
   bool _enableScreenSharing;
   bool _isFrontCameraUsed = true;
+  bool _isSharedCall;
   RTCVideoViewObjectFit primaryVideoFit =
       RTCVideoViewObjectFit.RTCVideoViewObjectFitCover;
   final int currentUserId;
@@ -82,11 +88,14 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
 
   _ConversationCallScreenState(this._currentUser, this._callSession,
       this._meetingId, this._opponents, this._isIncoming, this._callName,
-      {this.initialLocalMediaStream, bool isFrontCameraUsed = true})
+      {this.initialLocalMediaStream,
+      bool? isFrontCameraUsed = true,
+      bool? isSharedCall = false})
       : _enableScreenSharing = !_callSession.startScreenSharing,
         _isCameraEnabled = _callSession.callType == CallType.VIDEO_CALL,
         currentUserId = _currentUser.id!,
-        _isFrontCameraUsed = isFrontCameraUsed {
+        _isFrontCameraUsed = isFrontCameraUsed ?? true,
+        _isSharedCall = isSharedCall ?? false {
     if (_opponents.length == 1) {
       layoutMode = LayoutMode.private;
     }
@@ -260,21 +269,9 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     _callManager.stopCall(_currentUser);
     _stopCallTimer();
 
-    log("[_onSessionClosed] 2", TAG);
-    var navigator = Navigator.of(context);
-    if (navigator.canPop()) {
-      log("[_onSessionClosed] navigator.canPop()", TAG);
-      Navigator.of(context).popUntil((route) {
-        return route.isFirst;
-      });
-    } else {
-      log("[_onSessionClosed] !navigator.canPop()", TAG);
-      navigator.pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => SelectOpponentsScreen(_currentUser),
-        ),
-      );
-    }
+    Navigator.of(context).pushNamedAndRemoveUntil(
+        SELECT_OPPONENTS_SCREEN, ModalRoute.withName(SELECT_OPPONENTS_SCREEN),
+        arguments: {ARG_USER: _currentUser});
   }
 
   void onPublishersReceived(publishers) {
@@ -458,6 +455,24 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
               },
             ),
           ),
+          Align(
+            alignment: Alignment.bottomLeft,
+            child: Container(
+              margin: EdgeInsets.only(bottom: 96, left: 16),
+              child: FloatingActionButton(
+                elevation: 0,
+                heroTag: "CopyConferenceUrl",
+                child: Icon(
+                  Icons.share,
+                  color: Colors.white,
+                ),
+                onPressed: () {
+                  _copyConferenceUrlToClipboard();
+                },
+                backgroundColor: Colors.green,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -527,6 +542,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
       },
       onRenderersChanged: _updateRenderers,
       statsReportsManager: _statsReportsManager,
+      getUserName: (userId) => _getUserName(userId),
     );
   }
 
@@ -541,6 +557,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
       participantsMediaConfigs: participantsMediaConfigs,
       onRenderersChanged: _updateRenderers,
       statsReportsManager: _statsReportsManager,
+      getUserName: (userId) => _getUserName(userId),
     );
   }
 
@@ -896,12 +913,14 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   String _getCallName() {
+    if (_isSharedCall) return 'Shared conference';
+
     if (_isIncoming) return _callName;
 
     if (_opponents.length > 1) return 'Group call';
 
     var opponent = users.firstWhere(
-        (savedUser) => savedUser.id == _opponents.first,
+        (savedUser) => savedUser.id == _opponents.firstOrNull,
         orElse: () => CubeUser(fullName: 'Unknown user'));
 
     return opponent.fullName ?? 'Unknown user';
@@ -961,6 +980,38 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   void _playStoppingCall() {
     _ringtonePlayer.open(Audio("assets/audio/end_call.mp3"),
         loopMode: LoopMode.none);
+  }
+
+  Future<String> _getUserName(int userId) {
+    if (userId == _currentUser.id) return Future.value('Me');
+
+    return getUserNameCached(userId);
+  }
+
+  void _copyConferenceUrlToClipboard() {
+    Clipboard.setData(ClipboardData(
+            text:
+                '${getAppHost()}/$CONVERSATION_SCREEN?$ARG_MEETING_ID=$_meetingId&$ARG_CALL_TYPE=${_callSession.callType}&$ARG_INITIATOR_ID=${_currentUser.id}'))
+        .then((_) {
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('URL copied'),
+            content: Text(
+                'The conference URL was copied to the clipboard. Any user can join the current call by this link.'),
+            actions: <Widget>[
+              TextButton(
+                child: Text("OK"),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        },
+      );
+    });
   }
 }
 
