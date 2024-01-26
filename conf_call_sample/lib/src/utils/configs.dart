@@ -7,7 +7,7 @@ const String DEFAULT_PASS = 'xxasBUM3gQs36bhj';
 const String API_ENDPOINT = 'https://api.connectycube.com';
 const String CHAT_ENDPOINT = 'chat.connectycube.com';
 const String CONF_SERVER_ENDPOINT = 'wss://janus.connectycube.com:8989';
-const String APP_HOST = 'https://flutter-chat.connectycube.com';
+const String APP_HOST = 'https://connectycube.github.io/connectycube-flutter-samples/conf_call_sample/build/web';
 
 List<CubeUser> users = [
   CubeUser(
