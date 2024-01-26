@@ -1,4 +1,4 @@
 RewriteEngine on
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule "^(.*)/conf_call_sample/build/web/(.*)" "/conf_call_sample/build/web/index.html" [L]
+RewriteRule "^(.*)/conf_call_sample/build/web/(.*)" "connectycube-flutter-samples/conf_call_sample/build/web/index.html" [L]
