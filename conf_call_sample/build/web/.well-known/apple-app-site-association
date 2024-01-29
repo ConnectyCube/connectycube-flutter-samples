@@ -9,7 +9,7 @@
         ],
         "appID": "6B6Z335W9Z.com.connectycube.flutter.conferenceCallSample.val",
         "paths": [
-          "/conversation"
+          "/connectycube-flutter-samples/conf_call_sample/build/web"
         ]
       }
     ]
