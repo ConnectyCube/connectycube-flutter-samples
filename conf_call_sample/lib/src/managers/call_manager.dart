@@ -551,7 +551,13 @@ class CallManager {
 
 List<CubeMessage> buildCallMessages(
     String callId, String meetingId, List<int?> participantIds) {
-  return participantIds.map((userId) {
+  return participantIds.where((userId) {
+    if (userId == null || userId <= 0) {
+      return false;
+    }
+
+    return userId != CubeSessionManager.instance.activeSession?.userId;
+  }).map((userId) {
     var msg = CubeMessage();
     msg.recipientId = userId;
     msg.properties = {PARAM_MEETING_ID: meetingId, PARAM_SESSION_ID: callId};

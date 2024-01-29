@@ -989,9 +989,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   void _copyConferenceUrlToClipboard() {
-    Clipboard.setData(ClipboardData(
-            text:
-                '${getAppHost()}/$CONVERSATION_SCREEN?$ARG_MEETING_ID=$_meetingId&$ARG_CALL_TYPE=${_callSession.callType}&$ARG_INITIATOR_ID=${_currentUser.id}'))
+    Clipboard.setData(
+            ClipboardData(text: '${getAppHost()}?$ARG_MEETING_ID=$_meetingId'))
         .then((_) {
       showDialog(
         context: context,
