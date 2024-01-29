@@ -436,8 +436,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
                   alignment: Alignment.topLeft,
                   child: Container(
                     margin: orientation == Orientation.portrait
-                        ? EdgeInsets.only(top: 40, left: 20)
-                        : EdgeInsets.only(left: 40, top: 20),
+                        ? EdgeInsets.only(top: 40, left: 16)
+                        : EdgeInsets.only(left: 16, top: 20),
                     child: FloatingActionButton(
                       elevation: 0,
                       heroTag: "ToggleScreenMode",
@@ -455,21 +455,24 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
               },
             ),
           ),
-          Align(
-            alignment: Alignment.bottomLeft,
-            child: Container(
-              margin: EdgeInsets.only(bottom: 96, left: 16),
-              child: FloatingActionButton(
-                elevation: 0,
-                heroTag: "CopyConferenceUrl",
-                child: Icon(
-                  Icons.share,
-                  color: Colors.white,
+          Visibility(
+            visible: layoutMode != LayoutMode.private,
+            child: Align(
+              alignment: Alignment.bottomLeft,
+              child: Container(
+                margin: EdgeInsets.only(bottom: 96, left: 16),
+                child: FloatingActionButton(
+                  elevation: 0,
+                  heroTag: "CopyConferenceUrl",
+                  child: Icon(
+                    Icons.share,
+                    color: Colors.white,
+                  ),
+                  onPressed: () {
+                    _copyConferenceUrlToClipboard();
+                  },
+                  backgroundColor: Colors.green,
                 ),
-                onPressed: () {
-                  _copyConferenceUrlToClipboard();
-                },
-                backgroundColor: Colors.green,
               ),
             ),
           ),
