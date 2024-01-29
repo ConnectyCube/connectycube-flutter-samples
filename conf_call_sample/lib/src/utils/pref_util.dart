@@ -5,16 +5,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-const String prefUserLogin = "pref_user_login";
-const String prefUserPsw = "pref_user_psw";
-const String prefUserName = "pref_user_name";
-const String prefUserId = "pref_user_id";
-const String prefUserAvatar = "pref_user_avatar";
-const String prefUserIsGuest = "pref_user_is_guest";
-const String prefUserCreatedAt = "pref_user_created_at";
-const String prefSession = "pref_session";
-const String prefSubscriptionToken = "pref_subscription_token";
-const String prefSubscriptionId = "pref_subscription_id";
+const String prefUserLogin = 'conf_pref_user_login';
+const String prefUserPsw = 'conf_pref_user_psw';
+const String prefUserName = 'conf_pref_user_name';
+const String prefUserId = 'conf_pref_user_id';
+const String prefUserAvatar = 'conf_pref_user_avatar';
+const String prefUserIsGuest = 'conf_pref_user_is_guest';
+const String prefUserCreatedAt = 'conf_pref_user_created_at';
+const String prefSession = 'conf_pref_session';
+const String prefSubscriptionToken = 'conf_pref_subscription_token';
+const String prefSubscriptionId = 'conf_pref_subscription_id';
 
 class SharedPrefs {
   static SharedPreferences? _prefs;

@@ -58,8 +58,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <!-- Host URL -->
                 <data
-                    android:host="flutter-chat.connectycube.com"
-                    android:pathPrefix="/conversation"
+                    android:host="connectycube.github.io"
+                    android:pathPrefix="/connectycube-flutter-samples/conf_call_sample/build/web"
                     android:scheme="https" />
             </intent-filter>
         </activity>

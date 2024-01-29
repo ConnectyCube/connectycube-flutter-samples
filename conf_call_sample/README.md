@@ -5,6 +5,7 @@ This README introduces [ConnectyCube](https://connectycube.com) Conference Calls
 Project contains the following features implemented:
 
 - User authorization
+- Guest User authorization
 - Conference video calls (up to 12 users)
 - Mute/unmute microphone
 - Switch cameras
@@ -18,6 +19,9 @@ Project contains the following features implemented:
 - CallKit
 - Pre-join screen for video calls
 - Switching from audio call to video without reconnection
+- Shared conferences (join by link)
+
+[**Conference calls Sample Web app**](https://connectycube.github.io/connectycube-flutter-samples/conf_call_sample/build/web)
 
 ## Documentation
 
@@ -27,10 +31,10 @@ ConnectyCube Conference Calls API documentation - [https://developers.connectycu
 
 ## Screenshots
 
-<kbd><img alt="Flutter Conference Calls code sample, select users" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/select_opponents_screen.png" height="440" /></kbd> 
+<kbd><img alt="Flutter Conference Calls code sample, select users" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/select_opponents_screen_conf.png" height="440" /></kbd> 
 <kbd><img alt="Flutter Conference Calls code sample, video chat private" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen_private.png" height="440" /></kbd></kbd> 
-<kbd><img alt="Flutter Conference Calls code sample, video chat" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen_group.png" height="440" /></kbd></kbd> 
-<kbd><img alt="Flutter Conference Calls code sample, video chat (macOS)" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen_macos.png" height="440" /></kbd>
+<kbd><img alt="Flutter Conference Calls code sample, video chat" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen_group_conf.png" height="440" /></kbd></kbd> 
+<kbd><img alt="Flutter Conference Calls code sample, video chat (macOS)" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen_macos_conf.png" height="440" /></kbd>
 
 ## Quick start and develop
 

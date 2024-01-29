@@ -47,14 +47,9 @@ class _AppState extends State<App> {
 
         name = name?.replaceFirst('/', '');
 
-        log('[build] routeName: $routeName, args: $args', 'App');
-        log('[build] name: $name, args: $args', 'App');
-
         var uri = Uri.tryParse('$routeName');
         if (uri != null) {
           var params = uri.queryParameters;
-
-          log('[build] params: $params', 'App');
 
           var meetingId = params[ARG_MEETING_ID];
 
@@ -75,14 +70,10 @@ class _AppState extends State<App> {
 
         switch (name) {
           case LOGIN_SCREEN:
-            log('[build] try to go $LOGIN_SCREEN screen, args: $args', 'App');
-
             pageRout = MaterialPageRoute(builder: (context) => LoginScreen());
             break;
 
           case CONVERSATION_SCREEN:
-            log('[build] try to go $CONVERSATION_SCREEN screen, args: $args',
-                'App');
             if (args != null) {
               pageRout = MaterialPageRoute(
                   builder: (context) => ConversationCallScreen(
@@ -101,8 +92,6 @@ class _AppState extends State<App> {
             break;
 
           case SELECT_OPPONENTS_SCREEN:
-            log('[build] try to go $SELECT_OPPONENTS_SCREEN screen, args: $args',
-                'App');
             if (args != null) {
               pageRout = MaterialPageRoute(
                   builder: (context) => SelectOpponentsScreen(args[ARG_USER]));
@@ -111,8 +100,6 @@ class _AppState extends State<App> {
             break;
 
           case INCOMING_CALL_SCREEN:
-            log('[build] try to go $INCOMING_CALL_SCREEN screen, args: $args',
-                'App');
             if (args != null) {
               pageRout = MaterialPageRoute(
                   builder: (context) => IncomingCallScreen(
@@ -128,13 +115,10 @@ class _AppState extends State<App> {
             break;
 
           default:
-            log('[build] try to go \'default\' screen, args: $args', 'App');
             pageRout = MaterialPageRoute(builder: (context) => LoginScreen());
 
             break;
         }
-
-        log('[build] pageRout == null: ${pageRout == null}', 'App');
 
         return pageRout ??
             MaterialPageRoute(builder: (context) => LoginScreen());

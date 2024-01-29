@@ -7,6 +7,7 @@ This project contains chat and video chat code samples for Flutter platform base
 The following code samples are available:
 
 - [Chat code sample](https://github.com/ConnectyCube/connectycube-flutter-samples/tree/master/chat_sample)
+- [Chat Sample Web App](https://connectycube.github.io/connectycube-flutter-samples/chat_sample/build/web)
 
 <kbd><img alt="Flutter Chat sample, select dialogs" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/dialogs_screen.png" height="440" /></kbd>
 <kbd><img alt="Flutter Chat code sample, chat" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/chat_screen.png" height="440" /></kbd>
@@ -20,10 +21,11 @@ The following code samples are available:
 </kbd> <kbd><img alt="Flutter P2P Calls code sample, video chat (macOS)" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen_macos.png" height="440" /></kbd>
 
 - [Conference Calls code sample](https://github.com/ConnectyCube/connectycube-flutter-samples/tree/master/conf_call_sample)
+- [Conference Calls Sample Web App](https://connectycube.github.io/connectycube-flutter-samples/conf_call_sample/build/web)
 
-<kbd><img alt="Flutter Conference Calls code sample, select users" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/select_opponents_screen.png" height="440" /></kbd>
-<kbd><img alt="Flutter Conference Calls code sample, video chat" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen_group.png" height="440" /></kbd>
-</kbd> <kbd><img alt="Flutter Conference Calls code sample, video chat (macOS)" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen_macos.png" height="440" /></kbd>
+<kbd><img alt="Flutter Conference Calls code sample, select users" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/select_opponents_screen_conf.png" height="440" /></kbd>
+<kbd><img alt="Flutter Conference Calls code sample, video chat" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen_group_conf.png" height="440" /></kbd>
+</kbd> <kbd><img alt="Flutter Conference Calls code sample, video chat (macOS)" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen_macos_conf.png" height="440" /></kbd>
 ## Documentation
 
 All the samples use ConnectyCube SDK. The following tech integration documentation is available:

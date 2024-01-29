@@ -79,7 +79,7 @@ class BodyState extends State<BodyLayout> {
 
     return SingleChildScrollView(
       child: Container(
-        padding: EdgeInsets.only(top: 48, bottom: 24, left: 8, right: 8),
+        padding: EdgeInsets.only(top: 48, bottom: 24, left: 24, right: 24),
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
           constraints: BoxConstraints(maxWidth: 400),
