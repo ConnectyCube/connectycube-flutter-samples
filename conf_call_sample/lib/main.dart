@@ -15,6 +15,7 @@ import 'src/utils/platform_utils.dart';
 import 'src/utils/pref_util.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   configurePlatform();
   runApp(App());
 }
@@ -49,6 +50,29 @@ class _AppState extends State<App> {
         log('[build] routeName: $routeName, args: $args', 'App');
         log('[build] name: $name, args: $args', 'App');
 
+        var uri = Uri.tryParse('$routeName');
+        if (uri != null) {
+          var params = uri.queryParameters;
+
+          log('[build] params: $params', 'App');
+
+          var meetingId = params[ARG_MEETING_ID];
+
+          if (meetingId != null) {
+            return MaterialPageRoute(builder: (context) {
+              return FutureBuilder(
+                  future: prepareConversationScreen(meetingId),
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData || snapshot.data == null) {
+                      return Container();
+                    } else {
+                      return snapshot.data!;
+                    }
+                  });
+            });
+          }
+        }
+
         switch (name) {
           case LOGIN_SCREEN:
             log('[build] try to go $LOGIN_SCREEN screen, args: $args', 'App');
@@ -59,34 +83,7 @@ class _AppState extends State<App> {
           case CONVERSATION_SCREEN:
             log('[build] try to go $CONVERSATION_SCREEN screen, args: $args',
                 'App');
-            if (args == null) {
-              var uri = Uri.tryParse('$routeName');
-              if (uri != null) {
-                var params = uri.queryParameters;
-
-                log('[build] params: $params', 'App');
-
-                var meetingId = params[ARG_MEETING_ID];
-                var callType = int.tryParse(params[ARG_CALL_TYPE] ?? '');
-                var callerId =
-                    int.tryParse(params[ARG_INITIATOR_ID] ?? '') ?? -1;
-
-                if (meetingId != null) {
-                  pageRout = MaterialPageRoute(builder: (context) {
-                    return FutureBuilder(
-                        future: prepareConversationScreen(
-                            meetingId, callerId, callType),
-                        builder: (context, snapshot) {
-                          if (!snapshot.hasData || snapshot.data == null) {
-                            return Container();
-                          } else {
-                            return snapshot.data!;
-                          }
-                        });
-                  });
-                }
-              }
-            } else {
+            if (args != null) {
               pageRout = MaterialPageRoute(
                   builder: (context) => ConversationCallScreen(
                         args[ARG_USER],
@@ -160,8 +157,7 @@ class _AppState extends State<App> {
     });
   }
 
-  Future<Widget> prepareConversationScreen(
-      String meetingId, int callerId, int? callType) async {
+  Future<Widget> prepareConversationScreen(String meetingId) async {
     var currentUser = await SharedPrefs.getUser();
 
     if (currentUser == null) {
@@ -183,13 +179,13 @@ class _AppState extends State<App> {
     return ConferenceClient.instance
         .createCallSession(
       currentUser!.id!,
-      callType: callType ?? CallType.VIDEO_CALL,
+      callType: CallType.VIDEO_CALL,
     )
         .then((confSession) {
       CallManager.instance.init(context);
       CallManager.instance.currentCallState = InternalCallState.ACCEPTED;
-      CallManager.instance.setActiveCall('', meetingId, callerId, []);
-      CallManager.instance.sendAcceptMessage('', meetingId, callerId);
+      CallManager.instance.setActiveCall('', meetingId, -1, []);
+      CallManager.instance.sendAcceptMessage('', meetingId, -1);
 
       return ConversationCallScreen(
         currentUser!,
