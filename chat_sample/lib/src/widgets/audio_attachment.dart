@@ -3,8 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 
-import 'package:connectycube_sdk/connectycube_sdk.dart';
-
 import '../utils/string_utils.dart';
 
 class AudioAttachment extends StatefulWidget {
@@ -54,7 +52,6 @@ class AudioAttachmentState extends State<AudioAttachment> {
         children: [
           GestureDetector(
             onTap: () {
-              log('[onPressed] playing: ${player.playing}', TAG);
               startStopPlayer();
             },
             child: AbsorbPointer(
@@ -86,24 +83,26 @@ class AudioAttachmentState extends State<AudioAttachment> {
                   mainAxisSize: MainAxisSize.min,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                  SizedBox(
-                  height: 24,
-                  child: Slider(
-                        min: 0,
-                        max: max(
-                            player.duration?.inMilliseconds.toDouble() ?? 1.0,
-                            player.position.inMilliseconds.toDouble()),
-                        activeColor: widget.accentColor,
-                        inactiveColor: widget.accentColor.withAlpha(100),
-                        value: snapshot.data?.inMilliseconds.toDouble() ?? 0,
-                        onChanged: onPositionChanged),),
-
+                    SizedBox(
+                      height: 24,
+                      child: Slider(
+                          min: 0,
+                          max: max(
+                              player.duration?.inMilliseconds.toDouble() ?? 1.0,
+                              player.position.inMilliseconds.toDouble()),
+                          activeColor: widget.accentColor,
+                          inactiveColor: widget.accentColor.withAlpha(100),
+                          value: snapshot.data?.inMilliseconds.toDouble() ?? 0,
+                          onChanged: onPositionChanged),
+                    ),
                     Row(children: [
-                      Text(formatHHMMSS(snapshot.data?.inSeconds ?? 0) +
-                          '/' +
-                          formatHHMMSS(player.duration?.inSeconds ??
-                              widget.duration ~/ 1000),
-                      style: TextStyle(color: widget.accentColor),),
+                      Text(
+                        formatHHMMSS(snapshot.data?.inSeconds ?? 0) +
+                            '/' +
+                            formatHHMMSS(player.duration?.inSeconds ??
+                                widget.duration ~/ 1000),
+                        style: TextStyle(color: widget.accentColor),
+                      ),
                       StreamBuilder<ProcessingState>(
                           stream: player.processingStateStream,
                           builder: (context, snapshot) {
@@ -129,25 +128,13 @@ class AudioAttachmentState extends State<AudioAttachment> {
   }
 
   void startStopPlayer() {
-    log('[startStopPlayer]', TAG);
     if (player.playing) {
-      log('[startStopPlayer] playing true', TAG);
       player.pause().then((_) {
-        setState(() {
-          log('[startStopPlayer] playing true 1', TAG);
-        });
+        setState(() {});
       });
     } else {
-      log('[startStopPlayer] playing false', TAG);
       setState(() {
-        log('[startStopPlayer] playing false 1', TAG);
-
-        player.play().then((_) {
-          // setState(() {
-          log('[startStopPlayer] playing false 2', TAG);
-
-          // });
-        });
+        player.play();
       });
     }
   }
