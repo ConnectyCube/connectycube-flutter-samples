@@ -30,5 +30,10 @@
 	<string>NSApplication</string>
 	<key>NSUserNotificationAlertStyle</key>
     <string>banner</string>
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <true/>
+    </dict>
 </dict>
 </plist>
