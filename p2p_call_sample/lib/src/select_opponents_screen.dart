@@ -1,10 +1,8 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
+import 'login_screen.dart';
 import 'managers/call_manager.dart';
 import 'managers/push_notifications_manager.dart';
 import 'utils/configs.dart' as utils;
@@ -77,7 +75,13 @@ class SelectOpponentsScreen extends StatelessWidget {
   }
 
   _navigateToLoginScreen(BuildContext context) {
-    Navigator.pop(context);
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(
+        builder: (context) => LoginScreen(),
+      ),
+      (r) => false,
+    );
   }
 
   SelectOpponentsScreen(this.currentUser);
@@ -190,6 +194,8 @@ class _BodyLayoutState extends State<BodyLayout> {
     checkSystemAlertWindowPermission(context);
 
     requestNotificationsPermission();
+
+    CallManager.instance.init(context);
 
     PushNotificationsManager.instance.init();
   }

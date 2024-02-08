@@ -125,6 +125,7 @@ class _BodyLayoutState extends State<BodyLayout> {
         children: <Widget>[
           new Container(
             child: new TextField(
+                autofocus: true,
                 textInputAction: TextInputAction.search,
                 decoration: new InputDecoration(labelText: 'Search users'),
                 onSubmitted: (value) {
@@ -151,20 +152,28 @@ class _BodyLayoutState extends State<BodyLayout> {
           setState(() {
             clearValues();
             userList.addAll(users!.items);
+
+            if (users.items.isEmpty) {
+              userMsg = "Couldn't find user";
+            }
           });
-        }).catchError((onError) {
-          log("getusers catchError: $onError", TAG);
-          setState(() {
-            clearValues();
-            userMsg = "Couldn't find user";
-          });
-        });
+        }).catchError(
+          (onError) {
+            log("getusers catchError: $onError", TAG);
+            setState(() {
+              clearValues();
+              userMsg = "Couldn't find user";
+            });
+          },
+        );
       }
     }
     if (userList.isEmpty)
-      return FittedBox(
-        fit: BoxFit.contain,
-        child: Text(userMsg),
+      return Center(
+        child: Text(
+          userMsg,
+          style: TextStyle(fontSize: 20),
+        ),
       );
     else
       return ListView.builder(
@@ -178,27 +187,7 @@ class _BodyLayoutState extends State<BodyLayout> {
       child: TextButton(
         child: Row(
           children: <Widget>[
-            Material(
-              child: CircleAvatar(
-                radius: 30,
-                backgroundColor: Colors.white,
-                child: CircleAvatar(
-                  backgroundImage: userList[index].avatar != null &&
-                          userList[index].avatar!.isNotEmpty
-                      ? NetworkImage(userList[index].avatar!)
-                      : null,
-                  radius: 25,
-                  child: getAvatarTextWidget(
-                      userList[index].avatar != null &&
-                          userList[index].avatar!.isNotEmpty,
-                      userList[index].fullName!.substring(0, 2).toUpperCase()),
-                ),
-              ),
-              borderRadius: BorderRadius.all(
-                Radius.circular(40.0),
-              ),
-              clipBehavior: Clip.hardEdge,
-            ),
+            getUserAvatarWidget(userList[index], 30),
             Flexible(
               child: Container(
                 child: Column(

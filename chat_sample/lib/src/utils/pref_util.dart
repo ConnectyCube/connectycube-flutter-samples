@@ -1,9 +1,17 @@
 import 'dart:async';
 
-import 'package:connectycube_sdk/connectycube_chat.dart';
+import 'package:collection/collection.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:connectycube_sdk/connectycube_chat.dart';
+
+import 'consts.dart';
+
+const String prefLoginType = "pref_login_type";
 const String prefUserLogin = "pref_user_login";
+const String prefUserEmail = "pref_user_email";
+const String prefUserPhone = "pref_user_phone";
 const String prefUserPsw = "pref_user_psw";
 const String prefUserName = "pref_user_name";
 const String prefUserId = "pref_user_id";
@@ -34,11 +42,18 @@ class SharedPrefs {
     return completer.future;
   }
 
-  saveNewUser(CubeUser cubeUser) {
+  saveNewUser(CubeUser cubeUser, LoginType loginType) {
     prefs.clear();
-    prefs.setString(prefUserLogin, cubeUser.login!);
-    prefs.setString(prefUserPsw, cubeUser.password!);
-    prefs.setString(prefUserName, cubeUser.fullName!);
+
+    prefs.setString(prefLoginType, describeEnum(loginType));
+
+    if (cubeUser.login != null) prefs.setString(prefUserLogin, cubeUser.login!);
+    if (cubeUser.email != null) prefs.setString(prefUserEmail, cubeUser.email!);
+    if (cubeUser.phone != null) prefs.setString(prefUserPhone, cubeUser.phone!);
+    if (cubeUser.password != null)
+      prefs.setString(prefUserPsw, cubeUser.password!);
+    if (cubeUser.fullName != null)
+      prefs.setString(prefUserName, cubeUser.fullName!);
     prefs.setInt(prefUserId, cubeUser.id!);
     if (cubeUser.avatar != null)
       prefs.setString(prefUserAvatar, cubeUser.avatar!);
@@ -48,6 +63,8 @@ class SharedPrefs {
     if (cubeUser.password != null)
       prefs.setString(prefUserPsw, cubeUser.password!);
     if (cubeUser.login != null) prefs.setString(prefUserLogin, cubeUser.login!);
+    if (cubeUser.email != null) prefs.setString(prefUserEmail, cubeUser.email!);
+    if (cubeUser.phone != null) prefs.setString(prefUserPhone, cubeUser.phone!);
     if (cubeUser.fullName != null)
       prefs.setString(prefUserName, cubeUser.fullName!);
     if (cubeUser.avatar != null)
@@ -55,9 +72,12 @@ class SharedPrefs {
   }
 
   CubeUser? getUser() {
-    if (prefs.get(prefUserLogin) == null) return null;
+    if (prefs.getString(prefUserLogin) == null &&
+        prefs.getString(prefUserEmail) == null) return null;
     var user = CubeUser();
     user.login = prefs.getString(prefUserLogin);
+    user.email = prefs.getString(prefUserEmail);
+    user.phone = prefs.getString(prefUserPhone);
     user.password = prefs.getString(prefUserPsw);
     user.fullName = prefs.getString(prefUserName);
     user.id = prefs.getInt(prefUserId);
@@ -65,8 +85,21 @@ class SharedPrefs {
     return user;
   }
 
-  deleteUser() {
-    prefs.clear();
+  LoginType? getLoginType() {
+    var savedLoginType = prefs.getString(prefLoginType);
+    if (savedLoginType == null) return null;
+
+    var loginType = LoginType.values
+        .firstWhereOrNull((e) => describeEnum(e) == savedLoginType);
+    return loginType;
+  }
+
+  saveLoginType(LoginType loginType) {
+    prefs.setString(prefLoginType, describeEnum(loginType));
+  }
+
+  Future<bool> deleteUser() {
+    return prefs.clear();
   }
 
   saveSubscriptionToken(String token) {
@@ -85,11 +118,11 @@ class SharedPrefs {
     return prefs.getInt(prefSubscriptionId) ?? 0;
   }
 
-  saveSelectedDialogId(String dialogId){
+  saveSelectedDialogId(String dialogId) {
     prefs.setString(prefSelectedDialogId, dialogId);
   }
 
-  String? getSelectedDialogId(){
+  String? getSelectedDialogId() {
     return prefs.getString(prefSelectedDialogId);
   }
 }

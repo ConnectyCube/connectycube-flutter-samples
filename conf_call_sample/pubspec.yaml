@@ -1,21 +1,31 @@
 name: conf_call_sample
 description: Conf Calls Sample
 
-version: 0.3.2
+version: 0.3.6
 
 environment:
-  sdk: '>=2.12.0 <3.0.0'
+  sdk: '>=3.0.0 <4.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
 
-  connectycube_sdk: ^2.5.0
+  assets_audio_player: ^3.1.1
+  connectycube_sdk: ^2.11.2
 #  connectycube_sdk:
 #    path: ../../flutter-sdk
+  connectycube_flutter_call_kit: ^2.5.0
+#  connectycube_flutter_call_kit:
+#    path: ../../connectycube-flutter-call-kit/connectycube_flutter_call_kit
+  device_info_plus: ^9.0.0
   flutter_background: ^1.2.0
+  flutter_speed_dial: ^7.0.0
+  package_info_plus: ^5.0.0
+  permission_handler: ^11.0.1
+  shared_preferences: ^2.2.1
+  universal_io: ^2.2.2
+  uuid: ^3.0.7
   web_browser_detect: ^2.0.3
-  flutter_speed_dial: ^6.2.0
 
 dev_dependencies:
   flutter_test:
@@ -24,3 +34,5 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/audio/

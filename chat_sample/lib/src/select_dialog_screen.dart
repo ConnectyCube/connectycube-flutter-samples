@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -8,15 +7,22 @@ import 'package:intl/intl.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import 'new_dialog_screen.dart';
-import '../src/utils/api_utils.dart';
-import '../src/utils/consts.dart';
+import 'create_dialog_flow.dart';
+import 'managers/chat_manager.dart';
+import 'settings_screen.dart';
+import 'utils/api_utils.dart';
+import 'utils/consts.dart';
+import 'utils/platform_utils.dart';
+import 'widgets/common.dart';
 
 class SelectDialogScreen extends StatelessWidget {
   static const String TAG = "SelectDialogScreen";
   final CubeUser currentUser;
+  final Function(CubeDialog)? onDialogSelectedCallback;
+  final CubeDialog? selectedDialog;
 
-  SelectDialogScreen(this.currentUser);
+  SelectDialogScreen(
+      this.currentUser, this.selectedDialog, this.onDialogSelectedCallback);
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +32,7 @@ class SelectDialogScreen extends StatelessWidget {
         appBar: AppBar(
           automaticallyImplyLeading: false,
           title: Text(
-            'Logged in as ${currentUser.fullName}',
+            'Logged in as ${currentUser.fullName ?? currentUser.login ?? currentUser.email}',
           ),
           actions: <Widget>[
             IconButton(
@@ -38,7 +44,7 @@ class SelectDialogScreen extends StatelessWidget {
             ),
           ],
         ),
-        body: BodyLayout(currentUser),
+        body: BodyLayout(currentUser, selectedDialog, onDialogSelectedCallback),
       ),
     );
   }
@@ -48,19 +54,22 @@ class SelectDialogScreen extends StatelessWidget {
   }
 
   _openSettings(BuildContext context) {
-    Navigator.pushNamed(context, 'settings',
-        arguments: {USER_ARG_NAME: currentUser});
+    showModal(context: context, child: SettingsScreen(currentUser));
   }
 }
 
 class BodyLayout extends StatefulWidget {
   final CubeUser currentUser;
+  final Function(CubeDialog)? onDialogSelectedCallback;
+  final CubeDialog? selectedDialog;
 
-  BodyLayout(this.currentUser);
+  BodyLayout(
+      this.currentUser, this.selectedDialog, this.onDialogSelectedCallback);
 
   @override
   State<StatefulWidget> createState() {
-    return _BodyLayoutState(currentUser);
+    return _BodyLayoutState(
+        currentUser, selectedDialog, onDialogSelectedCallback);
   }
 }
 
@@ -72,16 +81,25 @@ class _BodyLayoutState extends State<BodyLayout> {
   var _isDialogContinues = true;
 
   StreamSubscription<CubeMessage>? msgSubscription;
+  StreamSubscription<MessageStatus>? msgDeliveringSubscription;
+  StreamSubscription<MessageStatus>? msgReadingSubscription;
+  StreamSubscription<MessageStatus>? msgLocalReadingSubscription;
+  StreamSubscription<CubeMessage>? msgSendingSubscription;
   final ChatMessagesManager? chatMessagesManager =
       CubeChatConnection.instance.chatMessagesManager;
+  Function(CubeDialog)? onDialogSelectedCallback;
+  CubeDialog? selectedDialog;
 
-  _BodyLayoutState(this.currentUser);
+  Map<String, Set<String>> unreadMessages = {};
+
+  _BodyLayoutState(
+      this.currentUser, this.selectedDialog, this.onDialogSelectedCallback);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        padding: EdgeInsets.only(bottom: 16, top: 16),
+        padding: EdgeInsets.only(top: 2),
         child: Column(
           children: [
             Visibility(
@@ -103,7 +121,7 @@ class _BodyLayoutState extends State<BodyLayout> {
       floatingActionButton: FloatingActionButton(
         heroTag: "New dialog",
         child: Icon(
-          Icons.chat,
+          Icons.add_comment,
           color: Colors.white,
         ),
         backgroundColor: Colors.blue,
@@ -113,12 +131,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   void _createNewDialog(BuildContext context) async {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CreateChatScreen(currentUser),
-      ),
-    ).then((value) => refresh());
+    showModal(context: context, child: CreateDialog(currentUser));
   }
 
   void _processGetDialogError(exception) {
@@ -137,7 +150,7 @@ class _BodyLayoutState extends State<BodyLayout> {
         setState(() {
           dialogList.clear();
           dialogList.addAll(
-              dialogs!.items.map((dialog) => ListItem(dialog)).toList());
+              dialogs?.items.map((dialog) => ListItem(dialog)).toList() ?? []);
         });
       }).catchError((exception) {
         _processGetDialogError(exception);
@@ -146,22 +159,28 @@ class _BodyLayoutState extends State<BodyLayout> {
     if (_isDialogContinues && dialogList.isEmpty)
       return SizedBox.shrink();
     else if (dialogList.isEmpty)
-      return FittedBox(
-        fit: BoxFit.contain,
-        child: Text("No dialogs yet"),
+      return Center(
+        child: Text(
+          'No dialogs yet',
+          style: TextStyle(fontSize: 20),
+        ),
       );
     else
       return ListView.separated(
         itemCount: dialogList.length,
         itemBuilder: _getListItemTile,
         separatorBuilder: (context, index) {
-          return Divider(thickness: 2, indent: 40);
+          return Divider(
+            thickness: 1,
+            indent: 68,
+            height: 1,
+          );
         },
       );
   }
 
   Widget _getListItemTile(BuildContext context, int index) {
-    getDialogIcon() {
+    Widget getDialogIcon() {
       var dialog = dialogList[index].data;
       if (dialog.type == CubeDialogType.PRIVATE)
         return Icon(
@@ -178,75 +197,52 @@ class _BodyLayoutState extends State<BodyLayout> {
       }
     }
 
-    getDialogAvatarWidget() {
+    getDialogAvatar() {
       var dialog = dialogList[index].data;
-      if (dialog.photo == null) {
-        return CircleAvatar(
-            radius: 25, backgroundColor: greyColor3, child: getDialogIcon());
-      } else {
-        return CachedNetworkImage(
-          placeholder: (context, url) => Container(
-            child: CircularProgressIndicator(
-              valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-            ),
-            width: 40.0,
-            height: 40.0,
-            padding: EdgeInsets.all(70.0),
-            decoration: BoxDecoration(
-              color: greyColor2,
-              borderRadius: BorderRadius.all(
-                Radius.circular(8.0),
-              ),
-            ),
-          ),
-          imageUrl: dialogList[index].data.photo!,
-          width: 45.0,
-          height: 45.0,
-          fit: BoxFit.cover,
-        );
-      }
+
+      return getDialogAvatarWidget(dialog, 25,
+          placeholder: getDialogIcon(), errorWidget: getDialogIcon());
     }
 
     return Container(
-      child: TextButton(
+      color: selectedDialog != null &&
+              selectedDialog!.dialogId == dialogList[index].data.dialogId
+          ? Color.fromARGB(100, 168, 228, 160)
+          : null,
+      child: GestureDetector(
+        behavior: HitTestBehavior.translucent,
         child: Row(
           children: <Widget>[
-            Material(
-              child: getDialogAvatarWidget(),
-              borderRadius: BorderRadius.all(Radius.circular(25.0)),
-              clipBehavior: Clip.hardEdge,
-            ),
+            getDialogAvatar(),
             Flexible(
               child: Container(
                 child: Column(
                   children: <Widget>[
                     Container(
                       child: Text(
-                        '${dialogList[index].data.name ?? 'Not available'}',
+                        '${dialogList[index].data.name ?? 'Unknown dialog'}',
                         style: TextStyle(
                             color: primaryColor,
                             fontWeight: FontWeight.bold,
-                            fontSize: 20.0,
+                            fontSize: 16.0,
                             overflow: TextOverflow.ellipsis),
                         maxLines: 1,
                       ),
                       alignment: Alignment.centerLeft,
-                      margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 5.0),
                     ),
                     Container(
                       child: Text(
-                        '${dialogList[index].data.lastMessage ?? 'Not available'}',
+                        '${dialogList[index].data.lastMessage ?? ''}',
                         style: TextStyle(
                             color: primaryColor,
                             overflow: TextOverflow.ellipsis),
                         maxLines: 2,
                       ),
                       alignment: Alignment.centerLeft,
-                      margin: EdgeInsets.fromLTRB(10.0, 0.0, 0.0, 0.0),
                     ),
                   ],
                 ),
-                margin: EdgeInsets.only(left: 20.0),
+                margin: EdgeInsets.only(left: 8.0),
               ),
             ),
             Visibility(
@@ -260,21 +256,28 @@ class _BodyLayoutState extends State<BodyLayout> {
                   _deleteDialog(context, dialogList[index].data);
                 },
               ),
-              maintainSize: true,
               maintainAnimation: true,
               maintainState: true,
               visible: dialogList[index].isSelected,
             ),
             Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  '${dialogList[index].data.lastMessageDateSent != null ? DateFormat('MMM dd').format(DateTime.fromMillisecondsSinceEpoch(dialogList[index].data.lastMessageDateSent! * 1000)) : 'Not available'}',
-                  style: TextStyle(color: primaryColor),
+                Row(
+                  children: [
+                    getMessageStateWidget(
+                        dialogList[index].data.lastMessageState),
+                    Text(
+                      '${DateFormat('MMM dd').format(dialogList[index].data.lastMessageDateSent != null ? DateTime.fromMillisecondsSinceEpoch(dialogList[index].data.lastMessageDateSent! * 1000) : dialogList[index].data.updatedAt!)}',
+                      style: TextStyle(color: primaryColor),
+                    ),
+                  ],
                 ),
                 if (dialogList[index].data.unreadMessageCount != null &&
                     dialogList[index].data.unreadMessageCount != 0)
-                  Container(
+                  Padding(
+                    padding: EdgeInsets.only(top: 4),
+                    child: Container(
                       padding: EdgeInsets.symmetric(vertical: 2, horizontal: 6),
                       decoration: BoxDecoration(
                           color: Colors.green,
@@ -282,7 +285,9 @@ class _BodyLayoutState extends State<BodyLayout> {
                       child: Text(
                         dialogList[index].data.unreadMessageCount.toString(),
                         style: TextStyle(color: Colors.white),
-                      )),
+                      ),
+                    ),
+                  ),
               ],
             ),
           ],
@@ -292,11 +297,11 @@ class _BodyLayoutState extends State<BodyLayout> {
             dialogList[index].isSelected = !dialogList[index].isSelected;
           });
         },
-        onPressed: () {
-          _openDialog(context, dialogList[index].data);
+        onTap: () {
+          _selectDialog(context, dialogList[index].data);
         },
       ),
-      margin: EdgeInsets.only(left: 5.0, right: 5.0),
+      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 10),
     );
   }
 
@@ -305,9 +310,16 @@ class _BodyLayoutState extends State<BodyLayout> {
     Fluttertoast.showToast(msg: 'Coming soon');
   }
 
-  void _openDialog(BuildContext context, CubeDialog dialog) async {
-    Navigator.pushNamed(context, 'chat_dialog',
-        arguments: {USER_ARG_NAME: currentUser, DIALOG_ARG_NAME: dialog});
+  void _selectDialog(BuildContext context, CubeDialog dialog) async {
+    if (onDialogSelectedCallback != null) {
+      onDialogSelectedCallback?.call(dialog);
+      setState(() {
+        selectedDialog = dialog;
+      });
+    } else {
+      Navigator.pushNamed(context, 'chat_dialog',
+          arguments: {USER_ARG_NAME: currentUser, DIALOG_ARG_NAME: dialog});
+    }
   }
 
   void refresh() {
@@ -319,8 +331,19 @@ class _BodyLayoutState extends State<BodyLayout> {
   @override
   void initState() {
     super.initState();
+    refreshBadgeCount();
     msgSubscription =
         chatMessagesManager!.chatMessagesStream.listen(onReceiveMessage);
+    msgDeliveringSubscription = CubeChatConnection
+        .instance.messagesStatusesManager?.deliveredStream
+        .listen(onMessageDelivered);
+    msgReadingSubscription = CubeChatConnection
+        .instance.messagesStatusesManager?.readStream
+        .listen(onMessageRead);
+    msgLocalReadingSubscription =
+        ChatManager.instance.readMessagesStream.listen(onMessageRead);
+    msgSendingSubscription =
+        ChatManager.instance.sentMessagesStream.listen(onReceiveMessage);
   }
 
   @override
@@ -328,6 +351,10 @@ class _BodyLayoutState extends State<BodyLayout> {
     super.dispose();
     log("dispose", TAG);
     msgSubscription?.cancel();
+    msgDeliveringSubscription?.cancel();
+    msgReadingSubscription?.cancel();
+    msgLocalReadingSubscription?.cancel();
+    msgSendingSubscription?.cancel();
   }
 
   void onReceiveMessage(CubeMessage message) {
@@ -336,16 +363,32 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   updateDialog(CubeMessage msg) {
+    refreshBadgeCount();
+
     ListItem<CubeDialog>? dialogItem =
         dialogList.firstWhereOrNull((dlg) => dlg.data.dialogId == msg.dialogId);
     if (dialogItem == null) return;
 
     setState(() {
       dialogItem.data.lastMessage = msg.body;
-      dialogItem.data.unreadMessageCount =
-          dialogItem.data.unreadMessageCount == null
-              ? 1
-              : dialogItem.data.unreadMessageCount! + 1;
+      dialogItem.data.lastMessageId = msg.messageId;
+
+      if (msg.senderId != currentUser.id) {
+        dialogItem.data.unreadMessageCount =
+            dialogItem.data.unreadMessageCount == null
+                ? 1
+                : dialogItem.data.unreadMessageCount! + 1;
+
+        unreadMessages[msg.dialogId!] = <String>[
+          ...unreadMessages[msg.dialogId] ?? [],
+          msg.messageId!
+        ].toSet();
+
+        dialogItem.data.lastMessageState = null;
+      } else {
+        dialogItem.data.lastMessageState = MessageState.sent;
+      }
+
       dialogItem.data.lastMessageDateSent = msg.dateSent;
       dialogList.sort((a, b) {
         DateTime dateA;
@@ -353,7 +396,7 @@ class _BodyLayoutState extends State<BodyLayout> {
           dateA = DateTime.fromMillisecondsSinceEpoch(
               a.data.lastMessageDateSent! * 1000);
         } else {
-          dateA = a.data.createdAt!;
+          dateA = a.data.updatedAt!;
         }
 
         DateTime dateB;
@@ -361,7 +404,7 @@ class _BodyLayoutState extends State<BodyLayout> {
           dateB = DateTime.fromMillisecondsSinceEpoch(
               b.data.lastMessageDateSent! * 1000);
         } else {
-          dateB = b.data.createdAt!;
+          dateB = b.data.updatedAt!;
         }
 
         if (dateA.isAfter(dateB)) {
@@ -373,5 +416,52 @@ class _BodyLayoutState extends State<BodyLayout> {
         }
       });
     });
+  }
+
+  void onMessageDelivered(MessageStatus messageStatus) {
+    _updateLastMessageState(messageStatus, MessageState.delivered);
+  }
+
+  void onMessageRead(MessageStatus messageStatus) {
+    _updateLastMessageState(messageStatus, MessageState.read);
+
+    if (messageStatus.userId == currentUser.id &&
+        unreadMessages.containsKey(messageStatus.dialogId)) {
+      if (unreadMessages[messageStatus.dialogId]
+              ?.remove(messageStatus.messageId) ??
+          false) {
+        setState(() {
+          var dialog = dialogList
+              .firstWhereOrNull(
+                  (dlg) => dlg.data.dialogId == messageStatus.dialogId)
+              ?.data;
+
+          if (dialog == null) return;
+
+          dialog.unreadMessageCount = dialog.unreadMessageCount == null ||
+                  dialog.unreadMessageCount == 0
+              ? 0
+              : dialog.unreadMessageCount! - 1;
+        });
+      }
+    }
+  }
+
+  void _updateLastMessageState(
+      MessageStatus messageStatus, MessageState state) {
+    var dialog = dialogList
+        .firstWhereOrNull((dlg) => dlg.data.dialogId == messageStatus.dialogId)
+        ?.data;
+
+    if (dialog == null) return;
+
+    if (messageStatus.messageId == dialog.lastMessageId &&
+        messageStatus.userId != currentUser.id) {
+      if (dialog.lastMessageState != state) {
+        setState(() {
+          dialog.lastMessageState = state;
+        });
+      }
+    }
   }
 }

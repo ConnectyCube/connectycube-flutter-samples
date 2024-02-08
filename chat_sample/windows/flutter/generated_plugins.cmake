@@ -4,9 +4,12 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   connectivity_plus
+  desktop_webview_auth
   emoji_picker_flutter
+  firebase_auth
   firebase_core
   flutter_webrtc
+  record_windows
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

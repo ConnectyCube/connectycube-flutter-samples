@@ -1,16 +1,14 @@
 import 'dart:async';
 
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-import 'add_occupant_screen.dart';
-import '../src/utils/api_utils.dart';
-import '../src/utils/consts.dart';
-import '../src/widgets/common.dart';
+import 'utils/api_utils.dart';
+import 'utils/consts.dart';
+import 'widgets/common.dart';
 
 class ChatDetailsScreen extends StatelessWidget {
   final CubeUser _cubeUser;
@@ -24,13 +22,30 @@ class ChatDetailsScreen extends StatelessWidget {
       onWillPop: () => _onBackPressed(context),
       child: Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            icon: Icon(Icons.close, color: Colors.white),
+            onPressed: () {
+              Navigator.of(context, rootNavigator: true).pop();
+            },
+          ),
+          automaticallyImplyLeading: false,
           title: Text(
             _cubeDialog.type == CubeDialogType.PRIVATE
                 ? "Contact details"
                 : "Group details",
           ),
           centerTitle: false,
-          actions: <Widget>[],
+          actions: <Widget>[
+            if (_cubeDialog.type != CubeDialogType.PRIVATE)
+              IconButton(
+                onPressed: () {
+                  _exitDialog(context);
+                },
+                icon: Icon(
+                  Icons.exit_to_app,
+                ),
+              )
+          ],
         ),
         body: DetailScreen(_cubeUser, _cubeDialog),
       ),
@@ -40,6 +55,43 @@ class ChatDetailsScreen extends StatelessWidget {
   Future<bool> _onBackPressed(BuildContext context) {
     Navigator.pop(context);
     return Future.value(false);
+  }
+
+  _exitDialog(BuildContext context) {
+    print('_exitDialog');
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Leave Dialog'),
+          content: Text("Are you sure you want to leave this dialog?"),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Cancel'),
+              onPressed: () {
+                Navigator.pop(context);
+              },
+            ),
+            TextButton(
+              child: Text('Ok'),
+              onPressed: () {
+                deleteDialog(_cubeDialog.dialogId!).then((onValue) {
+                  Fluttertoast.showToast(msg: 'Success');
+                  Navigator.of(context, rootNavigator: true)
+                      .pushNamedAndRemoveUntil(
+                    'select_dialog',
+                    (route) => false,
+                    arguments: {USER_ARG_NAME: _cubeUser},
+                  );
+                }).catchError((error) {
+                  showDialogError(error, context);
+                });
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 }
 
@@ -136,23 +188,7 @@ class ContactScreenState extends ScreenState {
       return SizedBox.shrink();
     }
     return Stack(
-      children: <Widget>[
-        CircleAvatar(
-          backgroundImage:
-              contactUser!.avatar != null && contactUser!.avatar!.isNotEmpty
-                  ? NetworkImage(contactUser!.avatar!)
-                  : null,
-          backgroundColor: greyColor2,
-          radius: 50,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(55),
-            child: Text(
-              contactUser!.fullName!.substring(0, 2).toUpperCase(),
-              style: TextStyle(fontSize: 40),
-            ),
-          ),
-        ),
-      ],
+      children: <Widget>[getUserAvatarWidget(contactUser!, 50)],
     );
   }
 
@@ -176,7 +212,10 @@ class ContactScreenState extends ScreenState {
               width: 1.0, // Underline width
             ))),
             child: Text(
-              contactUser!.fullName!,
+              contactUser!.fullName ??
+                  contactUser!.login ??
+                  contactUser!.email ??
+                  '',
               style: TextStyle(
                 color: primaryColor,
                 fontSize: 20, // Text colour here
@@ -200,10 +239,9 @@ class ContactScreenState extends ScreenState {
               'Start dialog',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 20, // Text colour here
               ),
             ),
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
           ),
         ],
       ),
@@ -236,28 +274,33 @@ class GroupScreenState extends ScreenState {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
-        child: Container(
-            alignment: Alignment.center,
-            padding: EdgeInsets.all(40),
-            child: Column(
-              children: [
-                _buildPhotoFields(),
-                _buildTextFields(),
-                _buildGroupFields(),
-                Container(
-                  margin: EdgeInsets.only(left: 8),
-                  child: Visibility(
-                    maintainSize: false,
-                    maintainAnimation: false,
-                    maintainState: false,
-                    visible: _isProgressContinues,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
+        child: Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: 400),
+            child: Container(
+                alignment: Alignment.center,
+                padding: EdgeInsets.all(40),
+                child: Column(
+                  children: [
+                    _buildPhotoFields(),
+                    _buildTextFields(),
+                    _buildGroupFields(),
+                    Container(
+                      margin: EdgeInsets.only(left: 8),
+                      child: Visibility(
+                        maintainSize: false,
+                        maintainAnimation: false,
+                        maintainState: false,
+                        visible: _isProgressContinues,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              ],
-            )),
+                  ],
+                )),
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: "Update dialog",
@@ -275,17 +318,8 @@ class GroupScreenState extends ScreenState {
     if (_isProgressContinues) {
       return SizedBox.shrink();
     }
-    Widget avatarCircle = CircleAvatar(
-      backgroundImage:
-          _cubeDialog.photo != null && _cubeDialog.photo!.isNotEmpty
-              ? NetworkImage(_cubeDialog.photo!)
-              : null,
-      backgroundColor: greyColor2,
-      radius: 50,
-      child: getAvatarTextWidget(
-          _cubeDialog.photo != null && _cubeDialog.photo!.isNotEmpty,
-          _cubeDialog.name!.substring(0, 2).toUpperCase()),
-    );
+
+    Widget avatarCircle = getDialogAvatarWidget(_cubeDialog, 50);
 
     return new Stack(
       children: <Widget>[
@@ -340,11 +374,12 @@ class GroupScreenState extends ScreenState {
       return SizedBox.shrink();
     }
     return Container(
-      padding: EdgeInsets.all(20),
+      padding: EdgeInsets.only(bottom: 20),
       child: Column(
         children: <Widget>[
           Container(
             child: TextField(
+              autofocus: true,
               style: TextStyle(color: primaryColor, fontSize: 20.0),
               controller: _nameFilter,
               decoration: InputDecoration(labelText: 'Change group name'),
@@ -362,9 +397,7 @@ class GroupScreenState extends ScreenState {
     return Column(
       children: <Widget>[
         _addMemberBtn(),
-        _removeMemberBtn(),
         _getUsersList(),
-        _exitGroupBtn(),
       ],
     );
   }
@@ -377,78 +410,44 @@ class GroupScreenState extends ScreenState {
       decoration: BoxDecoration(
           border: Border(
               bottom: BorderSide(
-        color: greyColor, // Text colour here
-        width: 1.0, // Underline width
+        color: Colors.green, // Text colour here
+        width: 2.0, // Underline width
       ))),
-      child: InkWell(
-        splashColor: greyColor2,
-        borderRadius: BorderRadius.circular(45),
-        onTap: () => _addOpponent(),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
-            Icon(
+      child: Row(
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          Text(
+            'Members:',
+            style: TextStyle(
+              color: primaryColor,
+              fontSize: 18, // Text colour here
+            ),
+          ),
+          Expanded(flex: 1, child: Container()),
+          IconButton(
+            onPressed: () {
+              _addOpponent();
+            },
+            icon: Icon(
               Icons.person_add,
-              size: 35.0,
-              color: blueColor,
+              size: 26.0,
+              color: Colors.green,
             ),
-            Padding(
-              child: Text(
-                'Add member',
-                style: TextStyle(
-                  color: primaryColor,
-                  fontSize: 20, // Text colour here
-                ),
-              ),
-              padding: EdgeInsets.only(left: 16),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _removeMemberBtn() {
-    if (_usersToRemove.isEmpty) {
-      return SizedBox.shrink();
-    }
-    return Container(
-      padding: EdgeInsets.only(
-        bottom: 3, // space between underline and text
-      ),
-      decoration: BoxDecoration(
-          border: Border(
-              bottom: BorderSide(
-        color: greyColor, // Text colour here
-        width: 1.0, // Underline width
-      ))),
-      child: InkWell(
-        splashColor: greyColor2,
-        borderRadius: BorderRadius.circular(45),
-        onTap: () => _removeOpponent(),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
-            Padding(
-              padding: EdgeInsets.only(left: 4),
-              child: Icon(
-                Icons.person_outline,
-                size: 35.0,
-                color: blueColor,
+          ),
+          Visibility(
+            visible: _usersToRemove.isNotEmpty,
+            child: IconButton(
+              onPressed: () {
+                _removeOpponent();
+              },
+              icon: Icon(
+                Icons.person_remove,
+                size: 26.0,
+                color: Colors.red,
               ),
             ),
-            Padding(
-              child: Text(
-                'Remove member',
-                style: TextStyle(
-                  color: primaryColor,
-                  fontSize: 20, // Text colour here
-                ),
-              ),
-              padding: EdgeInsets.only(left: 12),
-            ),
-          ],
-        ),
+          )
+        ],
       ),
     );
   }
@@ -474,14 +473,7 @@ class GroupScreenState extends ScreenState {
     final user = _occupants.values.elementAt(index);
     Widget getUserAvatar() {
       if (user.avatar != null && user.avatar!.isNotEmpty) {
-        return CircleAvatar(
-          backgroundImage: NetworkImage(user.avatar!),
-          backgroundColor: greyColor2,
-          radius: 25.0,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(55),
-          ),
-        );
+        return getUserAvatarWidget(user, 25);
       } else {
         return Material(
           child: Icon(
@@ -543,45 +535,6 @@ class GroupScreenState extends ScreenState {
     );
   }
 
-  Widget _exitGroupBtn() {
-    return Container(
-      padding: EdgeInsets.only(
-        bottom: 3, // space between underline and text
-      ),
-      decoration: BoxDecoration(
-          border: Border(
-              bottom: BorderSide(
-        color: greyColor, // Text colour here
-        width: 1.0, // Underline width
-      ))),
-      child: InkWell(
-        splashColor: greyColor2,
-        borderRadius: BorderRadius.circular(45),
-        onTap: () => _exitDialog(),
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
-            Icon(
-              Icons.exit_to_app,
-              size: 35.0,
-              color: blueColor,
-            ),
-            Padding(
-              child: Text(
-                'Exit group member',
-                style: TextStyle(
-                  color: primaryColor,
-                  fontSize: 20, // Text colour here
-                ),
-              ),
-              padding: EdgeInsets.only(left: 16),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _processUpdateError(exception) {
     log("_processUpdateUserError error $exception");
     setState(() {
@@ -593,29 +546,20 @@ class GroupScreenState extends ScreenState {
 
   _addOpponent() async {
     print('_addOpponent');
-    _usersToAdd = await Navigator.push(
+    _usersToAdd = await Navigator.pushNamed(
       context,
-      MaterialPageRoute(
-        builder: (context) => AddOccupantScreen(_cubeUser),
-      ),
+      'search_users',
+      arguments: {
+        USER_ARG_NAME: _cubeUser,
+      },
     );
+
     if (_usersToAdd != null && _usersToAdd!.isNotEmpty) _updateDialog();
   }
 
   _removeOpponent() async {
     print('_removeOpponent');
     if (_usersToRemove.isNotEmpty) _updateDialog();
-  }
-
-  _exitDialog() {
-    print('_exitDialog');
-    deleteDialog(_cubeDialog.dialogId!).then((onValue) {
-      Fluttertoast.showToast(msg: 'Success');
-      Navigator.pushReplacementNamed(context, 'select_dialog',
-          arguments: {USER_ARG_NAME: _cubeUser});
-    }).catchError((error) {
-      _processUpdateError(error);
-    });
   }
 
   void _updateDialog() {

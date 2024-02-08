@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -11,21 +12,29 @@ import 'package:universal_io/io.dart';
 import 'firebase_options.dart';
 import 'src/chat_details_screen.dart';
 import 'src/chat_dialog_screen.dart';
+import 'src/chat_dialog_resizable_screen.dart';
 import 'src/login_screen.dart';
-import 'src/push_notifications_manager.dart';
+import 'src/managers/push_notifications_manager.dart';
 import 'src/select_dialog_screen.dart';
 import 'src/settings_screen.dart';
+import 'src/utils/auth_utils.dart';
 import 'src/utils/configs.dart' as config;
 import 'src/utils/consts.dart';
+import 'src/utils/platform_utils.dart' as platformUtils;
 import 'src/utils/pref_util.dart';
+import 'src/utils/route_utils.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  log('[main]');
 
-  if (!kIsWeb && !Platform.isLinux) {
+  if (kIsWeb || !(Platform.isLinux && Platform.isWindows)) {
+    log('[main] init Firebase');
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+
+    FirebaseMessaging.onBackgroundMessage(onBackgroundMessage);
   }
 
   runApp(App());
@@ -49,6 +58,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
         primarySwatch: Colors.green,
       ),
       home: LoginScreen(),
+      navigatorKey: Navigation.mainNavigation,
       onGenerateRoute: (settings) {
         String? name = settings.name;
         Map<String, dynamic>? args =
@@ -59,9 +69,21 @@ class _AppState extends State<App> with WidgetsBindingObserver {
         switch (name) {
           case 'chat_dialog':
             pageRout = MaterialPageRoute(
-                builder: (context) => ChatDialogScreen(
-                    args![USER_ARG_NAME], args[DIALOG_ARG_NAME]));
+                builder: (context) => platformUtils.isDesktop()
+                    ? ChatDialogResizableScreen(
+                        args![USER_ARG_NAME], args[DIALOG_ARG_NAME])
+                    : ChatDialogScreen(
+                        args![USER_ARG_NAME], args[DIALOG_ARG_NAME]));
             break;
+
+          case 'chat_dialog_resizable':
+            pageRout = MaterialPageRoute<bool>(
+              builder: (context) => ChatDialogResizableScreen(
+                  args![USER_ARG_NAME], args[DIALOG_ARG_NAME]),
+            );
+
+            break;
+
           case 'chat_details':
             pageRout = MaterialPageRoute(
                 builder: (context) => ChatDetailsScreen(
@@ -70,7 +92,10 @@ class _AppState extends State<App> with WidgetsBindingObserver {
 
           case 'select_dialog':
             pageRout = MaterialPageRoute<bool>(
-                builder: (context) => SelectDialogScreen(args![USER_ARG_NAME]));
+                builder: (context) => platformUtils.isDesktop()
+                    ? ChatDialogResizableScreen(
+                        args![USER_ARG_NAME], args[DIALOG_ARG_NAME])
+                    : SelectDialogScreen(args![USER_ARG_NAME], null, null));
 
             break;
 
@@ -105,9 +130,12 @@ class _AppState extends State<App> with WidgetsBindingObserver {
     init(config.APP_ID, config.AUTH_KEY, config.AUTH_SECRET,
         onSessionRestore: () async {
       SharedPrefs sharedPrefs = await SharedPrefs.instance.init();
-      CubeUser? user = sharedPrefs.getUser();
 
-      return createSession(user);
+      if (LoginType.phone == sharedPrefs.getLoginType()) {
+        return createPhoneAuthSession();
+      }
+
+      return createSession(sharedPrefs.getUser());
     });
 
     // setEndpoints("", ""); // set custom API and Char server domains
@@ -154,11 +182,19 @@ class _AppState extends State<App> with WidgetsBindingObserver {
       }
     } else if (AppLifecycleState.resumed == state) {
       // just for an example user was saved in the local storage
-      SharedPrefs.instance.init().then((sharedPrefs) {
+      SharedPrefs.instance.init().then((sharedPrefs) async {
         CubeUser? user = sharedPrefs.getUser();
 
         if (user != null) {
           if (!CubeChatConnection.instance.isAuthenticated()) {
+            if (LoginType.phone == sharedPrefs.getLoginType()) {
+              if(CubeSessionManager.instance.isActiveSessionValid()){
+                user.password = CubeSessionManager.instance.activeSession?.token;
+              } else {
+                var phoneAuthSession = await createPhoneAuthSession();
+                user.password = phoneAuthSession.token;
+              }
+            }
             CubeChatConnection.instance.login(user);
           } else {
             CubeChatConnection.instance.markActive();

@@ -3,8 +3,10 @@
 #
 
 list(APPEND FLUTTER_PLUGIN_LIST
+  desktop_webview_auth
   emoji_picker_flutter
   flutter_webrtc
+  record_linux
 )
 
 list(APPEND FLUTTER_FFI_PLUGIN_LIST

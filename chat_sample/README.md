@@ -4,15 +4,23 @@ This README introduces [ConnectyCube](https://connectycube.com) Chat code sample
 
 The project contains the following features implemented:
 
-- User authorization
+- User authorization:
+  - By login;
+  - By e-mail;
+  - By Phone number (on supported platforms - Android, iOS, Web);
 - Users search
 - Chat dialogs creation
 - 1-1 messaging
 - Group messaging
+- Media attachments:
+  - Images;
+  - Voice;
 - ‘Is typing’ statuses
 - Group chat: edit a name, photo; list of participants, add/remove participants; leave a group
 - Push notification: subscribe/unsubscribe, show local notification, navigate to the app click on a local notification
 - Messages' reactions
+
+[**Chat Sample Web App**](https://connectycube.github.io/connectycube-flutter-samples/chat_sample/build/web)
 
 ## Documentation
 
@@ -54,6 +62,8 @@ The app will automatically run on a selected iOS device or simulator.
 - Run command from the Terminal `flutter run -d windows`;
 ### Run on Web
 - Run command from the Terminal `flutter run -d chrome`;
+
+or follow the [link](https://connectycube.github.io/connectycube-flutter-samples/chat_sample/build/web) to take a look at the deployed version
 ### Run on Linux
 - Run command from the Terminal `flutter run -d linux`;
 

@@ -1,3 +1,4 @@
+import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart';
 import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
@@ -25,8 +26,6 @@ class _AppState extends State<App> {
       ),
       home: Builder(
         builder: (context) {
-          CallManager.instance.init(context);
-
           return LoginScreen();
         },
       ),
@@ -36,6 +35,8 @@ class _AppState extends State<App> {
   @override
   void initState() {
     super.initState();
+
+    ConnectycubeFlutterCallKit.instance.init();
 
     initConnectycube();
   }

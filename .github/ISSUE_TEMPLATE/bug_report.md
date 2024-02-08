@@ -9,8 +9,8 @@ assignees: ''
 
 **Specify the sample to which the issue belongs (use [x]):**
 [] Chat sample
-[] P2P Call sample
-[] Conference Call sample
+[] P2P Calls sample
+[] Conference Calls sample
 
 **Platform (use [x])**
 [] Android
@@ -18,6 +18,7 @@ assignees: ''
 [] macOS
 [] Windows
 [] Web
+[] Linux
 
 **Device info**
 Manufacture: 
