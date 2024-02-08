@@ -19,6 +19,8 @@ import 'update_dialog_flow.dart';
 import 'utils/api_utils.dart';
 import 'utils/consts.dart';
 import 'utils/platform_utils.dart' as platformUtils;
+import 'widgets/audio_recorder.dart';
+import 'widgets/audio_attachment.dart';
 import 'widgets/common.dart';
 import 'widgets/full_photo.dart';
 import 'widgets/loading.dart';
@@ -100,6 +102,8 @@ class ChatScreenState extends State<ChatScreen> {
 
   late FocusNode _editMessageFocusNode;
 
+  bool isAudioRecording = false;
+
   ChatScreenState(this._cubeUser, this._cubeDialog);
 
   @override
@@ -154,7 +158,7 @@ class ChatScreenState extends State<ChatScreen> {
 
   Future uploadImageFile(Future<CubeFile> uploadAction, imageData) async {
     uploadAction.then((cubeFile) {
-      onSendChatAttachment(cubeFile, imageData);
+      onSendImageAttachment(cubeFile, imageData);
     }).catchError((ex) {
       setState(() {
         isLoading = false;
@@ -224,7 +228,7 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void onSendChatAttachment(CubeFile cubeFile, imageData) async {
+  void onSendImageAttachment(CubeFile cubeFile, imageData) async {
     final attachment = CubeAttachment();
     attachment.id = cubeFile.uid;
     attachment.type = CubeAttachmentType.IMAGE_TYPE;
@@ -232,7 +236,20 @@ class ChatScreenState extends State<ChatScreen> {
     attachment.height = imageData.height;
     attachment.width = imageData.width;
     final message = createCubeMsg();
-    message.body = "Attachment";
+    message.body = '🖼Attachment';
+    message.attachments = [attachment];
+    onSendMessage(message);
+  }
+
+  void onSendAudioAttachment(CubeFile cubeFile, int duration) async {
+    final attachment = CubeAttachment();
+    attachment.id = cubeFile.uid;
+    attachment.type = CubeAttachmentType.AUDIO_TYPE;
+    attachment.url = cubeFile.getPublicUrl();
+    attachment.duration = duration;
+
+    final message = createCubeMsg();
+    message.body = '🎤 Attachment';
     message.attachments = [attachment];
     onSendMessage(message);
   }
@@ -306,6 +323,7 @@ class ChatScreenState extends State<ChatScreen> {
                 //Typing content
                 buildTyping(),
                 // Input content
+                buildAudioRecording(),
                 buildInput(),
               ],
             ),
@@ -437,59 +455,13 @@ class ChatScreenState extends State<ChatScreen> {
                 message.attachments?.isNotEmpty ?? false
                     // Image
                     ? Container(
+                        decoration: BoxDecoration(
+                            color: greyColor2,
+                            borderRadius: BorderRadius.circular(8.0)),
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => FullPhoto(
-                                              url: message
-                                                  .attachments!.first.url!)));
-                                },
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(8.0),
-                                      topRight: Radius.circular(8.0)),
-                                  child: CachedNetworkImage(
-                                    placeholder: (context, url) => Container(
-                                      child: CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                                themeColor),
-                                      ),
-                                      width: 200.0,
-                                      height: 200.0,
-                                      padding: EdgeInsets.all(70.0),
-                                      decoration: BoxDecoration(
-                                        color: greyColor2,
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(8.0),
-                                        ),
-                                      ),
-                                    ),
-                                    errorWidget: (context, url, error) =>
-                                        Material(
-                                      child: Image.asset(
-                                        'images/img_not_available.jpeg',
-                                        width: 200.0,
-                                        height: 200.0,
-                                        fit: BoxFit.cover,
-                                      ),
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(8.0),
-                                      ),
-                                      clipBehavior: Clip.hardEdge,
-                                    ),
-                                    imageUrl: message.attachments!.first.url!,
-                                    width: 200.0,
-                                    height: 200.0,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
+                              _buildAttachmentWidget(message),
                               if (message.reactions != null &&
                                   message.reactions!.total.isNotEmpty)
                                 getReactionsWidget(message),
@@ -504,14 +476,14 @@ class ChatScreenState extends State<ChatScreen> {
                         margin: EdgeInsets.only(
                             bottom: isLastMessageRight(index) ? 20.0 : 10.0,
                             right: 10.0),
+                        padding: EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
                       )
                     : message.body != null && message.body!.isNotEmpty
                         // Text
                         ? Flexible(
                             child: Container(
                               constraints: BoxConstraints(maxWidth: 480),
-                              padding:
-                                  EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+                              padding: EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
                               decoration: BoxDecoration(
                                   color: greyColor2,
                                   borderRadius: BorderRadius.circular(8.0)),
@@ -574,65 +546,20 @@ class ChatScreenState extends State<ChatScreen> {
                   getUserAvatarWidget(_occupants[message.senderId], 30),
                   message.attachments?.isNotEmpty ?? false
                       ? Container(
+                          decoration: BoxDecoration(
+                              color: primaryColor,
+                              borderRadius: BorderRadius.circular(8.0)),
                           child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => FullPhoto(
-                                                url: message
-                                                    .attachments!.first.url!)));
-                                  },
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(8.0),
-                                        topRight: Radius.circular(8.0)),
-                                    child: CachedNetworkImage(
-                                      placeholder: (context, url) => Container(
-                                        child: CircularProgressIndicator(
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  themeColor),
-                                        ),
-                                        width: 200.0,
-                                        height: 200.0,
-                                        padding: EdgeInsets.all(70.0),
-                                        decoration: BoxDecoration(
-                                          color: greyColor2,
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(8.0),
-                                          ),
-                                        ),
-                                      ),
-                                      errorWidget: (context, url, error) =>
-                                          Material(
-                                        child: Image.asset(
-                                          'images/img_not_available.jpeg',
-                                          width: 200.0,
-                                          height: 200.0,
-                                          fit: BoxFit.cover,
-                                        ),
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(8.0),
-                                        ),
-                                        clipBehavior: Clip.hardEdge,
-                                      ),
-                                      imageUrl: message.attachments!.first.url!,
-                                      width: 200.0,
-                                      height: 200.0,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
+                                _buildAttachmentWidget(message),
                                 if (message.reactions != null &&
                                     message.reactions!.total.isNotEmpty)
                                   getReactionsWidget(message),
                                 getDateWidget(),
                               ]),
                           margin: EdgeInsets.only(left: 10.0),
+                          padding: EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
                         )
                       : message.body != null && message.body!.isNotEmpty
                           ? Flexible(
@@ -640,7 +567,7 @@ class ChatScreenState extends State<ChatScreen> {
                                 constraints: BoxConstraints(
                                     minWidth: 0.0, maxWidth: 480),
                                 padding:
-                                    EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+                                    EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
                                 decoration: BoxDecoration(
                                     color: primaryColor,
                                     borderRadius: BorderRadius.circular(8.0)),
@@ -735,6 +662,20 @@ class ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  Widget buildAudioRecording() {
+    return Visibility(
+      visible: isAudioRecording,
+      child: AudioRecorder(
+        onAccept: sendAudioAttachment,
+        onClose: () {
+          setState(() {
+            isAudioRecording = false;
+          });
+        },
+      ),
+    );
+  }
+
   Widget buildInput() {
     return Container(
       child: Row(
@@ -778,7 +719,7 @@ class ChatScreenState extends State<ChatScreen> {
           // Button send message
           Material(
             child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 8.0),
+              margin: EdgeInsets.only(left: 4, right: 2.0),
               child: IconButton(
                 icon: Icon(Icons.send),
                 onPressed: () => onSendChatMessage(textEditingController.text),
@@ -786,6 +727,19 @@ class ChatScreenState extends State<ChatScreen> {
               ),
             ),
             color: Colors.white,
+          ),
+          // Button record audio
+          IconButton(
+            splashRadius: 12,
+            icon: Icon(Icons.mic_none_rounded),
+            onPressed: () {
+              if (!isAudioRecording) {
+                setState(() {
+                  isAudioRecording = true;
+                });
+              }
+            },
+            color: isAudioRecording ? Colors.grey : primaryColor,
           ),
         ],
       ),
@@ -1047,7 +1001,7 @@ class ChatScreenState extends State<ChatScreen> {
             childAspectRatio: 2,
             physics: NeverScrollableScrollPhysics(),
             shrinkWrap: true,
-            padding: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(vertical: 2),
             children: <Widget>[
               ...message.reactions!.total.keys.map((reaction) {
                 return GestureDetector(
@@ -1212,6 +1166,106 @@ class ChatScreenState extends State<ChatScreen> {
         }
       },
     );
+  }
+
+  Widget _buildAttachmentWidget(CubeMessage message) {
+    var attachmentType = message.attachments?.firstOrNull?.type ?? 'unknown';
+
+    switch (attachmentType) {
+      case CubeAttachmentType.IMAGE_TYPE:
+        return _buildImageAttachmentWidget(message);
+      case CubeAttachmentType.AUDIO_TYPE:
+        return _buildAudioAttachmentWidget(message);
+      case CubeAttachmentType.VIDEO_TYPE:
+      case CubeAttachmentType.LOCATION_TYPE:
+      default:
+        return SizedBox.shrink();
+    }
+  }
+
+  Widget _buildImageAttachmentWidget(CubeMessage message) {
+    return Container(
+      padding: EdgeInsets.only(bottom: 2.0),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) =>
+                      FullPhoto(url: message.attachments!.first.url!)));
+        },
+        child: ClipRRect(
+          borderRadius: BorderRadius.vertical(
+              top: Radius.circular(8.0), bottom: Radius.circular(2.0)),
+          // topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0)),
+          child: CachedNetworkImage(
+            placeholder: (context, url) => Container(
+              child: CircularProgressIndicator(
+                valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+              ),
+              width: 200.0,
+              height: 200.0,
+              padding: EdgeInsets.all(70.0),
+              decoration: BoxDecoration(
+                color: greyColor2,
+                borderRadius: BorderRadius.all(
+                  Radius.circular(8.0),
+                ),
+              ),
+            ),
+            errorWidget: (context, url, error) => Material(
+              child: Image.asset(
+                'images/img_not_available.jpeg',
+                width: 200.0,
+                height: 200.0,
+                fit: BoxFit.cover,
+              ),
+              borderRadius: BorderRadius.all(
+                Radius.circular(8.0),
+              ),
+              clipBehavior: Clip.hardEdge,
+            ),
+            imageUrl: message.attachments!.first.url!,
+            width: 200.0,
+            height: 200.0,
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAudioAttachmentWidget(CubeMessage message) {
+    var attachment = message.attachments?.firstOrNull;
+    if (attachment == null) return SizedBox.shrink();
+
+    return AudioAttachment(
+        key: Key(message.messageId!),
+        accentColor: Colors.green,
+        source: attachment.url ?? '',
+        duration: attachment.duration ?? 0);
+  }
+
+  sendAudioAttachment(
+      String audioFilePath, String mimeType, String fileName, int duration) {
+    log('[sendAudioAttachment] audioFilePath: $audioFilePath, mimeType: $mimeType, fileName: $fileName, duration: $duration');
+
+    setState(() {
+      isLoading = true;
+      isAudioRecording = false;
+    });
+
+    getUploadingFileFuture(audioFilePath, mimeType, fileName, isPublic: true)
+        .then((cubeFile) {
+      onSendAudioAttachment(cubeFile, duration);
+    }).catchError((onError) {
+      log('[sendAudioAttachment] onError: $onError');
+      setState(() {
+        isLoading = false;
+      });
+      Fluttertoast.showToast(
+          msg: 'An error occurred while sending voice message');
+    });
   }
 }
 

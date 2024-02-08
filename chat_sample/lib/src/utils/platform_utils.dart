@@ -5,6 +5,12 @@ import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:universal_io/io.dart';
 
+import 'package:connectycube_sdk/connectycube_sdk.dart';
+
+import 'platform_api_utils.dart'
+    if (dart.library.html) 'platform_api_utils_web.dart'
+    if (dart.library.io) 'platform_api_utils_io.dart';
+
 bool isDesktop() {
   return Platform.isLinux || Platform.isMacOS || Platform.isWindows;
 }
@@ -75,3 +81,9 @@ void updateBadgeCount(int? count) {
 }
 
 bool get isPhoneAuthSupported => kIsWeb || !isDesktop();
+
+Future<CubeFile> getFileLoadingFuture(
+    String path, String mimeType, String fileName,
+    {bool isPublic = true}) {
+  return getUploadingFilePlatformFuture(path, mimeType, fileName);
+}
