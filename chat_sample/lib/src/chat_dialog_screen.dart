@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
@@ -24,6 +25,7 @@ import 'widgets/audio_attachment.dart';
 import 'widgets/common.dart';
 import 'widgets/full_photo.dart';
 import 'widgets/loading.dart';
+import 'widgets/video_attachment.dart';
 
 class ChatDialogScreen extends StatelessWidget {
   final CubeUser _cubeUser;
@@ -132,6 +134,37 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   void openGallery() async {
+    if (platformUtils.isVideoAttachmentsSupported) {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return Dialog(
+                child: Container(
+                    margin: EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              pickImage();
+                            },
+                            child: Text('Send Image')),
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              pickVideo();
+                            },
+                            child: Text('Send Video'))
+                      ],
+                    )));
+          });
+    } else {
+      pickImage();
+    }
+  }
+
+  void pickImage() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.image,
     );
@@ -142,7 +175,7 @@ class ChatScreenState extends State<ChatScreen> {
       isLoading = true;
     });
 
-    var uploadImageFuture = getUploadingImageFuture(result);
+    var uploadImageFuture = getUploadingMediaFuture(result);
     var imageData;
 
     if (kIsWeb) {
@@ -154,6 +187,32 @@ class ChatScreenState extends State<ChatScreen> {
     var decodedImage = await decodeImageFromList(imageData);
 
     uploadImageFile(uploadImageFuture, decodedImage);
+  }
+
+  void pickVideo() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.video,
+    );
+
+    if (result == null) {
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+
+    getUploadingMediaFuture(result).then((cubeFile) {
+      onSendVideoAttachment(cubeFile);
+    }).catchError((onError) {
+      setState(() {
+        isLoading = false;
+      });
+      Fluttertoast.showToast(msg: 'An error occurred while sending video file');
+    });
   }
 
   Future uploadImageFile(Future<CubeFile> uploadAction, imageData) async {
@@ -252,6 +311,29 @@ class ChatScreenState extends State<ChatScreen> {
     message.body = '🎤 Attachment';
     message.attachments = [attachment];
     onSendMessage(message);
+  }
+
+  void onSendVideoAttachment(CubeFile cubeFile) async {
+    var videoController = CachedVideoPlayerPlusController.networkUrl(
+        Uri.parse(cubeFile.getPublicUrl()!),
+        httpHeaders: {
+          'Cache-Control': 'max-age=${30 * 24 * 60 * 60}',
+        });
+
+    videoController.initialize().then((_) {
+      final attachment = CubeAttachment();
+      attachment.id = cubeFile.uid;
+      attachment.type = CubeAttachmentType.VIDEO_TYPE;
+      attachment.url = cubeFile.getPublicUrl();
+      attachment.width = videoController.value.size.width.toInt();
+      attachment.height = videoController.value.size.height.toInt();
+      attachment.duration = videoController.value.duration.inMilliseconds;
+
+      final message = createCubeMsg();
+      message.body = '🎞 Attachment';
+      message.attachments = [attachment];
+      onSendMessage(message);
+    });
   }
 
   CubeMessage createCubeMsg() {
@@ -685,7 +767,7 @@ class ChatScreenState extends State<ChatScreen> {
             child: Container(
               margin: EdgeInsets.symmetric(horizontal: 1.0),
               child: IconButton(
-                icon: Icon(Icons.image),
+                icon: Icon(Icons.attach_file_rounded),
                 onPressed: () {
                   openGallery();
                 },
@@ -1177,6 +1259,7 @@ class ChatScreenState extends State<ChatScreen> {
       case CubeAttachmentType.AUDIO_TYPE:
         return _buildAudioAttachmentWidget(message);
       case CubeAttachmentType.VIDEO_TYPE:
+        return _buildVideoAttachmentWidget(message);
       case CubeAttachmentType.LOCATION_TYPE:
       default:
         return SizedBox.shrink();
@@ -1246,7 +1329,27 @@ class ChatScreenState extends State<ChatScreen> {
         duration: attachment.duration ?? 0);
   }
 
-  sendAudioAttachment(
+  Widget _buildVideoAttachmentWidget(CubeMessage message) {
+    var attachment = message.attachments?.firstOrNull;
+    if (attachment == null) return SizedBox.shrink();
+
+    return platformUtils.isVideoAttachmentsSupported
+        ? VideoAttachment(
+            key: Key(message.messageId!),
+            accentColor: Colors.green,
+            source: attachment.url ?? '',
+            videoSize: Size((attachment.width ?? 300).toDouble(),
+                (attachment.height ?? 200).toDouble()),
+          )
+        : VideoAttachmentStub(
+            source: attachment.url ?? '',
+            videoSize: Size((attachment.width ?? 300).toDouble(),
+                (attachment.height ?? 200).toDouble()),
+            accentColor: Colors.green,
+          );
+  }
+
+  void sendAudioAttachment(
       String audioFilePath, String mimeType, String fileName, int duration) {
     log('[sendAudioAttachment] audioFilePath: $audioFilePath, mimeType: $mimeType, fileName: $fileName, duration: $duration');
 

@@ -170,7 +170,7 @@ class _BodyLayoutState extends State<BodyLayout> {
 
     if (result == null) return;
 
-    var uploadImageFuture = getUploadingImageFuture(result);
+    var uploadImageFuture = getUploadingMediaFuture(result);
 
     uploadImageFuture.then((cubeFile) {
       _avatarUrl = cubeFile.getPublicUrl();

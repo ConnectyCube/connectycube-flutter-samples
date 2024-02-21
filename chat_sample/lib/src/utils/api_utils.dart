@@ -66,8 +66,8 @@ Future<Map<int, CubeUser>> getUsersByIds(Set<int> ids) async {
   return completer.future;
 }
 
-Future<CubeFile> getUploadingImageFuture(FilePickerResult result) {
-  return getUploadingImagePlatformFuture(result);
+Future<CubeFile> getUploadingMediaFuture(FilePickerResult result) {
+  return getUploadingMediaPlatformFuture(result);
 }
 
 Future<CubeFile> getUploadingFileFuture(

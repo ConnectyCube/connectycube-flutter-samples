@@ -138,7 +138,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
       return createSession(sharedPrefs.getUser());
     });
 
-    // setEndpoints("", ""); // set custom API and Char server domains
+    setEndpoints(config.API_ENDPOINT, config.CHAT_ENDPOINT); // set custom API and Char server domains
 
     connectivityStateSubscription =
         Connectivity().onConnectivityChanged.listen((connectivityType) {
