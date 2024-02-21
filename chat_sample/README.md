@@ -15,6 +15,7 @@ The project contains the following features implemented:
 - Media attachments:
   - Images;
   - Voice;
+  - Videos;
 - ‘Is typing’ statuses
 - Group chat: edit a name, photo; list of participants, add/remove participants; leave a group
 - Push notification: subscribe/unsubscribe, show local notification, navigate to the app click on a local notification
