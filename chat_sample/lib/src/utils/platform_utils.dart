@@ -82,6 +82,8 @@ void updateBadgeCount(int? count) {
 
 bool get isPhoneAuthSupported => kIsWeb || !isDesktop();
 
+bool get isVideoAttachmentsSupported => kIsWeb || !(Platform.isLinux || Platform.isWindows);
+
 Future<CubeFile> getFileLoadingFuture(
     String path, String mimeType, String fileName,
     {bool isPublic = true}) {

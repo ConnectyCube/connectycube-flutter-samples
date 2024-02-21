@@ -154,9 +154,9 @@ PODS:
   - record_darwin (1.0.0):
     - Flutter
     - FlutterMacOS
-  - SDWebImage (5.18.10):
-    - SDWebImage/Core (= 5.18.10)
-  - SDWebImage/Core (5.18.10)
+  - SDWebImage (5.18.11):
+    - SDWebImage/Core (= 5.18.11)
+  - SDWebImage/Core (5.18.11)
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
@@ -165,6 +165,11 @@ PODS:
     - FMDB (>= 2.7.5)
   - SwiftyGif (5.4.4)
   - Toast (4.1.0)
+  - url_launcher_ios (0.0.1):
+    - Flutter
+  - video_player_avfoundation (0.0.1):
+    - Flutter
+    - FlutterMacOS
   - WebRTC-SDK (114.5735.08)
 
 DEPENDENCIES:
@@ -189,6 +194,8 @@ DEPENDENCIES:
   - record_darwin (from `.symlinks/plugins/record_darwin/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
+  - url_launcher_ios (from `.symlinks/plugins/url_launcher_ios/ios`)
+  - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/darwin`)
 
 SPEC REPOS:
   trunk:
@@ -258,6 +265,10 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/shared_preferences_foundation/darwin"
   sqflite:
     :path: ".symlinks/plugins/sqflite/ios"
+  url_launcher_ios:
+    :path: ".symlinks/plugins/url_launcher_ios/ios"
+  video_player_avfoundation:
+    :path: ".symlinks/plugins/video_player_avfoundation/darwin"
 
 SPEC CHECKSUMS:
   audio_session: 4f3e461722055d21515cf3261b64c973c062f345
@@ -297,11 +308,13 @@ SPEC CHECKSUMS:
   ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
   RecaptchaInterop: 7d1a4a01a6b2cb1610a47ef3f85f0c411434cb21
   record_darwin: 1f6619f2abac4d1ca91d3eeab038c980d76f1517
-  SDWebImage: fc8f2d48bbfd72ef39d70e981bd24a3f3be53fec
+  SDWebImage: a3ba0b8faac7228c3c8eadd1a55c9c9fe5e16457
   shared_preferences_foundation: e2dae3258e06f44cc55f49d42024fd8dd03c590c
   sqflite: 31f7eba61e3074736dff8807a9b41581e4f7f15a
   SwiftyGif: 93a1cc87bf3a51916001cf8f3d63835fb64c819f
   Toast: ec33c32b8688982cecc6348adeae667c1b9938da
+  url_launcher_ios: bbd758c6e7f9fd7b5b1d4cde34d2b95fcce5e812
+  video_player_avfoundation: e9e6f9cae7d7a6d9b43519b0aab382bca60fcfd1
   WebRTC-SDK: c24d2a6c9f571f2ed42297cb8ffba9557093142b
 
 PODFILE CHECKSUM: 3a1ce06cf205003c899194d51f2311854d0c93af
