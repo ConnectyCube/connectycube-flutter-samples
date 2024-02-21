@@ -1,7 +1,7 @@
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'package:file_picker/file_picker.dart';
 
-Future<CubeFile> getUploadingImagePlatformFuture(FilePickerResult result) {
+Future<CubeFile> getUploadingMediaPlatformFuture(FilePickerResult result) {
   throw UnsupportedError('No implementation provided for current platform');
 }
 

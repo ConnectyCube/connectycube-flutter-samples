@@ -357,7 +357,7 @@ class GroupScreenState extends ScreenState {
 
     if (result == null) return;
 
-    var uploadImageFuture = getUploadingImageFuture(result);
+    var uploadImageFuture = getUploadingMediaFuture(result);
 
     uploadImageFuture.then((cubeFile) {
       _photoUrl = cubeFile.getPublicUrl();

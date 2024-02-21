@@ -138,7 +138,7 @@ class NewChatScreenState extends State<NewChatScreen> {
 
     if (result == null) return;
 
-    var uploadImageFuture = getUploadingImageFuture(result);
+    var uploadImageFuture = getUploadingMediaFuture(result);
 
     uploadImageFuture.then((cubeFile) {
       var url = cubeFile.getPublicUrl();
