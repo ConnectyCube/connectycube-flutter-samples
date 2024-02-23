@@ -7,11 +7,13 @@ final greyColor2 = Color(0xffE8E8E8);
 final greyColor3 = Color(0xffeaeaea);
 final blueColor = Color(0xff0080ff);
 
-final String SORT_ASC = "asc";
-final String SORT_DESC = "desc";
+final String SORT_ASC = 'asc';
+final String SORT_DESC = 'desc';
 
-final String USER_ARG_NAME = "user";
-final String DIALOG_ARG_NAME = "dialog";
-final String SELECTED_USERS_ARG_NAME = "selected_users";
+final String USER_ARG_NAME = 'user';
+final String DIALOG_ARG_NAME = 'dialog';
+final String SELECTED_USERS_ARG_NAME = 'selected_users';
+
+final String PARAM_HASH = 'hash';
 
 enum LoginType { login, email, phone, facebook }
