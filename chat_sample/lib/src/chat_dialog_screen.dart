@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cached_video_player_plus/cached_video_player_plus.dart';
@@ -9,6 +10,8 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart' as hashDecoder;
+import 'package:blurhash/blurhash.dart' as hashEncoder;
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:universal_io/io.dart';
@@ -19,6 +22,7 @@ import 'managers/chat_manager.dart';
 import 'update_dialog_flow.dart';
 import 'utils/api_utils.dart';
 import 'utils/consts.dart';
+import 'utils/ui_utils.dart';
 import 'utils/platform_utils.dart' as platformUtils;
 import 'widgets/audio_recorder.dart';
 import 'widgets/audio_attachment.dart';
@@ -185,8 +189,11 @@ class ChatScreenState extends State<ChatScreen> {
     }
 
     var decodedImage = await decodeImageFromList(imageData);
+    var imageHash = platformUtils.isImageBlurHashGenerationSupported
+        ? await hashEncoder.BlurHash.encode(imageData, 4, 3)
+        : null;
 
-    uploadImageFile(uploadImageFuture, decodedImage);
+    uploadImageFile(uploadImageFuture, decodedImage, imageHash);
   }
 
   void pickVideo() async {
@@ -215,9 +222,10 @@ class ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  Future uploadImageFile(Future<CubeFile> uploadAction, imageData) async {
+  Future uploadImageFile(
+      Future<CubeFile> uploadAction, imageData, String? imageHash) async {
     uploadAction.then((cubeFile) {
-      onSendImageAttachment(cubeFile, imageData);
+      onSendImageAttachment(cubeFile, imageData, imageHash);
     }).catchError((ex) {
       setState(() {
         isLoading = false;
@@ -287,13 +295,15 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void onSendImageAttachment(CubeFile cubeFile, imageData) async {
+  void onSendImageAttachment(
+      CubeFile cubeFile, imageData, String? imageHash) async {
     final attachment = CubeAttachment();
     attachment.id = cubeFile.uid;
     attachment.type = CubeAttachmentType.IMAGE_TYPE;
     attachment.url = cubeFile.getPublicUrl();
     attachment.height = imageData.height;
     attachment.width = imageData.width;
+    attachment.data = jsonEncode({PARAM_HASH: imageHash});
     final message = createCubeMsg();
     message.body = '🖼Attachment';
     message.attachments = [attachment];
@@ -1267,50 +1277,68 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildImageAttachmentWidget(CubeMessage message) {
+    var firstAttachment = message.attachments!.firstOrNull;
+
+    if (firstAttachment == null) return SizedBox.shrink();
+
+    var imageHash;
+
+    var attachmentData = firstAttachment.data;
+    if (attachmentData != null) {
+      try {
+        var jsonData = jsonDecode(Uri.decodeComponent(attachmentData));
+        imageHash = jsonData[PARAM_HASH];
+      } on FormatException catch (e) {
+        log('[_buildImageAttachmentWidget] FormatException: ${e.message}');
+        imageHash = Uri.decodeComponent(attachmentData);
+      } catch (e) {
+        log('[_buildImageAttachmentWidget] e: $e');
+      }
+    }
+
+    log('[_buildImageAttachmentWidget] imageHash: $imageHash');
+
+    var widgetSize = getWidgetSize(
+        (firstAttachment.width ?? 1) / (firstAttachment.height ?? 1), 240, 240);
     return Container(
+      width: widgetSize.width,
+      height: widgetSize.height,
       padding: EdgeInsets.only(bottom: 2.0),
       child: GestureDetector(
         onTap: () {
           Navigator.push(
-              context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      FullPhoto(url: message.attachments!.first.url!)));
+            context,
+            MaterialPageRoute(
+              builder: (context) => FullPhoto(
+                url: firstAttachment.url!,
+              ),
+            ),
+          );
         },
         child: ClipRRect(
           borderRadius: BorderRadius.vertical(
               top: Radius.circular(8.0), bottom: Radius.circular(2.0)),
-          // topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0)),
           child: CachedNetworkImage(
-            placeholder: (context, url) => Container(
-              child: CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(themeColor),
-              ),
-              width: 200.0,
-              height: 200.0,
-              padding: EdgeInsets.all(70.0),
-              decoration: BoxDecoration(
-                color: greyColor2,
-                borderRadius: BorderRadius.all(
-                  Radius.circular(8.0),
-                ),
-              ),
+            placeholder: (context, url) => Center(
+              child: imageHash == null || imageHash.isEmpty
+                  ? Container(
+                      width: 28,
+                      height: 28,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                      ),
+                    )
+                  : hashDecoder.BlurHash(
+                      hash: imageHash,
+                      imageFit: BoxFit.cover,
+                    ),
             ),
-            errorWidget: (context, url, error) => Material(
-              child: Image.asset(
-                'images/img_not_available.jpeg',
-                width: 200.0,
-                height: 200.0,
-                fit: BoxFit.cover,
-              ),
-              borderRadius: BorderRadius.all(
-                Radius.circular(8.0),
-              ),
-              clipBehavior: Clip.hardEdge,
+            errorWidget: (context, url, error) => Image.asset(
+              'assets/images/img_not_available.jpg',
+              fit: BoxFit.cover,
             ),
-            imageUrl: message.attachments!.first.url!,
-            width: 200.0,
-            height: 200.0,
+            imageUrl: firstAttachment.url!,
             fit: BoxFit.cover,
           ),
         ),

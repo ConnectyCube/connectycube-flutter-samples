@@ -84,6 +84,8 @@ bool get isPhoneAuthSupported => kIsWeb || !isDesktop();
 
 bool get isVideoAttachmentsSupported => kIsWeb || !(Platform.isLinux || Platform.isWindows);
 
+bool get isImageBlurHashGenerationSupported => kIsWeb || !isDesktop();
+
 Future<CubeFile> getFileLoadingFuture(
     String path, String mimeType, String fileName,
     {bool isPublic = true}) {

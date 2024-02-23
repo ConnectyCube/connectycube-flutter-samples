@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import 'package:url_launcher/url_launcher.dart';
 
+import '../utils/ui_utils.dart';
 import 'full_video.dart';
 
 class VideoAttachment extends StatefulWidget {
@@ -57,26 +58,11 @@ class VideoAttachmentState extends State<VideoAttachment> {
   Widget build(BuildContext context) {
     var aspectRatio = widget.videoSize.width / widget.videoSize.height;
 
-    bool isVerticalVideo() {
-      return aspectRatio < 1;
-    }
-
-    var widgetWidth;
-    var widgetHeight;
-
-    controller.addListener(() {});
-
-    if (isVerticalVideo()) {
-      widgetHeight = 300;
-      widgetWidth = widgetHeight * aspectRatio;
-    } else {
-      widgetWidth = 300;
-      widgetHeight = widgetWidth ~/ aspectRatio;
-    }
+    var widgetSize = getWidgetSize(aspectRatio, 240, 240);
 
     return Container(
-      width: widgetWidth.toDouble(),
-      height: widgetHeight.toDouble(),
+      width: widgetSize.width,
+      height: widgetSize.height,
       child: GestureDetector(
         onTap: () {
           Navigator.push(
