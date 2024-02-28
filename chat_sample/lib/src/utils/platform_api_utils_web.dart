@@ -6,7 +6,7 @@ import 'package:file_picker/file_picker.dart';
 
 export 'platform_api_utils.dart';
 
-Future<CubeFile> getUploadingMediaPlatformFuture(FilePickerResult result) {
+Future<CubeFile> getUploadingMediaPlatformFuture(FilePickerResult result) async {
   return uploadRawFile(result.files.single.bytes!, result.files.single.name,
       isPublic: true, onProgress: (progress) {
     log('[getUploadingImagePlatformFuture] uploadImageFile progress= $progress');
