@@ -10,8 +10,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_blurhash/flutter_blurhash.dart' as hashDecoder;
-import 'package:blurhash/blurhash.dart' as hashEncoder;
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:universal_io/io.dart';
@@ -180,8 +179,8 @@ class ChatScreenState extends State<ChatScreen> {
     });
 
     var uploadImageFuture = getUploadingMediaFuture(result);
-    var imageData;
 
+    var imageData;
     if (kIsWeb) {
       imageData = result.files.single.bytes!;
     } else {
@@ -189,11 +188,10 @@ class ChatScreenState extends State<ChatScreen> {
     }
 
     var decodedImage = await decodeImageFromList(imageData);
-    var imageHash = platformUtils.isImageBlurHashGenerationSupported
-        ? await hashEncoder.BlurHash.encode(imageData, 4, 3)
-        : null;
 
-    uploadImageFile(uploadImageFuture, decodedImage, imageHash);
+    platformUtils.getImageHashAsync(imageData).then((imageHash) async {
+      uploadImageFile(uploadImageFuture, decodedImage, imageHash);
+    });
   }
 
   void pickVideo() async {
@@ -303,9 +301,9 @@ class ChatScreenState extends State<ChatScreen> {
     attachment.url = cubeFile.getPublicUrl();
     attachment.height = imageData.height;
     attachment.width = imageData.width;
-    attachment.data = jsonEncode({PARAM_HASH: imageHash});
     final message = createCubeMsg();
     message.body = '🖼Attachment';
+    message.properties[attachment.id!] = imageHash ?? '';
     message.attachments = [attachment];
     onSendMessage(message);
   }
@@ -433,8 +431,8 @@ class ChatScreenState extends State<ChatScreen> {
     markAsReadIfNeed() {
       var isOpponentMsgRead =
           message.readIds != null && message.readIds!.contains(_cubeUser.id);
-      print(
-          "markAsReadIfNeed message= $message, isOpponentMsgRead= $isOpponentMsgRead");
+      // print(
+      //     "markAsReadIfNeed message= $message, isOpponentMsgRead= $isOpponentMsgRead");
       if (message.senderId != _cubeUser.id && !isOpponentMsgRead) {
         if (message.readIds == null) {
           message.readIds = [_cubeUser.id!];
@@ -455,9 +453,9 @@ class ChatScreenState extends State<ChatScreen> {
     }
 
     Widget getReadDeliveredWidget() {
-      log("[getReadDeliveredWidget]");
+      // log("[getReadDeliveredWidget]");
       bool messageIsRead() {
-        log("[getReadDeliveredWidget] messageIsRead");
+        // log("[getReadDeliveredWidget] messageIsRead");
         if (_cubeDialog.type == CubeDialogType.PRIVATE)
           return message.readIds != null &&
               (message.recipientId == null ||
@@ -468,7 +466,7 @@ class ChatScreenState extends State<ChatScreen> {
       }
 
       bool messageIsDelivered() {
-        log("[getReadDeliveredWidget] messageIsDelivered");
+        // log("[getReadDeliveredWidget] messageIsDelivered");
         if (_cubeDialog.type == CubeDialogType.PRIVATE)
           return message.deliveredIds != null &&
               (message.recipientId == null ||
@@ -479,13 +477,13 @@ class ChatScreenState extends State<ChatScreen> {
       }
 
       if (messageIsRead()) {
-        log("[getReadDeliveredWidget] if messageIsRead");
+        // log("[getReadDeliveredWidget] if messageIsRead");
         return getMessageStateWidget(MessageState.read);
       } else if (messageIsDelivered()) {
-        log("[getReadDeliveredWidget] if messageIsDelivered");
+        // log("[getReadDeliveredWidget] if messageIsDelivered");
         return getMessageStateWidget(MessageState.delivered);
       } else {
-        log("[getReadDeliveredWidget] sent");
+        // log("[getReadDeliveredWidget] sent");
         return getMessageStateWidget(MessageState.sent);
       }
     }
@@ -1296,6 +1294,10 @@ class ChatScreenState extends State<ChatScreen> {
       }
     }
 
+    if (imageHash == null || imageHash.isEmpty) {
+      imageHash = message.properties[firstAttachment.id!];
+    }
+
     log('[_buildImageAttachmentWidget] imageHash: $imageHash');
 
     var widgetSize = getWidgetSize(
@@ -1329,7 +1331,7 @@ class ChatScreenState extends State<ChatScreen> {
                         valueColor: AlwaysStoppedAnimation<Color>(themeColor),
                       ),
                     )
-                  : hashDecoder.BlurHash(
+                  : BlurHash(
                       hash: imageHash,
                       imageFit: BoxFit.cover,
                     ),

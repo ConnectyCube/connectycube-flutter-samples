@@ -10,36 +10,36 @@ PODS:
     - FlutterMacOS
   - emoji_picker_flutter (0.0.1):
     - FlutterMacOS
-  - Firebase/Auth (10.18.0):
+  - Firebase/Auth (10.20.0):
     - Firebase/CoreOnly
-    - FirebaseAuth (~> 10.18.0)
-  - Firebase/CoreOnly (10.18.0):
-    - FirebaseCore (= 10.18.0)
-  - Firebase/Messaging (10.18.0):
+    - FirebaseAuth (~> 10.20.0)
+  - Firebase/CoreOnly (10.20.0):
+    - FirebaseCore (= 10.20.0)
+  - Firebase/Messaging (10.20.0):
     - Firebase/CoreOnly
-    - FirebaseMessaging (~> 10.18.0)
-  - firebase_auth (4.15.0):
-    - Firebase/Auth (~> 10.18.0)
-    - Firebase/CoreOnly (~> 10.18.0)
+    - FirebaseMessaging (~> 10.20.0)
+  - firebase_auth (4.17.5):
+    - Firebase/Auth (~> 10.20.0)
+    - Firebase/CoreOnly (~> 10.20.0)
     - firebase_core
     - FlutterMacOS
-  - firebase_core (2.24.2):
-    - Firebase/CoreOnly (~> 10.18.0)
+  - firebase_core (2.25.4):
+    - Firebase/CoreOnly (~> 10.20.0)
     - FlutterMacOS
-  - firebase_messaging (14.7.6):
-    - Firebase/CoreOnly (~> 10.18.0)
-    - Firebase/Messaging (~> 10.18.0)
+  - firebase_messaging (14.7.16):
+    - Firebase/CoreOnly (~> 10.20.0)
+    - Firebase/Messaging (~> 10.20.0)
     - firebase_core
     - FlutterMacOS
   - FirebaseAppCheckInterop (10.21.0)
-  - FirebaseAuth (10.18.0):
+  - FirebaseAuth (10.20.0):
     - FirebaseAppCheckInterop (~> 10.17)
     - FirebaseCore (~> 10.0)
     - GoogleUtilities/AppDelegateSwizzler (~> 7.8)
     - GoogleUtilities/Environment (~> 7.8)
     - GTMSessionFetcher/Core (< 4.0, >= 2.1)
     - RecaptchaInterop (~> 100.0)
-  - FirebaseCore (10.18.0):
+  - FirebaseCore (10.20.0):
     - FirebaseCoreInternal (~> 10.0)
     - GoogleUtilities/Environment (~> 7.12)
     - GoogleUtilities/Logger (~> 7.12)
@@ -50,10 +50,10 @@ PODS:
     - GoogleUtilities/Environment (~> 7.8)
     - GoogleUtilities/UserDefaults (~> 7.8)
     - PromisesObjC (~> 2.1)
-  - FirebaseMessaging (10.18.0):
+  - FirebaseMessaging (10.20.0):
     - FirebaseCore (~> 10.0)
     - FirebaseInstallations (~> 10.0)
-    - GoogleDataTransport (~> 9.2)
+    - GoogleDataTransport (~> 9.3)
     - GoogleUtilities/AppDelegateSwizzler (~> 7.8)
     - GoogleUtilities/Environment (~> 7.8)
     - GoogleUtilities/Reachability (~> 7.8)
@@ -61,15 +61,17 @@ PODS:
     - nanopb (< 2.30910.0, >= 2.30908.0)
   - flutter_app_badger (1.3.0):
     - FlutterMacOS
+  - flutter_image_compress_macos (1.0.0):
+    - FlutterMacOS
   - flutter_local_notifications (0.0.1):
     - FlutterMacOS
   - flutter_webrtc (0.9.36):
     - FlutterMacOS
     - WebRTC-SDK (= 114.5735.08)
   - FlutterMacOS (1.0.0)
-  - FMDB (2.7.5):
-    - FMDB/standard (= 2.7.5)
-  - FMDB/standard (2.7.5)
+  - FMDB (2.7.9):
+    - FMDB/standard (= 2.7.9)
+  - FMDB/standard (2.7.9)
   - GoogleDataTransport (9.3.0):
     - GoogleUtilities/Environment (~> 7.7)
     - nanopb (< 2.30910.0, >= 2.30908.0)
@@ -104,7 +106,7 @@ PODS:
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - PromisesObjC (2.3.1)
+  - PromisesObjC (2.4.0)
   - ReachabilitySwift (5.0.0)
   - record_darwin (1.0.0):
     - Flutter
@@ -132,6 +134,7 @@ DEPENDENCIES:
   - firebase_core (from `Flutter/ephemeral/.symlinks/plugins/firebase_core/macos`)
   - firebase_messaging (from `Flutter/ephemeral/.symlinks/plugins/firebase_messaging/macos`)
   - flutter_app_badger (from `Flutter/ephemeral/.symlinks/plugins/flutter_app_badger/macos`)
+  - flutter_image_compress_macos (from `Flutter/ephemeral/.symlinks/plugins/flutter_image_compress_macos/macos`)
   - flutter_local_notifications (from `Flutter/ephemeral/.symlinks/plugins/flutter_local_notifications/macos`)
   - flutter_webrtc (from `Flutter/ephemeral/.symlinks/plugins/flutter_webrtc/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
@@ -181,6 +184,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/firebase_messaging/macos
   flutter_app_badger:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_app_badger/macos
+  flutter_image_compress_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/flutter_image_compress_macos/macos
   flutter_local_notifications:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_local_notifications/macos
   flutter_webrtc:
@@ -210,21 +215,22 @@ SPEC CHECKSUMS:
   desktop_webview_auth: 9bba53a29c9bc6a4ff621fd0ebfbb18856c4dada
   device_info_plus: 5401765fde0b8d062a2f8eb65510fb17e77cf07f
   emoji_picker_flutter: 533634326b1c5de9a181ba14b9758e6dfe967a20
-  Firebase: 414ad272f8d02dfbf12662a9d43f4bba9bec2a06
-  firebase_auth: a403926db1dd7734c02f354e03b5d8b70b7dcc7d
-  firebase_core: a74ee8b3ab5f91ae6b73f4913eaca996c24458b6
-  firebase_messaging: 5076e2561f280ded068e6125cd93e0e7f4311835
+  Firebase: 10c8cb12fb7ad2ae0c09ffc86cd9c1ab392a0031
+  firebase_auth: fd1d51ad2b50cde2d9cd4499e26774f3dd27df39
+  firebase_core: 2e1a33fd13fb581f0dc809c18be25cdc1a2e10db
+  firebase_messaging: 0ea7ba8abbaa3228b36b1e64b5ad5268996b0d1a
   FirebaseAppCheckInterop: 69fc7d8f6a1cbfa973efb8d1723651de30d12525
-  FirebaseAuth: 12314b438fa76048540c8fb86d6cfc9e08595176
-  FirebaseCore: 2322423314d92f946219c8791674d2f3345b598f
+  FirebaseAuth: 9c5c400d2c3055d8ae3a0284944c86fa95d48dac
+  FirebaseCore: 28045c1560a2600d284b9c45a904fe322dc890b6
   FirebaseCoreInternal: 43c1788eaeee9d1b97caaa751af567ce11010d00
   FirebaseInstallations: 390ea1d10a4d02b20c965cbfd527ee9b3b412acb
-  FirebaseMessaging: 9bc34a98d2e0237e1b121915120d4d48ddcf301e
+  FirebaseMessaging: 06c414a21b122396a26847c523d5c370f8325df5
   flutter_app_badger: 55a64b179f8438e89d574320c77b306e327a1730
+  flutter_image_compress_macos: c26c3c13ea0f28ae6dea4e139b3292e7729f99f1
   flutter_local_notifications: 3805ca215b2fb7f397d78b66db91f6a747af52e4
   flutter_webrtc: cf7dc44d26cbb5c5f1ae5f583dab545871f287f9
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
-  FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
+  FMDB: aa44149f6fb634b1ac54f64f47064bb0d0c5a032
   GoogleDataTransport: 57c22343ab29bc686febbf7cbb13bad167c2d8fe
   GoogleUtilities: 0759d1a57ebb953965c2dfe0ba4c82e95ccc2e34
   GTMSessionFetcher: 8a1b34ad97ebe6f909fb8b9b77fba99943007556
@@ -232,7 +238,7 @@ SPEC CHECKSUMS:
   nanopb: d4d75c12cd1316f4a64e3c6963f879ecd4b5e0d5
   package_info_plus: 02d7a575e80f194102bef286361c6c326e4c29ce
   path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
-  PromisesObjC: c50d2056b5253dadbd6c2bea79b0674bd5a52fa4
+  PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47
   ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
   record_darwin: 1f6619f2abac4d1ca91d3eeab038c980d76f1517
   shared_preferences_foundation: e2dae3258e06f44cc55f49d42024fd8dd03c590c

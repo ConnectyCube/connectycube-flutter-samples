@@ -55,6 +55,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
+        useMaterial3: false,
         primarySwatch: Colors.green,
       ),
       home: LoginScreen(),
