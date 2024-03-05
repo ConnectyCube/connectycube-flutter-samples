@@ -301,9 +301,9 @@ class ChatScreenState extends State<ChatScreen> {
     attachment.url = cubeFile.getPublicUrl();
     attachment.height = imageData.height;
     attachment.width = imageData.width;
+    attachment.data = imageHash ?? '';
     final message = createCubeMsg();
     message.body = '🖼Attachment';
-    message.properties[attachment.id!] = imageHash ?? '';
     message.attachments = [attachment];
     onSendMessage(message);
   }
@@ -1154,9 +1154,17 @@ class ChatScreenState extends State<ChatScreen> {
                           ? TextStyle(
                               color: Colors.green, fontFamily: 'NotoColorEmoji')
                           : null,
-                      iconColorSelected: Colors.green,
-                      indicatorColor: Colors.green,
-                      bgColor: Colors.white,
+                      categoryViewConfig: CategoryViewConfig(
+                        backgroundColor: Colors.white,
+                        indicatorColor: Colors.green,
+                        iconColorSelected: Colors.green,
+                      ),
+                      emojiViewConfig: EmojiViewConfig(
+                        backgroundColor: Colors.white,
+                        columns: 8,
+                      ),
+                      bottomActionBarConfig:
+                          BottomActionBarConfig(enabled: false),
                     ),
                     onEmojiSelected: (category, emoji) {
                       Navigator.pop(context, emoji);
@@ -1287,18 +1295,11 @@ class ChatScreenState extends State<ChatScreen> {
         var jsonData = jsonDecode(Uri.decodeComponent(attachmentData));
         imageHash = jsonData[PARAM_HASH];
       } on FormatException catch (e) {
-        log('[_buildImageAttachmentWidget] FormatException: ${e.message}');
         imageHash = Uri.decodeComponent(attachmentData);
       } catch (e) {
-        log('[_buildImageAttachmentWidget] e: $e');
+        imageHash = attachmentData;
       }
     }
-
-    if (imageHash == null || imageHash.isEmpty) {
-      imageHash = message.properties[firstAttachment.id!];
-    }
-
-    log('[_buildImageAttachmentWidget] imageHash: $imageHash');
 
     var widgetSize = getWidgetSize(
         (firstAttachment.width ?? 1) / (firstAttachment.height ?? 1), 240, 240);
@@ -1322,7 +1323,7 @@ class ChatScreenState extends State<ChatScreen> {
               top: Radius.circular(8.0), bottom: Radius.circular(2.0)),
           child: CachedNetworkImage(
             placeholder: (context, url) => Center(
-              child: imageHash == null || imageHash.isEmpty
+              child: !validateBlurhash(imageHash ?? '')
                   ? Container(
                       width: 28,
                       height: 28,

@@ -1,7 +1,7 @@
 name: chat_sample
 description: Chat Sample
 
-version: 0.9.0
+version: 0.9.1
 
 environment:
   sdk: '>=2.12.0 <3.0.0'
@@ -10,16 +10,16 @@ dependencies:
   flutter:
     sdk: flutter
 
-  connectycube_sdk: ^2.11.2
-  #  connectycube_sdk:
-  #    path: ../../flutter-sdk
+  connectycube_sdk: ^2.11.3
+#  connectycube_sdk:
+#      path: ../../flutter-sdk
   shared_preferences: ^2.2.2
   file_picker: ^6.1.1
   fluttertoast: ^8.2.4
   cached_network_image: ^3.3.1
   photo_view: ^0.14.0
   device_info_plus: ^9.1.2
-  emoji_picker_flutter: ^1.6.4
+  emoji_picker_flutter: ^2.1.0
   firebase_core: ^2.25.4
   firebase_messaging: ^14.7.16
   flutter_local_notifications: ^16.3.2
@@ -51,6 +51,9 @@ dev_dependencies:
 
 dependency_overrides:
   intl: ^0.18.1
+  uuid: ^3.0.7
+  http: ^1.1.0
+  web_socket_channel: ^2.4.0
 
 
 flutter:
