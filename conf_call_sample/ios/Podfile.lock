@@ -3,7 +3,7 @@ PODS:
     - Flutter
   - assets_audio_player_web (0.0.1):
     - Flutter
-  - connectycube_flutter_call_kit (2.5.0):
+  - connectycube_flutter_call_kit (2.7.0):
     - Flutter
   - device_info_plus (0.0.1):
     - Flutter
@@ -64,9 +64,9 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   assets_audio_player: edee322b9cb625571b830b35872ead1a295fd917
   assets_audio_player_web: 19826380c44375761aa0b9053665c1e3fbc3b86b
-  connectycube_flutter_call_kit: cc0bbb77ddefdc484ae7608eeda046a9bb16f0c7
-  device_info_plus: 7545d84d8d1b896cb16a4ff98c19f07ec4b298ea
-  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
+  connectycube_flutter_call_kit: 4a95d2e8b248ed78fe9d805c8550b2120b19b2b7
+  device_info_plus: c6fb39579d0f423935b0c9ce7ee2f44b71b9fce6
+  Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
   flutter_webrtc: 55df3aaa802114dad390191a46c2c8d535751268
   package_info_plus: 115f4ad11e0698c8c1c5d8a689390df880f47e85
   path_provider_foundation: eaf5b3e458fc0e5fbb9940fb09980e853fe058b8
@@ -76,4 +76,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 4e8f8b2be68aeea4c0d5beb6ff1e79fface1d048
 
-COCOAPODS: 1.11.3
+COCOAPODS: 1.15.2
