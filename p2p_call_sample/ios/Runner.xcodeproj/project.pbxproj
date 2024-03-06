@@ -213,14 +213,14 @@
 			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;
 			buildPhases = (
 				10D3B4B6B08C2EC508498864 /* [CP] Check Pods Manifest.lock */,
+				9705A1C41CF9048500538489 /* Embed Frameworks */,
+				1AE56D3ABC8CEF5A17179F06 /* [CP] Embed Pods Frameworks */,
+				A5C81D1027722EE3009691D9 /* Embed App Extensions */,
 				9740EEB61CF901F6004384FC /* Run Script */,
 				97C146EA1CF9000F007C117D /* Sources */,
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
-				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
-				1AE56D3ABC8CEF5A17179F06 /* [CP] Embed Pods Frameworks */,
-				A5C81D1027722EE3009691D9 /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
@@ -512,7 +512,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1.3.2;
-				DEVELOPMENT_TEAM = 92G479T7LY;
+				DEVELOPMENT_TEAM = 6B6Z335W9Z;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -529,7 +529,7 @@
 					"$(PROJECT_DIR)/Flutter",
 				);
 				MARKETING_VERSION = 1.3.2;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app.val";
 				PRODUCT_NAME = P2PCallsSample;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -658,7 +658,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1.3.2;
-				DEVELOPMENT_TEAM = 92G479T7LY;
+				DEVELOPMENT_TEAM = 6B6Z335W9Z;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -675,7 +675,7 @@
 					"$(PROJECT_DIR)/Flutter",
 				);
 				MARKETING_VERSION = 1.3.2;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app.val";
 				PRODUCT_NAME = P2PCallsSample;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -697,7 +697,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1.3.2;
-				DEVELOPMENT_TEAM = 92G479T7LY;
+				DEVELOPMENT_TEAM = 6B6Z335W9Z;
 				ENABLE_BITCODE = NO;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -714,7 +714,7 @@
 					"$(PROJECT_DIR)/Flutter",
 				);
 				MARKETING_VERSION = 1.3.2;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app.val";
 				PRODUCT_NAME = P2PCallsSample;
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
@@ -737,7 +737,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1.3.2;
-				DEVELOPMENT_TEAM = 92G479T7LY;
+				DEVELOPMENT_TEAM = 6B6Z335W9Z;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Broadcast Extension/Info.plist";
@@ -752,7 +752,7 @@
 				MARKETING_VERSION = 1.3.2;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app.Broadcast-Extension";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app.val.Broadcast-Extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
@@ -778,7 +778,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1.3.2;
-				DEVELOPMENT_TEAM = 92G479T7LY;
+				DEVELOPMENT_TEAM = 6B6Z335W9Z;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Broadcast Extension/Info.plist";
@@ -792,7 +792,7 @@
 				);
 				MARKETING_VERSION = 1.3.2;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app.Broadcast-Extension";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app.val.Broadcast-Extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
@@ -816,7 +816,7 @@
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1.3.2;
-				DEVELOPMENT_TEAM = 92G479T7LY;
+				DEVELOPMENT_TEAM = 6B6Z335W9Z;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Broadcast Extension/Info.plist";
@@ -830,7 +830,7 @@
 				);
 				MARKETING_VERSION = 1.3.2;
 				MTL_FAST_MATH = YES;
-				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app.Broadcast-Extension";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.connectycube.flutter.p2p-call-sample.app.val.Broadcast-Extension";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SKIP_INSTALL = YES;
