@@ -53,9 +53,9 @@ class CallManager {
 
   void _initCustomMediaConfigs() {
     RTCMediaConfig mediaConfig = RTCMediaConfig.instance;
-    mediaConfig.minHeight = 340;
-    mediaConfig.minWidth = 480;
-    mediaConfig.minFrameRate = 25;
+    mediaConfig.minHeight = 720;
+    mediaConfig.minWidth = 1280;
+    mediaConfig.minFrameRate = 30;
 
     RTCConfig.instance.statsReportsInterval = 200;
   }
@@ -129,7 +129,9 @@ class CallManager {
       BuildContext context, int callType, Set<int> opponents) async {
     if (opponents.isEmpty) return;
 
-    Helper.setAppleAudioIOMode(AppleAudioIOMode.localAndRemote);
+    if (Platform.isIOS) {
+      Helper.setAppleAudioIOMode(AppleAudioIOMode.localAndRemote);
+    }
 
     P2PSession callSession =
         _callClient!.createCallSession(callType, opponents);
@@ -178,7 +180,9 @@ class CallManager {
         );
       }
 
-      Helper.setAppleAudioIOMode(AppleAudioIOMode.localAndRemote);
+      if (Platform.isIOS) {
+        Helper.setAppleAudioIOMode(AppleAudioIOMode.localAndRemote);
+      }
     }
   }
 

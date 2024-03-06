@@ -1043,6 +1043,17 @@ class _ConversationCallScreenState extends State<ConversationCallScreen>
     log("onDisconnectedFromUser userId= $userId");
   }
 
+
+  @override
+  void onConnectingToUser(P2PSession session, int userId) {
+    log("onConnectingToUser userId= $userId");
+  }
+
+  @override
+  void onConnectionFailedWithUser(P2PSession session, int userId) {
+    log("onConnectionFailedWithUser userId= $userId");
+  }
+
   void _initAlreadyReceivedStreams() {
     if (CallManager.instance.remoteStreams.isNotEmpty) {
       minorRenderers.addEntries([

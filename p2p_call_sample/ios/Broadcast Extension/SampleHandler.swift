@@ -9,7 +9,7 @@ import ReplayKit
 
 private enum Constants {
     // the App Group ID value that the app and the broadcast extension targets are setup with. It differs for each app.
-    static let appGroupIdentifier = "group.com.connectycube.flutter"
+    static let appGroupIdentifier = "group.com.connectycube.flutter.val"
 }
 
 class SampleHandler: RPBroadcastSampleHandler {
