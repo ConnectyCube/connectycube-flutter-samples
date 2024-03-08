@@ -526,6 +526,7 @@ class ChatScreenState extends State<ChatScreen> {
     if (message.senderId == _cubeUser.id) {
       // Right (own message)
       return Column(
+        key: Key('${message.messageId}'),
         children: <Widget>[
           isHeaderView() ? getHeaderDateWidget() : SizedBox.shrink(),
           GestureDetector(
@@ -626,6 +627,7 @@ class ChatScreenState extends State<ChatScreen> {
       // Left (opponent message)
       markAsReadIfNeed();
       return Container(
+        key: Key('${message.messageId}'),
         child: Column(
           children: <Widget>[
             isHeaderView() ? getHeaderDateWidget() : SizedBox.shrink(),
@@ -1322,6 +1324,10 @@ class ChatScreenState extends State<ChatScreen> {
           borderRadius: BorderRadius.vertical(
               top: Radius.circular(8.0), bottom: Radius.circular(2.0)),
           child: CachedNetworkImage(
+            fadeInDuration: Duration(milliseconds: 300),
+            fadeOutDuration: Duration(milliseconds: 100),
+            maxHeightDiskCache: 300,
+            maxWidthDiskCache: 300,
             placeholder: (context, url) => Center(
               child: !validateBlurhash(imageHash ?? '')
                   ? Container(

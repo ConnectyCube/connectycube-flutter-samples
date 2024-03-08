@@ -25,8 +25,11 @@ import 'src/utils/pref_util.dart';
 import 'src/utils/route_utils.dart';
 
 Future<void> main() async {
+  CustomImageCache();
   WidgetsFlutterBinding.ensureInitialized();
   log('[main]');
+
+
 
   if (kIsWeb || !(Platform.isLinux && Platform.isWindows)) {
     log('[main] init Firebase');
@@ -203,5 +206,15 @@ class _AppState extends State<App> with WidgetsBindingObserver {
         }
       });
     }
+  }
+}
+
+class CustomImageCache extends WidgetsFlutterBinding {
+  @override
+  ImageCache createImageCache() {
+    ImageCache imageCache = super.createImageCache();
+    // Set your image cache size
+    imageCache.maximumSizeBytes = 1024 * 1024 * 1024; // 100 MB
+    return imageCache;
   }
 }
