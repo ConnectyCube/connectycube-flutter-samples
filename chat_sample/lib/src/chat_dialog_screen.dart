@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_video_player_plus/cached_video_player_plus.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
@@ -8,6 +10,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:universal_io/io.dart';
@@ -18,10 +21,14 @@ import 'managers/chat_manager.dart';
 import 'update_dialog_flow.dart';
 import 'utils/api_utils.dart';
 import 'utils/consts.dart';
+import 'utils/ui_utils.dart';
 import 'utils/platform_utils.dart' as platformUtils;
+import 'widgets/audio_recorder.dart';
+import 'widgets/audio_attachment.dart';
 import 'widgets/common.dart';
 import 'widgets/full_photo.dart';
 import 'widgets/loading.dart';
+import 'widgets/video_attachment.dart';
 
 class ChatDialogScreen extends StatelessWidget {
   final CubeUser _cubeUser;
@@ -100,6 +107,8 @@ class ChatScreenState extends State<ChatScreen> {
 
   late FocusNode _editMessageFocusNode;
 
+  bool isAudioRecording = false;
+
   ChatScreenState(this._cubeUser, this._cubeDialog);
 
   @override
@@ -128,6 +137,37 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   void openGallery() async {
+    if (platformUtils.isVideoAttachmentsSupported) {
+      showDialog(
+          context: context,
+          builder: (context) {
+            return Dialog(
+                child: Container(
+                    margin: EdgeInsets.all(16.0),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              pickImage();
+                            },
+                            child: Text('Send Image')),
+                        TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              pickVideo();
+                            },
+                            child: Text('Send Video'))
+                      ],
+                    )));
+          });
+    } else {
+      pickImage();
+    }
+  }
+
+  void pickImage() async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
       type: FileType.image,
     );
@@ -138,9 +178,9 @@ class ChatScreenState extends State<ChatScreen> {
       isLoading = true;
     });
 
-    var uploadImageFuture = getUploadingImageFuture(result);
-    var imageData;
+    var uploadImageFuture = getUploadingMediaFuture(result);
 
+    var imageData;
     if (kIsWeb) {
       imageData = result.files.single.bytes!;
     } else {
@@ -149,12 +189,41 @@ class ChatScreenState extends State<ChatScreen> {
 
     var decodedImage = await decodeImageFromList(imageData);
 
-    uploadImageFile(uploadImageFuture, decodedImage);
+    platformUtils.getImageHashAsync(imageData).then((imageHash) async {
+      uploadImageFile(uploadImageFuture, decodedImage, imageHash);
+    });
   }
 
-  Future uploadImageFile(Future<CubeFile> uploadAction, imageData) async {
+  void pickVideo() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.video,
+    );
+
+    if (result == null) {
+      setState(() {
+        isLoading = false;
+      });
+      return;
+    }
+
+    getUploadingMediaFuture(result).then((cubeFile) {
+      onSendVideoAttachment(cubeFile);
+    }).catchError((onError) {
+      setState(() {
+        isLoading = false;
+      });
+      Fluttertoast.showToast(msg: 'An error occurred while sending video file');
+    });
+  }
+
+  Future uploadImageFile(
+      Future<CubeFile> uploadAction, imageData, String? imageHash) async {
     uploadAction.then((cubeFile) {
-      onSendChatAttachment(cubeFile, imageData);
+      onSendImageAttachment(cubeFile, imageData, imageHash);
     }).catchError((ex) {
       setState(() {
         isLoading = false;
@@ -224,17 +293,55 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void onSendChatAttachment(CubeFile cubeFile, imageData) async {
+  void onSendImageAttachment(
+      CubeFile cubeFile, imageData, String? imageHash) async {
     final attachment = CubeAttachment();
     attachment.id = cubeFile.uid;
     attachment.type = CubeAttachmentType.IMAGE_TYPE;
     attachment.url = cubeFile.getPublicUrl();
     attachment.height = imageData.height;
     attachment.width = imageData.width;
+    attachment.data = imageHash ?? '';
     final message = createCubeMsg();
-    message.body = "Attachment";
+    message.body = '🖼Attachment';
     message.attachments = [attachment];
     onSendMessage(message);
+  }
+
+  void onSendAudioAttachment(CubeFile cubeFile, int duration) async {
+    final attachment = CubeAttachment();
+    attachment.id = cubeFile.uid;
+    attachment.type = CubeAttachmentType.AUDIO_TYPE;
+    attachment.url = cubeFile.getPublicUrl();
+    attachment.duration = duration;
+
+    final message = createCubeMsg();
+    message.body = '🎤 Attachment';
+    message.attachments = [attachment];
+    onSendMessage(message);
+  }
+
+  void onSendVideoAttachment(CubeFile cubeFile) async {
+    var videoController = CachedVideoPlayerPlusController.networkUrl(
+        Uri.parse(cubeFile.getPublicUrl()!),
+        httpHeaders: {
+          'Cache-Control': 'max-age=${30 * 24 * 60 * 60}',
+        });
+
+    videoController.initialize().then((_) {
+      final attachment = CubeAttachment();
+      attachment.id = cubeFile.uid;
+      attachment.type = CubeAttachmentType.VIDEO_TYPE;
+      attachment.url = cubeFile.getPublicUrl();
+      attachment.width = videoController.value.size.width.toInt();
+      attachment.height = videoController.value.size.height.toInt();
+      attachment.duration = videoController.value.duration.inMilliseconds;
+
+      final message = createCubeMsg();
+      message.body = '🎞 Attachment';
+      message.attachments = [attachment];
+      onSendMessage(message);
+    });
   }
 
   CubeMessage createCubeMsg() {
@@ -306,6 +413,7 @@ class ChatScreenState extends State<ChatScreen> {
                 //Typing content
                 buildTyping(),
                 // Input content
+                buildAudioRecording(),
                 buildInput(),
               ],
             ),
@@ -323,8 +431,8 @@ class ChatScreenState extends State<ChatScreen> {
     markAsReadIfNeed() {
       var isOpponentMsgRead =
           message.readIds != null && message.readIds!.contains(_cubeUser.id);
-      print(
-          "markAsReadIfNeed message= $message, isOpponentMsgRead= $isOpponentMsgRead");
+      // print(
+      //     "markAsReadIfNeed message= $message, isOpponentMsgRead= $isOpponentMsgRead");
       if (message.senderId != _cubeUser.id && !isOpponentMsgRead) {
         if (message.readIds == null) {
           message.readIds = [_cubeUser.id!];
@@ -345,9 +453,9 @@ class ChatScreenState extends State<ChatScreen> {
     }
 
     Widget getReadDeliveredWidget() {
-      log("[getReadDeliveredWidget]");
+      // log("[getReadDeliveredWidget]");
       bool messageIsRead() {
-        log("[getReadDeliveredWidget] messageIsRead");
+        // log("[getReadDeliveredWidget] messageIsRead");
         if (_cubeDialog.type == CubeDialogType.PRIVATE)
           return message.readIds != null &&
               (message.recipientId == null ||
@@ -358,7 +466,7 @@ class ChatScreenState extends State<ChatScreen> {
       }
 
       bool messageIsDelivered() {
-        log("[getReadDeliveredWidget] messageIsDelivered");
+        // log("[getReadDeliveredWidget] messageIsDelivered");
         if (_cubeDialog.type == CubeDialogType.PRIVATE)
           return message.deliveredIds != null &&
               (message.recipientId == null ||
@@ -369,13 +477,13 @@ class ChatScreenState extends State<ChatScreen> {
       }
 
       if (messageIsRead()) {
-        log("[getReadDeliveredWidget] if messageIsRead");
+        // log("[getReadDeliveredWidget] if messageIsRead");
         return getMessageStateWidget(MessageState.read);
       } else if (messageIsDelivered()) {
-        log("[getReadDeliveredWidget] if messageIsDelivered");
+        // log("[getReadDeliveredWidget] if messageIsDelivered");
         return getMessageStateWidget(MessageState.delivered);
       } else {
-        log("[getReadDeliveredWidget] sent");
+        // log("[getReadDeliveredWidget] sent");
         return getMessageStateWidget(MessageState.sent);
       }
     }
@@ -418,6 +526,7 @@ class ChatScreenState extends State<ChatScreen> {
     if (message.senderId == _cubeUser.id) {
       // Right (own message)
       return Column(
+        key: Key('${message.messageId}'),
         children: <Widget>[
           isHeaderView() ? getHeaderDateWidget() : SizedBox.shrink(),
           GestureDetector(
@@ -437,59 +546,13 @@ class ChatScreenState extends State<ChatScreen> {
                 message.attachments?.isNotEmpty ?? false
                     // Image
                     ? Container(
+                        decoration: BoxDecoration(
+                            color: greyColor2,
+                            borderRadius: BorderRadius.circular(8.0)),
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              GestureDetector(
-                                onTap: () {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) => FullPhoto(
-                                              url: message
-                                                  .attachments!.first.url!)));
-                                },
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(8.0),
-                                      topRight: Radius.circular(8.0)),
-                                  child: CachedNetworkImage(
-                                    placeholder: (context, url) => Container(
-                                      child: CircularProgressIndicator(
-                                        valueColor:
-                                            AlwaysStoppedAnimation<Color>(
-                                                themeColor),
-                                      ),
-                                      width: 200.0,
-                                      height: 200.0,
-                                      padding: EdgeInsets.all(70.0),
-                                      decoration: BoxDecoration(
-                                        color: greyColor2,
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(8.0),
-                                        ),
-                                      ),
-                                    ),
-                                    errorWidget: (context, url, error) =>
-                                        Material(
-                                      child: Image.asset(
-                                        'images/img_not_available.jpeg',
-                                        width: 200.0,
-                                        height: 200.0,
-                                        fit: BoxFit.cover,
-                                      ),
-                                      borderRadius: BorderRadius.all(
-                                        Radius.circular(8.0),
-                                      ),
-                                      clipBehavior: Clip.hardEdge,
-                                    ),
-                                    imageUrl: message.attachments!.first.url!,
-                                    width: 200.0,
-                                    height: 200.0,
-                                    fit: BoxFit.cover,
-                                  ),
-                                ),
-                              ),
+                              _buildAttachmentWidget(message),
                               if (message.reactions != null &&
                                   message.reactions!.total.isNotEmpty)
                                 getReactionsWidget(message),
@@ -504,14 +567,14 @@ class ChatScreenState extends State<ChatScreen> {
                         margin: EdgeInsets.only(
                             bottom: isLastMessageRight(index) ? 20.0 : 10.0,
                             right: 10.0),
+                        padding: EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
                       )
                     : message.body != null && message.body!.isNotEmpty
                         // Text
                         ? Flexible(
                             child: Container(
                               constraints: BoxConstraints(maxWidth: 480),
-                              padding:
-                                  EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+                              padding: EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
                               decoration: BoxDecoration(
                                   color: greyColor2,
                                   borderRadius: BorderRadius.circular(8.0)),
@@ -564,6 +627,7 @@ class ChatScreenState extends State<ChatScreen> {
       // Left (opponent message)
       markAsReadIfNeed();
       return Container(
+        key: Key('${message.messageId}'),
         child: Column(
           children: <Widget>[
             isHeaderView() ? getHeaderDateWidget() : SizedBox.shrink(),
@@ -574,65 +638,20 @@ class ChatScreenState extends State<ChatScreen> {
                   getUserAvatarWidget(_occupants[message.senderId], 30),
                   message.attachments?.isNotEmpty ?? false
                       ? Container(
+                          decoration: BoxDecoration(
+                              color: primaryColor,
+                              borderRadius: BorderRadius.circular(8.0)),
                           child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                            builder: (context) => FullPhoto(
-                                                url: message
-                                                    .attachments!.first.url!)));
-                                  },
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.only(
-                                        topLeft: Radius.circular(8.0),
-                                        topRight: Radius.circular(8.0)),
-                                    child: CachedNetworkImage(
-                                      placeholder: (context, url) => Container(
-                                        child: CircularProgressIndicator(
-                                          valueColor:
-                                              AlwaysStoppedAnimation<Color>(
-                                                  themeColor),
-                                        ),
-                                        width: 200.0,
-                                        height: 200.0,
-                                        padding: EdgeInsets.all(70.0),
-                                        decoration: BoxDecoration(
-                                          color: greyColor2,
-                                          borderRadius: BorderRadius.all(
-                                            Radius.circular(8.0),
-                                          ),
-                                        ),
-                                      ),
-                                      errorWidget: (context, url, error) =>
-                                          Material(
-                                        child: Image.asset(
-                                          'images/img_not_available.jpeg',
-                                          width: 200.0,
-                                          height: 200.0,
-                                          fit: BoxFit.cover,
-                                        ),
-                                        borderRadius: BorderRadius.all(
-                                          Radius.circular(8.0),
-                                        ),
-                                        clipBehavior: Clip.hardEdge,
-                                      ),
-                                      imageUrl: message.attachments!.first.url!,
-                                      width: 200.0,
-                                      height: 200.0,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
+                                _buildAttachmentWidget(message),
                                 if (message.reactions != null &&
                                     message.reactions!.total.isNotEmpty)
                                   getReactionsWidget(message),
                                 getDateWidget(),
                               ]),
                           margin: EdgeInsets.only(left: 10.0),
+                          padding: EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
                         )
                       : message.body != null && message.body!.isNotEmpty
                           ? Flexible(
@@ -640,7 +659,7 @@ class ChatScreenState extends State<ChatScreen> {
                                 constraints: BoxConstraints(
                                     minWidth: 0.0, maxWidth: 480),
                                 padding:
-                                    EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+                                    EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
                                 decoration: BoxDecoration(
                                     color: primaryColor,
                                     borderRadius: BorderRadius.circular(8.0)),
@@ -735,6 +754,20 @@ class ChatScreenState extends State<ChatScreen> {
     );
   }
 
+  Widget buildAudioRecording() {
+    return Visibility(
+      visible: isAudioRecording,
+      child: AudioRecorder(
+        onAccept: sendAudioAttachment,
+        onClose: () {
+          setState(() {
+            isAudioRecording = false;
+          });
+        },
+      ),
+    );
+  }
+
   Widget buildInput() {
     return Container(
       child: Row(
@@ -744,7 +777,7 @@ class ChatScreenState extends State<ChatScreen> {
             child: Container(
               margin: EdgeInsets.symmetric(horizontal: 1.0),
               child: IconButton(
-                icon: Icon(Icons.image),
+                icon: Icon(Icons.attach_file_rounded),
                 onPressed: () {
                   openGallery();
                 },
@@ -778,7 +811,7 @@ class ChatScreenState extends State<ChatScreen> {
           // Button send message
           Material(
             child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 8.0),
+              margin: EdgeInsets.only(left: 4, right: 2.0),
               child: IconButton(
                 icon: Icon(Icons.send),
                 onPressed: () => onSendChatMessage(textEditingController.text),
@@ -786,6 +819,19 @@ class ChatScreenState extends State<ChatScreen> {
               ),
             ),
             color: Colors.white,
+          ),
+          // Button record audio
+          IconButton(
+            splashRadius: 12,
+            icon: Icon(Icons.mic_none_rounded),
+            onPressed: () {
+              if (!isAudioRecording) {
+                setState(() {
+                  isAudioRecording = true;
+                });
+              }
+            },
+            color: isAudioRecording ? Colors.grey : primaryColor,
           ),
         ],
       ),
@@ -1047,7 +1093,7 @@ class ChatScreenState extends State<ChatScreen> {
             childAspectRatio: 2,
             physics: NeverScrollableScrollPhysics(),
             shrinkWrap: true,
-            padding: const EdgeInsets.symmetric(vertical: 4),
+            padding: const EdgeInsets.symmetric(vertical: 2),
             children: <Widget>[
               ...message.reactions!.total.keys.map((reaction) {
                 return GestureDetector(
@@ -1110,9 +1156,17 @@ class ChatScreenState extends State<ChatScreen> {
                           ? TextStyle(
                               color: Colors.green, fontFamily: 'NotoColorEmoji')
                           : null,
-                      iconColorSelected: Colors.green,
-                      indicatorColor: Colors.green,
-                      bgColor: Colors.white,
+                      categoryViewConfig: CategoryViewConfig(
+                        backgroundColor: Colors.white,
+                        indicatorColor: Colors.green,
+                        iconColorSelected: Colors.green,
+                      ),
+                      emojiViewConfig: EmojiViewConfig(
+                        backgroundColor: Colors.white,
+                        columns: 8,
+                      ),
+                      bottomActionBarConfig:
+                          BottomActionBarConfig(enabled: false),
                     ),
                     onEmojiSelected: (category, emoji) {
                       Navigator.pop(context, emoji);
@@ -1212,6 +1266,146 @@ class ChatScreenState extends State<ChatScreen> {
         }
       },
     );
+  }
+
+  Widget _buildAttachmentWidget(CubeMessage message) {
+    var attachmentType = message.attachments?.firstOrNull?.type ?? 'unknown';
+
+    switch (attachmentType) {
+      case CubeAttachmentType.IMAGE_TYPE:
+        return _buildImageAttachmentWidget(message);
+      case CubeAttachmentType.AUDIO_TYPE:
+        return _buildAudioAttachmentWidget(message);
+      case CubeAttachmentType.VIDEO_TYPE:
+        return _buildVideoAttachmentWidget(message);
+      case CubeAttachmentType.LOCATION_TYPE:
+      default:
+        return SizedBox.shrink();
+    }
+  }
+
+  Widget _buildImageAttachmentWidget(CubeMessage message) {
+    var firstAttachment = message.attachments!.firstOrNull;
+
+    if (firstAttachment == null) return SizedBox.shrink();
+
+    var imageHash;
+
+    var attachmentData = firstAttachment.data;
+    if (attachmentData != null) {
+      try {
+        var jsonData = jsonDecode(Uri.decodeComponent(attachmentData));
+        imageHash = jsonData[PARAM_HASH];
+      } on FormatException catch (e) {
+        imageHash = Uri.decodeComponent(attachmentData);
+      } catch (e) {
+        imageHash = attachmentData;
+      }
+    }
+
+    var widgetSize = getWidgetSize(
+        (firstAttachment.width ?? 1) / (firstAttachment.height ?? 1), 240, 240);
+    return Container(
+      width: widgetSize.width,
+      height: widgetSize.height,
+      padding: EdgeInsets.only(bottom: 2.0),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FullPhoto(
+                url: firstAttachment.url!,
+              ),
+            ),
+          );
+        },
+        child: ClipRRect(
+          borderRadius: BorderRadius.vertical(
+              top: Radius.circular(8.0), bottom: Radius.circular(2.0)),
+          child: CachedNetworkImage(
+            fadeInDuration: Duration(milliseconds: 300),
+            fadeOutDuration: Duration(milliseconds: 100),
+            maxHeightDiskCache: 300,
+            maxWidthDiskCache: 300,
+            placeholder: (context, url) => Center(
+              child: !validateBlurhash(imageHash ?? '')
+                  ? Container(
+                      width: 28,
+                      height: 28,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(themeColor),
+                      ),
+                    )
+                  : BlurHash(
+                      hash: imageHash,
+                      imageFit: BoxFit.cover,
+                    ),
+            ),
+            errorWidget: (context, url, error) => Image.asset(
+              'assets/images/img_not_available.jpg',
+              fit: BoxFit.cover,
+            ),
+            imageUrl: firstAttachment.url!,
+            fit: BoxFit.cover,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAudioAttachmentWidget(CubeMessage message) {
+    var attachment = message.attachments?.firstOrNull;
+    if (attachment == null) return SizedBox.shrink();
+
+    return AudioAttachment(
+        key: Key(message.messageId!),
+        accentColor: Colors.green,
+        source: attachment.url ?? '',
+        duration: attachment.duration ?? 0);
+  }
+
+  Widget _buildVideoAttachmentWidget(CubeMessage message) {
+    var attachment = message.attachments?.firstOrNull;
+    if (attachment == null) return SizedBox.shrink();
+
+    return platformUtils.isVideoAttachmentsSupported
+        ? VideoAttachment(
+            key: Key(message.messageId!),
+            accentColor: Colors.green,
+            source: attachment.url ?? '',
+            videoSize: Size((attachment.width ?? 300).toDouble(),
+                (attachment.height ?? 200).toDouble()),
+          )
+        : VideoAttachmentStub(
+            source: attachment.url ?? '',
+            videoSize: Size((attachment.width ?? 300).toDouble(),
+                (attachment.height ?? 200).toDouble()),
+            accentColor: Colors.green,
+          );
+  }
+
+  void sendAudioAttachment(
+      String audioFilePath, String mimeType, String fileName, int duration) {
+    log('[sendAudioAttachment] audioFilePath: $audioFilePath, mimeType: $mimeType, fileName: $fileName, duration: $duration');
+
+    setState(() {
+      isLoading = true;
+      isAudioRecording = false;
+    });
+
+    getUploadingFileFuture(audioFilePath, mimeType, fileName, isPublic: true)
+        .then((cubeFile) {
+      onSendAudioAttachment(cubeFile, duration);
+    }).catchError((onError) {
+      log('[sendAudioAttachment] onError: $onError');
+      setState(() {
+        isLoading = false;
+      });
+      Fluttertoast.showToast(
+          msg: 'An error occurred while sending voice message');
+    });
   }
 }
 

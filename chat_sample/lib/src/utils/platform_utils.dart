@@ -1,9 +1,18 @@
+import 'package:blurhash_dart/blurhash_dart.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:image/image.dart' as img;
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:universal_io/io.dart';
+
+import 'package:connectycube_sdk/connectycube_sdk.dart';
+
+import 'platform_api_utils.dart'
+    if (dart.library.html) 'platform_api_utils_web.dart'
+    if (dart.library.io) 'platform_api_utils_io.dart';
 
 bool isDesktop() {
   return Platform.isLinux || Platform.isMacOS || Platform.isWindows;
@@ -75,3 +84,37 @@ void updateBadgeCount(int? count) {
 }
 
 bool get isPhoneAuthSupported => kIsWeb || !isDesktop();
+
+bool get isVideoAttachmentsSupported =>
+    kIsWeb || !(Platform.isLinux || Platform.isWindows);
+
+bool get isImageCompressionSupported =>
+    kIsWeb || Platform.isMacOS || !isDesktop();
+
+Future<CubeFile> getFileLoadingFuture(
+    String path, String mimeType, String fileName,
+    {bool isPublic = true}) {
+  return getUploadingFilePlatformFuture(path, mimeType, fileName);
+}
+
+Future<String> getImgHash(Uint8List imageData) async {
+  var image = img.decodeImage(imageData);
+  return BlurHash.encode(image!, numCompX: 4, numCompY: 3).hash;
+}
+
+Future<String> getImageHashAsync(Uint8List imageData) async {
+  if (isImageCompressionSupported) {
+    imageData = await FlutterImageCompress.compressWithList(
+      imageData,
+      minHeight: 480,
+      minWidth: 640,
+    );
+  }
+
+  if (kIsWeb) {
+    return compute(getImgHash, imageData);
+  } else {
+    var image = img.decodeImage(imageData);
+    return BlurHash.encode(image!, numCompX: 4, numCompY: 3).hash;
+  }
+}

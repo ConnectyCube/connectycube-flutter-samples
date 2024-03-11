@@ -175,7 +175,7 @@ class BodyState extends State<BodyLayout> {
   }
 
   void _goSelectOpponentsScreen(BuildContext context, CubeUser cubeUser) {
-    Navigator.push(
+    Navigator.pushReplacement(
       context,
       MaterialPageRoute(
         builder: (context) => SelectOpponentsScreen(cubeUser),

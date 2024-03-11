@@ -1,7 +1,7 @@
 name: chat_sample
 description: Chat Sample
 
-version: 0.8.0
+version: 0.10.0
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -10,31 +10,39 @@ dependencies:
   flutter:
     sdk: flutter
 
-  connectycube_sdk: ^2.6.0
-  #  connectycube_sdk:
-  #    path: ../../flutter-sdk
-  shared_preferences: ^2.0.12
-  file_picker: ^5.2.11
-  fluttertoast: ^8.0.8
-  cached_network_image: ^3.2.3
+  connectycube_sdk: ^2.11.3
+#  connectycube_sdk:
+#      path: ../../flutter-sdk
+  shared_preferences: ^2.2.2
+  file_picker: ^6.1.1
+  fluttertoast: ^8.2.4
+  cached_network_image: ^3.3.1
   photo_view: ^0.14.0
-  device_info_plus: ^9.0.0
-  emoji_picker_flutter: ^1.5.4
-  firebase_core: ^2.14.0
-  firebase_messaging: ^14.6.3
-  flutter_local_notifications: ^14.1.1
-  connectivity_plus: ^4.0.0
+  device_info_plus: ^9.1.2
+  emoji_picker_flutter: ^2.1.0
+  firebase_core: ^2.25.4
+  firebase_messaging: ^14.7.16
+  flutter_local_notifications: ^16.3.2
+  connectivity_plus: ^5.0.2
   logging: ^1.0.2
-  collection: ^1.17.1
+  collection: ^1.17.2
   universal_io: ^2.2.0
-  path_provider: ^2.0.8
-  package_info_plus: ^4.0.0
-  uuid: ^3.0.6
+  path_provider: ^2.1.2
+  package_info_plus: ^4.2.0
+  uuid: ^3.0.7
   modal_bottom_sheet: ^3.0.0-pre
-  firebase_ui_auth: ^1.5.0
-  firebase_auth: ^4.6.3
+  firebase_ui_auth: ^1.13.0
+  firebase_auth: ^4.17.5
   flutter_app_badger: ^1.5.0
   firebase_ui_oauth_facebook: ^1.2.4
+  just_audio: ^0.9.36
+  record: ^5.0.4
+  http: ^1.1.0
+  cached_video_player_plus: ^2.0.0
+  url_launcher: ^6.2.4
+  flutter_blurhash: ^0.8.2
+  blurhash_dart: ^1.2.1
+  flutter_image_compress: ^2.1.0
 
 dev_dependencies:
   flutter_test:
@@ -44,13 +52,16 @@ dev_dependencies:
 
 dependency_overrides:
   intl: ^0.18.1
+  uuid: ^3.0.7
   http: ^1.1.0
+  web_socket_channel: ^2.4.0
   flutter_facebook_auth: ^6.0.0
 
 flutter:
   uses-material-design: true
   assets:
     - assets/images/splash.png
+    - assets/images/img_not_available.jpg
   fonts:
     - family: NotoColorEmoji
       fonts:

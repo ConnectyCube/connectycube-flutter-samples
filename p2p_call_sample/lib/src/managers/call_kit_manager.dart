@@ -44,14 +44,20 @@ class CallKitManager {
   }
 
   Future<void> processCallFinished(String uuid) async {
-    ConnectycubeFlutterCallKit.reportCallEnded(sessionId: uuid);
-    ConnectycubeFlutterCallKit.setOnLockScreenVisibility(isVisible: false);
+    if(Platform.isAndroid || Platform.isIOS) {
+      ConnectycubeFlutterCallKit.reportCallEnded(sessionId: uuid);
+      ConnectycubeFlutterCallKit.setOnLockScreenVisibility(isVisible: false);
+    }
   }
 
   /// Event Listener Callbacks for 'connectycube_flutter_call_kit'
   ///
   Future<void> _onCallMuted(bool mute, String uuid) async {
     onMuteCall.call(mute, uuid);
+  }
+
+  void muteCall(String sessionId, bool mute) {
+    ConnectycubeFlutterCallKit.reportCallMuted(sessionId: sessionId, muted: mute);
   }
 
   Future<void> _onCallAccepted(CallEvent callEvent) async {

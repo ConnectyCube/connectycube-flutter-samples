@@ -386,8 +386,8 @@ class LoginPageState extends State<LoginPage> {
       user.id = newUser.id;
       SharedPrefs.instance.saveNewUser(
           user, isEmailSelected ? LoginType.email : LoginType.login);
-      PushNotificationsManager.instance.init();
       signIn(user).then((result) {
+        PushNotificationsManager.instance.init();
         _loginToCubeChat(context, user);
       });
     }).catchError((exception) {

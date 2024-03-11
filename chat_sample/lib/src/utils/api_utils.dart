@@ -1,15 +1,17 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:connectycube_sdk/connectycube_chat.dart';
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app_badger/flutter_app_badger.dart';
 import 'package:universal_io/io.dart';
 
 import 'platform_utils.dart';
+
+import 'platform_api_utils.dart'
+    if (dart.library.html) 'platform_api_utils_web.dart'
+    if (dart.library.io) 'platform_api_utils_io.dart';
 
 void showDialogError(exception, context) {
   showDialog(
@@ -66,27 +68,22 @@ Future<Map<int, CubeUser>> getUsersByIds(Set<int> ids) async {
   return completer.future;
 }
 
-Future<CubeFile> getUploadingImageFuture(FilePickerResult result) async {
-  // there possible to upload the file as an array of bytes, but here showed two ways just as an example
-  if (kIsWeb) {
-    return uploadRawFile(result.files.single.bytes!, result.files.single.name,
-        isPublic: true, onProgress: (progress) {
-      log("uploadImageFile progress= $progress");
-    });
-  } else {
-    return uploadFile(File(result.files.single.path!), isPublic: true,
-        onProgress: (progress) {
-      log("uploadImageFile progress= $progress");
-    });
-  }
+Future<CubeFile> getUploadingMediaFuture(FilePickerResult result) async {
+  return getUploadingMediaPlatformFuture(result);
 }
 
-refreshBadgeCount() {
-  FlutterAppBadger.isAppBadgeSupported().then((isBadgesSupported) {
-    if (isBadgesSupported) {
-      getUnreadMessagesCount().then((result) {
-        updateBadgeCount(result['total']);
-      });
-    }
+Future<CubeFile> getUploadingFileFuture(
+  String path,
+  String mimeType,
+  String fileName, {
+  bool isPublic = true,
+}) {
+  return getUploadingFilePlatformFuture(path, mimeType, fileName,
+      isPublic: isPublic);
+}
+
+void refreshBadgeCount() {
+  getUnreadMessagesCount().then((result) {
+    updateBadgeCount(result['total']);
   });
 }

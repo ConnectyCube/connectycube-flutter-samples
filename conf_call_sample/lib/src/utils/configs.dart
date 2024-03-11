@@ -1,11 +1,13 @@
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-const String APP_ID = "476";
-const String AUTH_KEY = "PDZjPBzAO8WPfCp";
-const String AUTH_SECRET = "6247kjxXCLRaua6";
-const String ACCOUNT_ID = "TpuBZox_HPxofh7PVZdP";
-const String DEFAULT_PASS = "xxasBUM3gQs36bhj";
-const String SERVER_ENDPOINT = "wss://janus.connectycube.com:8989";
+const String APP_ID = '476';
+const String AUTH_KEY = 'PDZjPBzAO8WPfCp';
+const String AUTH_SECRET = '6247kjxXCLRaua6';
+const String DEFAULT_PASS = 'xxasBUM3gQs36bhj';
+const String API_ENDPOINT = 'https://api.connectycube.com';
+const String CHAT_ENDPOINT = 'chat.connectycube.com';
+const String CONF_SERVER_ENDPOINT = 'wss://janus.connectycube.com:8989';
+const String APP_HOST = 'https://connectycube.github.io/connectycube-flutter-samples/conf_call_sample/build/web';
 
 List<CubeUser> users = [
   CubeUser(

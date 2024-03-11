@@ -65,6 +65,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
+        useMaterial3: false,
         primarySwatch: Colors.green,
       ),
       home: LoginScreen(),
@@ -158,8 +159,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
       }
     });
 
-    setEndpoints(config.API_ENDPOINT,
-        config.CHAT_ENDPOINT); // set custom API and Char server domains
+    setEndpoints(config.API_ENDPOINT, config.CHAT_ENDPOINT); // set custom API and Char server domains
 
     connectivityStateSubscription =
         Connectivity().onConnectivityChanged.listen((connectivityType) {

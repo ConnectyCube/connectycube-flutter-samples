@@ -12,10 +12,17 @@ The project contains the following features implemented:
 - Chat dialogs creation
 - 1-1 messaging
 - Group messaging
+- Media attachments:
+  - Images;
+  - Voice;
+  - Videos;
+- BlurHash feature for Images attachments;
 - ‘Is typing’ statuses
 - Group chat: edit a name, photo; list of participants, add/remove participants; leave a group
 - Push notification: subscribe/unsubscribe, show local notification, navigate to the app click on a local notification
 - Messages' reactions
+
+[**Chat Sample Web App**](https://connectycube.github.io/connectycube-flutter-samples/chat_sample/build/web)
 
 ## Documentation
 
