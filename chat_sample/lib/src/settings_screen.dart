@@ -1,6 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
@@ -62,6 +63,8 @@ class _BodyLayoutState extends State<BodyLayout> {
   String _name = "";
   String _email = "";
 
+  LoginType loginType = LoginType.login;
+
   _BodyLayoutState(this.currentUser) {
     _loginFilter.addListener(_loginListen);
     _nameFilter.addListener(_nameListen);
@@ -69,6 +72,12 @@ class _BodyLayoutState extends State<BodyLayout> {
     _nameFilter.text = currentUser.fullName ?? '';
     _loginFilter.text = currentUser.login ?? '';
     _emailFilter.text = currentUser.email ?? '';
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    loginType = SharedPrefs.instance.getLoginType() ?? LoginType.login;
   }
 
   void _loginListen() {
@@ -192,16 +201,24 @@ class _BodyLayoutState extends State<BodyLayout> {
               decoration: InputDecoration(labelText: 'Change name'),
             ),
           ),
-          Container(
-            child: TextField(
-              controller: _loginFilter,
-              decoration: InputDecoration(labelText: 'Change login'),
+          Visibility(
+            visible:
+                loginType != LoginType.phone && loginType != LoginType.facebook,
+            child: Container(
+              child: TextField(
+                controller: _loginFilter,
+                decoration: InputDecoration(labelText: 'Change login'),
+              ),
             ),
           ),
-          Container(
-            child: TextField(
-              controller: _emailFilter,
-              decoration: InputDecoration(labelText: 'Change e-mail'),
+          Visibility(
+            visible:
+                loginType != LoginType.phone && loginType != LoginType.facebook,
+            child: Container(
+              child: TextField(
+                controller: _emailFilter,
+                decoration: InputDecoration(labelText: 'Change e-mail'),
+              ),
             ),
           ),
         ],
@@ -307,6 +324,7 @@ class _BodyLayoutState extends State<BodyLayout> {
             TextButton(
               child: Text("OK"),
               onPressed: () {
+                PushNotificationsManager.instance.unsubscribe();
                 signOut().then(
                   (voidValue) {
                     Navigator.pop(context); // cancel current Dialog
@@ -317,9 +335,12 @@ class _BodyLayoutState extends State<BodyLayout> {
                   },
                 ).whenComplete(() {
                   CubeChatConnection.instance.destroy();
-                  PushNotificationsManager.instance.unsubscribe();
-                  FirebaseAuth.instance.currentUser
-                      ?.unlink(PhoneAuthProvider.PROVIDER_ID);
+                  if (loginType == LoginType.phone) {
+                    FirebaseAuth.instance.currentUser
+                        ?.unlink(PhoneAuthProvider.PROVIDER_ID);
+                  } else if (loginType == LoginType.facebook) {
+                    FacebookAuth.instance.logOut();
+                  }
                   SharedPrefs.instance.deleteUser();
                   Navigator.pop(context); // cancel current screen
                   _navigateToLoginScreen(context);

@@ -47,20 +47,32 @@ class VerifyPhoneNumber extends StatelessWidget {
                       actions: [
                         AuthStateChangeAction<SignedIn>((ctx3, state) {
                           log('[AuthStateChangeAction] SignedIn');
-                          state.user?.getIdToken().then((idToken) {
-                            SharedPrefs.instance.saveLoginType(LoginType.phone);
-                            Navigator.of(ctx3, rootNavigator: true)
-                                .pushNamedAndRemoveUntil(
-                                    'login', (route) => false);
+                          state.user?.providerData.forEach((providerData) {
+                            if (providerData.providerId ==
+                                PhoneAuthProvider().providerId) {
+                              state.user?.getIdToken().then((idToken) {
+                                SharedPrefs.instance
+                                    .saveLoginType(LoginType.phone);
+                                Navigator.of(ctx3, rootNavigator: true)
+                                    .pushNamedAndRemoveUntil(
+                                        'login', (route) => false);
+                              });
+                            }
                           });
                         }),
                         AuthStateChangeAction<CredentialLinked>((ctx3, state) {
                           log('[AuthStateChangeAction] CredentialLinked');
-                          state.user.getIdToken().then((idToken) {
-                            SharedPrefs.instance.saveLoginType(LoginType.phone);
-                            Navigator.of(ctx3, rootNavigator: true)
-                                .pushNamedAndRemoveUntil(
-                                    'login', (route) => false);
+                          state.user.providerData.forEach((providerData) {
+                            if (providerData.providerId ==
+                                PhoneAuthProvider().providerId) {
+                              state.user.getIdToken().then((idToken) {
+                                SharedPrefs.instance
+                                    .saveLoginType(LoginType.phone);
+                                Navigator.of(ctx3, rootNavigator: true)
+                                    .pushNamedAndRemoveUntil(
+                                        'login', (route) => false);
+                              });
+                            }
                           });
                         }),
                         AuthStateChangeAction<Uninitialized>((ctx3, state) {
@@ -75,11 +87,20 @@ class VerifyPhoneNumber extends StatelessWidget {
                         }),
                         AuthStateChangeAction<UserCreated>((ctx3, state) {
                           log('[AuthStateChangeAction] UserCreated');
-                          state.credential.user?.getIdToken().then((idToken) {
-                            SharedPrefs.instance.saveLoginType(LoginType.phone);
-                            Navigator.of(ctx3, rootNavigator: true)
-                                .pushNamedAndRemoveUntil(
-                                    'login', (route) => false);
+                          state.credential.user?.providerData
+                              .forEach((providerData) {
+                            if (providerData.providerId ==
+                                PhoneAuthProvider().providerId) {
+                              state.credential.user
+                                  ?.getIdToken()
+                                  .then((idToken) {
+                                SharedPrefs.instance
+                                    .saveLoginType(LoginType.phone);
+                                Navigator.of(ctx3, rootNavigator: true)
+                                    .pushNamedAndRemoveUntil(
+                                        'login', (route) => false);
+                              });
+                            }
                           });
                         }),
                       ],

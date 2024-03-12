@@ -4,6 +4,8 @@ import 'dart:collection';
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app_badger/flutter_app_badger.dart';
+import 'package:universal_io/io.dart';
 
 import 'platform_utils.dart';
 
@@ -17,7 +19,7 @@ void showDialogError(exception, context) {
       builder: (BuildContext context) {
         return AlertDialog(
           title: Text("Error"),
-          content: Text("Something went wrong $exception"),
+          content: Text("Something went wrong: $exception"),
           actions: <Widget>[
             TextButton(
               child: Text("OK"),

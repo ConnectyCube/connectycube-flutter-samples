@@ -26,6 +26,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>com.googleusercontent.apps.786049777770-mcpccnipn06dc6ieka28eg6nstbj1qe7</string>
+                <string>fb786550356345266</string>
 			</array>
 		</dict>
 		<dict>
@@ -34,6 +35,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>app-1-786049777770-ios-93d28dab0a8a256e21ca13</string>
+                <string>fb786550356345266</string>
 			</array>
 		</dict>
 	</array>
@@ -79,5 +81,16 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+    <key>FacebookAppID</key>
+    <string>786550356345266</string>
+    <key>FacebookClientToken</key>
+    <string>85257b1c8796e12ca3539373237c404c</string>
+    <key>FacebookDisplayName</key>
+    <string>Connectycube Flutter Chat Sample</string>
+    <key>LSApplicationQueriesSchemes</key>
+    <array>
+      <string>fbapi</string>
+      <string>fb-messenger-share-api</string>
+    </array>
 </dict>
 </plist>

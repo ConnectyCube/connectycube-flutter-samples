@@ -91,6 +91,9 @@ bool get isVideoAttachmentsSupported =>
 bool get isImageCompressionSupported =>
     kIsWeb || Platform.isMacOS || !isDesktop();
 
+bool get isFBAuthSupported =>
+    kIsWeb || Platform.isMacOS || !isDesktop();
+
 Future<CubeFile> getFileLoadingFuture(
     String path, String mimeType, String fileName,
     {bool isPublic = true}) {

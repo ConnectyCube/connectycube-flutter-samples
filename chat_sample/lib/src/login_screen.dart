@@ -2,10 +2,11 @@ import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../firebase_options.dart';
 import 'managers/push_notifications_manager.dart';
@@ -84,6 +85,15 @@ class LoginPageState extends State<LoginPage> {
   @override
   void initState() {
     super.initState();
+
+    SharedPrefs.instance.init().then((sharedPrefs) {
+      var loginType = sharedPrefs.getLoginType();
+      var user = sharedPrefs.getUser();
+      if ((user != null && loginType == null) || loginType != null) {
+        _loginToCCWithSavedUser(context, loginType ?? LoginType.login);
+      }
+    });
+
     loginEmailSelection = [true, false];
 
     isEmailSelected = loginEmailSelection[1];
@@ -149,19 +159,13 @@ class LoginPageState extends State<LoginPage> {
 
   Future<Widget> getFilterChipsWidgets() async {
     if (_isLoginContinues) return SizedBox.shrink();
-    SharedPrefs sharedPrefs = await SharedPrefs.instance.init();
-    var loginType = sharedPrefs.getLoginType();
-    var user = sharedPrefs.getUser();
-    if ((user != null && loginType == null) || loginType != null) {
-      _loginToCCWithSavedUser(context, loginType ?? LoginType.login);
-      return SizedBox.shrink();
-    } else
-      return new Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        mainAxisSize: MainAxisSize.max,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: <Widget>[_buildTextFields(), _buildButtons()],
-      );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: <Widget>[_buildTextFields(), _buildButtons()],
+    );
   }
 
   Widget _buildTextFields() {
@@ -316,9 +320,26 @@ class LoginPageState extends State<LoginPage> {
           'By Facebook',
           style: TextStyle(color: Colors.blue.shade700),
         ),
-        onPressed: () {
-          Fluttertoast.showToast(
-              msg: 'Coming soon', gravity: ToastGravity.BOTTOM);
+        onPressed: () async {
+          if (platformUtils.isFBAuthSupported) {
+            var result = await FacebookAuth.instance
+                .login(permissions: ['email', 'public_profile']);
+            log('[Facebook login] result received ${result.accessToken?.toJson().toString()}',
+                TAG);
+
+            if (result.status == LoginStatus.success) {
+              SharedPrefs.instance.saveLoginType(LoginType.facebook);
+              Navigator.of(context, rootNavigator: true)
+                  .pushNamedAndRemoveUntil('login', (route) => false);
+            } else {
+              log('[Facebook login] result.status: ${result.status}');
+              log('[Facebook login] result.message: ${result.message}');
+            }
+          } else {
+            Fluttertoast.showToast(
+                msg:
+                    'Facebook authentication is temporarily not supported on the current platform');
+          }
         },
       ),
     ];
@@ -430,7 +451,14 @@ class LoginPageState extends State<LoginPage> {
                     'Your Phone authentication session was expired, please refresh it by second login using your phone number'),
                 actions: <Widget>[
                   TextButton(
-                    child: Text("OK"),
+                    child: Text('Retry'),
+                    onPressed: () {
+                      _loginToCCWithSavedUser(context, LoginType.phone);
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  TextButton(
+                    child: Text("Ok"),
                     onPressed: () => Navigator.of(context).pop(),
                   )
                 ],
@@ -441,7 +469,7 @@ class LoginPageState extends State<LoginPage> {
       }
 
       signInFuture = createSession().then((cubeSession) {
-        return signInUsingFirebase(
+        return signInUsingFirebasePhone(
                 DefaultFirebaseOptions.currentPlatform.projectId,
                 phoneAuthToken)
             .then((cubeUser) {
@@ -459,6 +487,51 @@ class LoginPageState extends State<LoginPage> {
           return savedUser!;
         });
       });
+    } else if (loginType == LoginType.facebook) {
+      final AccessToken? accessToken = await FacebookAuth.instance.accessToken;
+      if (accessToken == null) {
+        setState(() {
+          _isLoginContinues = false;
+        });
+
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Error'),
+                content: Text(
+                    'Facebook session was expired. For continue please refresh your Facebook session by second login.'),
+                actions: <Widget>[
+                  TextButton(
+                    child: Text('Retry'),
+                    onPressed: () {
+                      _loginToCCWithSavedUser(context, LoginType.facebook);
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  TextButton(
+                    child: Text("Ok"),
+                    onPressed: () => Navigator.of(context).pop(),
+                  )
+                ],
+              );
+            });
+
+        return;
+      } else {
+        signInFuture = createSession().then((cubeSession) {
+          return signInUsingSocialProvider(
+            CubeProvider.FACEBOOK,
+            accessToken.token,
+          ).then((cubeUser) {
+            return SharedPrefs.instance.init().then((sharedPrefs) {
+              sharedPrefs.saveNewUser(cubeUser, LoginType.facebook);
+              return cubeUser
+                ..password = CubeSessionManager.instance.activeSession?.token;
+            });
+          });
+        });
+      }
     }
 
     signInFuture?.then((cubeUser) {
