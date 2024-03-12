@@ -10,6 +10,8 @@ PODS:
     - FlutterMacOS
   - emoji_picker_flutter (0.0.1):
     - FlutterMacOS
+  - facebook_auth_desktop (0.0.3):
+    - FlutterMacOS
   - Firebase/Auth (10.22.0):
     - Firebase/CoreOnly
     - FirebaseAuth (~> 10.22.0)
@@ -65,6 +67,8 @@ PODS:
     - FlutterMacOS
   - flutter_local_notifications (0.0.1):
     - FlutterMacOS
+  - flutter_secure_storage_macos (6.1.1):
+    - FlutterMacOS
   - flutter_webrtc (0.9.36):
     - FlutterMacOS
     - WebRTC-SDK (= 114.5735.08)
@@ -72,9 +76,9 @@ PODS:
   - FMDB (2.7.9):
     - FMDB/standard (= 2.7.9)
   - FMDB/standard (2.7.9)
-  - GoogleDataTransport (9.4.0):
+  - GoogleDataTransport (9.4.1):
     - GoogleUtilities/Environment (~> 7.7)
-    - nanopb (< 2.30910.0, >= 2.30908.0)
+    - nanopb (< 2.30911.0, >= 2.30908.0)
     - PromisesObjC (< 3.0, >= 1.2)
   - GoogleUtilities/AppDelegateSwizzler (7.13.0):
     - GoogleUtilities/Environment
@@ -104,11 +108,11 @@ PODS:
   - GTMSessionFetcher/Core (3.3.1)
   - just_audio (0.0.1):
     - FlutterMacOS
-  - nanopb (2.30909.1):
-    - nanopb/decode (= 2.30909.1)
-    - nanopb/encode (= 2.30909.1)
-  - nanopb/decode (2.30909.1)
-  - nanopb/encode (2.30909.1)
+  - nanopb (2.30910.0):
+    - nanopb/decode (= 2.30910.0)
+    - nanopb/encode (= 2.30910.0)
+  - nanopb/decode (2.30910.0)
+  - nanopb/encode (2.30910.0)
   - package_info_plus (0.0.1):
     - FlutterMacOS
   - path_provider_foundation (0.0.1):
@@ -138,12 +142,14 @@ DEPENDENCIES:
   - desktop_webview_auth (from `Flutter/ephemeral/.symlinks/plugins/desktop_webview_auth/macos`)
   - device_info_plus (from `Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos`)
   - emoji_picker_flutter (from `Flutter/ephemeral/.symlinks/plugins/emoji_picker_flutter/macos`)
+  - facebook_auth_desktop (from `Flutter/ephemeral/.symlinks/plugins/facebook_auth_desktop/macos`)
   - firebase_auth (from `Flutter/ephemeral/.symlinks/plugins/firebase_auth/macos`)
   - firebase_core (from `Flutter/ephemeral/.symlinks/plugins/firebase_core/macos`)
   - firebase_messaging (from `Flutter/ephemeral/.symlinks/plugins/firebase_messaging/macos`)
   - flutter_app_badger (from `Flutter/ephemeral/.symlinks/plugins/flutter_app_badger/macos`)
   - flutter_image_compress_macos (from `Flutter/ephemeral/.symlinks/plugins/flutter_image_compress_macos/macos`)
   - flutter_local_notifications (from `Flutter/ephemeral/.symlinks/plugins/flutter_local_notifications/macos`)
+  - flutter_secure_storage_macos (from `Flutter/ephemeral/.symlinks/plugins/flutter_secure_storage_macos/macos`)
   - flutter_webrtc (from `Flutter/ephemeral/.symlinks/plugins/flutter_webrtc/macos`)
   - FlutterMacOS (from `Flutter/ephemeral`)
   - just_audio (from `Flutter/ephemeral/.symlinks/plugins/just_audio/macos`)
@@ -184,6 +190,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/device_info_plus/macos
   emoji_picker_flutter:
     :path: Flutter/ephemeral/.symlinks/plugins/emoji_picker_flutter/macos
+  facebook_auth_desktop:
+    :path: Flutter/ephemeral/.symlinks/plugins/facebook_auth_desktop/macos
   firebase_auth:
     :path: Flutter/ephemeral/.symlinks/plugins/firebase_auth/macos
   firebase_core:
@@ -196,6 +204,8 @@ EXTERNAL SOURCES:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_image_compress_macos/macos
   flutter_local_notifications:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_local_notifications/macos
+  flutter_secure_storage_macos:
+    :path: Flutter/ephemeral/.symlinks/plugins/flutter_secure_storage_macos/macos
   flutter_webrtc:
     :path: Flutter/ephemeral/.symlinks/plugins/flutter_webrtc/macos
   FlutterMacOS:
@@ -223,6 +233,7 @@ SPEC CHECKSUMS:
   desktop_webview_auth: 9bba53a29c9bc6a4ff621fd0ebfbb18856c4dada
   device_info_plus: 5401765fde0b8d062a2f8eb65510fb17e77cf07f
   emoji_picker_flutter: 533634326b1c5de9a181ba14b9758e6dfe967a20
+  facebook_auth_desktop: 0ec755e3b01669ec14776af18b6945671a788916
   Firebase: 797fd7297b7e1be954432743a0b3f90038e45a71
   firebase_auth: 7c693e2314a8b2cd8b925d8e8a4c15f8883863ce
   firebase_core: 2dd24517c818d09543dffe1b74daa16fb3f55a81
@@ -236,14 +247,15 @@ SPEC CHECKSUMS:
   flutter_app_badger: 55a64b179f8438e89d574320c77b306e327a1730
   flutter_image_compress_macos: c26c3c13ea0f28ae6dea4e139b3292e7729f99f1
   flutter_local_notifications: 3805ca215b2fb7f397d78b66db91f6a747af52e4
+  flutter_secure_storage_macos: d56e2d218c1130b262bef8b4a7d64f88d7f9c9ea
   flutter_webrtc: cf7dc44d26cbb5c5f1ae5f583dab545871f287f9
   FlutterMacOS: 8f6f14fa908a6fb3fba0cd85dbd81ec4b251fb24
   FMDB: aa44149f6fb634b1ac54f64f47064bb0d0c5a032
-  GoogleDataTransport: bed3a36c04c8552479fbb9b76326e0fc69bddcb2
+  GoogleDataTransport: 6c09b596d841063d76d4288cc2d2f42cc36e1e2a
   GoogleUtilities: d053d902a8edaa9904e1bd00c37535385b8ed152
   GTMSessionFetcher: 8a1b34ad97ebe6f909fb8b9b77fba99943007556
   just_audio: 9b67ca7b97c61cfc9784ea23cd8cc55eb226d489
-  nanopb: d4d75c12cd1316f4a64e3c6963f879ecd4b5e0d5
+  nanopb: 438bc412db1928dac798aa6fd75726007be04262
   package_info_plus: 02d7a575e80f194102bef286361c6c326e4c29ce
   path_provider_foundation: 3784922295ac71e43754bd15e0653ccfd36a147c
   PromisesObjC: f5707f49cb48b9636751c5b2e7d227e43fba9f47

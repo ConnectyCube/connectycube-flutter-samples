@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart';
-import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:connectycube_sdk/connectycube_chat.dart';
@@ -45,7 +44,7 @@ class SharedPrefs {
   saveNewUser(CubeUser cubeUser, LoginType loginType) {
     prefs.clear();
 
-    prefs.setString(prefLoginType, describeEnum(loginType));
+    prefs.setString(prefLoginType, loginType.name);
 
     if (cubeUser.login != null) prefs.setString(prefUserLogin, cubeUser.login!);
     if (cubeUser.email != null) prefs.setString(prefUserEmail, cubeUser.email!);
@@ -89,14 +88,13 @@ class SharedPrefs {
     var savedLoginType = prefs.getString(prefLoginType);
     if (savedLoginType == null) return null;
 
-    var loginType = LoginType.values
-        .firstWhereOrNull((e) => describeEnum(e) == savedLoginType);
+    var loginType =
+        LoginType.values.firstWhereOrNull((e) => e.name == savedLoginType);
     return loginType;
   }
 
   saveLoginType(LoginType loginType) {
-    log('[saveLoginType] $loginType', 'SharedPrefs');
-    prefs.setString(prefLoginType, describeEnum(loginType));
+    prefs.setString(prefLoginType, loginType.name);
   }
 
   Future<bool> deleteUser() {

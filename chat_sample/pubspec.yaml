@@ -34,7 +34,6 @@ dependencies:
   firebase_ui_auth: ^1.13.0
   firebase_auth: ^4.17.5
   flutter_app_badger: ^1.5.0
-  firebase_ui_oauth_facebook: ^1.2.4
   just_audio: ^0.9.36
   record: ^5.0.4
   http: ^1.1.0
@@ -43,6 +42,7 @@ dependencies:
   flutter_blurhash: ^0.8.2
   blurhash_dart: ^1.2.1
   flutter_image_compress: ^2.1.0
+  flutter_facebook_auth: ^6.1.1
 
 dev_dependencies:
   flutter_test:
@@ -55,7 +55,6 @@ dependency_overrides:
   uuid: ^3.0.7
   http: ^1.1.0
   web_socket_channel: ^2.4.0
-  flutter_facebook_auth: ^6.0.0
 
 flutter:
   uses-material-design: true

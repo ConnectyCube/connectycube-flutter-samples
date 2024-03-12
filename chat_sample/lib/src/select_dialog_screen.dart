@@ -32,7 +32,7 @@ class SelectDialogScreen extends StatelessWidget {
         appBar: AppBar(
           automaticallyImplyLeading: false,
           title: Text(
-            'Logged in as ${currentUser.fullName ?? currentUser.login ?? currentUser.email}',
+            'Logged in as ${currentUser.fullName ?? currentUser.login ?? currentUser.email ?? currentUser.phone ?? currentUser.facebookId}',
           ),
           actions: <Widget>[
             IconButton(

@@ -6,6 +6,7 @@ import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 import '../firebase_options.dart';
 import 'managers/push_notifications_manager.dart';
@@ -320,19 +321,24 @@ class LoginPageState extends State<LoginPage> {
           style: TextStyle(color: Colors.blue.shade700),
         ),
         onPressed: () async {
-          log('[Facebook login] started', TAG);
-          final LoginResult? result = await FacebookAuth.instance
-              .login(permissions: ['email', 'public_profile']);
-          log('[Facebook login] result received ${result?.accessToken?.toJson().toString()}',
-              TAG);
+          if (platformUtils.isFBAuthSupported) {
+            var result = await FacebookAuth.instance
+                .login(permissions: ['email', 'public_profile']);
+            log('[Facebook login] result received ${result.accessToken?.toJson().toString()}',
+                TAG);
 
-          if (result?.status == LoginStatus.success) {
-            SharedPrefs.instance.saveLoginType(LoginType.facebook);
-            Navigator.of(context, rootNavigator: true)
-                .pushNamedAndRemoveUntil('login', (route) => false);
+            if (result.status == LoginStatus.success) {
+              SharedPrefs.instance.saveLoginType(LoginType.facebook);
+              Navigator.of(context, rootNavigator: true)
+                  .pushNamedAndRemoveUntil('login', (route) => false);
+            } else {
+              log('[Facebook login] result.status: ${result.status}');
+              log('[Facebook login] result.message: ${result.message}');
+            }
           } else {
-            log('[Facebook login] result.status: ${result?.status}');
-            log('[Facebook login] result.message: ${result?.message}');
+            Fluttertoast.showToast(
+                msg:
+                    'Facebook authentication is temporarily not supported on the current platform');
           }
         },
       ),
@@ -463,7 +469,7 @@ class LoginPageState extends State<LoginPage> {
       }
 
       signInFuture = createSession().then((cubeSession) {
-        return signInUsingFirebase(
+        return signInUsingFirebasePhone(
                 DefaultFirebaseOptions.currentPlatform.projectId,
                 phoneAuthToken)
             .then((cubeUser) {
