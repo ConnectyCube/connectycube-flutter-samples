@@ -1,5 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -203,7 +204,7 @@ class _BodyLayoutState extends State<BodyLayout> {
           ),
           Visibility(
             visible:
-                loginType != LoginType.phone && loginType != LoginType.facebook,
+                loginType == LoginType.login || loginType == LoginType.email,
             child: Container(
               child: TextField(
                 controller: _loginFilter,
@@ -213,7 +214,7 @@ class _BodyLayoutState extends State<BodyLayout> {
           ),
           Visibility(
             visible:
-                loginType != LoginType.phone && loginType != LoginType.facebook,
+                loginType == LoginType.login || loginType == LoginType.email,
             child: Container(
               child: TextField(
                 controller: _emailFilter,
@@ -323,8 +324,8 @@ class _BodyLayoutState extends State<BodyLayout> {
             ),
             TextButton(
               child: Text("OK"),
-              onPressed: () {
-                PushNotificationsManager.instance.unsubscribe();
+              onPressed: () async {
+                await PushNotificationsManager.instance.unsubscribe();
                 signOut().then(
                   (voidValue) {
                     Navigator.pop(context); // cancel current Dialog
@@ -338,8 +339,11 @@ class _BodyLayoutState extends State<BodyLayout> {
                   if (loginType == LoginType.phone) {
                     FirebaseAuth.instance.currentUser
                         ?.unlink(PhoneAuthProvider.PROVIDER_ID);
+                    FirebaseAuth.instance.currentUser?.delete();
                   } else if (loginType == LoginType.facebook) {
                     FacebookAuth.instance.logOut();
+                  } else if (loginType == LoginType.google) {
+                    FirebaseAuth.instance.currentUser?.delete();
                   }
                   SharedPrefs.instance.deleteUser();
                   Navigator.pop(context); // cancel current screen

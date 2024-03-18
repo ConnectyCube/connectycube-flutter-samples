@@ -1,12 +1,16 @@
 import 'dart:convert';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_ui_auth/firebase_ui_auth.dart';
+import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:universal_io/io.dart';
 
 import '../firebase_options.dart';
 import 'managers/push_notifications_manager.dart';
@@ -292,12 +296,12 @@ class LoginPageState extends State<LoginPage> {
         visible: platformUtils.isPhoneAuthSupported,
         child: OutlinedButton.icon(
           style: OutlinedButton.styleFrom(
-            minimumSize: Size(190, 36),
+            minimumSize: Size(220, 36),
           ),
           icon: Icon(
             Icons.dialpad,
           ),
-          label: Text('By Phone number'),
+          label: Text('Sign in with phone'),
           onPressed: () {
             platformUtils.showModal(
                 context: context, child: VerifyPhoneNumber());
@@ -310,14 +314,14 @@ class LoginPageState extends State<LoginPage> {
       OutlinedButton.icon(
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.blue,
-          minimumSize: Size(190, 36),
+          minimumSize: Size(220, 36),
         ),
         icon: Icon(
           Icons.facebook,
           color: Colors.blue.shade700,
         ),
         label: Text(
-          'By Facebook',
+          'Sign in with Facebook',
           style: TextStyle(color: Colors.blue.shade700),
         ),
         onPressed: () async {
@@ -340,6 +344,69 @@ class LoginPageState extends State<LoginPage> {
                 msg:
                     'Facebook authentication is temporarily not supported on the current platform');
           }
+        },
+      ),
+      SizedBox(
+        height: 6,
+      ),
+      OutlinedButton.icon(
+        style: OutlinedButton.styleFrom(
+          foregroundColor: Colors.red,
+          minimumSize: Size(220, 36),
+        ),
+        icon: Icon(
+          Icons.alternate_email,
+          color: Colors.red.shade700,
+        ),
+        label: Text(
+          'Sign in with Google',
+          style: TextStyle(color: Colors.red.shade700),
+        ),
+        onPressed: () async {
+          var authFlow = OAuthFlow(
+            provider: GoogleProvider(
+                clientId: kIsWeb || !(Platform.isIOS || Platform.isMacOS)
+                    ? '786049777770-sb3lhate1vt1obsmqag5fsd2dspok7pq.apps.googleusercontent.com'
+                    : '786049777770-9pa9ne829mevpih6fl2jtmg0ogatm5ki.apps.googleusercontent.com'),
+          );
+
+          authFlow.addListener(() {
+            var newState = authFlow.value;
+
+            log('[OAuth login] newState: $newState');
+
+            if (newState is SignedIn) {
+              newState.user?.getIdToken().then((idToken) {
+                if (idToken != null) {
+                  SharedPrefs.instance.saveLoginType(LoginType.google);
+                  Navigator.of(context, rootNavigator: true)
+                      .pushNamedAndRemoveUntil('login', (route) => false);
+                }
+              });
+            } else if (newState is CredentialReceived) {
+              var idToken = newState.credential.accessToken;
+              if (idToken != null) {
+                SharedPrefs.instance.saveLoginType(LoginType.google);
+                Navigator.of(context, rootNavigator: true)
+                    .pushNamedAndRemoveUntil('login', (route) => false);
+              }
+            } else if (newState is UserCreated) {
+              newState.credential.user?.getIdToken().then((idToken) {
+                if (idToken != null) {
+                  SharedPrefs.instance.saveLoginType(LoginType.google);
+                  Navigator.of(context, rootNavigator: true)
+                      .pushNamedAndRemoveUntil('login', (route) => false);
+                }
+              });
+            } else if (newState is AuthFailed) {
+              SharedPrefs.instance.deleteUser().then((value) {
+                Navigator.of(context, rootNavigator: true)
+                    .pushNamedAndRemoveUntil('login', (route) => false);
+              });
+            }
+          });
+
+          authFlow.signIn(defaultTargetPlatform);
         },
       ),
     ];
@@ -532,6 +599,52 @@ class LoginPageState extends State<LoginPage> {
           });
         });
       }
+    } else if (loginType == LoginType.google) {
+      var googleAuthToken =
+          await FirebaseAuth.instance.currentUser?.getIdToken();
+      if (googleAuthToken == null) {
+        setState(() {
+          _isLoginContinues = false;
+        });
+
+        showDialog(
+            context: context,
+            builder: (BuildContext context) {
+              return AlertDialog(
+                title: Text('Error'),
+                content: Text(
+                    'Your Google authentication session was expired, please refresh it by second login using your Google account'),
+                actions: <Widget>[
+                  TextButton(
+                    child: Text('Retry'),
+                    onPressed: () {
+                      _loginToCCWithSavedUser(context, LoginType.google);
+                      Navigator.of(context).pop();
+                    },
+                  ),
+                  TextButton(
+                    child: Text("Ok"),
+                    onPressed: () => Navigator.of(context).pop(),
+                  )
+                ],
+              );
+            });
+
+        return;
+      }
+
+      signInFuture = createSession().then((cubeSession) {
+        return signInUsingFirebaseEmail(
+                DefaultFirebaseOptions.currentPlatform.projectId,
+                googleAuthToken)
+            .then((cubeUser) {
+          return SharedPrefs.instance.init().then((sharedPrefs) {
+            sharedPrefs.saveNewUser(cubeUser, LoginType.google);
+            return cubeUser
+              ..password = CubeSessionManager.instance.activeSession?.token;
+          });
+        });
+      });
     }
 
     signInFuture?.then((cubeUser) {

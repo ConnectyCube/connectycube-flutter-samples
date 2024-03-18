@@ -23,19 +23,11 @@
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>com.googleusercontent.apps.786049777770-mcpccnipn06dc6ieka28eg6nstbj1qe7</string>
-                <string>fb786550356345266</string>
-			</array>
-		</dict>
-		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>app-1-786049777770-ios-93d28dab0a8a256e21ca13</string>
-                <string>fb786550356345266</string>
+				<string>com.googleusercontent.apps.786049777770-9pa9ne829mevpih6fl2jtmg0ogatm5ki</string>
 			</array>
 		</dict>
 	</array>
