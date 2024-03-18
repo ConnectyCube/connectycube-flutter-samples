@@ -16,4 +16,4 @@ final String SELECTED_USERS_ARG_NAME = 'selected_users';
 
 final String PARAM_HASH = 'hash';
 
-enum LoginType { login, email, phone, facebook }
+enum LoginType { login, email, phone, facebook, google }
