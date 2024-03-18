@@ -2,6 +2,7 @@ _flutterfire_internals
 firebase_ui_auth
 firebase_ui_localizations
 firebase_ui_oauth
+firebase_ui_oauth_google
 firebase_ui_shared
 
 Copyright 2017, the Chromium project authors. All rights reserved.
@@ -4984,6 +4985,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 --------------------------------------------------------------------------------
 cross_file
 flutter_plugin_android_lifecycle
+google_identity_services_web
+google_sign_in
+google_sign_in_android
+google_sign_in_ios
+google_sign_in_platform_interface
+google_sign_in_web
 path_provider
 path_provider_android
 path_provider_foundation
