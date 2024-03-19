@@ -12,7 +12,7 @@ Future<CubeSession> createPhoneAuthSession() async {
   }
 
   return createSession().then((cubeSession) {
-    return signInUsingFirebase(
+    return signInUsingFirebasePhone(
       DefaultFirebaseOptions.currentPlatform.projectId,
       phoneAuthIdToken,
     ).then((_) {
@@ -32,6 +32,22 @@ Future<CubeSession> createFacebookAuthSession() async {
       CubeProvider.FACEBOOK,
       accessToken.token,
     ).then((cubeUser) {
+      return CubeSessionManager.instance.activeSession!;
+    });
+  });
+}
+
+Future<CubeSession> createGoogleAuthSession() async {
+  var googleAuthIdToken = await FirebaseAuth.instance.currentUser?.getIdToken();
+  if (googleAuthIdToken == null) {
+    return createSession();
+  }
+
+  return createSession().then((cubeSession) {
+    return signInUsingFirebaseEmail(
+      DefaultFirebaseOptions.currentPlatform.projectId,
+      googleAuthIdToken,
+    ).then((_) {
       return CubeSessionManager.instance.activeSession!;
     });
   });
