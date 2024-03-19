@@ -149,6 +149,8 @@ class _AppState extends State<App> with WidgetsBindingObserver {
           return createPhoneAuthSession();
         case LoginType.facebook:
           return createFacebookAuthSession();
+        case LoginType.google:
+          return createGoogleAuthSession();
 
         case LoginType.login:
         case LoginType.email:
@@ -159,7 +161,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
       }
     });
 
-    setEndpoints(config.API_ENDPOINT, config.CHAT_ENDPOINT); // set custom API and Char server domains
+    setEndpoints(config.API_ENDPOINT, config.CHAT_ENDPOINT);
 
     connectivityStateSubscription =
         Connectivity().onConnectivityChanged.listen((connectivityType) {
