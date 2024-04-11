@@ -522,7 +522,9 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
         _minorWidgetPosition = newPosition;
       },
       onPrimaryVideoFitChanged: (newObjectFit) {
-        primaryVideoFit = newObjectFit;
+        setState(() {
+          primaryVideoFit = newObjectFit;
+        });
       },
       onRenderersChanged: _updateRenderers,
     );
@@ -542,7 +544,9 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
       isScreenSharingEnabled: !_enableScreenSharing,
       participantsMediaConfigs: participantsMediaConfigs,
       onPrimaryVideoFitChanged: (newObjectFit) {
-        primaryVideoFit = newObjectFit;
+        setState(() {
+          primaryVideoFit = newObjectFit;
+        });
       },
       onRenderersChanged: _updateRenderers,
       statsReportsManager: _statsReportsManager,

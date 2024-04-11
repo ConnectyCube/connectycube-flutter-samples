@@ -50,11 +50,7 @@ class CallControls extends StatelessWidget {
     return Container(
       margin: EdgeInsets.only(bottom: 16, left: 8, right: 8),
       child: ClipRRect(
-        borderRadius: BorderRadius.only(
-            bottomLeft: Radius.circular(32),
-            bottomRight: Radius.circular(32),
-            topLeft: Radius.circular(32),
-            topRight: Radius.circular(32)),
+        borderRadius: BorderRadius.all(Radius.circular(Theme.of(context).useMaterial3 ? 16 : 32)),
         child: Container(
           padding: EdgeInsets.all(4),
           color: Colors.black26,
@@ -97,6 +93,7 @@ class CallControls extends StatelessWidget {
                 backgroundColor: Colors.black38,
                 switchLabelPosition: true,
                 overlayColor: Colors.black,
+                foregroundColor: Colors.white,
                 elevation: 0,
                 overlayOpacity: 0.5,
                 children: [

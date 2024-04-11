@@ -208,8 +208,8 @@ class BodyState extends State<BodyLayout> {
     });
 
     if (CubeSessionManager.instance.isActiveSessionValid() &&
-        CubeSessionManager.instance.activeSession?.userId != null &&
-        CubeSessionManager.instance.activeSession?.userId == user.id) {
+        CubeSessionManager.instance.activeSession?.user?.id != null &&
+        CubeSessionManager.instance.activeSession?.user?.id == user.id) {
       _loginToCubeChat(context, user);
     } else {
       createSession(user).then((cubeSession) {
