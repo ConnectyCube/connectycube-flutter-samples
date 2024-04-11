@@ -28,7 +28,6 @@ class SelectOpponentsScreen extends StatelessWidget {
               onPressed: () => _logOut(context),
               icon: Icon(
                 Icons.exit_to_app,
-                color: Colors.white,
               ),
             ),
           ],

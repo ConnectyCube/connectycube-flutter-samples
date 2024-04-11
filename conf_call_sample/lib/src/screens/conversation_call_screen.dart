@@ -282,6 +282,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   void onPublisherLeft(publisher) {
     log("onPublisherLeft $publisher", TAG);
     _removeMediaStream(_callSession, publisher);
+    _callManager.processParticipantLeave(publisher);
     _closeSessionIfLast();
   }
 
@@ -521,7 +522,9 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
         _minorWidgetPosition = newPosition;
       },
       onPrimaryVideoFitChanged: (newObjectFit) {
-        primaryVideoFit = newObjectFit;
+        setState(() {
+          primaryVideoFit = newObjectFit;
+        });
       },
       onRenderersChanged: _updateRenderers,
     );
@@ -541,7 +544,9 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
       isScreenSharingEnabled: !_enableScreenSharing,
       participantsMediaConfigs: participantsMediaConfigs,
       onPrimaryVideoFitChanged: (newObjectFit) {
-        primaryVideoFit = newObjectFit;
+        setState(() {
+          primaryVideoFit = newObjectFit;
+        });
       },
       onRenderersChanged: _updateRenderers,
       statsReportsManager: _statsReportsManager,

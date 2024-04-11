@@ -34,7 +34,8 @@ class _AppState extends State<App> {
 
     return MaterialApp(
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
       ),
       home: LoginScreen(),
       onGenerateRoute: (settings) {
