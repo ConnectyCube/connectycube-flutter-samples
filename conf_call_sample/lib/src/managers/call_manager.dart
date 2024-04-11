@@ -538,6 +538,10 @@ class CallManager {
         _participantIds!, mediaConfig);
   }
 
+  void processParticipantLeave(int participant){
+    _participantIds?.remove(participant);
+  }
+
   void requestParticipantsMediaConfig(List<int?> participants) {
     if (_meetingId == null) return;
     participants.removeWhere((userId) => userId == null);
@@ -546,6 +550,11 @@ class CallManager {
 
     sendRequestMediaConfigMessage(
         _meetingsCalls[_meetingId]!, _meetingId!, List<int>.from(participants));
+
+    _participantIds?.addAll(participants
+        .where((userId) =>
+            userId != null && !(_participantIds?.contains(userId) ?? true))
+        .map((e) => e!));
   }
 }
 

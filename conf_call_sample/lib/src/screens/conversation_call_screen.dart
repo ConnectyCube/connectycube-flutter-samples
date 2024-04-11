@@ -282,6 +282,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   void onPublisherLeft(publisher) {
     log("onPublisherLeft $publisher", TAG);
     _removeMediaStream(_callSession, publisher);
+    _callManager.processParticipantLeave(publisher);
     _closeSessionIfLast();
   }
 
