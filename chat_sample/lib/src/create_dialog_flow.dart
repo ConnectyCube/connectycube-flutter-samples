@@ -1,5 +1,5 @@
 import 'package:chat_sample/src/utils/consts.dart';
-import 'package:connectycube_sdk/src/core/users/models/cube_user.dart';
+import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'package:flutter/material.dart';
 
 import 'new_dialog_screen.dart';
@@ -9,7 +9,7 @@ import 'utils/route_utils.dart';
 class CreateDialog extends StatelessWidget {
   final CubeUser currentUser;
 
-  CreateDialog(this.currentUser);
+  const CreateDialog(this.currentUser, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -28,13 +28,13 @@ class CreateDialog extends StatelessWidget {
               break;
             case 'configure_group_dialog':
               page = NewGroupDialogScreen(
-                args![USER_ARG_NAME],
-                args[DIALOG_ARG_NAME],
-                args[SELECTED_USERS_ARG_NAME],
+                args![userArgName],
+                args[dialogArgName],
+                args[selectedUsersArgName],
               );
               break;
             default:
-              page = CreateChatScreen(args![USER_ARG_NAME]);
+              page = CreateChatScreen(args![userArgName]);
               break;
           }
 

@@ -1,17 +1,16 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 
 class FullPhoto extends StatelessWidget {
   final String url;
 
-  FullPhoto({Key? key, required this.url}) : super(key: key);
+  const FullPhoto({super.key, required this.url});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Full photo',
         ),
         centerTitle: true,
@@ -24,16 +23,16 @@ class FullPhoto extends StatelessWidget {
 class FullPhotoScreen extends StatefulWidget {
   final String url;
 
-  FullPhotoScreen({Key? key, required this.url}) : super(key: key);
+  const FullPhotoScreen({super.key, required this.url});
 
   @override
-  State createState() => FullPhotoScreenState(url: url);
+  FullPhotoScreenState createState() {
+    return FullPhotoScreenState();
+  }
 }
 
 class FullPhotoScreenState extends State<FullPhotoScreen> {
-  final String url;
-
-  FullPhotoScreenState({Key? key, required this.url});
+  FullPhotoScreenState();
 
   @override
   void initState() {
@@ -42,6 +41,6 @@ class FullPhotoScreenState extends State<FullPhotoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(child: PhotoView(imageProvider: NetworkImage(url)));
+    return PhotoView(imageProvider: NetworkImage(widget.url));
   }
 }

@@ -28,12 +28,12 @@ void showModal({
         context: context,
         builder: (BuildContext cxt) {
           return Dialog(
-            shape: RoundedRectangleBorder(
+            shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(8.0))),
-            child: RawKeyboardListener(
-              focusNode: FocusNode(onKey: (FocusNode node, RawKeyEvent evt) {
+            child: KeyboardListener(
+              focusNode: FocusNode(onKeyEvent: (FocusNode node, KeyEvent evt) {
                 if (evt.logicalKey == LogicalKeyboardKey.escape) {
-                  if (evt is RawKeyDownEvent) {
+                  if (evt is KeyDownEvent) {
                     Navigator.pop(context);
                     return KeyEventResult.handled;
                   }
@@ -91,8 +91,7 @@ bool get isVideoAttachmentsSupported =>
 bool get isImageCompressionSupported =>
     kIsWeb || Platform.isMacOS || !isDesktop();
 
-bool get isFBAuthSupported =>
-    kIsWeb || Platform.isMacOS || !isDesktop();
+bool get isFBAuthSupported => kIsWeb || Platform.isMacOS || !isDesktop();
 
 Future<CubeFile> getFileLoadingFuture(
     String path, String mimeType, String fileName,

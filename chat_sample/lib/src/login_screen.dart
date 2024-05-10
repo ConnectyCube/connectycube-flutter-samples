@@ -17,33 +17,36 @@ import 'managers/push_notifications_manager.dart';
 import 'phone_auth_flow.dart';
 import 'utils/api_utils.dart';
 import 'utils/consts.dart';
-import 'utils/platform_utils.dart' as platformUtils;
+import 'utils/platform_utils.dart' as platform_utils;
 import 'utils/pref_util.dart';
 
 class LoginScreen extends StatelessWidget {
-  static const String TAG = "LoginScreen";
+  static const String tag = "LoginScreen";
+
+  const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // appBar: AppBar(automaticallyImplyLeading: false, title: Text('Chat')),
+    return const Scaffold(
       body: LoginPage(),
     );
   }
 }
 
 class LoginPage extends StatefulWidget {
+  const LoginPage({super.key});
+
   @override
-  State<StatefulWidget> createState() => new LoginPageState();
+  State<StatefulWidget> createState() => LoginPageState();
 }
 
-// Used for controlling whether the user is loggin or creating an account
+// Used for controlling whether the user is login or creating an account
 enum FormType { login, register }
 
 class LoginPageState extends State<LoginPage> {
-  static const String TAG = "_LoginPageState";
-  final TextEditingController _loginFilter = new TextEditingController();
-  final TextEditingController _passwordFilter = new TextEditingController();
+  static const String tag = "_LoginPageState";
+  final TextEditingController _loginFilter = TextEditingController();
+  final TextEditingController _passwordFilter = TextEditingController();
   String _login = "";
   String _password = "";
   FormType _form = FormType
@@ -105,12 +108,12 @@ class LoginPageState extends State<LoginPage> {
 
   @override
   Widget build(BuildContext context) {
-    return new Scaffold(
+    return Scaffold(
       body: Center(
         child: SingleChildScrollView(
-          child: new Container(
-            padding: EdgeInsets.symmetric(horizontal: 16.0),
-            child: new Column(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.end,
@@ -124,28 +127,26 @@ class LoginPageState extends State<LoginPage> {
 
   Widget _buildLogoField() {
 //    return Image.asset('assets/images/splash.png');
-    return Container(
-      child: Align(
-        alignment: FractionalOffset.center,
-        child: Column(
-          children: [
-            ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: 350),
-              child: Image.asset('assets/images/splash.png'),
-            ),
-            Container(
-              margin: EdgeInsets.only(left: 8),
-              height: 18,
-              width: 18,
-              child: Visibility(
-                visible: _isLoginContinues,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                ),
+    return Align(
+      alignment: FractionalOffset.center,
+      child: Column(
+        children: [
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 350),
+            child: Image.asset('assets/images/splash.png'),
+          ),
+          Container(
+            margin: const EdgeInsets.only(left: 8),
+            height: 18,
+            width: 18,
+            child: Visibility(
+              visible: _isLoginContinues,
+              child: const CircularProgressIndicator(
+                strokeWidth: 2,
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -157,12 +158,12 @@ class LoginPageState extends State<LoginPage> {
           if (snapshot.hasData) {
             return snapshot.data!;
           }
-          return SizedBox.shrink();
+          return const SizedBox.shrink();
         });
   }
 
   Future<Widget> getFilterChipsWidgets() async {
-    if (_isLoginContinues) return SizedBox.shrink();
+    if (_isLoginContinues) return const SizedBox.shrink();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
@@ -174,114 +175,108 @@ class LoginPageState extends State<LoginPage> {
 
   Widget _buildTextFields() {
     return ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: 400),
-      child: Container(
-        child: Column(
-          children: <Widget>[
-            Align(
-              alignment: Alignment.centerRight,
-              child: ToggleButtons(
-                constraints: BoxConstraints(maxHeight: 38),
-                borderColor: Colors.green,
-                fillColor: Colors.green.shade400,
-                borderWidth: 1,
-                selectedBorderColor: Colors.green,
-                selectedColor: Colors.white,
-                borderRadius: BorderRadius.circular(28),
-                children: <Widget>[
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 4, horizontal: 6.0),
-                    child: Text(
-                      'By Login',
-                      style: TextStyle(
-                          color: isEmailSelected ? Colors.green : Colors.white),
-                    ),
+      constraints: const BoxConstraints(maxWidth: 400),
+      child: Column(
+        children: <Widget>[
+          Align(
+            alignment: Alignment.centerRight,
+            child: ToggleButtons(
+              constraints: const BoxConstraints(maxHeight: 38),
+              borderColor: Colors.green,
+              fillColor: Colors.green.shade400,
+              borderWidth: 1,
+              selectedBorderColor: Colors.green,
+              selectedColor: Colors.white,
+              borderRadius: BorderRadius.circular(28),
+              onPressed: (int index) {
+                setState(() {
+                  for (int i = 0; i < loginEmailSelection.length; i++) {
+                    loginEmailSelection[i] = i == index;
+                  }
+                  isEmailSelected = loginEmailSelection[1];
+                });
+              },
+              isSelected: loginEmailSelection,
+              children: <Widget>[
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 4, horizontal: 6.0),
+                  child: Text(
+                    'By Login',
+                    style: TextStyle(
+                        color: isEmailSelected ? Colors.green : Colors.white),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(
-                        vertical: 4, horizontal: 6.0),
-                    child: Text(
-                      'By E-mail',
-                      style: TextStyle(
-                          color: isEmailSelected ? Colors.white : Colors.green),
-                    ),
+                ),
+                Padding(
+                  padding:
+                      const EdgeInsets.symmetric(vertical: 4, horizontal: 6.0),
+                  child: Text(
+                    'By E-mail',
+                    style: TextStyle(
+                        color: isEmailSelected ? Colors.white : Colors.green),
                   ),
-                ],
-                onPressed: (int index) {
-                  setState(() {
-                    for (int i = 0; i < loginEmailSelection.length; i++) {
-                      loginEmailSelection[i] = i == index;
-                    }
-                    isEmailSelected = loginEmailSelection[1];
-                  });
-                },
-                isSelected: loginEmailSelection,
-              ),
+                ),
+              ],
             ),
-            Container(
-              child: TextField(
-                keyboardType: isEmailSelected
-                    ? TextInputType.emailAddress
-                    : TextInputType.text,
-                controller: _loginFilter,
-                decoration: InputDecoration(
-                    labelText: isEmailSelected ? 'E-mail' : 'Login'),
-              ),
-            ),
-            Container(
-              child: TextField(
-                keyboardType: TextInputType.visiblePassword,
-                controller: _passwordFilter,
-                decoration: InputDecoration(labelText: 'Password'),
-                obscureText: true,
-                enableSuggestions: false,
-                autocorrect: false,
-                onSubmitted: (_) {
-                  _form == FormType.login
-                      ? _loginPressed()
-                      : _createAccountPressed();
-                },
-              ),
-            )
-          ],
-        ),
+          ),
+          TextField(
+            keyboardType: isEmailSelected
+                ? TextInputType.emailAddress
+                : TextInputType.text,
+            controller: _loginFilter,
+            decoration: InputDecoration(
+                labelText: isEmailSelected ? 'E-mail' : 'Login'),
+          ),
+          TextField(
+            keyboardType: TextInputType.visiblePassword,
+            controller: _passwordFilter,
+            decoration: const InputDecoration(labelText: 'Password'),
+            obscureText: true,
+            enableSuggestions: false,
+            autocorrect: false,
+            onSubmitted: (_) {
+              _form == FormType.login
+                  ? _loginPressed()
+                  : _createAccountPressed();
+            },
+          )
+        ],
       ),
     );
   }
 
   Widget _buildButtons() {
     return ConstrainedBox(
-      constraints: BoxConstraints(maxWidth: 400),
+      constraints: const BoxConstraints(maxWidth: 400),
       child: _form == FormType.login
           ? Container(
-              margin: EdgeInsets.only(top: 8),
+              margin: const EdgeInsets.only(top: 8),
               child: Column(
                 children: <Widget>[
                   ElevatedButton(
-                    child: new Text('Login'),
                     onPressed: _loginPressed,
+                    child: const Text('Login'),
                   ),
                   TextButton(
-                    child: new Text(
-                        'Don\'t have an account? Tap here to register.'),
                     onPressed: _formChange,
+                    child: const Text(
+                        'Don\'t have an account? Tap here to register.'),
                   ),
                   ...createCIPButtons(),
                 ],
               ),
             )
           : Container(
-              margin: EdgeInsets.only(top: 8),
+              margin: const EdgeInsets.only(top: 8),
               child: Column(
                 children: <Widget>[
                   ElevatedButton(
-                    child: new Text('Create an Account'),
                     onPressed: _createAccountPressed,
+                    child: const Text('Create an Account'),
                   ),
                   TextButton(
-                    child: new Text('Have an account? Click here to login.'),
                     onPressed: _formChange,
+                    child: const Text('Have an account? Click here to login.'),
                   ),
                   ...createCIPButtons(),
                 ],
@@ -293,28 +288,28 @@ class LoginPageState extends State<LoginPage> {
   List<Widget> createCIPButtons() {
     return [
       Visibility(
-        visible: platformUtils.isPhoneAuthSupported,
+        visible: platform_utils.isPhoneAuthSupported,
         child: OutlinedButton.icon(
           style: OutlinedButton.styleFrom(
-            minimumSize: Size(220, 36),
+            minimumSize: const Size(220, 36),
           ),
-          icon: Icon(
+          icon: const Icon(
             Icons.dialpad,
           ),
-          label: Text('Sign in with phone'),
+          label: const Text('Sign in with phone'),
           onPressed: () {
-            platformUtils.showModal(
-                context: context, child: VerifyPhoneNumber());
+            platform_utils.showModal(
+                context: context, child: const VerifyPhoneNumber());
           },
         ),
       ),
-      SizedBox(
+      const SizedBox(
         height: 6,
       ),
       OutlinedButton.icon(
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.blue,
-          minimumSize: Size(220, 36),
+          minimumSize: const Size(220, 36),
         ),
         icon: Icon(
           Icons.facebook,
@@ -324,21 +319,22 @@ class LoginPageState extends State<LoginPage> {
           'Sign in with Facebook',
           style: TextStyle(color: Colors.blue.shade700),
         ),
-        onPressed: () async {
-          if (platformUtils.isFBAuthSupported) {
-            var result = await FacebookAuth.instance
-                .login(permissions: ['email', 'public_profile']);
-            log('[Facebook login] result received ${result.accessToken?.toJson().toString()}',
-                TAG);
+        onPressed: () {
+          if (platform_utils.isFBAuthSupported) {
+            FacebookAuth.instance
+                .login(permissions: ['email', 'public_profile']).then((result) {
+              log('[Facebook login] result received ${result.accessToken?.toJson().toString()}',
+                  tag);
 
-            if (result.status == LoginStatus.success) {
-              SharedPrefs.instance.saveLoginType(LoginType.facebook);
-              Navigator.of(context, rootNavigator: true)
-                  .pushNamedAndRemoveUntil('login', (route) => false);
-            } else {
-              log('[Facebook login] result.status: ${result.status}');
-              log('[Facebook login] result.message: ${result.message}');
-            }
+              if (result.status == LoginStatus.success) {
+                SharedPrefs.instance.saveLoginType(LoginType.facebook);
+                Navigator.of(context, rootNavigator: true)
+                    .pushNamedAndRemoveUntil('login', (route) => false);
+              } else {
+                log('[Facebook login] result.status: ${result.status}');
+                log('[Facebook login] result.message: ${result.message}');
+              }
+            });
           } else {
             Fluttertoast.showToast(
                 msg:
@@ -346,13 +342,13 @@ class LoginPageState extends State<LoginPage> {
           }
         },
       ),
-      SizedBox(
+      const SizedBox(
         height: 6,
       ),
       OutlinedButton.icon(
         style: OutlinedButton.styleFrom(
           foregroundColor: Colors.red,
-          minimumSize: Size(220, 36),
+          minimumSize: const Size(220, 36),
         ),
         icon: Icon(
           Icons.alternate_email,
@@ -413,7 +409,7 @@ class LoginPageState extends State<LoginPage> {
   }
 
   void _loginPressed() {
-    print('login with $_login and $_password');
+    log('login with $_login and $_password');
     var userToLogin = CubeUser();
     if (isEmailSelected) {
       userToLogin.email = _login;
@@ -427,7 +423,7 @@ class LoginPageState extends State<LoginPage> {
   }
 
   void _createAccountPressed() {
-    print('create an user with $_login and $_password');
+    log('create an user with $_login and $_password');
     var userToSignUp = CubeUser();
     if (isEmailSelected) {
       userToSignUp.email = _login;
@@ -455,7 +451,7 @@ class LoginPageState extends State<LoginPage> {
       }
     }
     signUp(user).then((newUser) {
-      print("signUp newUser $newUser");
+      log("signUp newUser $newUser");
       user.id = newUser.id;
       SharedPrefs.instance.saveNewUser(
           user, isEmailSelected ? LoginType.email : LoginType.login);
@@ -469,21 +465,22 @@ class LoginPageState extends State<LoginPage> {
   }
 
   _loginToCC(BuildContext context, CubeUser user, {bool saveUser = false}) {
-    print("_loginToCC user: $user");
+    log("_loginToCC user: $user");
     if (_isLoginContinues) return;
     setState(() {
       _isLoginContinues = true;
     });
 
-    createSession(user).then((cubeSession) async {
-      print("createSession cubeSession: $cubeSession");
+    createSession(user).then((cubeSession) {
+      log("createSession cubeSession: $cubeSession");
       var tempUser = user;
       user = cubeSession.user!..password = tempUser.password;
-      if (saveUser)
+      if (saveUser) {
         SharedPrefs.instance.init().then((sharedPrefs) {
           sharedPrefs.saveNewUser(
               user, isEmailSelected ? LoginType.email : LoginType.login);
         });
+      }
 
       PushNotificationsManager.instance.init();
 
@@ -502,35 +499,41 @@ class LoginPageState extends State<LoginPage> {
 
     Future<CubeUser>? signInFuture;
     if (loginType == LoginType.phone) {
-      var phoneAuthToken =
-          await FirebaseAuth.instance.currentUser?.getIdToken();
+      var phoneAuthToken = await FirebaseAuth.instance.currentUser
+          ?.getIdToken()
+          .then((phoneAuthToken) {
+        if (phoneAuthToken == null) {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('Error'),
+                  content: const Text(
+                      'Your Phone authentication session was expired, please refresh it by second login using your phone number'),
+                  actions: <Widget>[
+                    TextButton(
+                      child: const Text('Retry'),
+                      onPressed: () {
+                        _loginToCCWithSavedUser(context, LoginType.phone);
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    TextButton(
+                      child: const Text("Ok"),
+                      onPressed: () => Navigator.of(context).pop(),
+                    )
+                  ],
+                );
+              });
+        }
+
+        return phoneAuthToken;
+      });
+
       if (phoneAuthToken == null) {
         setState(() {
           _isLoginContinues = false;
         });
-
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('Error'),
-                content: Text(
-                    'Your Phone authentication session was expired, please refresh it by second login using your phone number'),
-                actions: <Widget>[
-                  TextButton(
-                    child: Text('Retry'),
-                    onPressed: () {
-                      _loginToCCWithSavedUser(context, LoginType.phone);
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  TextButton(
-                    child: Text("Ok"),
-                    onPressed: () => Navigator.of(context).pop(),
-                  )
-                ],
-              );
-            });
 
         return;
       }
@@ -555,80 +558,92 @@ class LoginPageState extends State<LoginPage> {
         });
       });
     } else if (loginType == LoginType.facebook) {
-      final AccessToken? accessToken = await FacebookAuth.instance.accessToken;
+      final AccessToken? accessToken =
+          await FacebookAuth.instance.accessToken.then((accessToken) {
+        if (accessToken == null) {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('Error'),
+                  content: const Text(
+                      'Facebook session was expired. For continue please refresh your Facebook session by second login.'),
+                  actions: <Widget>[
+                    TextButton(
+                      child: const Text('Retry'),
+                      onPressed: () {
+                        _loginToCCWithSavedUser(context, LoginType.facebook);
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    TextButton(
+                      child: const Text("Ok"),
+                      onPressed: () => Navigator.of(context).pop(),
+                    )
+                  ],
+                );
+              });
+        }
+
+        return accessToken;
+      });
+
       if (accessToken == null) {
         setState(() {
           _isLoginContinues = false;
         });
 
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('Error'),
-                content: Text(
-                    'Facebook session was expired. For continue please refresh your Facebook session by second login.'),
-                actions: <Widget>[
-                  TextButton(
-                    child: Text('Retry'),
-                    onPressed: () {
-                      _loginToCCWithSavedUser(context, LoginType.facebook);
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  TextButton(
-                    child: Text("Ok"),
-                    onPressed: () => Navigator.of(context).pop(),
-                  )
-                ],
-              );
-            });
-
         return;
-      } else {
-        signInFuture = createSession().then((cubeSession) {
-          return signInUsingSocialProvider(
-            CubeProvider.FACEBOOK,
-            accessToken.token,
-          ).then((cubeUser) {
-            return SharedPrefs.instance.init().then((sharedPrefs) {
-              sharedPrefs.saveNewUser(cubeUser, LoginType.facebook);
-              return cubeUser
-                ..password = CubeSessionManager.instance.activeSession?.token;
-            });
+      }
+
+      signInFuture = createSession().then((cubeSession) {
+        return signInUsingSocialProvider(
+          CubeProvider.FACEBOOK,
+          accessToken.token,
+        ).then((cubeUser) {
+          return SharedPrefs.instance.init().then((sharedPrefs) {
+            sharedPrefs.saveNewUser(cubeUser, LoginType.facebook);
+            return cubeUser
+              ..password = CubeSessionManager.instance.activeSession?.token;
           });
         });
-      }
+      });
     } else if (loginType == LoginType.google) {
-      var googleAuthToken =
-          await FirebaseAuth.instance.currentUser?.getIdToken();
+      var googleAuthToken = await FirebaseAuth.instance.currentUser
+          ?.getIdToken()
+          .then((googleAuthToken) {
+        if (googleAuthToken == null) {
+          showDialog(
+              context: context,
+              builder: (BuildContext context) {
+                return AlertDialog(
+                  title: const Text('Error'),
+                  content: const Text(
+                      'Your Google authentication session was expired, please refresh it by second login using your Google account'),
+                  actions: <Widget>[
+                    TextButton(
+                      child: const Text('Retry'),
+                      onPressed: () {
+                        _loginToCCWithSavedUser(context, LoginType.google);
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                    TextButton(
+                      child: const Text("Ok"),
+                      onPressed: () => Navigator.of(context).pop(),
+                    )
+                  ],
+                );
+              });
+        }
+
+        return googleAuthToken;
+      });
+
       if (googleAuthToken == null) {
         setState(() {
           _isLoginContinues = false;
         });
-
-        showDialog(
-            context: context,
-            builder: (BuildContext context) {
-              return AlertDialog(
-                title: Text('Error'),
-                content: Text(
-                    'Your Google authentication session was expired, please refresh it by second login using your Google account'),
-                actions: <Widget>[
-                  TextButton(
-                    child: Text('Retry'),
-                    onPressed: () {
-                      _loginToCCWithSavedUser(context, LoginType.google);
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                  TextButton(
-                    child: Text("Ok"),
-                    onPressed: () => Navigator.of(context).pop(),
-                  )
-                ],
-              );
-            });
 
         return;
       }
@@ -668,7 +683,7 @@ class LoginPageState extends State<LoginPage> {
   }
 
   void _processLoginError(exception) {
-    log("Login error $exception", TAG);
+    log("Login error $exception", tag);
     setState(() {
       _isLoginContinues = false;
     });
@@ -685,7 +700,7 @@ class LoginPageState extends State<LoginPage> {
 
       log("getNotificationAppLaunchDetails, payload: $payload");
 
-      var dialogId;
+      String? dialogId;
       if (payload == null) {
         dialogId = SharedPrefs.instance.getSelectedDialogId();
         log("getNotificationAppLaunchDetails, selectedDialogId: $dialogId");
@@ -719,12 +734,12 @@ class LoginPageState extends State<LoginPage> {
     Navigator.pushReplacementNamed(
       context,
       'select_dialog',
-      arguments: {USER_ARG_NAME: cubeUser, DIALOG_ARG_NAME: dialog},
+      arguments: {userArgName: cubeUser, dialogArgName: dialog},
     );
 
-    if (dialog != null && !platformUtils.isDesktop()) {
+    if (dialog != null && !platform_utils.isDesktop()) {
       Navigator.pushNamed(context, 'chat_dialog',
-          arguments: {USER_ARG_NAME: cubeUser, DIALOG_ARG_NAME: dialog});
+          arguments: {userArgName: cubeUser, dialogArgName: dialog});
     }
   }
 }

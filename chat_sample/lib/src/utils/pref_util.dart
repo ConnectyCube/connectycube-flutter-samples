@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:collection/collection.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:connectycube_sdk/connectycube_chat.dart';
@@ -49,25 +48,31 @@ class SharedPrefs {
     if (cubeUser.login != null) prefs.setString(prefUserLogin, cubeUser.login!);
     if (cubeUser.email != null) prefs.setString(prefUserEmail, cubeUser.email!);
     if (cubeUser.phone != null) prefs.setString(prefUserPhone, cubeUser.phone!);
-    if (cubeUser.password != null)
+    if (cubeUser.password != null) {
       prefs.setString(prefUserPsw, cubeUser.password!);
-    if (cubeUser.fullName != null)
+    }
+    if (cubeUser.fullName != null) {
       prefs.setString(prefUserName, cubeUser.fullName!);
+    }
     prefs.setInt(prefUserId, cubeUser.id!);
-    if (cubeUser.avatar != null)
+    if (cubeUser.avatar != null) {
       prefs.setString(prefUserAvatar, cubeUser.avatar!);
+    }
   }
 
   updateUser(CubeUser cubeUser) {
-    if (cubeUser.password != null)
+    if (cubeUser.password != null) {
       prefs.setString(prefUserPsw, cubeUser.password!);
+    }
     if (cubeUser.login != null) prefs.setString(prefUserLogin, cubeUser.login!);
     if (cubeUser.email != null) prefs.setString(prefUserEmail, cubeUser.email!);
     if (cubeUser.phone != null) prefs.setString(prefUserPhone, cubeUser.phone!);
-    if (cubeUser.fullName != null)
+    if (cubeUser.fullName != null) {
       prefs.setString(prefUserName, cubeUser.fullName!);
-    if (cubeUser.avatar != null)
+    }
+    if (cubeUser.avatar != null) {
       prefs.setString(prefUserAvatar, cubeUser.avatar!);
+    }
   }
 
   CubeUser? getUser() {
@@ -89,7 +94,7 @@ class SharedPrefs {
     if (savedLoginType == null) return null;
 
     var loginType =
-        LoginType.values.firstWhereOrNull((e) => e.name == savedLoginType);
+        LoginType.values.where((e) => e.name == savedLoginType).firstOrNull;
     return loginType;
   }
 
