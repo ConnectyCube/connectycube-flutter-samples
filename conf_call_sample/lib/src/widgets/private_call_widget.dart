@@ -25,7 +25,7 @@ class PrivateCallLayout extends StatefulWidget {
   final Function(MapEntry<int, RTCVideoRenderer>? primaryRenderer,
       Map<int, RTCVideoRenderer> minorRenderers) onRenderersChanged;
 
-  PrivateCallLayout({
+  const PrivateCallLayout({
     super.key,
     required this.currentUserId,
     required this.primaryRenderer,
@@ -45,40 +45,36 @@ class PrivateCallLayout extends StatefulWidget {
 
   @override
   State<PrivateCallLayout> createState() {
-    return _PrivateCallLayoutState(
-      primaryRenderer: primaryRenderer,
-      minorRenderers: minorRenderers,
-      primaryVideoFit: primaryVideoFit,
-      minorWidgetInitialPosition: minorWidgetInitialPosition,
-    );
+    return _PrivateCallLayoutState();
   }
 }
 
 class _PrivateCallLayoutState extends State<PrivateCallLayout> {
-  static final String TAG = 'PrivateCallLayout';
+  static const String tag = 'PrivateCallLayout';
 
-  MapEntry<int, RTCVideoRenderer>? _primaryRenderer;
-  Map<int, RTCVideoRenderer> _minorRenderers;
-  RTCVideoViewObjectFit _primaryVideoFit;
+  late MapEntry<int, RTCVideoRenderer>? _primaryRenderer;
+  late Map<int, RTCVideoRenderer> _minorRenderers;
+  late RTCVideoViewObjectFit _primaryVideoFit;
+  late WidgetPosition _minorWidgetInitialPosition;
+
   bool _isPrimaryUserForciblySelected = false;
-  WidgetPosition _minorWidgetInitialPosition;
-  Offset _minorWidgetOffset = Offset(0, 0);
+  Offset _minorWidgetOffset = const Offset(0, 0);
   bool _isWidgetMoving = false;
 
-  _PrivateCallLayoutState({
-    required MapEntry<int, RTCVideoRenderer>? primaryRenderer,
-    required Map<int, RTCVideoRenderer> minorRenderers,
-    required RTCVideoViewObjectFit primaryVideoFit,
-    required WidgetPosition minorWidgetInitialPosition,
-  })  : _primaryRenderer = primaryRenderer,
-        _minorRenderers = minorRenderers,
-        _primaryVideoFit = primaryVideoFit,
-        _minorWidgetInitialPosition = minorWidgetInitialPosition;
+  @override
+  void initState() {
+    super.initState();
+
+    _primaryRenderer = widget.primaryRenderer;
+    _minorRenderers = widget.minorRenderers;
+    _primaryVideoFit = widget.primaryVideoFit;
+    _minorWidgetInitialPosition = widget.minorWidgetInitialPosition;
+  }
 
   @override
   void didUpdateWidget(PrivateCallLayout oldWidget) {
     super.didUpdateWidget(oldWidget);
-    log("[didUpdateWidget]", TAG);
+    log("[didUpdateWidget]", tag);
     _primaryRenderer = widget.primaryRenderer;
     _minorRenderers = widget.minorRenderers;
     _primaryVideoFit = widget.primaryVideoFit;
@@ -88,7 +84,7 @@ class _PrivateCallLayoutState extends State<PrivateCallLayout> {
   @override
   Widget build(BuildContext context) {
     var orientation = MediaQuery.of(context).orientation;
-    log("[build]", TAG);
+    log("[build]", tag);
 
     List<Widget> children = [];
 
@@ -132,7 +128,7 @@ class _PrivateCallLayoutState extends State<PrivateCallLayout> {
       return null;
     }
 
-    var primaryVideoWidget;
+    Widget? primaryVideoWidget;
 
     var minorUserWithEnabledVideo = getUserWithEnabledVideo(
         _minorRenderers, widget.currentUserId, widget.participantsMediaConfigs);
@@ -206,7 +202,7 @@ class _PrivateCallLayoutState extends State<PrivateCallLayout> {
               onPanEnd: (details) => _onPanEnd(context, details),
               onTap: () => setState(
                 () {
-                  log("[onTap] userId: $key", TAG);
+                  log("[onTap] userId: $key", tag);
                   updatePrimaryUser(
                     key,
                     true,
@@ -255,7 +251,7 @@ class _PrivateCallLayoutState extends State<PrivateCallLayout> {
 
   void _onPanUpdate(
       BuildContext context, DragUpdateDetails details, Offset offset) {
-    log('_onPanUpdate', TAG);
+    log('_onPanUpdate', tag);
 
     setState(() {
       _isWidgetMoving = true;
@@ -264,7 +260,7 @@ class _PrivateCallLayoutState extends State<PrivateCallLayout> {
   }
 
   void _onPanEnd(BuildContext context, DragEndDetails details) {
-    log('_onPanEnd', TAG);
+    log('_onPanEnd', tag);
 
     setState(() {
       _isWidgetMoving = false;

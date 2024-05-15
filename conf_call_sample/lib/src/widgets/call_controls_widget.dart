@@ -27,7 +27,7 @@ class CallControls extends StatelessWidget {
 
   final Function() onEndCall;
 
-  CallControls({
+  const CallControls({
     super.key,
     required this.isMicMuted,
     required this.onMute,
@@ -48,41 +48,42 @@ class CallControls extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(bottom: 16, left: 8, right: 8),
+      margin: const EdgeInsets.only(bottom: 16, left: 8, right: 8),
       child: ClipRRect(
-        borderRadius: BorderRadius.all(Radius.circular(Theme.of(context).useMaterial3 ? 16 : 32)),
+        borderRadius: BorderRadius.all(
+            Radius.circular(Theme.of(context).useMaterial3 ? 16 : 32)),
         child: Container(
-          padding: EdgeInsets.all(4),
+          padding: const EdgeInsets.all(4),
           color: Colors.black26,
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
               Padding(
-                padding: EdgeInsets.only(right: 4),
+                padding: const EdgeInsets.only(right: 4),
                 child: FloatingActionButton(
                   elevation: 0,
                   heroTag: "Mute",
+                  onPressed: onMute,
+                  backgroundColor: Colors.black38,
                   child: Icon(
                     isMicMuted ? Icons.mic_off : Icons.mic,
                     color: isMicMuted ? Colors.grey : Colors.white,
                   ),
-                  onPressed: onMute,
-                  backgroundColor: Colors.black38,
                 ),
               ),
               Visibility(
                 visible: isCameraButtonVisible,
                 child: Padding(
-                  padding: EdgeInsets.only(right: 4),
+                  padding: const EdgeInsets.only(right: 4),
                   child: FloatingActionButton(
                     elevation: 0,
                     heroTag: "ToggleCamera",
+                    onPressed: onToggleCamera,
+                    backgroundColor: Colors.black38,
                     child: Icon(
                       isCameraEnabled ? Icons.videocam : Icons.videocam_off,
                       color: isCameraEnabled ? Colors.white : Colors.grey,
                     ),
-                    onPressed: onToggleCamera,
-                    backgroundColor: Colors.black38,
                   ),
                 ),
               ),
@@ -131,7 +132,7 @@ class CallControls extends StatelessWidget {
                   ),
                   SpeedDialChild(
                     visible: kIsWeb || WebRTC.platformIsDesktop,
-                    child: Icon(
+                    child: const Icon(
                       Icons.record_voice_over,
                       color: Colors.white,
                     ),
@@ -153,19 +154,19 @@ class CallControls extends StatelessWidget {
                   ),
                 ],
               ),
-              Expanded(
-                child: SizedBox(),
+              const Expanded(
                 flex: 1,
+                child: SizedBox(),
               ),
               Padding(
-                padding: EdgeInsets.only(left: 0),
+                padding: const EdgeInsets.only(left: 0),
                 child: FloatingActionButton(
-                  child: Icon(
+                  backgroundColor: Colors.red,
+                  onPressed: onEndCall,
+                  child: const Icon(
                     Icons.call_end,
                     color: Colors.white,
                   ),
-                  backgroundColor: Colors.red,
-                  onPressed: onEndCall,
                 ),
               ),
             ],

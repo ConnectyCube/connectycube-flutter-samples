@@ -8,7 +8,7 @@ class PrimaryVideo extends StatelessWidget {
   final bool mirror;
   final Function()? onDoubleTap;
 
-  PrimaryVideo({
+  const PrimaryVideo({
     super.key,
     required this.renderer,
     required this.objectFit,

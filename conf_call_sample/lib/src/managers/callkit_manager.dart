@@ -13,7 +13,7 @@ import 'call_manager.dart';
 class CallKitManager {
   static CallKitManager get instance => _getInstance();
   static CallKitManager? _instance;
-  static String TAG = "CallKitManager";
+  static String tag = "CallKitManager";
 
   static CallKitManager _getInstance() {
     return _instance ??= CallKitManager._internal();
@@ -24,13 +24,13 @@ class CallKitManager {
   CallKitManager._internal();
 
   late Function(CallEvent callEvent) onCallAccepted;
-  late Function(CallEvent CallEvent) onCallEnded;
+  late Function(CallEvent callEvent) onCallEnded;
   late Function(bool mute, String uuid) onMuteCall;
 
   init({
-    required onCallAccepted(CallEvent callEvent),
-    required onCallEnded(CallEvent callEvent),
-    required onMuteCall(bool mute, String uuid),
+    required Function(CallEvent callEvent) onCallAccepted,
+    required Function(CallEvent callEvent) onCallEnded,
+    required Function(bool mute, String uuid) onMuteCall,
   }) {
     this.onCallAccepted = onCallAccepted;
     this.onCallEnded = onCallEnded;
@@ -104,20 +104,19 @@ class CallKitManager {
             if (callData == null) return null;
 
             return CallEvent(
-              sessionId: callData[PARAM_SESSION_ID].toString(),
-              callType: int.parse(callData[PARAM_CALL_TYPE].toString()),
-              callerId: int.parse(callData[PARAM_CALLER_ID].toString()),
-              callerName: callData[PARAM_CALLER_NAME] as String,
-              opponentsIds: (callData[PARAM_CALL_OPPONENTS] as String)
+              sessionId: callData[paramSessionId].toString(),
+              callType: int.parse(callData[paramCallType].toString()),
+              callerId: int.parse(callData[paramCallerId].toString()),
+              callerName: callData[paramCallerName] as String,
+              opponentsIds: (callData[paramCallOpponents] as String)
                   .split(',')
                   .map(int.parse)
                   .toSet(),
-              userInfo: callData[PARAM_USER_INFO] != null
+              userInfo: callData[paramUserInfo] != null
                   ? Map<String, String>.from(
-                      jsonDecode(callData[PARAM_USER_INFO]))
+                      jsonDecode(callData[paramUserInfo]))
                   : null,
             );
-            ;
           });
         }
         return null;
@@ -128,35 +127,35 @@ class CallKitManager {
 
 @pragma('vm:entry-point')
 Future<void> onCallRejectedWhenTerminated(CallEvent callEvent) async {
-  print(
-      '[PushNotificationsManager][onCallRejectedWhenTerminated] callEvent: $callEvent');
+  log('[PushNotificationsManager][onCallRejectedWhenTerminated] callEvent: $callEvent');
 
-  var meetingId = callEvent.userInfo?[PARAM_MEETING_ID];
+  var meetingId = callEvent.userInfo?[paramMeetingId];
   if (meetingId == null) return;
 
   initConnectycubeContextLess();
 
   var callMsgList =
       buildCallMessages(callEvent.sessionId, meetingId, [callEvent.callerId]);
-  callMsgList.forEach((callMsg) {
-    callMsg.properties[SIGNAL_TYPE_REJECT_CALL] = '1';
-    callMsg.properties[PARAM_BUSY] = 'false';
-  });
+  for (var callMsg in callMsgList) {
+    callMsg.properties[signalTypeRejectCall] = '1';
+    callMsg.properties[paramBusy] = 'false';
+  }
 
-  callMsgList
-      .forEach((msg) => sendSystemMessage(msg.recipientId!, msg.properties));
+  for (var msg in callMsgList) {
+    sendSystemMessage(msg.recipientId!, msg.properties);
+  }
 
   var sendRejectCallMessage = callMsgList.map((msg) {
     return sendSystemMessage(msg.recipientId!, msg.properties);
   }).toList();
 
   var sendPushAboutReject = sendPushAboutRejectFromKilledState({
-    PARAM_CALL_TYPE: callEvent.callType,
-    PARAM_SESSION_ID: callEvent.sessionId,
-    PARAM_CALLER_ID: callEvent.callerId,
-    PARAM_CALLER_NAME: callEvent.callerName,
-    PARAM_CALL_OPPONENTS: callEvent.opponentsIds.join(','),
-    PARAM_USER_INFO: {PARAM_MEETING_ID: meetingId},
+    paramCallType: callEvent.callType,
+    paramSessionId: callEvent.sessionId,
+    paramCallerId: callEvent.callerId,
+    paramCallerName: callEvent.callerName,
+    paramCallOpponents: callEvent.opponentsIds.join(','),
+    paramUserInfo: {paramMeetingId: meetingId},
   }, callEvent.callerId);
 
   return Future.wait([...sendRejectCallMessage, sendPushAboutReject])
@@ -171,8 +170,8 @@ Future<void> sendPushAboutRejectFromKilledState(
 ) {
   CreateEventParams params = CreateEventParams();
   params.parameters = parameters;
-  params.parameters[PARAM_MESSAGE] = "Reject call";
-  params.parameters[PARAM_SIGNAL_TYPE] = SIGNAL_TYPE_REJECT_CALL;
+  params.parameters[paramMessage] = "Reject call";
+  params.parameters[paramSignalType] = signalTypeRejectCall;
 
   params.notificationType = NotificationType.PUSH;
   params.environment =
@@ -187,9 +186,9 @@ Future<void> sendPushAboutEndingCall(
   List<int> participants,
 ) {
   CreateEventParams params = CreateEventParams();
-  params.parameters[PARAM_SESSION_ID] = callId;
-  params.parameters[PARAM_MESSAGE] = 'End call';
-  params.parameters[PARAM_SIGNAL_TYPE] = SIGNAL_TYPE_END_CALL;
+  params.parameters[paramSessionId] = callId;
+  params.parameters[paramMessage] = 'End call';
+  params.parameters[paramSignalType] = signalTypeEndCall;
 
   params.notificationType = NotificationType.PUSH;
   params.environment =

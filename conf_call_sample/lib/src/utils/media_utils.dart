@@ -21,7 +21,7 @@ bool canShowVideo(
 
 bool isUserCameraEnabled(int userId, Map<int, Map<String, bool>> config,
     {bool defaultValue = false}) {
-  return config[userId]?[PARAM_IS_CAMERA_ENABLED] ?? defaultValue;
+  return config[userId]?[paramIsCameraEnabled] ?? defaultValue;
 }
 
 int? getUserWithEnabledVideo(Map<int, RTCVideoRenderer> renderers,

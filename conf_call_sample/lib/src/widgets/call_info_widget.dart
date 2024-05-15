@@ -8,7 +8,7 @@ class CallInfo extends StatelessWidget {
   final String callStatus;
   final DurationTimer callTimer;
 
-  CallInfo(this.callName, this.callStatus, this.callTimer);
+  const CallInfo(this.callName, this.callStatus, this.callTimer, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +23,7 @@ class CallInfo extends StatelessWidget {
             shadows: [
               Shadow(
                 color: Colors.grey.shade900,
-                offset: Offset(2, 1),
+                offset: const Offset(2, 1),
                 blurRadius: 12,
               ),
             ],
@@ -38,7 +38,7 @@ class CallInfo extends StatelessWidget {
             shadows: [
               Shadow(
                 color: Colors.grey.shade900,
-                offset: Offset(2, 1),
+                offset: const Offset(2, 1),
                 blurRadius: 12,
               ),
             ],
@@ -56,7 +56,7 @@ class CallInfo extends StatelessWidget {
                   shadows: [
                     Shadow(
                       color: Colors.grey.shade900,
-                      offset: Offset(2, 1),
+                      offset: const Offset(2, 1),
                       blurRadius: 12,
                     ),
                   ],
