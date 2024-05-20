@@ -5,5 +5,5 @@ void configureNavigation() {
 }
 
 String getHostUrl() {
-  return Uri.base.origin + '/connectycube-flutter-samples/conf_call_sample/build/web';
+  return '${Uri.base.origin}/connectycube-flutter-samples/conf_call_sample/build/web';
 }

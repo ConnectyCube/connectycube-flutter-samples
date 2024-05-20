@@ -12,7 +12,7 @@ import 'package:connectycube_sdk/connectycube_sdk.dart';
 import '../utils/pref_util.dart';
 
 class PushNotificationsManager {
-  static const TAG = "PushNotificationsManager";
+  static const tag = "PushNotificationsManager";
 
   static PushNotificationsManager? _instance;
 
@@ -32,12 +32,12 @@ class PushNotificationsManager {
     ConnectycubeFlutterCallKit.initEventsHandler();
 
     ConnectycubeFlutterCallKit.onTokenRefreshed = (token) {
-      log('[onTokenRefresh] VoIP token: $token', TAG);
+      log('[onTokenRefresh] VoIP token: $token', tag);
       subscribe(token);
     };
 
     ConnectycubeFlutterCallKit.getToken().then((token) {
-      log('[getToken] VoIP token: $token', TAG);
+      log('[getToken] VoIP token: $token', tag);
       if (token != null) {
         subscribe(token);
       }
@@ -45,12 +45,12 @@ class PushNotificationsManager {
   }
 
   subscribe(String token) async {
-    log('[subscribe] token: $token', PushNotificationsManager.TAG);
+    log('[subscribe] token: $token', PushNotificationsManager.tag);
 
     var savedToken = await SharedPrefs.getSubscriptionToken();
     if (token == savedToken) {
       log('[subscribe] skip subscription for same token',
-          PushNotificationsManager.TAG);
+          PushNotificationsManager.tag);
       return;
     }
 
@@ -71,7 +71,7 @@ class PushNotificationsManager {
 
     var deviceInfoPlugin = DeviceInfoPlugin();
 
-    var deviceId;
+    String? deviceId;
 
     if (kIsWeb) {
       var webBrowserInfo = await deviceInfoPlugin.webBrowserInfo;
@@ -94,16 +94,16 @@ class PushNotificationsManager {
 
     createSubscription(parameters.getRequestParameters())
         .then((cubeSubscriptions) {
-      log('[subscribe] subscription SUCCESS', PushNotificationsManager.TAG);
+      log('[subscribe] subscription SUCCESS', PushNotificationsManager.tag);
       SharedPrefs.saveSubscriptionToken(token);
-      cubeSubscriptions.forEach((subscription) {
+      for (var subscription in cubeSubscriptions) {
         if (subscription.device!.clientIdentificationSequence == token) {
           SharedPrefs.saveSubscriptionId(subscription.id!);
         }
-      });
+      }
     }).catchError((error) {
       log('[subscribe] subscription ERROR: $error',
-          PushNotificationsManager.TAG);
+          PushNotificationsManager.tag);
     });
   }
 
@@ -117,7 +117,7 @@ class PushNotificationsManager {
         return Future.value();
       }
     }).catchError((onError) {
-      log('[unsubscribe] ERROR: $onError', PushNotificationsManager.TAG);
+      log('[unsubscribe] ERROR: $onError', PushNotificationsManager.tag);
     });
   }
 }

@@ -17,7 +17,7 @@ import '../utils/platform_utils.dart';
 import '../utils/pref_util.dart';
 
 class PushNotificationsManager {
-  static const TAG = "PushNotificationsManager";
+  static const tag = "PushNotificationsManager";
 
   static final PushNotificationsManager _instance =
       PushNotificationsManager._internal();
@@ -35,7 +35,7 @@ class PushNotificationsManager {
   Future<dynamic> Function(String? payload)? onNotificationClicked;
 
   init() async {
-    log('[init]', TAG);
+    log('[init]', tag);
     FirebaseMessaging firebaseMessaging = FirebaseMessaging.instance;
 
     await firebaseMessaging.requestPermission(
@@ -55,13 +55,13 @@ class PushNotificationsManager {
         InitializationSettings(
             android: initializationSettingsAndroid,
             iOS: initializationSettingsIOS,
-            macOS: DarwinInitializationSettings());
+            macOS: const DarwinInitializationSettings());
     await flutterLocalNotificationsPlugin.initialize(
       initializationSettings,
       onDidReceiveNotificationResponse:
           (NotificationResponse notificationResponse) {
         log('[onDidReceiveNotificationResponse] payload: ${notificationResponse.payload}',
-            TAG);
+            tag);
         var data = notificationResponse.payload;
         if (data != null) {
           if (onNotificationClicked != null) {
@@ -78,10 +78,10 @@ class PushNotificationsManager {
     String? token;
     if (Platform.isAndroid || kIsWeb || Platform.isIOS || Platform.isMacOS) {
       firebaseMessaging.getToken().then((token) {
-        log('[getToken] token: $token', TAG);
+        log('[getToken] token: $token', tag);
         subscribe(token);
       }).catchError((onError) {
-        log('[getToken] onError: $onError', TAG);
+        log('[getToken] onError: $onError', tag);
       });
     }
 
@@ -94,31 +94,32 @@ class PushNotificationsManager {
     });
 
     FirebaseMessaging.onMessage.listen((remoteMessage) {
-      log('[onMessage] message: ${remoteMessage.data}', TAG);
+      log('[onMessage] message: ${remoteMessage.data}', tag);
       showNotification(remoteMessage);
     });
 
     // TODO test after fix https://github.com/FirebaseExtended/flutterfire/issues/4898
     FirebaseMessaging.onMessageOpenedApp.listen((remoteMessage) {
-      log('[onMessageOpenedApp] remoteMessage: $remoteMessage', TAG);
+      log('[onMessageOpenedApp] remoteMessage: $remoteMessage', tag);
       onNotificationClicked?.call(jsonEncode(remoteMessage.data));
     });
   }
 
   subscribe(String? token) async {
-    log('[subscribe] token: $token', PushNotificationsManager.TAG);
+    log('[subscribe] token: $token', PushNotificationsManager.tag);
 
     SharedPrefs sharedPrefs = await SharedPrefs.instance.init();
     if (sharedPrefs.getSubscriptionToken() == token) {
       log('[subscribe] skip subscription for same token',
-          PushNotificationsManager.TAG);
+          PushNotificationsManager.tag);
       return;
     }
 
     CreateSubscriptionParameters parameters = CreateSubscriptionParameters();
     parameters.pushToken = token;
 
-    bool isProduction = kIsWeb ? true : bool.fromEnvironment('dart.vm.product');
+    bool isProduction =
+        kIsWeb ? true : const bool.fromEnvironment('dart.vm.product');
     parameters.environment =
         isProduction ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
 
@@ -129,7 +130,7 @@ class PushNotificationsManager {
 
     var deviceInfoPlugin = DeviceInfoPlugin();
 
-    var deviceId;
+    String? deviceId;
 
     if (kIsWeb) {
       var webBrowserInfo = await deviceInfoPlugin.webBrowserInfo;
@@ -145,23 +146,23 @@ class PushNotificationsManager {
       deviceId = macOsInfo.computerName;
     }
 
-    parameters.udid = deviceId ?? Uuid().v4;
+    parameters.udid = deviceId ?? const Uuid().v4();
 
     var packageInfo = await PackageInfo.fromPlatform();
     parameters.bundleIdentifier = packageInfo.packageName;
 
     createSubscription(parameters.getRequestParameters())
         .then((cubeSubscription) {
-      log('[subscribe] subscription SUCCESS', PushNotificationsManager.TAG);
+      log('[subscribe] subscription SUCCESS', PushNotificationsManager.tag);
       sharedPrefs.saveSubscriptionToken(token!);
-      cubeSubscription.forEach((subscription) {
+      for (var subscription in cubeSubscription) {
         if (subscription.clientIdentificationSequence == token) {
           sharedPrefs.saveSubscriptionId(subscription.id!);
         }
-      });
+      }
     }).catchError((error) {
       log('[subscribe] subscription ERROR: $error',
-          PushNotificationsManager.TAG);
+          PushNotificationsManager.tag);
     });
   }
 
@@ -176,20 +177,20 @@ class PushNotificationsManager {
       }
       return Future.value();
     }).catchError((onError) {
-      log('[unsubscribe] ERROR: $onError', PushNotificationsManager.TAG);
+      log('[unsubscribe] ERROR: $onError', PushNotificationsManager.tag);
     });
   }
 
   Future<dynamic> onDidReceiveLocalNotification(
       int id, String? title, String? body, String? payload) {
     log('[onDidReceiveLocalNotification] id: $id , title: $title, body: $body, payload: $payload',
-        PushNotificationsManager.TAG);
+        PushNotificationsManager.tag);
     return Future.value();
   }
 
   Future<dynamic> onSelectNotification(String? payload) {
     log('[onSelectNotification] payload: $payload',
-        PushNotificationsManager.TAG);
+        PushNotificationsManager.tag);
     onNotificationClicked?.call(payload);
     return Future.value();
   }
@@ -197,7 +198,7 @@ class PushNotificationsManager {
 
 showNotification(RemoteMessage message) {
   log('[showNotification] message: ${message.data}',
-      PushNotificationsManager.TAG);
+      PushNotificationsManager.tag);
   Map<String, dynamic> data = message.data;
 
   NotificationDetails buildNotificationDetails(
@@ -210,7 +211,7 @@ showNotification(RemoteMessage message) {
       threadIdentifier: threadIdentifier,
     );
 
-    final AndroidNotificationDetails androidPlatformChannelSpecifics =
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
         AndroidNotificationDetails(
       'messages_channel_id',
       'Chat messages',
@@ -242,20 +243,20 @@ showNotification(RemoteMessage message) {
 @pragma('vm:entry-point')
 Future<void> onBackgroundMessage(RemoteMessage message) async {
   log('[onBackgroundMessage] message: ${message.data}',
-      PushNotificationsManager.TAG);
+      PushNotificationsManager.tag);
   showNotification(message);
-  if(!Platform.isIOS) {
+  if (!Platform.isIOS) {
     updateBadgeCount(int.tryParse(message.data['badge'].toString()));
   }
   return Future.value();
 }
 
 Future<dynamic> onNotificationSelected(String? payload, BuildContext? context) {
-  log('[onSelectNotification] payload: $payload', PushNotificationsManager.TAG);
+  log('[onSelectNotification] payload: $payload', PushNotificationsManager.tag);
 
   if (context == null) return Future.value();
 
-  log('[onSelectNotification] context != null', PushNotificationsManager.TAG);
+  log('[onSelectNotification] context != null', PushNotificationsManager.tag);
 
   if (payload != null) {
     return SharedPrefs.instance.init().then((sharedPrefs) {
@@ -265,14 +266,14 @@ Future<dynamic> onNotificationSelected(String? payload, BuildContext? context) {
       String? dialogId = payloadObject['dialog_id'];
 
       log("[onSelectNotification] dialog_id: $dialogId",
-          PushNotificationsManager.TAG);
+          PushNotificationsManager.tag);
 
       getDialogs({'id': dialogId}).then((dialogs) {
         if (dialogs?.items != null && dialogs!.items.isNotEmpty) {
           CubeDialog dialog = dialogs.items.first;
 
           Navigator.pushNamed(context, 'chat_dialog',
-              arguments: {USER_ARG_NAME: user, DIALOG_ARG_NAME: dialog});
+              arguments: {userArgName: user, dialogArgName: dialog});
         }
       });
     });

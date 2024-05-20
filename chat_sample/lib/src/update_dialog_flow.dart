@@ -11,7 +11,7 @@ class UpdateDialog extends StatelessWidget {
   final CubeUser currentUser;
   final CubeDialog currentDialog;
 
-  UpdateDialog(this.currentUser, this.currentDialog);
+  const UpdateDialog(this.currentUser, this.currentDialog, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -33,14 +33,14 @@ class UpdateDialog extends StatelessWidget {
           case 'search_users':
             pageRout = MaterialPageRoute<List<int>?>(
                 builder: (context) => AddOccupantScreen(
-                      args![USER_ARG_NAME],
+                      args![userArgName],
                     ));
             break;
           default:
             pageRout = MaterialPageRoute(
                 builder: (context) => ChatDetailsScreen(
-                      args![USER_ARG_NAME],
-                      args[DIALOG_ARG_NAME],
+                      args![userArgName],
+                      args[dialogArgName],
                     ));
             break;
         }

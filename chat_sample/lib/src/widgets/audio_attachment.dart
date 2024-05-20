@@ -11,11 +11,11 @@ class AudioAttachment extends StatefulWidget {
   final Color accentColor;
 
   const AudioAttachment({
-    Key? key,
+    super.key,
     required this.source,
     required this.duration,
     this.accentColor = Colors.blue,
-  }) : super(key: key);
+  });
 
   @override
   State<StatefulWidget> createState() {
@@ -24,7 +24,7 @@ class AudioAttachment extends StatefulWidget {
 }
 
 class AudioAttachmentState extends State<AudioAttachment> {
-  final String TAG = 'AudioAttachment';
+  final String tag = 'AudioAttachment';
 
   final AudioPlayer player = AudioPlayer();
 
@@ -35,7 +35,7 @@ class AudioAttachmentState extends State<AudioAttachment> {
     player.setUrl(widget.source, preload: false);
     player.positionStream.listen((duration) {
       if (duration.inMilliseconds == player.duration?.inMilliseconds) {
-        player.seek(Duration(milliseconds: 0));
+        player.seek(const Duration(milliseconds: 0));
         player.pause();
       }
     });
@@ -44,7 +44,7 @@ class AudioAttachmentState extends State<AudioAttachment> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: EdgeInsets.only(left: 4),
+      margin: const EdgeInsets.only(left: 4),
       height: 70,
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -60,7 +60,7 @@ class AudioAttachmentState extends State<AudioAttachment> {
                 height: 40,
                 decoration: ShapeDecoration(
                   color: widget.accentColor,
-                  shape: CircleBorder(),
+                  shape: const CircleBorder(),
                 ),
                 child: StreamBuilder<PlayerState>(
                   stream: player.playerStateStream,
@@ -97,10 +97,7 @@ class AudioAttachmentState extends State<AudioAttachment> {
                     ),
                     Row(children: [
                       Text(
-                        formatHHMMSS(snapshot.data?.inSeconds ?? 0) +
-                            '/' +
-                            formatHHMMSS(player.duration?.inSeconds ??
-                                widget.duration ~/ 1000),
+                        '${formatHHMMSS(snapshot.data?.inSeconds ?? 0)}/${formatHHMMSS(player.duration?.inSeconds ?? widget.duration ~/ 1000)}',
                         style: TextStyle(color: widget.accentColor),
                       ),
                       StreamBuilder<ProcessingState>(
@@ -110,7 +107,7 @@ class AudioAttachmentState extends State<AudioAttachment> {
                                 visible:
                                     snapshot.data == ProcessingState.loading,
                                 child: Container(
-                                    margin: EdgeInsets.only(left: 4),
+                                    margin: const EdgeInsets.only(left: 4),
                                     width: 12,
                                     height: 12,
                                     child: CircularProgressIndicator(

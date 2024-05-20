@@ -8,10 +8,12 @@ import 'utils/consts.dart';
 import 'utils/pref_util.dart';
 import 'utils/route_utils.dart';
 
-const String PHONE_INPUT_ROUTE_NAME = 'PhoneInputScreen';
-const String SMS_CODE_INPUT_ROUTE_NAME = 'SMSCodeInputScreen';
+const String phoneInputRouteName = 'PhoneInputScreen';
+const String smsCodeInputRouteName = 'SMSCodeInputScreen';
 
 class VerifyPhoneNumber extends StatelessWidget {
+  const VerifyPhoneNumber({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Navigator(
@@ -34,14 +36,14 @@ class VerifyPhoneNumber extends StatelessWidget {
               child: child,
             );
           },
-          settings: RouteSettings(name: PHONE_INPUT_ROUTE_NAME),
+          settings: const RouteSettings(name: phoneInputRouteName),
           pageBuilder: (context, animation, secondaryAnimation) =>
               PhoneInputScreen(
             actions: [
               SMSCodeRequestedAction((ctx1, action, flowKey, phoneNumber) {
                 Navigator.of(context).push(
                   MaterialPageRoute(
-                    settings: RouteSettings(name: SMS_CODE_INPUT_ROUTE_NAME),
+                    settings: const RouteSettings(name: smsCodeInputRouteName),
                     builder: (ctx2) => SMSCodeInputScreen(
                       flowKey: flowKey,
                       actions: [
@@ -62,7 +64,7 @@ class VerifyPhoneNumber extends StatelessWidget {
                         }),
                         AuthStateChangeAction<CredentialLinked>((ctx3, state) {
                           log('[AuthStateChangeAction] CredentialLinked');
-                          state.user.providerData.forEach((providerData) {
+                          for (var providerData in state.user.providerData) {
                             if (providerData.providerId ==
                                 PhoneAuthProvider().providerId) {
                               state.user.getIdToken().then((idToken) {
@@ -73,7 +75,7 @@ class VerifyPhoneNumber extends StatelessWidget {
                                         'login', (route) => false);
                               });
                             }
-                          });
+                          }
                         }),
                         AuthStateChangeAction<Uninitialized>((ctx3, state) {
                           log('[AuthStateChangeAction] Uninitialized');
@@ -125,7 +127,7 @@ class PhoneAuthRouteObserver extends RouteObserver {
   void didPop(Route route, Route? previousRoute) {
     super.didPop(route, previousRoute);
 
-    if (route.settings.name == PHONE_INPUT_ROUTE_NAME) {
+    if (route.settings.name == phoneInputRouteName) {
       Navigator.of(context, rootNavigator: true).pop();
     }
   }

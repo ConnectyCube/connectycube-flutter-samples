@@ -16,10 +16,10 @@ class AudioRecorder extends StatefulWidget {
       onAccept;
 
   const AudioRecorder({
-    Key? key,
+    super.key,
     required this.onClose,
     required this.onAccept,
-  }) : super(key: key);
+  });
 
   @override
   State<StatefulWidget> createState() {
@@ -28,7 +28,7 @@ class AudioRecorder extends StatefulWidget {
 }
 
 class AudioRecorderState extends State<AudioRecorder> {
-  final String TAG = 'AudioRecorder';
+  final String tag = 'AudioRecorder';
   final AudioPlayer player = AudioPlayer();
   final record.AudioRecorder recorder = record.AudioRecorder();
   final DurationTimer timer = DurationTimer();
@@ -51,7 +51,7 @@ class AudioRecorderState extends State<AudioRecorder> {
       alignment: Alignment.centerRight,
       child: Container(
         // width: 228,
-        padding: EdgeInsets.all(4.0),
+        padding: const EdgeInsets.all(4.0),
         height: 48,
         decoration: BoxDecoration(
             color: greyColor2, borderRadius: BorderRadius.circular(8.0)),
@@ -62,8 +62,8 @@ class AudioRecorderState extends State<AudioRecorder> {
               visible: player.audioSource != null,
               child: IconButton(
                 splashRadius: 20,
-                padding: EdgeInsets.symmetric(horizontal: 4),
-                constraints: BoxConstraints(),
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                constraints: const BoxConstraints(),
                 icon: Icon(
                   player.playing
                       ? Icons.pause_rounded
@@ -73,7 +73,7 @@ class AudioRecorderState extends State<AudioRecorder> {
                 onPressed: startStopPlayer,
               ),
             ),
-            SizedBox(
+            const SizedBox(
               width: 4,
             ),
             Row(children: [
@@ -83,11 +83,11 @@ class AudioRecorderState extends State<AudioRecorder> {
                   stream: player.positionStream,
                   builder: (context, snapshot) {
                     if (!snapshot.hasData) {
-                      return SizedBox.shrink();
+                      return const SizedBox.shrink();
                     }
 
                     return Text(
-                      formatHHMMSS(snapshot.data!.inSeconds) + '/',
+                      '${formatHHMMSS(snapshot.data!.inSeconds)}/',
                     );
                   },
                 ),
@@ -103,8 +103,8 @@ class AudioRecorderState extends State<AudioRecorder> {
             Visibility(
               visible: path == null && !isMicAwaiting,
               child: IconButton(
-                padding: EdgeInsets.symmetric(horizontal: 4),
-                constraints: BoxConstraints(),
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                constraints: const BoxConstraints(),
                 splashRadius: 20,
                 icon: Icon(isRecording
                     ? Icons.stop_circle_rounded
@@ -118,10 +118,10 @@ class AudioRecorderState extends State<AudioRecorder> {
             Visibility(
               visible: isMicAwaiting,
               child: Container(
-                  margin: EdgeInsets.symmetric(horizontal: 4),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
                   width: 14,
                   height: 14,
-                  child: CircularProgressIndicator(
+                  child: const CircularProgressIndicator(
                     color: Colors.red,
                     strokeWidth: 2,
                   )),
@@ -130,9 +130,9 @@ class AudioRecorderState extends State<AudioRecorder> {
               visible: path != null,
               child: IconButton(
                 splashRadius: 20,
-                padding: EdgeInsets.symmetric(horizontal: 4),
-                constraints: BoxConstraints(),
-                icon: Icon(Icons.check_rounded),
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                constraints: const BoxConstraints(),
+                icon: const Icon(Icons.check_rounded),
                 color: Colors.blue,
                 onPressed: () {
                   widget.onAccept.call(
@@ -146,9 +146,9 @@ class AudioRecorderState extends State<AudioRecorder> {
             ),
             IconButton(
               splashRadius: 20,
-              padding: EdgeInsets.symmetric(horizontal: 4),
-              constraints: BoxConstraints(),
-              icon: Icon(Icons.close),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              constraints: const BoxConstraints(),
+              icon: const Icon(Icons.close),
               color: Colors.red,
               onPressed: () {
                 recorder.stop();
@@ -206,8 +206,8 @@ class AudioRecorderState extends State<AudioRecorder> {
               mimeType = 'audio/wav';
               timer.start();
               recorder.start(
-                  record.RecordConfig(encoder: record.AudioEncoder.wav),
-                  path: path + '/$fileName');
+                  const record.RecordConfig(encoder: record.AudioEncoder.wav),
+                  path: '$path/$fileName');
             });
           });
         } else {

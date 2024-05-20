@@ -17,10 +17,12 @@ import 'src/utils/pref_util.dart';
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
   configurePlatform();
-  runApp(App());
+  runApp(const App());
 }
 
 class App extends StatefulWidget {
+  const App({super.key});
+
   @override
   State<StatefulWidget> createState() {
     return _AppState();
@@ -37,7 +39,7 @@ class _AppState extends State<App> {
         useMaterial3: true,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
       ),
-      home: LoginScreen(),
+      home: const LoginScreen(),
       onGenerateRoute: (settings) {
         String? routeName = settings.name;
         String? name = routeName?.split('?').firstOrNull;
@@ -52,7 +54,7 @@ class _AppState extends State<App> {
         if (uri != null) {
           var params = uri.queryParameters;
 
-          var meetingId = params[ARG_MEETING_ID];
+          var meetingId = params[argMeetingId];
 
           if (meetingId != null) {
             return MaterialPageRoute(builder: (context) {
@@ -70,59 +72,61 @@ class _AppState extends State<App> {
         }
 
         switch (name) {
-          case LOGIN_SCREEN:
-            pageRout = MaterialPageRoute(builder: (context) => LoginScreen());
+          case loginScreen:
+            pageRout =
+                MaterialPageRoute(builder: (context) => const LoginScreen());
             break;
 
-          case CONVERSATION_SCREEN:
+          case conversationScreen:
             if (args != null) {
               pageRout = MaterialPageRoute(
                   builder: (context) => ConversationCallScreen(
-                        args[ARG_USER],
-                        args[ARG_CALL_SESSION],
-                        args[ARG_MEETING_ID],
-                        args[ARG_OPPONENTS],
-                        args[ARG_IS_INCOMING],
-                        args[ARG_CALL_NAME],
+                        args[argUser],
+                        args[argCallSession],
+                        args[argMeetingId],
+                        args[argOpponents],
+                        args[argIsIncoming],
+                        args[argCallName],
                         initialLocalMediaStream:
-                            args[ARG_INITIAL_LOCAL_MEDIA_STREAM],
-                        isFrontCameraUsed: args[ARG_IS_FRONT_CAMERA_USED],
-                        isSharedCall: args[ARG_IS_SHARED_CALL],
+                            args[argInitialLocalMediaStream],
+                        isFrontCameraUsed: args[argIsFrontCameraUsed],
+                        isSharedCall: args[argIsSharedCall],
                       ));
             }
             break;
 
-          case SELECT_OPPONENTS_SCREEN:
+          case selectOpponentsScreen:
             if (args != null) {
               pageRout = MaterialPageRoute(
-                  builder: (context) => SelectOpponentsScreen(args[ARG_USER]));
+                  builder: (context) => SelectOpponentsScreen(args[argUser]));
             }
 
             break;
 
-          case INCOMING_CALL_SCREEN:
+          case incomingCallScreen:
             if (args != null) {
               pageRout = MaterialPageRoute(
                   builder: (context) => IncomingCallScreen(
-                      args[ARG_USER],
-                      args[ARG_CALL_ID],
-                      args[ARG_MEETING_ID],
-                      args[ARG_INITIATOR_ID],
-                      args[ARG_OPPONENTS],
-                      args[ARG_CALL_TYPE],
-                      args[ARG_CALL_NAME]));
+                      args[argUser],
+                      args[argCallId],
+                      args[argMeetingId],
+                      args[argInitiatorId],
+                      args[argOpponents],
+                      args[argCallType],
+                      args[argCallName]));
             }
 
             break;
 
           default:
-            pageRout = MaterialPageRoute(builder: (context) => LoginScreen());
+            pageRout =
+                MaterialPageRoute(builder: (context) => const LoginScreen());
 
             break;
         }
 
         return pageRout ??
-            MaterialPageRoute(builder: (context) => LoginScreen());
+            MaterialPageRoute(builder: (context) => const LoginScreen());
       },
     );
   }
@@ -145,21 +149,19 @@ class _AppState extends State<App> {
   Future<Widget> prepareConversationScreen(String meetingId) async {
     var currentUser = await SharedPrefs.getUser();
 
-    if (currentUser == null) {
-      currentUser = await createSession(CubeUser(
-              isGuest: true, fullName: 'Guest ${Random().nextInt(1024)}'))
-          .then((session) {
-        CubeChatConnection.instance
-            .login(CubeUser(id: session.user!.id!, password: session.token))
-            .then((value) {
-          log('[prepareConversationScreen] CHAT login SUCCESS', 'App');
-          SharedPrefs.saveNewUser(session.user!..password = session.token);
-          SharedPrefs.saveSession(session);
-        });
-
-        return session.user;
+    currentUser ??= await createSession(CubeUser(
+            isGuest: true, fullName: 'Guest ${Random().nextInt(1024)}'))
+        .then((session) {
+      CubeChatConnection.instance
+          .login(CubeUser(id: session.user!.id!, password: session.token))
+          .then((value) {
+        log('[prepareConversationScreen] CHAT login SUCCESS', 'App');
+        SharedPrefs.saveNewUser(session.user!..password = session.token);
+        SharedPrefs.saveSession(session);
       });
-    }
+
+      return session.user;
+    });
 
     return ConferenceClient.instance
         .createCallSession(
@@ -168,7 +170,7 @@ class _AppState extends State<App> {
     )
         .then((confSession) {
       CallManager.instance.init(context);
-      CallManager.instance.currentCallState = InternalCallState.ACCEPTED;
+      CallManager.instance.currentCallState = InternalCallState.accepted;
       CallManager.instance.setActiveCall('', meetingId, -1, []);
       CallManager.instance.sendAcceptMessage('', meetingId, -1);
 
@@ -176,7 +178,7 @@ class _AppState extends State<App> {
         currentUser!,
         confSession,
         meetingId,
-        [],
+        const [],
         true,
         'Shared conference',
         isSharedCall: true,
@@ -187,9 +189,9 @@ class _AppState extends State<App> {
 
 initConnectycube() {
   init(
-    config.APP_ID,
-    config.AUTH_KEY,
-    config.AUTH_SECRET,
+    config.appId,
+    config.authKey,
+    config.authSecret,
     onSessionRestore: () {
       return SharedPrefs.getUser().then((savedUser) async {
         if (savedUser?.isGuest ?? false) {
@@ -207,23 +209,23 @@ initConnectycube() {
     },
   );
 
-  setEndpoints(config.API_ENDPOINT, config.CHAT_ENDPOINT);
+  setEndpoints(config.apiEndpoint, config.chatEndpoint);
 
-  ConferenceConfig.instance.url = config.CONF_SERVER_ENDPOINT;
+  ConferenceConfig.instance.url = config.confServerEndpoint;
 }
 
 initConnectycubeContextLess() async {
-  CubeSettings.instance.applicationId = config.APP_ID;
-  CubeSettings.instance.authorizationKey = config.AUTH_KEY;
-  CubeSettings.instance.authorizationSecret = config.AUTH_SECRET;
+  CubeSettings.instance.applicationId = config.appId;
+  CubeSettings.instance.authorizationKey = config.authKey;
+  CubeSettings.instance.authorizationSecret = config.authSecret;
   CubeSettings.instance.onSessionRestore = () {
     return SharedPrefs.getUser().then((savedUser) {
       return createSession(savedUser);
     });
   };
 
-  CubeSettings.instance.apiEndpoint = config.API_ENDPOINT;
-  CubeSettings.instance.chatEndpoint = config.CHAT_ENDPOINT;
+  CubeSettings.instance.apiEndpoint = config.apiEndpoint;
+  CubeSettings.instance.chatEndpoint = config.chatEndpoint;
 
-  ConferenceConfig.instance.url = config.CONF_SERVER_ENDPOINT;
+  ConferenceConfig.instance.url = config.confServerEndpoint;
 }

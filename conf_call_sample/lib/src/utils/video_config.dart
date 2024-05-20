@@ -5,6 +5,6 @@ class VideoQuality {
   const VideoQuality(this.width, this.height);
 }
 
-const HD_VIDEO = const VideoQuality(1280, 720);
-const VGA_VIDEO = const VideoQuality(640, 480);
-const QVGA_VIDEO = const VideoQuality(320, 240);
+const hdVideo = VideoQuality(1280, 720);
+const vgaVideo = VideoQuality(640, 480);
+const qVgaVideo = VideoQuality(320, 240);

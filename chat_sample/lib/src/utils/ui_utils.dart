@@ -5,16 +5,16 @@ Size getWidgetSize(double aspectRatio, int maxWidth, int maxHeight) {
     return aspectRatio < 1;
   }
 
-  var widgetWidth;
-  var widgetHeight;
+  double widgetWidth;
+  double widgetHeight;
 
   if (isVertical()) {
-    widgetHeight = maxHeight;
+    widgetHeight = maxHeight.toDouble();
     widgetWidth = widgetHeight * aspectRatio;
   } else {
-    widgetWidth = maxWidth;
-    widgetHeight = widgetWidth ~/ aspectRatio;
+    widgetWidth = maxWidth.toDouble();
+    widgetHeight = (widgetWidth ~/ aspectRatio).toDouble();
   }
 
-  return Size(widgetWidth.toDouble(), widgetHeight.toDouble());
+  return Size(widgetWidth, widgetHeight);
 }

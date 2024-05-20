@@ -1,3 +1,4 @@
+import 'package:chat_sample/src/managers/chat_manager.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 
@@ -12,13 +13,14 @@ class NewGroupDialogScreen extends StatelessWidget {
   final CubeDialog _cubeDialog;
   final List<CubeUser> users;
 
-  NewGroupDialogScreen(this.currentUser, this._cubeDialog, this.users);
+  const NewGroupDialogScreen(this.currentUser, this._cubeDialog, this.users,
+      {super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
-          title: Text(
+          title: const Text(
             'Group configuration...',
           ),
           centerTitle: true,
@@ -29,25 +31,24 @@ class NewGroupDialogScreen extends StatelessWidget {
 }
 
 class NewChatScreen extends StatefulWidget {
-  static const String TAG = "_CreateChatScreenState";
+  static const String tag = "_CreateChatScreenState";
   final CubeUser currentUser;
-  final CubeDialog _cubeDialog;
+  final CubeDialog cubeDialog;
   final List<CubeUser?> users;
 
-  NewChatScreen(this.currentUser, this._cubeDialog, this.users);
+  const NewChatScreen(this.currentUser, this.cubeDialog, this.users,
+      {super.key});
 
   @override
-  State createState() => NewChatScreenState(currentUser, _cubeDialog, users);
+  State createState() => NewChatScreenState();
 }
 
 class NewChatScreenState extends State<NewChatScreen> {
-  static const String TAG = "NewChatScreenState";
-  final CubeUser currentUser;
-  final CubeDialog _cubeDialog;
-  final List<CubeUser?> users;
-  final TextEditingController _nameFilter = new TextEditingController();
+  static const String tag = "NewChatScreenState";
 
-  NewChatScreenState(this.currentUser, this._cubeDialog, this.users);
+  final TextEditingController _nameFilter = TextEditingController();
+
+  NewChatScreenState();
 
   @override
   void initState() {
@@ -58,7 +59,7 @@ class NewChatScreenState extends State<NewChatScreen> {
   void _nameListener() {
     if (_nameFilter.text.length > 4) {
       log("_createDialogImage text= ${_nameFilter.text.trim()}");
-      _cubeDialog.name = _nameFilter.text.trim();
+      widget.cubeDialog.name = _nameFilter.text.trim();
     }
   }
 
@@ -66,7 +67,7 @@ class NewChatScreenState extends State<NewChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
         body: Container(
-            padding: EdgeInsets.all(16),
+            padding: const EdgeInsets.all(16),
             child: Column(
               children: [
                 _buildGroupFields(),
@@ -75,20 +76,20 @@ class NewChatScreenState extends State<NewChatScreen> {
             )),
         floatingActionButton: FloatingActionButton(
           heroTag: "New dialog",
-          child: Icon(
+          backgroundColor: Colors.blue,
+          onPressed: () => _createDialog(),
+          child: const Icon(
             Icons.check,
             color: Colors.white,
           ),
-          backgroundColor: Colors.blue,
-          onPressed: () => _createDialog(),
         ),
         resizeToAvoidBottomInset: false);
   }
 
   _buildGroupFields() {
     getIcon() {
-      return getDialogAvatarWidget(_cubeDialog, 45,
-          placeholder: Icon(
+      return getDialogAvatarWidget(widget.cubeDialog, 45,
+          placeholder: const Icon(
             Icons.add_a_photo,
             size: 45.0,
             color: blueColor,
@@ -103,29 +104,29 @@ class NewChatScreenState extends State<NewChatScreen> {
               onPressed: () => _createDialogImage(),
               elevation: 2.0,
               fillColor: Colors.white,
+              padding: const EdgeInsets.all(0),
+              shape: const CircleBorder(),
               child: getIcon(),
-              padding: EdgeInsets.all(0),
-              shape: CircleBorder(),
             ),
-            SizedBox(
+            const SizedBox(
               width: 16,
             ),
             Flexible(
               child: TextField(
                 autofocus: true,
                 controller: _nameFilter,
-                decoration: InputDecoration(labelText: 'Group Name...'),
+                decoration: const InputDecoration(labelText: 'Group Name...'),
               ),
             )
           ],
         ),
         Container(
-          child: Text(
+          alignment: Alignment.centerLeft,
+          margin: const EdgeInsets.all(16.0),
+          child: const Text(
             'Please provide a group name and an optional group icon',
             style: TextStyle(color: primaryColor),
           ),
-          alignment: Alignment.centerLeft,
-          margin: EdgeInsets.all(16.0),
         ),
       ],
     );
@@ -144,7 +145,7 @@ class NewChatScreenState extends State<NewChatScreen> {
       var url = cubeFile.getPublicUrl();
       log("_createDialogImage url= $url");
       setState(() {
-        _cubeDialog.photo = url;
+        widget.cubeDialog.photo = url;
       });
     }).catchError((exception) {
       _processDialogError(exception);
@@ -152,67 +153,65 @@ class NewChatScreenState extends State<NewChatScreen> {
   }
 
   _buildDialogOccupants() {
-    _getListItemTile(BuildContext context, int index) {
-      return Container(
-        child: Column(
-          children: <Widget>[
-            getUserAvatarWidget(users[index]!, 25),
-            Container(
-              child: Column(
-                children: <Widget>[
-                  Container(
-                    child: Text(
-                      users[index]!.fullName ??
-                          users[index]!.login ??
-                          users[index]!.email ??
-                          '???',
-                      style: TextStyle(color: primaryColor),
-                    ),
-                    width: MediaQuery.of(context).size.width / 4,
-                    alignment: Alignment.center,
-                    margin: EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 5.0),
+    getListItemTile(BuildContext context, int index) {
+      return Column(
+        children: <Widget>[
+          getUserAvatarWidget(widget.users[index]!, 25),
+          Container(
+            margin: const EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 10.0),
+            child: Column(
+              children: <Widget>[
+                Container(
+                  width: MediaQuery.of(context).size.width / 4,
+                  alignment: Alignment.center,
+                  margin: const EdgeInsets.fromLTRB(0.0, 0.0, 0.0, 5.0),
+                  child: Text(
+                    widget.users[index]!.fullName ??
+                        widget.users[index]!.login ??
+                        widget.users[index]!.email ??
+                        '???',
+                    style: const TextStyle(color: primaryColor),
                   ),
-                ],
-              ),
-              margin: EdgeInsets.fromLTRB(0.0, 10.0, 0.0, 10.0),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       );
     }
 
-    _getOccupants() {
+    getOccupants() {
       return ListView.builder(
         shrinkWrap: true,
-        padding: EdgeInsets.symmetric(vertical: 20.0),
+        padding: const EdgeInsets.symmetric(vertical: 20.0),
         scrollDirection: Axis.horizontal,
-        itemCount: _cubeDialog.occupantsIds!.length,
-        itemBuilder: _getListItemTile,
+        itemCount: widget.cubeDialog.occupantsIds!.length,
+        itemBuilder: getListItemTile,
       );
     }
 
-    return Container(
-      child: Expanded(
-        child: _getOccupants(),
-      ),
+    return Expanded(
+      child: getOccupants(),
     );
   }
 
   void _processDialogError(exception) {
-    log("error $exception", TAG);
+    log("error $exception", tag);
     showDialogError(exception, context);
   }
 
   _createDialog() {
-    log("_createDialog _cubeDialog= $_cubeDialog");
-    if (_cubeDialog.name == null || _cubeDialog.name!.length < 5) {
+    log("_createDialog _cubeDialog= $widget.cubeDialog");
+    if (widget.cubeDialog.name == null || widget.cubeDialog.name!.length < 5) {
       showDialogMsg("Enter more than 4 character", context);
     } else {
-      createDialog(_cubeDialog).then((createdDialog) {
+      createDialog(widget.cubeDialog).then((createdDialog) {
+        ChatManager.instance.addDialogController.add(createdDialog);
+
         Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
-            'chat_dialog', (route) => false, arguments: {
-          USER_ARG_NAME: currentUser,
-          DIALOG_ARG_NAME: createdDialog
+            'chat_dialog', (route) => route.isFirst, arguments: {
+          userArgName: widget.currentUser,
+          dialogArgName: createdDialog
         });
       }).catchError((exception) {
         _processDialogError(exception);

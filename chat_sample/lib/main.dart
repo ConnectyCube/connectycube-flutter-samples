@@ -21,7 +21,7 @@ import 'src/settings_screen.dart';
 import 'src/utils/auth_utils.dart';
 import 'src/utils/configs.dart' as config;
 import 'src/utils/consts.dart';
-import 'src/utils/platform_utils.dart' as platformUtils;
+import 'src/utils/platform_utils.dart' as platform_utils;
 import 'src/utils/pref_util.dart';
 import 'src/utils/route_utils.dart';
 
@@ -47,10 +47,12 @@ Future<void> main() async {
     }
   }
 
-  runApp(App());
+  runApp(const App());
 }
 
 class App extends StatefulWidget {
+  const App({super.key});
+
   @override
   State<StatefulWidget> createState() {
     return _AppState();
@@ -68,7 +70,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
         useMaterial3: false,
         primarySwatch: Colors.green,
       ),
-      home: LoginScreen(),
+      home: const LoginScreen(),
       navigatorKey: Navigation.mainNavigation,
       onGenerateRoute: (settings) {
         String? name = settings.name;
@@ -80,47 +82,49 @@ class _AppState extends State<App> with WidgetsBindingObserver {
         switch (name) {
           case 'chat_dialog':
             pageRout = MaterialPageRoute(
-                builder: (context) => platformUtils.isDesktop()
+                builder: (context) => platform_utils.isDesktop()
                     ? ChatDialogResizableScreen(
-                        args![USER_ARG_NAME], args[DIALOG_ARG_NAME])
+                        args![userArgName], args[dialogArgName])
                     : ChatDialogScreen(
-                        args![USER_ARG_NAME], args[DIALOG_ARG_NAME]));
+                        args![userArgName], args[dialogArgName]));
             break;
 
           case 'chat_dialog_resizable':
             pageRout = MaterialPageRoute<bool>(
               builder: (context) => ChatDialogResizableScreen(
-                  args![USER_ARG_NAME], args[DIALOG_ARG_NAME]),
+                  args![userArgName], args[dialogArgName]),
             );
 
             break;
 
           case 'chat_details':
             pageRout = MaterialPageRoute(
-                builder: (context) => ChatDetailsScreen(
-                    args![USER_ARG_NAME], args[DIALOG_ARG_NAME]));
+                builder: (context) =>
+                    ChatDetailsScreen(args![userArgName], args[dialogArgName]));
             break;
 
           case 'select_dialog':
             pageRout = MaterialPageRoute<bool>(
-                builder: (context) => platformUtils.isDesktop()
+                builder: (context) => platform_utils.isDesktop()
                     ? ChatDialogResizableScreen(
-                        args![USER_ARG_NAME], args[DIALOG_ARG_NAME])
-                    : SelectDialogScreen(args![USER_ARG_NAME], null, null));
+                        args![userArgName], args[dialogArgName])
+                    : SelectDialogScreen(args![userArgName], null, null));
 
             break;
 
           case 'login':
-            pageRout = MaterialPageRoute(builder: (context) => LoginScreen());
+            pageRout =
+                MaterialPageRoute(builder: (context) => const LoginScreen());
             break;
 
           case 'settings':
             pageRout = MaterialPageRoute(
-                builder: (context) => SettingsScreen(args![USER_ARG_NAME]));
+                builder: (context) => SettingsScreen(args![userArgName]));
             break;
 
           default:
-            pageRout = MaterialPageRoute(builder: (context) => LoginScreen());
+            pageRout =
+                MaterialPageRoute(builder: (context) => const LoginScreen());
 
             break;
         }
@@ -138,7 +142,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
   void initState() {
     super.initState();
 
-    init(config.APP_ID, config.AUTH_KEY, config.AUTH_SECRET,
+    init(config.appId, config.authKey, config.authSecret,
         onSessionRestore: () async {
       SharedPrefs sharedPrefs = await SharedPrefs.instance.init();
 
@@ -161,7 +165,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
       }
     });
 
-    setEndpoints(config.API_ENDPOINT, config.CHAT_ENDPOINT);
+    setEndpoints(config.apiEndpoint, config.chatEndpoint);
 
     connectivityStateSubscription =
         Connectivity().onConnectivityChanged.listen((connectivityType) {

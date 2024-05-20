@@ -13,7 +13,7 @@ class MinorVideo extends StatelessWidget {
   final Function(DragUpdateDetails details)? onPanUpdate;
   final Function(DragEndDetails details)? onPanEnd;
 
-  MinorVideo({
+  const MinorVideo({
     super.key,
     required this.width,
     required this.height,
@@ -51,13 +51,13 @@ class MinorVideo extends StatelessWidget {
                 child: Align(
                   alignment: Alignment.bottomCenter,
                   child: Container(
-                    margin: EdgeInsets.only(bottom: 8),
+                    margin: const EdgeInsets.only(bottom: 8),
                     child: FutureBuilder<String>(
                       future: getUserName ?? Future.value(''),
                       builder: (context, snapshot) {
                         return Text(
                           snapshot.data ?? 'Unknown user',
-                          style: TextStyle(
+                          style: const TextStyle(
                             color: Colors.white,
                             shadows: [
                               Shadow(

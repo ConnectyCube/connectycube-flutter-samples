@@ -4,8 +4,6 @@ import 'dart:collection';
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app_badger/flutter_app_badger.dart';
-import 'package:universal_io/io.dart';
 
 import 'platform_utils.dart';
 
@@ -18,11 +16,11 @@ void showDialogError(exception, context) {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Error"),
+          title: const Text("Error"),
           content: Text("Something went wrong: $exception"),
           actions: <Widget>[
             TextButton(
-              child: Text("OK"),
+              child: const Text("OK"),
               onPressed: () => Navigator.of(context).pop(),
             )
           ],
@@ -35,11 +33,11 @@ void showDialogMsg(msg, context) {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Alert"),
+          title: const Text("Alert"),
           content: Text(msg),
           actions: <Widget>[
             TextButton(
-              child: Text("OK"),
+              child: const Text("OK"),
               onPressed: () => Navigator.of(context).pop(),
             )
           ],
@@ -59,8 +57,7 @@ Future<Map<int, CubeUser>> getUsersByIds(Set<int> ids) async {
   try {
     var result =
         await (getAllUsersByIds(ids) as FutureOr<PagedResult<CubeUser>>);
-    users.addAll(Map.fromIterable(result.items,
-        key: (item) => item.id, value: (item) => item));
+    users.addAll({for (var item in result.items) item.id!: item});
   } catch (ex) {
     log("exception= $ex");
   }

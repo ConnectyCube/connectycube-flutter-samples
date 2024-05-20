@@ -1,6 +1,5 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_ui_oauth_google/firebase_ui_oauth_google.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -16,20 +15,20 @@ import 'widgets/common.dart';
 class SettingsScreen extends StatelessWidget {
   final CubeUser currentUser;
 
-  SettingsScreen(this.currentUser);
+  const SettingsScreen(this.currentUser, {super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            icon: Icon(Icons.close, color: Colors.white),
+            icon: const Icon(Icons.close, color: Colors.white),
             onPressed: () {
               Navigator.of(context).pop();
             },
           ),
           automaticallyImplyLeading: false,
-          title: Text(
+          title: const Text(
             'Settings',
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
@@ -43,42 +42,42 @@ class SettingsScreen extends StatelessWidget {
 class BodyLayout extends StatefulWidget {
   final CubeUser currentUser;
 
-  BodyLayout(this.currentUser);
+  const BodyLayout(this.currentUser, {super.key});
 
   @override
   State<StatefulWidget> createState() {
-    return _BodyLayoutState(currentUser);
+    return _BodyLayoutState();
   }
 }
 
 class _BodyLayoutState extends State<BodyLayout> {
-  static const String TAG = "_BodyLayoutState";
+  static const String tag = "_BodyLayoutState";
 
-  final CubeUser currentUser;
   var _isUsersContinues = false;
   String? _avatarUrl = "";
-  final TextEditingController _loginFilter = new TextEditingController();
-  final TextEditingController _nameFilter = new TextEditingController();
-  final TextEditingController _emailFilter = new TextEditingController();
+  final TextEditingController _loginFilter = TextEditingController();
+  final TextEditingController _nameFilter = TextEditingController();
+  final TextEditingController _emailFilter = TextEditingController();
   String _login = "";
   String _name = "";
   String _email = "";
 
   LoginType loginType = LoginType.login;
 
-  _BodyLayoutState(this.currentUser) {
+  _BodyLayoutState() {
     _loginFilter.addListener(_loginListen);
     _nameFilter.addListener(_nameListen);
     _emailFilter.addListener(_emailListen);
-    _nameFilter.text = currentUser.fullName ?? '';
-    _loginFilter.text = currentUser.login ?? '';
-    _emailFilter.text = currentUser.email ?? '';
   }
 
   @override
   void initState() {
     super.initState();
     loginType = SharedPrefs.instance.getLoginType() ?? LoginType.login;
+
+    _nameFilter.text = widget.currentUser.fullName ?? '';
+    _loginFilter.text = widget.currentUser.login ?? '';
+    _emailFilter.text = widget.currentUser.email ?? '';
   }
 
   void _loginListen() {
@@ -111,23 +110,23 @@ class _BodyLayoutState extends State<BodyLayout> {
       body: SingleChildScrollView(
         child: Center(
           child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: 400),
+            constraints: const BoxConstraints(maxWidth: 400),
             child: Container(
               alignment: Alignment.center,
-              padding: EdgeInsets.all(60),
+              padding: const EdgeInsets.all(60),
               child: Column(
                 children: [
                   _buildAvatarFields(),
                   _buildTextFields(),
                   _buildButtons(),
                   Container(
-                    margin: EdgeInsets.only(left: 8),
+                    margin: const EdgeInsets.only(left: 8),
                     child: Visibility(
                       maintainSize: false,
                       maintainAnimation: false,
                       maintainState: false,
                       visible: _isUsersContinues,
-                      child: CircularProgressIndicator(
+                      child: const CircularProgressIndicator(
                         strokeWidth: 2,
                       ),
                     ),
@@ -142,9 +141,9 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   Widget _buildAvatarFields() {
-    Widget avatarCircle = getUserAvatarWidget(currentUser, 50);
+    Widget avatarCircle = getUserAvatarWidget(widget.currentUser, 50);
 
-    return new Stack(
+    return Stack(
       children: <Widget>[
         InkWell(
           splashColor: greyColor2,
@@ -152,22 +151,22 @@ class _BodyLayoutState extends State<BodyLayout> {
           onTap: () => _chooseUserImage(),
           child: avatarCircle,
         ),
-        new Positioned(
+        Positioned(
+          top: 55.0,
+          right: 35.0,
           child: RawMaterialButton(
             onPressed: () {
               _chooseUserImage();
             },
             elevation: 2.0,
             fillColor: Colors.white,
-            child: Icon(
+            padding: const EdgeInsets.all(5.0),
+            shape: const CircleBorder(),
+            child: const Icon(
               Icons.mode_edit,
               size: 20.0,
             ),
-            padding: EdgeInsets.all(5.0),
-            shape: CircleBorder(),
           ),
-          top: 55.0,
-          right: 35.0,
         ),
       ],
     );
@@ -185,7 +184,7 @@ class _BodyLayoutState extends State<BodyLayout> {
     uploadImageFuture.then((cubeFile) {
       _avatarUrl = cubeFile.getPublicUrl();
       setState(() {
-        currentUser.avatar = _avatarUrl;
+        widget.currentUser.avatar = _avatarUrl;
       });
     }).catchError((exception) {
       _processUpdateUserError(exception);
@@ -193,93 +192,80 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   Widget _buildTextFields() {
-    return Container(
-      child: Column(
-        children: <Widget>[
-          Container(
-            child: TextField(
-              controller: _nameFilter,
-              decoration: InputDecoration(labelText: 'Change name'),
-            ),
+    return Column(
+      children: <Widget>[
+        TextField(
+          controller: _nameFilter,
+          decoration: const InputDecoration(labelText: 'Change name'),
+        ),
+        Visibility(
+          visible: loginType == LoginType.login || loginType == LoginType.email,
+          child: TextField(
+            controller: _loginFilter,
+            decoration: const InputDecoration(labelText: 'Change login'),
           ),
-          Visibility(
-            visible:
-                loginType == LoginType.login || loginType == LoginType.email,
-            child: Container(
-              child: TextField(
-                controller: _loginFilter,
-                decoration: InputDecoration(labelText: 'Change login'),
-              ),
-            ),
+        ),
+        Visibility(
+          visible: loginType == LoginType.login || loginType == LoginType.email,
+          child: TextField(
+            controller: _emailFilter,
+            decoration: const InputDecoration(labelText: 'Change e-mail'),
           ),
-          Visibility(
-            visible:
-                loginType == LoginType.login || loginType == LoginType.email,
-            child: Container(
-              child: TextField(
-                controller: _emailFilter,
-                decoration: InputDecoration(labelText: 'Change e-mail'),
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
   Widget _buildButtons() {
-    return new Container(
-      child: new Column(
-        children: <Widget>[
-          SizedBox(
-            height: 6,
+    return Column(
+      children: <Widget>[
+        const SizedBox(
+          height: 6,
+        ),
+        ElevatedButton(
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(120, 36),
           ),
-          ElevatedButton(
-            style: OutlinedButton.styleFrom(
-              minimumSize: Size(120, 36),
-            ),
-            child: new Text('Save'),
-            onPressed: _updateUser,
+          onPressed: _updateUser,
+          child: const Text('Save'),
+        ),
+        const SizedBox(
+          height: 6,
+        ),
+        OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(160, 36),
           ),
-          SizedBox(
-            height: 6,
+          icon: const Icon(
+            Icons.logout,
           ),
-          OutlinedButton.icon(
-            style: OutlinedButton.styleFrom(
-              minimumSize: Size(160, 36),
-            ),
-            icon: Icon(
-              Icons.logout,
-            ),
-            label: Text('Logout'),
-            onPressed: _logout,
+          label: const Text('Logout'),
+          onPressed: _logout,
+        ),
+        const SizedBox(
+          height: 6,
+        ),
+        OutlinedButton.icon(
+          style: OutlinedButton.styleFrom(
+            foregroundColor: Colors.red.shade300,
+            minimumSize: const Size(160, 36),
           ),
-          SizedBox(
-            height: 6,
+          icon: const Icon(
+            Icons.delete,
+            color: Colors.red,
           ),
-          OutlinedButton.icon(
-            style: OutlinedButton.styleFrom(
-              foregroundColor: Colors.red.shade300,
-              minimumSize: Size(160, 36),
-            ),
-            icon: Icon(
-              Icons.delete,
-              color: Colors.red,
-            ),
-            label: Text(
-              'Delete user',
-              style: TextStyle(color: Colors.red),
-            ),
-            onPressed: _deleteUserPressed,
+          label: const Text(
+            'Delete user',
+            style: TextStyle(color: Colors.red),
           ),
-        ],
-      ),
+          onPressed: _deleteUserPressed,
+        ),
+      ],
     );
   }
 
   void _updateUser() {
-    print(
-        '_updateUser user with login: $_login, name: $_name, e-mail: $_email');
+    log('_updateUser user with login: $_login, name: $_name, e-mail: $_email');
     if (_login.isEmpty &&
         _name.isEmpty &&
         _avatarUrl!.isEmpty &&
@@ -287,7 +273,7 @@ class _BodyLayoutState extends State<BodyLayout> {
       Fluttertoast.showToast(msg: 'Nothing to save');
       return;
     }
-    var userToUpdate = CubeUser()..id = currentUser.id;
+    var userToUpdate = CubeUser()..id = widget.currentUser.id;
 
     if (_name.isNotEmpty) userToUpdate.fullName = _name;
     if (_login.isNotEmpty) userToUpdate.login = _login;
@@ -308,22 +294,22 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   void _logout() {
-    print('_logout $_login and $_name');
+    log('_logout $_login and $_name');
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Logout"),
-          content: Text("Are you sure you want logout current user"),
+          title: const Text("Logout"),
+          content: const Text("Are you sure you want logout current user"),
           actions: <Widget>[
             TextButton(
-              child: Text("CANCEL"),
+              child: const Text("CANCEL"),
               onPressed: () {
                 Navigator.pop(context);
               },
             ),
             TextButton(
-              child: Text("OK"),
+              child: const Text("OK"),
               onPressed: () async {
                 await PushNotificationsManager.instance.unsubscribe();
                 signOut().then(
@@ -358,7 +344,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   void _deleteUserPressed() {
-    print('_deleteUserPressed ${_login.isNotEmpty ? _login : _email}');
+    log('_deleteUserPressed ${_login.isNotEmpty ? _login : _email}');
     _userDelete();
   }
 
@@ -367,33 +353,27 @@ class _BodyLayoutState extends State<BodyLayout> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Delete user"),
-          content: Text("Are you sure you want to delete current user?"),
+          title: const Text("Delete user"),
+          content: const Text("Are you sure you want to delete current user?"),
           actions: <Widget>[
             TextButton(
-              child: Text("CANCEL"),
+              child: const Text("CANCEL"),
               onPressed: () {
                 Navigator.pop(context);
               },
             ),
             TextButton(
-              child: Text("OK"),
+              child: const Text("OK"),
               onPressed: () async {
                 CubeChatConnection.instance.destroy();
                 await SharedPrefs.instance.deleteUser();
 
-                deleteUser(currentUser.id!).then(
-                  (voidValue) {
-                    Navigator.pop(context); // cancel current Dialog
-                  },
-                ).catchError(
-                  (onError) {
-                    Navigator.pop(context); // cancel current Dialog
-                  },
-                ).whenComplete(() async {
-                  await PushNotificationsManager.instance.unsubscribe();
-                  Navigator.pop(context); // cancel current screen
-                  _navigateToLoginScreen(context);
+                await PushNotificationsManager.instance
+                    .unsubscribe()
+                    .whenComplete(() {
+                  deleteUser(widget.currentUser.id!).whenComplete(() async {
+                    _navigateToLoginScreen(context);
+                  });
                 });
               },
             ),
@@ -408,7 +388,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   void _processUpdateUserError(exception) {
-    log("_processUpdateUserError error $exception", TAG);
+    log("_processUpdateUserError error $exception", tag);
     setState(() {
       _isUsersContinues = false;
     });

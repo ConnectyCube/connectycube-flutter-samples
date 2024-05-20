@@ -16,7 +16,7 @@ import '../utils/consts.dart';
 import '../utils/pref_util.dart';
 
 class PushNotificationsManager {
-  static const TAG = "PushNotificationsManager";
+  static const tag = "PushNotificationsManager";
 
   static PushNotificationsManager? _instance;
 
@@ -36,12 +36,12 @@ class PushNotificationsManager {
     ConnectycubeFlutterCallKit.initEventsHandler();
 
     ConnectycubeFlutterCallKit.onTokenRefreshed = (token) {
-      log('[onTokenRefresh] VoIP token: $token', TAG);
+      log('[onTokenRefresh] VoIP token: $token', tag);
       subscribe(token);
     };
 
     ConnectycubeFlutterCallKit.getToken().then((token) {
-      log('[getToken] VoIP token: $token', TAG);
+      log('[getToken] VoIP token: $token', tag);
       if (token != null) {
         subscribe(token);
       }
@@ -52,12 +52,12 @@ class PushNotificationsManager {
   }
 
   subscribe(String token) async {
-    log('[subscribe] token: $token', PushNotificationsManager.TAG);
+    log('[subscribe] token: $token', PushNotificationsManager.tag);
 
     var savedToken = await SharedPrefs.getSubscriptionToken();
     if (token == savedToken) {
       log('[subscribe] skip subscription for same token',
-          PushNotificationsManager.TAG);
+          PushNotificationsManager.tag);
       return;
     }
 
@@ -77,7 +77,7 @@ class PushNotificationsManager {
 
     var deviceInfoPlugin = DeviceInfoPlugin();
 
-    var deviceId;
+    String? deviceId;
 
     if (kIsWeb) {
       var webBrowserInfo = await deviceInfoPlugin.webBrowserInfo;
@@ -100,16 +100,16 @@ class PushNotificationsManager {
 
     createSubscription(parameters.getRequestParameters())
         .then((cubeSubscriptions) {
-      log('[subscribe] subscription SUCCESS', PushNotificationsManager.TAG);
+      log('[subscribe] subscription SUCCESS', PushNotificationsManager.tag);
       SharedPrefs.saveSubscriptionToken(token);
-      cubeSubscriptions.forEach((subscription) {
-        if (subscription.device!.clientIdentificationSequence == token) {
+      for (var subscription in cubeSubscriptions) {
+        if (subscription.clientIdentificationSequence == token) {
           SharedPrefs.saveSubscriptionId(subscription.id!);
         }
-      });
+      }
     }).catchError((error) {
       log('[subscribe] subscription ERROR: $error',
-          PushNotificationsManager.TAG);
+          PushNotificationsManager.tag);
     });
   }
 
@@ -123,15 +123,14 @@ class PushNotificationsManager {
         return Future.value();
       }
     }).catchError((onError) {
-      log('[unsubscribe] ERROR: $onError', PushNotificationsManager.TAG);
+      log('[unsubscribe] ERROR: $onError', PushNotificationsManager.tag);
     });
   }
 }
 
 @pragma('vm:entry-point')
 Future<void> onCallRejectedWhenTerminated(CallEvent callEvent) async {
-  print(
-      '[PushNotificationsManager][onCallRejectedWhenTerminated] callEvent: $callEvent');
+  log('[PushNotificationsManager][onCallRejectedWhenTerminated] callEvent: $callEvent');
 
   var currentUser = await SharedPrefs.getUser();
   initConnectycubeContextLess();
@@ -141,11 +140,11 @@ Future<void> onCallRejectedWhenTerminated(CallEvent callEvent) async {
     callEvent.callerId
   });
   var sendPushAboutReject = sendPushAboutRejectFromKilledState({
-    PARAM_CALL_TYPE: callEvent.callType,
-    PARAM_SESSION_ID: callEvent.sessionId,
-    PARAM_CALLER_ID: callEvent.callerId,
-    PARAM_CALLER_NAME: callEvent.callerName,
-    PARAM_CALL_OPPONENTS: callEvent.opponentsIds.join(','),
+    paramCallType: callEvent.callType,
+    paramSessionId: callEvent.sessionId,
+    paramCallerId: callEvent.callerId,
+    paramCallerName: callEvent.callerName,
+    paramCallOpponents: callEvent.opponentsIds.join(','),
   }, callEvent.callerId);
 
   return Future.wait([sendOfflineReject, sendPushAboutReject]).then((result) {
@@ -160,7 +159,7 @@ Future<void> sendPushAboutRejectFromKilledState(
   CreateEventParams params = CreateEventParams();
   params.parameters = parameters;
   params.parameters['message'] = "Reject call";
-  params.parameters[PARAM_SIGNAL_TYPE] = SIGNAL_TYPE_REJECT_CALL;
+  params.parameters[paramSignalType] = signalTypeRejectCall;
   // params.parameters[PARAM_IOS_VOIP] = 1;
 
   params.notificationType = NotificationType.PUSH;

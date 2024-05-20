@@ -8,48 +8,38 @@ import 'package:connectycube_sdk/connectycube_sdk.dart';
 import '../managers/call_manager.dart';
 
 class IncomingCallScreen extends StatefulWidget {
-  static const String TAG = "IncomingCallScreen";
-  final CubeUser _currentUser;
-  final String _callId;
-  final String _meetingId;
-  final int _initiatorId;
-  final List<int> _participantIds;
-  final int _callType;
-  final String _callName;
+  static const String tag = "IncomingCallScreen";
+  final CubeUser currentUser;
+  final String callId;
+  final String meetingId;
+  final int initiatorId;
+  final List<int> participantIds;
+  final int callType;
+  final String callName;
 
-  IncomingCallScreen(this._currentUser, this._callId, this._meetingId,
-      this._initiatorId, this._participantIds, this._callType, this._callName);
+  const IncomingCallScreen(this.currentUser, this.callId, this.meetingId,
+      this.initiatorId, this.participantIds, this.callType, this.callName,
+      {super.key});
 
   @override
   State<StatefulWidget> createState() {
-    return _IncomingCallScreenState(_currentUser, _callId, _meetingId,
-        _initiatorId, _participantIds, _callType, _callName);
+    return _IncomingCallScreenState();
   }
 }
 
 class _IncomingCallScreenState extends State<IncomingCallScreen> {
-  static const String TAG = "_IncomingCallScreenState";
+  static const String tag = "_IncomingCallScreenState";
   final CallManager _callManager = CallManager.instance;
-  final CubeUser _currentUser;
-  final String _callId;
-  final String _meetingId;
-  final int _initiatorId;
-  final List<int> _participantIds;
-  final int _callType;
-  final String _callName;
   bool _isFrontCameraSelected = true;
   bool _isMicMute = false;
   MediaStream? _localMediaStream;
   RTCVideoRenderer? _localVideoRenderer;
-  AssetsAudioPlayer _ringtonePlayer = AssetsAudioPlayer.newPlayer();
-
-  _IncomingCallScreenState(this._currentUser, this._callId, this._meetingId,
-      this._initiatorId, this._participantIds, this._callType, this._callName);
+  final AssetsAudioPlayer _ringtonePlayer = AssetsAudioPlayer.newPlayer();
 
   @override
   void initState() {
     super.initState();
-    log('[initState]', TAG);
+    log('[initState]', tag);
 
     _callManager.onCloseCall = _onCallClosed;
     _callManager.onCallAccepted = _onCallAccepted;
@@ -58,16 +48,16 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
 
   @override
   Widget build(BuildContext context) {
-    log('[build]', TAG);
-    if (_callManager.currentCallState != InternalCallState.NEW) {
+    log('[build]', tag);
+    if (_callManager.currentCallState != InternalCallState.initial) {
       closeScreen();
-      return SizedBox.shrink();
+      return const SizedBox.shrink();
     }
 
     _playRingtone();
 
-    return WillPopScope(
-      onWillPop: () => _onBackPressed(context),
+    return PopScope(
+      canPop: false,
       child: Scaffold(
           backgroundColor: Colors.green.shade100,
           body: FutureBuilder<MediaStream?>(
@@ -81,7 +71,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
                       builder: (BuildContext context,
                           AsyncSnapshot<dynamic> snapshot2) {
                         if (!snapshot2.hasData) {
-                          return SizedBox.shrink();
+                          return const SizedBox.shrink();
                         }
 
                         return RTCVideoView(
@@ -101,22 +91,22 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
                         mainAxisSize: MainAxisSize.min,
                         children: <Widget>[
                           Padding(
-                            padding: EdgeInsets.all(8),
-                            child: Text(_callName,
+                            padding: const EdgeInsets.all(8),
+                            child: Text(widget.callName,
                                 style: TextStyle(
                                   color: Colors.white,
                                   fontSize: 24,
                                   shadows: [
                                     Shadow(
                                       color: Colors.grey.shade900,
-                                      offset: Offset(2, 1),
+                                      offset: const Offset(2, 1),
                                       blurRadius: 12,
                                     ),
                                   ],
                                 )),
                           ),
                           Padding(
-                            padding: EdgeInsets.all(8),
+                            padding: const EdgeInsets.all(8),
                             child: Text(_getCallTitle(),
                                 style: TextStyle(
                                   fontSize: 18,
@@ -124,18 +114,18 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
                                   shadows: [
                                     Shadow(
                                       color: Colors.grey.shade900,
-                                      offset: Offset(2, 1),
+                                      offset: const Offset(2, 1),
                                       blurRadius: 12,
                                     ),
                                   ],
                                 )),
                           ),
-                          Expanded(
-                            child: SizedBox(),
+                          const Expanded(
                             flex: 1,
+                            child: SizedBox(),
                           ),
                           Visibility(
-                            visible: _callType == CallType.VIDEO_CALL,
+                            visible: widget.callType == CallType.VIDEO_CALL,
                             child: Padding(
                               padding: EdgeInsets.only(
                                   bottom:
@@ -146,11 +136,16 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16),
                                     child: FloatingActionButton(
                                       elevation: 0,
                                       heroTag: "ToggleCamera",
+                                      onPressed: () => _toggleCamera(),
+                                      backgroundColor: isVideoEnabledInStream(
+                                              _localMediaStream)
+                                          ? Colors.white
+                                          : Colors.grey,
                                       child: Icon(
                                         isVideoEnabledInStream(
                                                 _localMediaStream)
@@ -161,37 +156,34 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
                                             ? Colors.grey
                                             : Colors.white,
                                       ),
-                                      onPressed: () => _toggleCamera(),
-                                      backgroundColor: isVideoEnabledInStream(
-                                              _localMediaStream)
-                                          ? Colors.white
-                                          : Colors.grey,
                                     ),
                                   ),
                                   Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16),
                                     child: FloatingActionButton(
                                       elevation: 0,
                                       heroTag: "Mute",
+                                      onPressed: () => _muteMic(),
+                                      backgroundColor: _isMicMute
+                                          ? Colors.grey
+                                          : Colors.white,
                                       child: Icon(
                                         _isMicMute ? Icons.mic_off : Icons.mic,
                                         color: _isMicMute
                                             ? Colors.white
                                             : Colors.grey,
                                       ),
-                                      onPressed: () => _muteMic(),
-                                      backgroundColor: _isMicMute
-                                          ? Colors.grey
-                                          : Colors.white,
                                     ),
                                   ),
                                   Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 16),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 16),
                                     child: FloatingActionButton(
                                       elevation: 0,
                                       heroTag: "SwitchCamera",
+                                      onPressed: () => _switchCamera(),
+                                      backgroundColor: Colors.black38,
                                       child: Icon(
                                         Icons.cameraswitch,
                                         color: isVideoEnabledInStream(
@@ -199,8 +191,6 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
                                             ? Colors.white
                                             : Colors.grey,
                                       ),
-                                      onPressed: () => _switchCamera(),
-                                      backgroundColor: Colors.black38,
                                     ),
                                   ),
                                 ],
@@ -215,29 +205,30 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
                               mainAxisSize: MainAxisSize.min,
                               children: <Widget>[
                                 Padding(
-                                  padding: EdgeInsets.only(right: 36),
+                                  padding: const EdgeInsets.only(right: 36),
                                   child: FloatingActionButton(
                                     heroTag: "RejectCall",
-                                    child: Icon(
+                                    backgroundColor: Colors.red,
+                                    onPressed: () => _rejectCall(),
+                                    child: const Icon(
                                       Icons.call_end,
                                       color: Colors.white,
                                     ),
-                                    backgroundColor: Colors.red,
-                                    onPressed: () => _rejectCall(),
                                   ),
                                 ),
                                 Padding(
-                                  padding: EdgeInsets.only(left: 36),
+                                  padding: const EdgeInsets.only(left: 36),
                                   child: FloatingActionButton(
                                     heroTag: "AcceptCall",
+                                    backgroundColor: Colors.green,
+                                    onPressed: () =>
+                                        _acceptCall(widget.callType),
                                     child: Icon(
-                                      _callType == CallType.VIDEO_CALL
+                                      widget.callType == CallType.VIDEO_CALL
                                           ? Icons.videocam
                                           : Icons.call,
                                       color: Colors.white,
                                     ),
-                                    backgroundColor: Colors.green,
-                                    onPressed: () => _acceptCall(_callType),
                                   ),
                                 ),
                               ],
@@ -255,37 +246,43 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
   }
 
   _getCallTitle() {
-    log('[_getCallTitle]', TAG);
-    String callType = _callType == CallType.VIDEO_CALL ? "Video" : 'Audio';
+    log('[_getCallTitle]', tag);
+    String callType =
+        widget.callType == CallType.VIDEO_CALL ? "Video" : 'Audio';
     return "Incoming $callType call";
   }
 
   void _acceptCall(int callType) async {
-    log('[_acceptCall]', TAG);
-    _callManager.startNewIncomingCall(context, _currentUser, _callId,
-        _meetingId, callType, _callName, _initiatorId, _participantIds, false,
+    log('[_acceptCall]', tag);
+    _callManager.startNewIncomingCall(
+        context,
+        widget.currentUser,
+        widget.callId,
+        widget.meetingId,
+        callType,
+        widget.callName,
+        widget.initiatorId,
+        widget.participantIds,
+        false,
         initialLocalMediaStream: _localMediaStream,
         isFrontCameraUsed: _isFrontCameraSelected);
   }
 
   void _rejectCall() {
-    log('[_rejectCall]', TAG);
+    log('[_rejectCall]', tag);
     _localMediaStream?.getTracks().forEach((track) async {
       await track.stop();
     });
     _localMediaStream?.dispose();
 
-    _callManager.reject(_callId, _meetingId, false, _initiatorId, false);
+    _callManager.reject(
+        widget.callId, widget.meetingId, false, widget.initiatorId, false);
     closeScreen();
-  }
-
-  Future<bool> _onBackPressed(BuildContext context) {
-    return Future.value(false);
   }
 
   @override
   void dispose() {
-    log('[dispose]', TAG);
+    log('[dispose]', tag);
     _localVideoRenderer?.srcObject = null;
     _localVideoRenderer?.dispose();
 
@@ -299,7 +296,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
   }
 
   void _onCallClosed() {
-    log('[_onCallClosed]', TAG);
+    log('[_onCallClosed]', tag);
     _localMediaStream?.getTracks().forEach((track) async {
       await track.stop();
     });
@@ -309,12 +306,12 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
   }
 
   void _onCallAccepted(String meetingId) {
-    log('[_onCallAccepted]', TAG);
+    log('[_onCallAccepted]', tag);
   }
 
   void _onCallRejected(String meetingId) {
-    log('[_onCallRejected]', TAG);
-    if (meetingId == _meetingId) {
+    log('[_onCallRejected]', tag);
+    if (meetingId == widget.meetingId) {
       _localMediaStream?.getTracks().forEach((track) async {
         await track.stop();
       });
@@ -325,8 +322,8 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
   }
 
   Future<MediaStream?> _getLocalMediaStream() {
-    log('[_getLocalMediaStream]', TAG);
-    if (_callType == CallType.AUDIO_CALL) return Future.value(null);
+    log('[_getLocalMediaStream]', tag);
+    if (widget.callType == CallType.AUDIO_CALL) return Future.value(null);
     if (_localMediaStream != null) return Future.value(_localMediaStream);
 
     return navigator.mediaDevices
@@ -339,12 +336,12 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
   }
 
   Map<String, dynamic> getMediaConstraints() {
-    log('[getMediaConstraints]', TAG);
+    log('[getMediaConstraints]', tag);
     final Map<String, dynamic> mediaConstraints = {
       'audio': getAudioConfig(),
     };
 
-    if (CallType.VIDEO_CALL == _callType) {
+    if (CallType.VIDEO_CALL == widget.callType) {
       mediaConstraints['video'] = getVideoConfig();
     }
 
@@ -352,7 +349,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
   }
 
   Future<RTCVideoRenderer> getVideoRenderer(MediaStream? mediaStream) {
-    log('[getVideoRenderer]', TAG);
+    log('[getVideoRenderer]', tag);
     if (_localVideoRenderer != null) return Future.value(_localVideoRenderer);
 
     var videoRenderer = RTCVideoRenderer();
@@ -439,7 +436,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
           );
         },
       ).then((deviceId) {
-        log("onCameraSelected deviceId: $deviceId", TAG);
+        log("onCameraSelected deviceId: $deviceId", tag);
         if (deviceId != null) switchCamera(deviceId: deviceId);
       });
     }

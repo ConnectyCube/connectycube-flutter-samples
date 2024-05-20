@@ -5,7 +5,7 @@ import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 class SpeakersManager {
   Timer? _processSpeakerTimer;
-  Map<int, double> _speakers = {};
+  final Map<int, double> _speakers = {};
 
   void init(CubeStatsReportsManager statsReportsManager,
       SpeakerChangedCallback callBack) {
@@ -17,12 +17,12 @@ class SpeakersManager {
       _speakers[event.userId] = _speakers[event.userId]! + event.micLevel;
     });
 
-    _processSpeakerTimer = Timer.periodic(Duration(seconds: 2), (timer) {
+    _processSpeakerTimer = Timer.periodic(const Duration(seconds: 2), (timer) {
       log('[calculate speaker]', 'SpeakersManager');
 
       if (_speakers.isEmpty) return;
 
-      var sortedByValueMap = new SplayTreeMap<int, double>.from(
+      var sortedByValueMap = SplayTreeMap<int, double>.from(
           _speakers, (k1, k2) => _speakers[k1]!.compareTo(_speakers[k2]!));
 
       if (sortedByValueMap[sortedByValueMap.lastKey()] == 0) return;
@@ -42,4 +42,4 @@ class SpeakersManager {
   }
 }
 
-typedef SpeakerChangedCallback(int userId);
+typedef SpeakerChangedCallback = Function(int userId);

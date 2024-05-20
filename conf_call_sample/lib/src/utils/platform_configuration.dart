@@ -1,6 +1,4 @@
-import 'package:conf_call_sample/src/utils/configs.dart';
-
-void configureNavigation(){
+void configureNavigation() {
   throw UnsupportedError('No implementation of the navigation config provided');
 }
 
