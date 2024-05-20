@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 import 'src/login_screen.dart';
-import 'src/managers/call_manager.dart';
 import 'src/utils/configs.dart' as config;
 import 'src/utils/pref_util.dart';
 
-void main() => runApp(App());
+void main() => runApp(const App());
 
 class App extends StatefulWidget {
+  const App({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     return _AppState();
@@ -21,12 +22,14 @@ class _AppState extends State<App> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+
       theme: ThemeData(
-        primarySwatch: Colors.green,
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
       ),
       home: Builder(
         builder: (context) {
-          return LoginScreen();
+          return const LoginScreen();
         },
       ),
     );
@@ -44,24 +47,27 @@ class _AppState extends State<App> {
 
 initConnectycube() {
   init(
-    config.APP_ID,
-    config.AUTH_KEY,
-    config.AUTH_SECRET,
+    config.appId,
+    config.authKey,
+    config.authSecret,
     onSessionRestore: () {
       return SharedPrefs.getUser().then((savedUser) {
         return createSession(savedUser);
       });
     },
   );
+  setEndpoints(config.apiEndpoint, config.chatEndpoint);
 }
 
 initConnectycubeContextLess() {
-  CubeSettings.instance.applicationId = config.APP_ID;
-  CubeSettings.instance.authorizationKey = config.AUTH_KEY;
-  CubeSettings.instance.authorizationSecret = config.AUTH_SECRET;
+  CubeSettings.instance.applicationId = config.appId;
+  CubeSettings.instance.authorizationKey = config.authKey;
+  CubeSettings.instance.authorizationSecret = config.authSecret;
   CubeSettings.instance.onSessionRestore = () {
     return SharedPrefs.getUser().then((savedUser) {
       return createSession(savedUser);
     });
   };
+
+  setEndpoints(config.apiEndpoint, config.chatEndpoint);
 }
