@@ -50027,13 +50027,13 @@ m=B.bo.gjA().aQ(n)
 s=5
 return A.E(A.aeT(),$async$kd)
 case 5:n=d.b
-if(A.eh("production")||A.eh(p)||A.eh(m)||A.eh(o)||A.eh(b))A.T(A.N1("Some required parameters are empty or null"))
+if(A.eh("development")||A.eh(p)||A.eh(m)||A.eh(o)||A.eh(b))A.T(A.N1("Some required parameters are empty or null"))
 l=A.b(t.N,t.z)
 k=new A.Ld(m)
 k.b=new A.Lg(o)
 l.l(0,"notification_channel",p)
 l.l(0,"device",k)
-l.l(0,"push_token",new A.agm("production",n,b))
+l.l(0,"push_token",new A.agm("development",n,b))
 new A.L8(l).dO().X(new A.agk(b),t.P).eg(new A.agl())
 case 1:return A.r(q,r)}})
 return A.t($async$kd,r)}}
