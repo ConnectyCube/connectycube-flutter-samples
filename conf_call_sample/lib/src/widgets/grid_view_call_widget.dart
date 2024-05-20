@@ -18,7 +18,7 @@ class GridViewLayout extends StatefulWidget {
   final CubeStatsReportsManager statsReportsManager;
   final Future<String> Function(int userId)? getUserName;
 
-  GridViewLayout({
+  const GridViewLayout({
     super.key,
     required this.currentUserId,
     required this.participants,
@@ -34,24 +34,23 @@ class GridViewLayout extends StatefulWidget {
 
   @override
   State<GridViewLayout> createState() {
-    return _GridViewLayoutState(
-      primaryRenderer: primaryRenderer,
-      minorRenderers: minorRenderers,
-    );
+    return _GridViewLayoutState();
   }
 }
 
 class _GridViewLayoutState extends State<GridViewLayout> {
-  static final String TAG = 'GridViewLayout';
+  static const String tag = 'GridViewLayout';
 
-  MapEntry<int, RTCVideoRenderer>? _primaryRenderer;
-  Map<int, RTCVideoRenderer> _minorRenderers;
+  late MapEntry<int, RTCVideoRenderer>? _primaryRenderer;
+  late Map<int, RTCVideoRenderer> _minorRenderers;
 
-  _GridViewLayoutState({
-    required MapEntry<int, RTCVideoRenderer>? primaryRenderer,
-    required Map<int, RTCVideoRenderer> minorRenderers,
-  })  : _primaryRenderer = primaryRenderer,
-        _minorRenderers = minorRenderers;
+  @override
+  void initState() {
+    super.initState();
+
+    _primaryRenderer = widget.primaryRenderer;
+    _minorRenderers = widget.minorRenderers;
+  }
 
   @override
   void didUpdateWidget(GridViewLayout oldWidget) {
@@ -72,7 +71,7 @@ class _GridViewLayoutState extends State<GridViewLayout> {
           mainAxisSpacing: 0,
           childAspectRatio: 4 / 3,
         ),
-        padding: EdgeInsets.all(4),
+        padding: const EdgeInsets.all(4),
         scrollDirection: Axis.vertical,
         children: _buildGridItems(orientation),
       ),
@@ -85,8 +84,8 @@ class _GridViewLayoutState extends State<GridViewLayout> {
     if (_primaryRenderer != null) {
       allRenderers.addEntries([_primaryRenderer!]);
     }
-    var itemHeight;
-    var itemWidth;
+    double itemHeight;
+    double itemWidth;
 
     if (orientation == Orientation.portrait) {
       itemWidth = MediaQuery.of(context).size.width * 0.95 / 2;

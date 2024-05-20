@@ -1,19 +1,19 @@
 import 'dart:ui';
 
-final themeColor = Color(0xfff5a623);
-final primaryColor = Color(0xff203152);
-final greyColor = Color(0xffaeaeae);
-final greyColor2 = Color(0xffE8E8E8);
-final greyColor3 = Color(0xffeaeaea);
-final blueColor = Color(0xff0080ff);
+const themeColor = Color(0xfff5a623);
+const primaryColor = Color(0xff203152);
+const greyColor = Color(0xffaeaeae);
+const greyColor2 = Color(0xffE8E8E8);
+const greyColor3 = Color(0xffeaeaea);
+const blueColor = Color(0xff0080ff);
 
-final String SORT_ASC = 'asc';
-final String SORT_DESC = 'desc';
+const String sortAsc = 'asc';
+const String sortDesc = 'desc';
 
-final String USER_ARG_NAME = 'user';
-final String DIALOG_ARG_NAME = 'dialog';
-final String SELECTED_USERS_ARG_NAME = 'selected_users';
+const String userArgName = 'user';
+const String dialogArgName = 'dialog';
+const String selectedUsersArgName = 'selected_users';
 
-final String PARAM_HASH = 'hash';
+const String paramHash = 'hash';
 
 enum LoginType { login, email, phone, facebook, google }

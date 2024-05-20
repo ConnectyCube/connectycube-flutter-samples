@@ -1,10 +1,8 @@
-import 'package:collection/collection.dart';
-
 import 'package:conf_call_sample/src/utils/configs.dart';
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 Future<String> getUserNameCached(int userId) async {
-  var cachedUser = users.firstWhereOrNull((user) => user.id == userId);
+  var cachedUser = users.where((user) => user.id == userId).firstOrNull;
 
   if (cachedUser != null) {
     return cachedUser.fullName ??

@@ -11,19 +11,23 @@ import '../utils/consts.dart';
 import '../utils/pref_util.dart';
 
 class LoginScreen extends StatelessWidget {
-  static const String TAG = "LoginScreen";
+  static const String tag = "LoginScreen";
+
+  const LoginScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          automaticallyImplyLeading: false, title: Text('Conference calls')),
-      body: BodyLayout(),
+          automaticallyImplyLeading: false, title: const Text('Conference calls')),
+      body: const BodyLayout(),
     );
   }
 }
 
 class BodyLayout extends StatefulWidget {
+  const BodyLayout({super.key});
+
   @override
   State<StatefulWidget> createState() {
     return BodyState();
@@ -31,7 +35,7 @@ class BodyLayout extends StatefulWidget {
 }
 
 class BodyState extends State<BodyLayout> {
-  static const String TAG = "LoginScreen.BodyState";
+  static const String tag = "LoginScreen.BodyState";
 
   bool _isLoginContinues = false;
   int? _selectedUserId;
@@ -42,7 +46,7 @@ class BodyState extends State<BodyLayout> {
   @override
   void initState() {
     super.initState();
-    log("initState", TAG);
+    log("initState", tag);
 
     _initChatConnectionListener();
     _loginWithSavedUserIfExist();
@@ -75,14 +79,14 @@ class BodyState extends State<BodyLayout> {
 
   @override
   Widget build(BuildContext context) {
-    log("build", TAG);
+    log("build", tag);
 
     return SingleChildScrollView(
       child: Container(
-        padding: EdgeInsets.only(top: 48, bottom: 24, left: 24, right: 24),
+        padding: const EdgeInsets.only(top: 48, bottom: 24, left: 24, right: 24),
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 400),
+          constraints: const BoxConstraints(maxWidth: 400),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -90,7 +94,7 @@ class BodyState extends State<BodyLayout> {
                 onPressed: () {
                   loginAsGuest();
                 },
-                child: Container(
+                child: SizedBox(
                   width: 400,
                   height: 48,
                   child: Row(
@@ -100,22 +104,22 @@ class BodyState extends State<BodyLayout> {
                     children: [
                       Visibility(
                         visible: !_isLoginContinues,
-                        child: Icon(
+                        child: const Icon(
                           Icons.add,
                           size: 18,
                         ),
                       ),
                       Visibility(
                           visible: _isLoginContinues && _selectedUserId == 0,
-                          child: SizedBox(
+                          child: const SizedBox(
                               width: 18,
                               height: 18,
                               child: CircularProgressIndicator(
                                 color: Colors.white,
                                 strokeWidth: 2.0,
                               ))),
-                      SizedBox(width: 8),
-                      Text(
+                      const SizedBox(width: 8),
+                      const Text(
                         'Login as Guest',
                         style: TextStyle(fontSize: 18),
                       ),
@@ -123,13 +127,13 @@ class BodyState extends State<BodyLayout> {
                   ),
                 ),
               ),
-              SizedBox(height: 16),
-              Text(
+              const SizedBox(height: 16),
+              const Text(
                 'or',
                 style: TextStyle(fontSize: 18),
               ),
-              SizedBox(height: 16),
-              Text(
+              const SizedBox(height: 16),
+              const Text(
                 "Select user to login:",
                 style: TextStyle(
                   fontSize: 22,
@@ -144,7 +148,7 @@ class BodyState extends State<BodyLayout> {
   }
 
   Widget _getUsersList(BuildContext context) {
-    log("[_getUsersList]", TAG);
+    log("[_getUsersList]", tag);
     final users = utils.users;
 
     return ListView.builder(
@@ -166,13 +170,13 @@ class BodyState extends State<BodyLayout> {
                             : Colors.black87),
                   ),
                   Container(
-                    margin: EdgeInsets.only(left: 8),
+                    margin: const EdgeInsets.only(left: 8),
                     height: 18,
                     width: 18,
                     child: Visibility(
                       visible: _isLoginContinues &&
                           users[index].id == _selectedUserId,
-                      child: CircularProgressIndicator(
+                      child: const CircularProgressIndicator(
                         strokeWidth: 2,
                       ),
                     ),
@@ -191,7 +195,7 @@ class BodyState extends State<BodyLayout> {
   }
 
   _loginToCC(BuildContext context, CubeUser user, {bool savedUser = false}) {
-    log('[_loginToCC]', TAG);
+    log('[_loginToCC]', tag);
     if (_isLoginContinues) return;
 
     if (CubeSessionManager.instance.isActiveSessionValid() &&
@@ -226,13 +230,13 @@ class BodyState extends State<BodyLayout> {
 
   void _loginToCubeChat(BuildContext context, CubeUser user,
       {Function()? successCallback}) {
-    log('[_loginToCubeChat]', TAG);
+    log('[_loginToCubeChat]', tag);
     _successChatLoginCallback = successCallback;
     CubeChatConnection.instance.login(user);
   }
 
   void _processLoginError(exception) {
-    log("Login error $exception", TAG);
+    log("Login error $exception", tag);
     if (!mounted) return;
 
     setState(() {
@@ -244,11 +248,11 @@ class BodyState extends State<BodyLayout> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Login Error"),
-            content: Text("Something went wrong during login to ConnectyCube"),
+            title: const Text("Login Error"),
+            content: const Text("Something went wrong during login to ConnectyCube"),
             actions: <Widget>[
               TextButton(
-                child: Text("OK"),
+                child: const Text("OK"),
                 onPressed: () => Navigator.of(context).pop(),
               )
             ],
@@ -259,15 +263,15 @@ class BodyState extends State<BodyLayout> {
   void _goSelectOpponentsScreen(BuildContext context, CubeUser cubeUser) {
     if (!CallManager.instance.hasActiveCall()) {
       Navigator.of(context).pushReplacementNamed(
-        SELECT_OPPONENTS_SCREEN,
-        arguments: {ARG_USER: cubeUser},
+        selectOpponentsScreen,
+        arguments: {argUser: cubeUser},
       );
     }
   }
 
   @override
   void dispose() {
-    log("[dispose]", TAG);
+    log("[dispose]", tag);
     _connectionStareSubscription?.cancel();
 
     super.dispose();
@@ -276,19 +280,19 @@ class BodyState extends State<BodyLayout> {
   @override
   void deactivate() {
     super.deactivate();
-    log("[deactivate]", TAG);
+    log("[deactivate]", tag);
   }
 
   @override
   void activate() {
     super.activate();
-    log("[activate]", TAG);
+    log("[activate]", tag);
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    log("[didChangeDependencies]", TAG);
+    log("[didChangeDependencies]", tag);
   }
 
   void loginAsGuest() {
@@ -310,10 +314,10 @@ class BodyState extends State<BodyLayout> {
   }
 
   void _initChatConnectionListener() {
-    log("[_initChatConnectionListener]", TAG);
+    log("[_initChatConnectionListener]", tag);
     _connectionStareSubscription =
         CubeChatConnection.instance.connectionStateStream.listen((state) {
-      log("[_initChatConnectionListener] state: $state", TAG);
+      log("[_initChatConnectionListener] state: $state", tag);
       if (state == CubeChatConnectionState.Ready) {
         _successChatLoginCallback?.call();
 

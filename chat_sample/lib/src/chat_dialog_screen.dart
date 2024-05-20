@@ -3,7 +3,6 @@ import 'dart:convert';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cached_video_player_plus/cached_video_player_plus.dart';
-import 'package:collection/collection.dart' show IterableExtension;
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:file_picker/file_picker.dart';
@@ -22,7 +21,7 @@ import 'update_dialog_flow.dart';
 import 'utils/api_utils.dart';
 import 'utils/consts.dart';
 import 'utils/ui_utils.dart';
-import 'utils/platform_utils.dart' as platformUtils;
+import 'utils/platform_utils.dart' as platform_utils;
 import 'widgets/audio_recorder.dart';
 import 'widgets/audio_attachment.dart';
 import 'widgets/common.dart';
@@ -34,7 +33,7 @@ class ChatDialogScreen extends StatelessWidget {
   final CubeUser _cubeUser;
   final CubeDialog _cubeDialog;
 
-  ChatDialogScreen(this._cubeUser, this._cubeDialog);
+  const ChatDialogScreen(this._cubeUser, this._cubeDialog, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +46,7 @@ class ChatDialogScreen extends StatelessWidget {
         actions: <Widget>[
           IconButton(
             onPressed: () => showChatDetails(context, _cubeUser, _cubeDialog),
-            icon: Icon(
+            icon: const Icon(
               Icons.info_outline,
               color: Colors.white,
             ),
@@ -60,20 +59,18 @@ class ChatDialogScreen extends StatelessWidget {
 }
 
 class ChatScreen extends StatefulWidget {
-  static const String TAG = "_CreateChatScreenState";
-  final CubeUser _cubeUser;
-  final CubeDialog _cubeDialog;
+  static const String tag = "_CreateChatScreenState";
+  final CubeUser cubeUser;
+  final CubeDialog cubeDialog;
 
-  ChatScreen(this._cubeUser, this._cubeDialog);
+  const ChatScreen(this.cubeUser, this.cubeDialog, {super.key});
 
   @override
-  State createState() => ChatScreenState(_cubeUser, _cubeDialog);
+  State createState() => ChatScreenState();
 }
 
 class ChatScreenState extends State<ChatScreen> {
-  final CubeUser _cubeUser;
-  final CubeDialog _cubeDialog;
-  final Map<int?, CubeUser?> _occupants = Map();
+  final Map<int?, CubeUser?> _occupants = {};
 
   late bool isLoading;
   late StreamSubscription<ConnectivityResult> connectivityStateSubscription;
@@ -82,8 +79,8 @@ class ChatScreenState extends State<ChatScreen> {
   Timer? typingTimer;
   bool isTyping = false;
   String userStatus = '';
-  static const int TYPING_TIMEOUT = 700;
-  static const int STOP_TYPING_TIMEOUT = 2000;
+  static const int typingTimeout = 700;
+  static const int stopTypingTimeout = 2000;
 
   int _sendIsTypingTime = DateTime.now().millisecondsSinceEpoch;
   Timer? _sendStopTypingTimer;
@@ -97,8 +94,8 @@ class ChatScreenState extends State<ChatScreen> {
   StreamSubscription<TypingStatus>? typingSubscription;
   StreamSubscription<MessageReaction>? reactionsSubscription;
 
-  List<CubeMessage> _unreadMessages = [];
-  List<CubeMessage> _unsentMessages = [];
+  final List<CubeMessage> _unreadMessages = [];
+  final List<CubeMessage> _unsentMessages = [];
 
   static const int messagesPerPage = 50;
   int lastPartSize = 0;
@@ -108,8 +105,6 @@ class ChatScreenState extends State<ChatScreen> {
   late FocusNode _editMessageFocusNode;
 
   bool isAudioRecording = false;
-
-  ChatScreenState(this._cubeUser, this._cubeDialog);
 
   @override
   void initState() {
@@ -137,13 +132,13 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   void openGallery() async {
-    if (platformUtils.isVideoAttachmentsSupported) {
+    if (platform_utils.isVideoAttachmentsSupported) {
       showDialog(
           context: context,
           builder: (context) {
             return Dialog(
                 child: Container(
-                    margin: EdgeInsets.all(16.0),
+                    margin: const EdgeInsets.all(16.0),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
@@ -152,13 +147,13 @@ class ChatScreenState extends State<ChatScreen> {
                               Navigator.pop(context);
                               pickImage();
                             },
-                            child: Text('Send Image')),
+                            child: const Text('Send Image')),
                         TextButton(
                             onPressed: () {
                               Navigator.pop(context);
                               pickVideo();
                             },
-                            child: Text('Send Video'))
+                            child: const Text('Send Video'))
                       ],
                     )));
           });
@@ -180,7 +175,7 @@ class ChatScreenState extends State<ChatScreen> {
 
     var uploadImageFuture = getUploadingMediaFuture(result);
 
-    var imageData;
+    Uint8List imageData;
     if (kIsWeb) {
       imageData = result.files.single.bytes!;
     } else {
@@ -189,7 +184,7 @@ class ChatScreenState extends State<ChatScreen> {
 
     var decodedImage = await decodeImageFromList(imageData);
 
-    platformUtils.getImageHashAsync(imageData).then((imageHash) async {
+    platform_utils.getImageHashAsync(imageData).then((imageHash) async {
       uploadImageFile(uploadImageFuture, decodedImage, imageHash);
     });
   }
@@ -234,7 +229,7 @@ class ChatScreenState extends State<ChatScreen> {
 
   void onReceiveMessage(CubeMessage message) {
     log("onReceiveMessage message= $message");
-    if (message.dialogId != _cubeDialog.dialogId) return;
+    if (message.dialogId != widget.cubeDialog.dialogId) return;
 
     addMessageToListView(message);
   }
@@ -256,9 +251,11 @@ class ChatScreenState extends State<ChatScreen> {
 
   void onTypingMessage(TypingStatus status) {
     log("TypingStatus message= ${status.userId}");
-    if (status.userId == _cubeUser.id ||
-        (status.dialogId != null && status.dialogId != _cubeDialog.dialogId))
+    if (status.userId == widget.cubeUser.id ||
+        (status.dialogId != null &&
+            status.dialogId != widget.cubeDialog.dialogId)) {
       return;
+    }
     userStatus = _occupants[status.userId]?.fullName ??
         _occupants[status.userId]?.login ??
         _occupants[status.userId]?.email ??
@@ -276,7 +273,7 @@ class ChatScreenState extends State<ChatScreen> {
 
   startTypingTimer() {
     typingTimer?.cancel();
-    typingTimer = Timer(Duration(milliseconds: 900), () {
+    typingTimer = Timer(const Duration(milliseconds: 900), () {
       setState(() {
         isTyping = false;
       });
@@ -355,14 +352,14 @@ class ChatScreenState extends State<ChatScreen> {
   void onSendMessage(CubeMessage message) async {
     log("onSendMessage message= $message");
     textEditingController.clear();
-    await _cubeDialog.sendMessage(message);
-    message.senderId = _cubeUser.id;
+    await widget.cubeDialog.sendMessage(message);
+    message.senderId = widget.cubeUser.id;
     addMessageToListView(message);
     listScrollController.animateTo(0.0,
-        duration: Duration(milliseconds: 300), curve: Curves.easeOut);
-    if (_cubeDialog.type == CubeDialogType.PRIVATE) {
+        duration: const Duration(milliseconds: 300), curve: Curves.easeOut);
+    if (widget.cubeDialog.type == CubeDialogType.PRIVATE) {
       ChatManager.instance.sentMessagesController
-          .add(message..dialogId = _cubeDialog.dialogId);
+          .add(message..dialogId = widget.cubeDialog.dialogId);
     }
   }
 
@@ -370,16 +367,18 @@ class ChatScreenState extends State<ChatScreen> {
     log('[updateReadDeliveredStatusMessage]');
     setState(() {
       CubeMessage? msg = listMessage
-          .firstWhereOrNull((msg) => msg.messageId == status.messageId);
+          .where((msg) => msg.messageId == status.messageId)
+          .firstOrNull;
       if (msg == null) return;
-      if (isRead)
+      if (isRead) {
         msg.readIds == null
             ? msg.readIds = [status.userId]
             : msg.readIds?.add(status.userId);
-      else
+      } else {
         msg.deliveredIds == null
             ? msg.deliveredIds = [status.userId]
             : msg.deliveredIds?.add(status.userId);
+      }
 
       log('[updateReadDeliveredStatusMessage] status updated for $msg');
     });
@@ -402,53 +401,49 @@ class ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      child: SafeArea(
-        child: Stack(
-          children: <Widget>[
-            Column(
-              children: <Widget>[
-                // List of messages
-                buildListMessage(),
-                //Typing content
-                buildTyping(),
-                // Input content
-                buildAudioRecording(),
-                buildInput(),
-              ],
-            ),
-
-            // Loading
-            buildLoading()
-          ],
-        ),
+    return SafeArea(
+      child: Stack(
+        children: <Widget>[
+          Column(
+            children: <Widget>[
+              // List of messages
+              buildListMessage(),
+              //Typing content
+              buildTyping(),
+              // Input content
+              buildAudioRecording(),
+              buildInput(),
+            ],
+          ),
+          // Loading
+          buildLoading()
+        ],
       ),
-      onWillPop: onBackPress,
     );
   }
 
   Widget buildItem(int index, CubeMessage message) {
     markAsReadIfNeed() {
-      var isOpponentMsgRead =
-          message.readIds != null && message.readIds!.contains(_cubeUser.id);
-      // print(
-      //     "markAsReadIfNeed message= $message, isOpponentMsgRead= $isOpponentMsgRead");
-      if (message.senderId != _cubeUser.id && !isOpponentMsgRead) {
+      var isOpponentMsgRead = message.readIds != null &&
+          message.readIds!.contains(widget.cubeUser.id);
+      if (message.senderId != widget.cubeUser.id && !isOpponentMsgRead) {
         if (message.readIds == null) {
-          message.readIds = [_cubeUser.id!];
+          message.readIds = [widget.cubeUser.id!];
         } else {
-          message.readIds!.add(_cubeUser.id!);
+          message.readIds!.add(widget.cubeUser.id!);
         }
 
         if (CubeChatConnection.instance.chatConnectionState ==
             CubeChatConnectionState.Ready) {
-          _cubeDialog.readMessage(message);
+          widget.cubeDialog.readMessage(message);
         } else {
           _unreadMessages.add(message);
         }
 
         ChatManager.instance.readMessagesController.add(MessageStatus(
-            _cubeUser.id!, message.messageId!, _cubeDialog.dialogId!));
+            widget.cubeUser.id!,
+            message.messageId!,
+            widget.cubeDialog.dialogId!));
       }
     }
 
@@ -456,24 +451,26 @@ class ChatScreenState extends State<ChatScreen> {
       // log("[getReadDeliveredWidget]");
       bool messageIsRead() {
         // log("[getReadDeliveredWidget] messageIsRead");
-        if (_cubeDialog.type == CubeDialogType.PRIVATE)
+        if (widget.cubeDialog.type == CubeDialogType.PRIVATE) {
           return message.readIds != null &&
               (message.recipientId == null ||
                   message.readIds!.contains(message.recipientId));
+        }
         return message.readIds != null &&
-            message.readIds!.any(
-                (int id) => id != _cubeUser.id && _occupants.keys.contains(id));
+            message.readIds!.any((int id) =>
+                id != widget.cubeUser.id && _occupants.keys.contains(id));
       }
 
       bool messageIsDelivered() {
         // log("[getReadDeliveredWidget] messageIsDelivered");
-        if (_cubeDialog.type == CubeDialogType.PRIVATE)
+        if (widget.cubeDialog.type == CubeDialogType.PRIVATE) {
           return message.deliveredIds != null &&
               (message.recipientId == null ||
                   message.deliveredIds!.contains(message.recipientId));
+        }
         return message.deliveredIds != null &&
-            message.deliveredIds!.any(
-                (int id) => id != _cubeUser.id && _occupants.keys.contains(id));
+            message.deliveredIds!.any((int id) =>
+                id != widget.cubeUser.id && _occupants.keys.contains(id));
       }
 
       if (messageIsRead()) {
@@ -492,7 +489,7 @@ class ChatScreenState extends State<ChatScreen> {
       return Text(
         DateFormat('HH:mm').format(
             DateTime.fromMillisecondsSinceEpoch(message.dateSent! * 1000)),
-        style: TextStyle(
+        style: const TextStyle(
             color: greyColor, fontSize: 12.0, fontStyle: FontStyle.italic),
       );
     }
@@ -500,13 +497,13 @@ class ChatScreenState extends State<ChatScreen> {
     Widget getHeaderDateWidget() {
       return Container(
         alignment: Alignment.center,
+        margin: const EdgeInsets.all(10.0),
         child: Text(
           DateFormat('dd MMMM').format(
               DateTime.fromMillisecondsSinceEpoch(message.dateSent! * 1000)),
-          style: TextStyle(
+          style: const TextStyle(
               color: primaryColor, fontSize: 20.0, fontStyle: FontStyle.italic),
         ),
-        margin: EdgeInsets.all(10.0),
       );
     }
 
@@ -523,15 +520,16 @@ class ChatScreenState extends State<ChatScreen> {
       return result;
     }
 
-    if (message.senderId == _cubeUser.id) {
+    if (message.senderId == widget.cubeUser.id) {
       // Right (own message)
       return Column(
         key: Key('${message.messageId}'),
         children: <Widget>[
-          isHeaderView() ? getHeaderDateWidget() : SizedBox.shrink(),
+          isHeaderView() ? getHeaderDateWidget() : const SizedBox.shrink(),
           GestureDetector(
             onLongPress: () => _reactOnMessage(message),
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
               children: <Widget>[
                 Padding(
                   padding: EdgeInsets.only(
@@ -539,7 +537,7 @@ class ChatScreenState extends State<ChatScreen> {
                       right: 4.0),
                   child: GestureDetector(
                     onTap: () => _reactOnMessage(message),
-                    child: Icon(Icons.add_reaction_outlined,
+                    child: const Icon(Icons.add_reaction_outlined,
                         size: 16, color: Colors.grey),
                   ),
                 ),
@@ -549,6 +547,10 @@ class ChatScreenState extends State<ChatScreen> {
                         decoration: BoxDecoration(
                             color: greyColor2,
                             borderRadius: BorderRadius.circular(8.0)),
+                        margin: EdgeInsets.only(
+                            bottom: isLastMessageRight(index) ? 20.0 : 10.0,
+                            right: 10.0),
+                        padding: const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
                         child: Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
@@ -564,17 +566,14 @@ class ChatScreenState extends State<ChatScreen> {
                                 ],
                               ),
                             ]),
-                        margin: EdgeInsets.only(
-                            bottom: isLastMessageRight(index) ? 20.0 : 10.0,
-                            right: 10.0),
-                        padding: EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
                       )
                     : message.body != null && message.body!.isNotEmpty
                         // Text
                         ? Flexible(
                             child: Container(
-                              constraints: BoxConstraints(maxWidth: 480),
-                              padding: EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
+                              constraints: const BoxConstraints(maxWidth: 480),
+                              padding:
+                                  const EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
                               decoration: BoxDecoration(
                                   color: greyColor2,
                                   borderRadius: BorderRadius.circular(8.0)),
@@ -587,7 +586,8 @@ class ChatScreenState extends State<ChatScreen> {
                                   children: [
                                     Text(
                                       message.body!,
-                                      style: TextStyle(color: primaryColor),
+                                      style:
+                                          const TextStyle(color: primaryColor),
                                     ),
                                     if (message.reactions != null &&
                                         message.reactions!.total.isNotEmpty)
@@ -603,12 +603,8 @@ class ChatScreenState extends State<ChatScreen> {
                             ),
                           )
                         : Container(
-                            child: Text(
-                              "Empty",
-                              style: TextStyle(color: primaryColor),
-                            ),
-                            padding:
-                                EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+                            padding: const EdgeInsets.fromLTRB(
+                                15.0, 10.0, 15.0, 10.0),
                             width: 200.0,
                             decoration: BoxDecoration(
                                 color: greyColor2,
@@ -616,9 +612,12 @@ class ChatScreenState extends State<ChatScreen> {
                             margin: EdgeInsets.only(
                                 bottom: isLastMessageRight(index) ? 20.0 : 10.0,
                                 right: 10.0),
+                            child: const Text(
+                              "Empty",
+                              style: TextStyle(color: primaryColor),
+                            ),
                           ),
               ],
-              mainAxisAlignment: MainAxisAlignment.end,
             ),
           ),
         ],
@@ -628,9 +627,11 @@ class ChatScreenState extends State<ChatScreen> {
       markAsReadIfNeed();
       return Container(
         key: Key('${message.messageId}'),
+        margin: const EdgeInsets.only(bottom: 10.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            isHeaderView() ? getHeaderDateWidget() : SizedBox.shrink(),
+            isHeaderView() ? getHeaderDateWidget() : const SizedBox.shrink(),
             GestureDetector(
               onLongPress: () => _reactOnMessage(message),
               child: Row(
@@ -641,6 +642,9 @@ class ChatScreenState extends State<ChatScreen> {
                           decoration: BoxDecoration(
                               color: primaryColor,
                               borderRadius: BorderRadius.circular(8.0)),
+                          margin: const EdgeInsets.only(left: 10.0),
+                          padding:
+                              const EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
                           child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
@@ -650,27 +654,26 @@ class ChatScreenState extends State<ChatScreen> {
                                   getReactionsWidget(message),
                                 getDateWidget(),
                               ]),
-                          margin: EdgeInsets.only(left: 10.0),
-                          padding: EdgeInsets.fromLTRB(4.0, 4.0, 4.0, 4.0),
                         )
                       : message.body != null && message.body!.isNotEmpty
                           ? Flexible(
                               child: Container(
-                                constraints: BoxConstraints(
+                                constraints: const BoxConstraints(
                                     minWidth: 0.0, maxWidth: 480),
-                                padding:
-                                    EdgeInsets.fromLTRB(8.0, 4.0, 8.0, 4.0),
+                                padding: const EdgeInsets.fromLTRB(
+                                    8.0, 4.0, 8.0, 4.0),
                                 decoration: BoxDecoration(
                                     color: primaryColor,
                                     borderRadius: BorderRadius.circular(8.0)),
-                                margin: EdgeInsets.only(left: 10.0),
+                                margin: const EdgeInsets.only(left: 10.0),
                                 child: Column(
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         message.body!,
-                                        style: TextStyle(color: Colors.white),
+                                        style: const TextStyle(
+                                            color: Colors.white),
                                       ),
                                       if (message.reactions != null &&
                                           message.reactions!.total.isNotEmpty)
@@ -680,12 +683,8 @@ class ChatScreenState extends State<ChatScreen> {
                               ),
                             )
                           : Container(
-                              child: Text(
-                                "Empty",
-                                style: TextStyle(color: primaryColor),
-                              ),
-                              padding:
-                                  EdgeInsets.fromLTRB(15.0, 10.0, 15.0, 10.0),
+                              padding: const EdgeInsets.fromLTRB(
+                                  15.0, 10.0, 15.0, 10.0),
                               width: 200.0,
                               decoration: BoxDecoration(
                                   color: greyColor2,
@@ -694,14 +693,18 @@ class ChatScreenState extends State<ChatScreen> {
                                   bottom:
                                       isLastMessageRight(index) ? 20.0 : 10.0,
                                   right: 10.0),
+                              child: const Text(
+                                "Empty",
+                                style: TextStyle(color: primaryColor),
+                              ),
                             ),
                   Padding(
-                    padding: EdgeInsets.only(
+                    padding: const EdgeInsets.only(
                         // bottom: isLastMessageRight(index) ? 20.0 : 10.0,
                         left: 4.0),
                     child: GestureDetector(
                       onTap: () => _reactOnMessage(message),
-                      child: Icon(Icons.add_reaction_outlined,
+                      child: const Icon(Icons.add_reaction_outlined,
                           size: 16, color: primaryColor),
                     ),
                   ),
@@ -709,15 +712,13 @@ class ChatScreenState extends State<ChatScreen> {
               ),
             )
           ],
-          crossAxisAlignment: CrossAxisAlignment.start,
         ),
-        margin: EdgeInsets.only(bottom: 10.0),
       );
     }
   }
 
   bool isLastMessageLeft(int index) {
-    if ((index > 0 && listMessage[index - 1].id == _cubeUser.id) ||
+    if ((index > 0 && listMessage[index - 1].id == widget.cubeUser.id) ||
         index == 0) {
       return true;
     } else {
@@ -726,7 +727,7 @@ class ChatScreenState extends State<ChatScreen> {
   }
 
   bool isLastMessageRight(int index) {
-    if ((index > 0 && listMessage[index - 1].id != _cubeUser.id) ||
+    if ((index > 0 && listMessage[index - 1].id != widget.cubeUser.id) ||
         index == 0) {
       return true;
     } else {
@@ -744,12 +745,12 @@ class ChatScreenState extends State<ChatScreen> {
     return Visibility(
       visible: isTyping,
       child: Container(
+        alignment: Alignment.centerLeft,
+        margin: const EdgeInsets.all(16.0),
         child: Text(
           userStatus,
-          style: TextStyle(color: primaryColor),
+          style: const TextStyle(color: primaryColor),
         ),
-        alignment: Alignment.centerLeft,
-        margin: EdgeInsets.all(16.0),
       ),
     );
   }
@@ -770,60 +771,63 @@ class ChatScreenState extends State<ChatScreen> {
 
   Widget buildInput() {
     return Container(
+      width: double.infinity,
+      height: 50.0,
+      decoration: const BoxDecoration(
+          border: Border(top: BorderSide(color: greyColor2, width: 0.5)),
+          color: Colors.white),
       child: Row(
         children: <Widget>[
           // Button send image
           Material(
+            color: Colors.white,
             child: Container(
-              margin: EdgeInsets.symmetric(horizontal: 1.0),
+              margin: const EdgeInsets.symmetric(horizontal: 1.0),
               child: IconButton(
-                icon: Icon(Icons.attach_file_rounded),
+                icon: const Icon(Icons.attach_file_rounded),
                 onPressed: () {
                   openGallery();
                 },
                 color: primaryColor,
               ),
             ),
-            color: Colors.white,
           ),
 
           // Edit text
           Flexible(
-            child: Container(
-              child: TextField(
-                autofocus: platformUtils.isDesktop(),
-                focusNode: _editMessageFocusNode,
-                keyboardType: TextInputType.multiline,
-                maxLines: null,
-                style: TextStyle(color: primaryColor, fontSize: 15.0),
-                controller: textEditingController,
-                decoration: InputDecoration.collapsed(
-                  hintText: 'Type your message...',
-                  hintStyle: TextStyle(color: greyColor),
-                ),
-                onChanged: (text) {
-                  sendIsTypingStatus();
-                },
+            child: TextField(
+              autofocus: platform_utils.isDesktop(),
+              focusNode: _editMessageFocusNode,
+              keyboardType: TextInputType.multiline,
+              maxLines: null,
+              style: const TextStyle(color: primaryColor, fontSize: 15.0),
+              controller: textEditingController,
+              decoration: const InputDecoration.collapsed(
+                hintText: 'Type your message...',
+                hintStyle: TextStyle(color: greyColor),
               ),
+              onChanged: (text) {
+                sendIsTypingStatus();
+              },
             ),
           ),
 
           // Button send message
           Material(
+            color: Colors.white,
             child: Container(
-              margin: EdgeInsets.only(left: 4, right: 2.0),
+              margin: const EdgeInsets.only(left: 4, right: 2.0),
               child: IconButton(
-                icon: Icon(Icons.send),
+                icon: const Icon(Icons.send),
                 onPressed: () => onSendChatMessage(textEditingController.text),
                 color: primaryColor,
               ),
             ),
-            color: Colors.white,
           ),
           // Button record audio
           IconButton(
             splashRadius: 12,
-            icon: Icon(Icons.mic_none_rounded),
+            icon: const Icon(Icons.mic_none_rounded),
             onPressed: () {
               if (!isAudioRecording) {
                 setState(() {
@@ -835,18 +839,13 @@ class ChatScreenState extends State<ChatScreen> {
           ),
         ],
       ),
-      width: double.infinity,
-      height: 50.0,
-      decoration: BoxDecoration(
-          border: Border(top: BorderSide(color: greyColor2, width: 0.5)),
-          color: Colors.white),
     );
   }
 
   Widget buildListMessage() {
     getWidgetMessages(listMessage) {
       return ListView.builder(
-        padding: EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(10.0),
         itemBuilder: (context, index) => buildItem(index, listMessage[index]),
         itemCount: listMessage.length,
         reverse: true,
@@ -859,7 +858,7 @@ class ChatScreenState extends State<ChatScreen> {
         stream: getMessagesList().asStream(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
-            return Center(
+            return const Center(
                 child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(themeColor)));
           } else {
@@ -882,9 +881,9 @@ class ChatScreenState extends State<ChatScreen> {
           isLoading = false;
           messages = loadedMessages;
         }),
-        getAllUsersByIds(_cubeDialog.occupantsIds!.toSet()).then((result) =>
-            _occupants.addAll(Map.fromIterable(result!.items,
-                key: (item) => item.id, value: (item) => item)))
+        getAllUsersByIds(widget.cubeDialog.occupantsIds!.toSet()).then(
+            (result) => _occupants
+                .addAll({for (var item in result!.items) item.id: item}))
       ]);
       completer.complete(messages);
     } catch (error) {
@@ -931,14 +930,6 @@ class ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  Future<bool> onBackPress() {
-    return Navigator.pushNamedAndRemoveUntil<bool>(
-        context, 'select_dialog', (r) => false,
-        arguments: {USER_ARG_NAME: _cubeUser}).then((value) {
-      return true;
-    });
-  }
-
   _initChatListeners() {
     log("[_initChatListeners]");
     msgSubscription = CubeChatConnection
@@ -971,16 +962,16 @@ class ChatScreenState extends State<ChatScreen> {
           _initChatListeners();
 
           if (_unreadMessages.isNotEmpty) {
-            _unreadMessages.forEach((cubeMessage) {
-              _cubeDialog.readMessage(cubeMessage);
-            });
+            for (var cubeMessage in _unreadMessages) {
+              widget.cubeDialog.readMessage(cubeMessage);
+            }
             _unreadMessages.clear();
           }
 
           if (_unsentMessages.isNotEmpty) {
-            _unsentMessages.forEach((cubeMessage) {
-              _cubeDialog.sendMessage(cubeMessage);
-            });
+            for (var cubeMessage in _unsentMessages) {
+              widget.cubeDialog.sendMessage(cubeMessage);
+            }
 
             _unsentMessages.clear();
           }
@@ -992,9 +983,9 @@ class ChatScreenState extends State<ChatScreen> {
   void sendIsTypingStatus() {
     var currentTime = DateTime.now().millisecondsSinceEpoch;
     var isTypingTimeout = currentTime - _sendIsTypingTime;
-    if (isTypingTimeout >= TYPING_TIMEOUT) {
+    if (isTypingTimeout >= typingTimeout) {
       _sendIsTypingTime = currentTime;
-      _cubeDialog.sendIsTypingStatus();
+      widget.cubeDialog.sendIsTypingStatus();
       _startStopTypingStatus();
     }
   }
@@ -1002,20 +993,21 @@ class ChatScreenState extends State<ChatScreen> {
   void _startStopTypingStatus() {
     _sendStopTypingTimer?.cancel();
     _sendStopTypingTimer =
-        Timer(Duration(milliseconds: STOP_TYPING_TIMEOUT), () {
-      _cubeDialog.sendStopTypingStatus();
+        Timer(const Duration(milliseconds: stopTypingTimeout), () {
+      widget.cubeDialog.sendStopTypingStatus();
     });
   }
 
   Future<List<CubeMessage>> getMessagesByDate(int date, bool isLoadNew) async {
     var params = GetMessagesParameters();
-    params.sorter = RequestSorter(SORT_DESC, '', 'date_sent');
+    params.sorter = RequestSorter(sortDesc, '', 'date_sent');
     params.limit = messagesPerPage;
     params.filters = [
       RequestFilter('', 'date_sent', isLoadNew || date == 0 ? 'gt' : 'lt', date)
     ];
 
-    return getMessages(_cubeDialog.dialogId!, params.getRequestParameters())
+    return getMessages(
+            widget.cubeDialog.dialogId!, params.getRequestParameters())
         .then((result) {
           lastPartSize = result!.items.length;
 
@@ -1030,14 +1022,15 @@ class ChatScreenState extends State<ChatScreen> {
   Future<List<CubeMessage>> getMessagesBetweenDates(
       int startDate, int endDate) async {
     var params = GetMessagesParameters();
-    params.sorter = RequestSorter(SORT_DESC, '', 'date_sent');
+    params.sorter = RequestSorter(sortDesc, '', 'date_sent');
     params.limit = messagesPerPage;
     params.filters = [
       RequestFilter('', 'date_sent', 'gt', startDate),
       RequestFilter('', 'date_sent', 'lt', endDate)
     ];
 
-    return getMessages(_cubeDialog.dialogId!, params.getRequestParameters())
+    return getMessages(
+            widget.cubeDialog.dialogId!, params.getRequestParameters())
         .then((result) {
       return result!.items;
     });
@@ -1074,7 +1067,7 @@ class ChatScreenState extends State<ChatScreen> {
   getReactionsWidget(CubeMessage message) {
     if (message.reactions == null) return Container();
 
-    var isOwnMessage = message.senderId == _cubeUser.id;
+    var isOwnMessage = message.senderId == widget.cubeUser.id;
 
     return LayoutBuilder(builder: (context, constraints) {
       var widgetWidth =
@@ -1091,7 +1084,7 @@ class ChatScreenState extends State<ChatScreen> {
             crossAxisCount: maxColumns,
             mainAxisSpacing: 4,
             childAspectRatio: 2,
-            physics: NeverScrollableScrollPhysics(),
+            physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             padding: const EdgeInsets.symmetric(vertical: 2),
             children: <Widget>[
@@ -1104,11 +1097,11 @@ class ChatScreenState extends State<ChatScreen> {
                           right: isOwnMessage ? 0 : 4,
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.all(
+                          borderRadius: const BorderRadius.all(
                             Radius.circular(16),
                           ),
                           child: Container(
-                              padding: EdgeInsets.symmetric(
+                              padding: const EdgeInsets.symmetric(
                                   vertical: 4, horizontal: 6),
                               color: message.reactions!.own.contains(reaction)
                                   ? Colors.green
@@ -1120,19 +1113,19 @@ class ChatScreenState extends State<ChatScreen> {
                                 children: [
                                   Text(reaction,
                                       style: kIsWeb
-                                          ? TextStyle(
+                                          ? const TextStyle(
                                               color: Colors.green,
                                               fontFamily: 'NotoColorEmoji')
                                           : null),
                                   Text(
                                       ' ${message.reactions!.total[reaction].toString()}',
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                         color: Colors.white,
                                       )),
                                 ],
                               )),
                         )));
-              }).toList()
+              })
             ],
           ));
     });
@@ -1144,14 +1137,14 @@ class ChatScreenState extends State<ChatScreen> {
         builder: (BuildContext context) {
           return Dialog(
               child: Container(
-                  margin: EdgeInsets.all(8),
+                  margin: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(8.0)),
                   width: 400,
                   height: 400,
                   child: EmojiPicker(
-                    config: Config(
+                    config: const Config(
                       emojiTextStyle: kIsWeb
                           ? TextStyle(
                               color: Colors.green, fontFamily: 'NotoColorEmoji')
@@ -1185,12 +1178,12 @@ class ChatScreenState extends State<ChatScreen> {
         (message.reactions?.own.contains(emoji.emoji) ?? false)) {
       removeMessageReaction(message.messageId!, emoji.emoji);
       _updateMessageReactions(MessageReaction(
-          _cubeUser.id!, _cubeDialog.dialogId!, message.messageId!,
+          widget.cubeUser.id!, widget.cubeDialog.dialogId!, message.messageId!,
           removeReaction: emoji.emoji));
     } else {
       addMessageReaction(message.messageId!, emoji.emoji);
       _updateMessageReactions(MessageReaction(
-          _cubeUser.id!, _cubeDialog.dialogId!, message.messageId!,
+          widget.cubeUser.id!, widget.cubeDialog.dialogId!, message.messageId!,
           addReaction: emoji.emoji));
     }
   }
@@ -1199,19 +1192,22 @@ class ChatScreenState extends State<ChatScreen> {
     log('[_updateMessageReactions]');
     setState(() {
       CubeMessage? msg = listMessage
-          .firstWhereOrNull((msg) => msg.messageId == reaction.messageId);
+          .where((msg) => msg.messageId == reaction.messageId)
+          .firstOrNull;
       if (msg == null) return;
 
       if (msg.reactions == null) {
         msg.reactions = CubeMessageReactions.fromJson({
-          'own': {if (reaction.userId == _cubeUser.id) reaction.addReaction},
+          'own': {
+            if (reaction.userId == widget.cubeUser.id) reaction.addReaction
+          },
           'total': {reaction.addReaction: 1}
         });
       } else {
         if (reaction.addReaction != null) {
-          if (reaction.userId != _cubeUser.id ||
+          if (reaction.userId != widget.cubeUser.id ||
               !(msg.reactions?.own.contains(reaction.addReaction) ?? false)) {
-            if (reaction.userId == _cubeUser.id) {
+            if (reaction.userId == widget.cubeUser.id) {
               msg.reactions!.own.add(reaction.addReaction!);
             }
 
@@ -1223,9 +1219,9 @@ class ChatScreenState extends State<ChatScreen> {
         }
 
         if (reaction.removeReaction != null) {
-          if (reaction.userId != _cubeUser.id ||
+          if (reaction.userId != widget.cubeUser.id ||
               (msg.reactions?.own.contains(reaction.removeReaction) ?? false)) {
-            if (reaction.userId == _cubeUser.id) {
+            if (reaction.userId == widget.cubeUser.id) {
               msg.reactions!.own.remove(reaction.removeReaction!);
             }
 
@@ -1244,17 +1240,18 @@ class ChatScreenState extends State<ChatScreen> {
 
   FocusNode createEditMessageFocusNode() {
     return FocusNode(
-      onKey: (FocusNode node, RawKeyEvent evt) {
-        if (!evt.isShiftPressed && evt.logicalKey == LogicalKeyboardKey.enter) {
-          if (evt is RawKeyDownEvent) {
+      onKeyEvent: (FocusNode node, KeyEvent evt) {
+        if (!HardwareKeyboard.instance.isShiftPressed &&
+            evt.logicalKey == LogicalKeyboardKey.enter) {
+          if (evt is KeyDownEvent) {
             onSendChatMessage(textEditingController.text);
           }
           _editMessageFocusNode.requestFocus();
           return KeyEventResult.handled;
         } else if (evt.logicalKey == LogicalKeyboardKey.enter) {
-          if (evt is RawKeyDownEvent) {
+          if (evt is KeyDownEvent) {
             setState(() {
-              textEditingController.text = textEditingController.text + '\n';
+              textEditingController.text = '${textEditingController.text}\n';
               textEditingController.selection = TextSelection.collapsed(
                   offset: textEditingController.text.length);
             });
@@ -1280,23 +1277,23 @@ class ChatScreenState extends State<ChatScreen> {
         return _buildVideoAttachmentWidget(message);
       case CubeAttachmentType.LOCATION_TYPE:
       default:
-        return SizedBox.shrink();
+        return const SizedBox.shrink();
     }
   }
 
   Widget _buildImageAttachmentWidget(CubeMessage message) {
     var firstAttachment = message.attachments!.firstOrNull;
 
-    if (firstAttachment == null) return SizedBox.shrink();
+    if (firstAttachment == null) return const SizedBox.shrink();
 
-    var imageHash;
+    String? imageHash;
 
     var attachmentData = firstAttachment.data;
     if (attachmentData != null) {
       try {
         var jsonData = jsonDecode(Uri.decodeComponent(attachmentData));
-        imageHash = jsonData[PARAM_HASH];
-      } on FormatException catch (e) {
+        imageHash = jsonData[paramHash];
+      } on FormatException {
         imageHash = Uri.decodeComponent(attachmentData);
       } catch (e) {
         imageHash = attachmentData;
@@ -1308,7 +1305,7 @@ class ChatScreenState extends State<ChatScreen> {
     return Container(
       width: widgetSize.width,
       height: widgetSize.height,
-      padding: EdgeInsets.only(bottom: 2.0),
+      padding: const EdgeInsets.only(bottom: 2.0),
       child: GestureDetector(
         onTap: () {
           Navigator.push(
@@ -1321,16 +1318,16 @@ class ChatScreenState extends State<ChatScreen> {
           );
         },
         child: ClipRRect(
-          borderRadius: BorderRadius.vertical(
+          borderRadius: const BorderRadius.vertical(
               top: Radius.circular(8.0), bottom: Radius.circular(2.0)),
           child: CachedNetworkImage(
-            fadeInDuration: Duration(milliseconds: 300),
-            fadeOutDuration: Duration(milliseconds: 100),
+            fadeInDuration: const Duration(milliseconds: 300),
+            fadeOutDuration: const Duration(milliseconds: 100),
             maxHeightDiskCache: 300,
             maxWidthDiskCache: 300,
             placeholder: (context, url) => Center(
               child: !validateBlurhash(imageHash ?? '')
-                  ? Container(
+                  ? const SizedBox(
                       width: 28,
                       height: 28,
                       child: CircularProgressIndicator(
@@ -1339,7 +1336,7 @@ class ChatScreenState extends State<ChatScreen> {
                       ),
                     )
                   : BlurHash(
-                      hash: imageHash,
+                      hash: imageHash!,
                       imageFit: BoxFit.cover,
                     ),
             ),
@@ -1357,7 +1354,7 @@ class ChatScreenState extends State<ChatScreen> {
 
   Widget _buildAudioAttachmentWidget(CubeMessage message) {
     var attachment = message.attachments?.firstOrNull;
-    if (attachment == null) return SizedBox.shrink();
+    if (attachment == null) return const SizedBox.shrink();
 
     return AudioAttachment(
         key: Key(message.messageId!),
@@ -1368,9 +1365,9 @@ class ChatScreenState extends State<ChatScreen> {
 
   Widget _buildVideoAttachmentWidget(CubeMessage message) {
     var attachment = message.attachments?.firstOrNull;
-    if (attachment == null) return SizedBox.shrink();
+    if (attachment == null) return const SizedBox.shrink();
 
-    return platformUtils.isVideoAttachmentsSupported
+    return platform_utils.isVideoAttachmentsSupported
         ? VideoAttachment(
             key: Key(message.messageId!),
             accentColor: Colors.green,
@@ -1413,6 +1410,6 @@ void showChatDetails(
     BuildContext context, CubeUser cubeUser, CubeDialog cubeDialog) async {
   log("_chatDetails= $cubeDialog");
 
-  platformUtils.showModal(
+  platform_utils.showModal(
       context: context, child: UpdateDialog(cubeUser, cubeDialog));
 }

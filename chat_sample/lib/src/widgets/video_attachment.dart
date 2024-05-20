@@ -14,11 +14,11 @@ class VideoAttachment extends StatefulWidget {
   final Color accentColor;
 
   const VideoAttachment({
-    Key? key,
+    super.key,
     required this.source,
     this.accentColor = Colors.blue,
     required this.videoSize,
-  }) : super(key: key);
+  });
 
   @override
   State<StatefulWidget> createState() {
@@ -27,7 +27,7 @@ class VideoAttachment extends StatefulWidget {
 }
 
 class VideoAttachmentState extends State<VideoAttachment> {
-  final String TAG = 'VideoAttachment';
+  final String tag = 'VideoAttachment';
 
   late CachedVideoPlayerPlusController controller;
 
@@ -60,7 +60,7 @@ class VideoAttachmentState extends State<VideoAttachment> {
 
     var widgetSize = getWidgetSize(aspectRatio, 240, 240);
 
-    return Container(
+    return SizedBox(
       width: widgetSize.width,
       height: widgetSize.height,
       child: GestureDetector(
@@ -74,7 +74,7 @@ class VideoAttachmentState extends State<VideoAttachment> {
                       )));
         },
         child: ClipRRect(
-          borderRadius: BorderRadius.vertical(
+          borderRadius: const BorderRadius.vertical(
               top: Radius.circular(8.0), bottom: Radius.circular(2.0)),
           // topLeft: Radius.circular(8.0), topRight: Radius.circular(8.0)),
           child: Stack(children: [
@@ -84,7 +84,7 @@ class VideoAttachmentState extends State<VideoAttachment> {
             Center(
               child: Visibility(
                 visible: controller.value.isBuffering,
-                child: Container(
+                child: const SizedBox(
                   width: 42,
                   height: 42,
                   child: CircularProgressIndicator(
@@ -97,12 +97,12 @@ class VideoAttachmentState extends State<VideoAttachment> {
               child: FloatingActionButton(
                 heroTag: 'PlayPauseVideo_${widget.source.split('/').last}',
                 onPressed: playPause,
-                child: Icon(controller.value.isPlaying
-                    ? Icons.pause_rounded
-                    : Icons.play_arrow_rounded),
                 backgroundColor: Colors.black38,
                 elevation: 0.0,
                 mini: true,
+                child: Icon(controller.value.isPlaying
+                    ? Icons.pause_rounded
+                    : Icons.play_arrow_rounded),
               ),
             ),
           ]),
@@ -132,15 +132,15 @@ class VideoAttachmentStub extends StatelessWidget {
   final Color accentColor;
 
   const VideoAttachmentStub({
-    Key? key,
+    super.key,
     required this.source,
     this.accentColor = Colors.blue,
     required this.videoSize,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
-    var defaultStyle = TextStyle(
+    var defaultStyle = const TextStyle(
       color: Colors.grey,
       fontSize: 14.0,
     );
@@ -152,28 +152,28 @@ class VideoAttachmentStub extends StatelessWidget {
       return aspectRatio < 1;
     }
 
-    var widgetWidth;
-    var widgetHeight;
+    double widgetWidth;
+    double widgetHeight;
 
     if (isVerticalVideo()) {
       widgetHeight = 300;
       widgetWidth = widgetHeight * aspectRatio;
     } else {
       widgetWidth = 300;
-      widgetHeight = widgetWidth ~/ aspectRatio;
+      widgetHeight = (widgetWidth ~/ aspectRatio).toDouble();
     }
 
     return Container(
-      width: widgetWidth.toDouble(),
-      height: widgetHeight.toDouble(),
-      margin: EdgeInsets.all(8),
+      width: widgetWidth,
+      height: widgetHeight,
+      margin: const EdgeInsets.all(8),
       child: Center(
         child: RichText(
           textAlign: TextAlign.center,
           text: TextSpan(
             style: defaultStyle,
             children: <TextSpan>[
-              TextSpan(
+              const TextSpan(
                   text:
                       'This attachment\'s type is temporarily unsupported on the current platform. Click the '),
               TextSpan(
@@ -183,7 +183,7 @@ class VideoAttachmentStub extends StatelessWidget {
                     ..onTap = () {
                       launchUrl(Uri.parse(source));
                     }),
-              TextSpan(text: 'to open it in your browser.'),
+              const TextSpan(text: 'to open it in your browser.'),
             ],
           ),
         ),

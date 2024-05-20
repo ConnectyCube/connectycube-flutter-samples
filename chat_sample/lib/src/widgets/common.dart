@@ -5,13 +5,14 @@ import 'package:flutter/material.dart';
 import '../utils/consts.dart';
 
 Widget getAvatarTextWidget(bool condition, String? text, {double? fontSize}) {
-  if (condition)
-    return SizedBox.shrink();
-  else
+  if (condition) {
+    return const SizedBox.shrink();
+  } else {
     return Text(
       isEmpty(text) ? '?' : text!,
       style: TextStyle(fontSize: fontSize ?? 30, color: Colors.green),
     );
+  }
 }
 
 Widget getUserAvatarWidget(CubeUser? cubeUser, double radius,
@@ -29,7 +30,7 @@ Widget getDialogAvatarWidget(CubeDialog? cubeDialog, double radius,
 Widget getAvatarWidget(String? imageUrl, String? name, double radius,
     {Widget? placeholder, Widget? errorWidget}) {
   return CircleAvatar(
-    backgroundColor: Color.fromARGB(20, 100, 100, 100),
+    backgroundColor: const Color.fromARGB(20, 100, 100, 100),
     radius: radius,
     child: ClipRRect(
       borderRadius: BorderRadius.circular(radius),
@@ -61,18 +62,20 @@ Widget getAvatarWidget(String? imageUrl, String? name, double radius,
 }
 
 Widget getMessageStateWidget(MessageState? state) {
-  var result;
+  Widget result;
 
   switch (state) {
     case MessageState.read:
-      result = Stack(children: <Widget>[
+      result = const Stack(children: <Widget>[
         Icon(
           Icons.check_rounded,
           size: 15.0,
           color: Colors.green,
         ),
         Padding(
-          padding: EdgeInsets.only(left: 4,),
+          padding: EdgeInsets.only(
+            left: 4,
+          ),
           child: Icon(
             Icons.check_rounded,
             size: 15.0,
@@ -83,7 +86,7 @@ Widget getMessageStateWidget(MessageState? state) {
 
       break;
     case MessageState.delivered:
-      result = Stack(children: <Widget>[
+      result = const Stack(children: <Widget>[
         Icon(
           Icons.check_rounded,
           size: 15.0,
@@ -101,7 +104,7 @@ Widget getMessageStateWidget(MessageState? state) {
 
       break;
     case MessageState.sent:
-      result = Icon(
+      result = const Icon(
         Icons.check_rounded,
         size: 15.0,
         color: greyColor,
@@ -109,7 +112,7 @@ Widget getMessageStateWidget(MessageState? state) {
 
       break;
     default:
-      result = SizedBox.shrink();
+      result = const SizedBox.shrink();
 
       break;
   }

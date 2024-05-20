@@ -5,8 +5,7 @@ class FullVideoScreen extends StatefulWidget {
   final String url;
   final CachedVideoPlayerPlusController? controller;
 
-  FullVideoScreen({Key? key, required this.url, this.controller})
-      : super(key: key);
+  const FullVideoScreen({super.key, required this.url, this.controller});
 
   @override
   State createState() => FullVideoScreenState();
@@ -19,9 +18,10 @@ class FullVideoScreenState extends State<FullVideoScreen> {
   void initState() {
     super.initState();
     if (widget.controller == null) {
-      controller =
-          CachedVideoPlayerPlusController.networkUrl(Uri.parse(widget.url), httpHeaders: {
-            'Cache-Control': 'max-age=${30*24*60*60}',
+      controller = CachedVideoPlayerPlusController.networkUrl(
+          Uri.parse(widget.url),
+          httpHeaders: {
+            'Cache-Control': 'max-age=${30 * 24 * 60 * 60}',
           });
     } else {
       controller = widget.controller!;
@@ -56,93 +56,89 @@ class FullVideoScreenState extends State<FullVideoScreen> {
 
     var videoAspectRatio = controller.value.aspectRatio;
 
-    var widgetWidth;
-    var widgetHeight;
+    double widgetWidth;
+    double widgetHeight;
 
     if (orientation == Orientation.portrait) {
       widgetWidth = deviceWidth;
-      widgetHeight = widgetWidth ~/ videoAspectRatio;
+      widgetHeight = (widgetWidth ~/ videoAspectRatio).toDouble();
     } else {
       widgetHeight = deviceHeight;
       widgetWidth = widgetHeight * videoAspectRatio;
     }
 
     return Scaffold(
-      //   appBar: AppBar(
-      //     backgroundColor: Colors.black,
-      // ),
       backgroundColor: Colors.black,
-      body: Container(
-        child: Stack(
-          children: [
-            Center(
-              child: Container(
-                width: widgetWidth.toDouble(),
-                height: widgetHeight.toDouble(),
-                child: CachedVideoPlayerPlus(controller),
-              ),
+      body: Stack(
+        children: [
+          Center(
+            child: SizedBox(
+              width: widgetWidth,
+              height: widgetHeight,
+              child: CachedVideoPlayerPlus(controller),
             ),
-            Align(
-              alignment: Alignment.topCenter,
-              child: Container(
-                height: 86,
-                child: AppBar(
-                  backgroundColor: Colors.black38,
-                ),
-              ),
-            ),
-            Align(
-              alignment: Alignment.center,
-              child: FloatingActionButton(
-                heroTag: "PlayPauseVideo",
-                onPressed: controller.value.isPlaying
-                    ? controller.pause
-                    : controller.play,
-                child: Icon(controller.value.isPlaying
-                    ? Icons.pause_rounded
-                    : Icons.play_arrow_rounded),
+          ),
+          Align(
+            alignment: Alignment.topCenter,
+            child: SizedBox(
+              height: 86,
+              child: AppBar(
                 backgroundColor: Colors.black38,
-                elevation: 0.0,
               ),
             ),
-            Align(
-              alignment: Alignment.bottomCenter,
+          ),
+          Align(
+            alignment: Alignment.center,
+            child: FloatingActionButton(
+              heroTag: "PlayPauseVideo",
+              onPressed: controller.value.isPlaying
+                  ? controller.pause
+                  : controller.play,
+              backgroundColor: Colors.black38,
+              elevation: 0.0,
+              child: Icon(controller.value.isPlaying
+                  ? Icons.pause_rounded
+                  : Icons.play_arrow_rounded),
+            ),
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Container(
+              margin:
+                  const EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
+              child: VideoProgressIndicator(
+                controller,
+                allowScrubbing: true,
+                colors: VideoProgressColors(
+                    playedColor: Colors.green,
+                    bufferedColor: Colors.green.shade100),
+              ),
+            ),
+          ),
+          Visibility(
+            visible: controller.value.isBuffering,
+            child: Align(
+              alignment: Alignment.bottomLeft,
               child: Container(
-                margin: EdgeInsets.symmetric(vertical: 16.0, horizontal: 8.0),
-                child: VideoProgressIndicator(
-                  controller,
-                  allowScrubbing: true,
-                  colors: VideoProgressColors(
-                      playedColor: Colors.green,
-                      bufferedColor: Colors.green.shade100),
-                ),
-              ),
-            ),
-            Visibility(
-              visible: controller.value.isBuffering,
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: Container(
-                  margin: EdgeInsets.only(left: 8, bottom: 32),
-                  child: Text(
-                    'Buffering...',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.white,
-                      shadows: [
-                        Shadow(
-                          color: Colors.black,
-                          offset: Offset(2, 1),
-                          blurRadius: 8,
-                        ),
-                      ],
-                    ),
+                margin: const EdgeInsets.only(left: 8, bottom: 32),
+                child: const Text(
+                  'Buffering...',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black,
+                        offset: Offset(2, 1),
+                        blurRadius: 8,
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

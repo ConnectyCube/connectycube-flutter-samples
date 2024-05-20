@@ -14,31 +14,24 @@ class SelectOpponentsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () => _onBackPressed(),
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: Text(
-            'Logged in as ${CubeChatConnection.instance.currentUser!.fullName}',
-          ),
-          actions: <Widget>[
-            IconButton(
-              onPressed: () => _logOut(context),
-              icon: Icon(
-                Icons.exit_to_app,
-                color: Colors.white,
-              ),
-            ),
-          ],
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text(
+          'Logged in as ${CubeChatConnection.instance.currentUser!.fullName}',
         ),
-        body: BodyLayout(currentUser),
+        actions: <Widget>[
+          IconButton(
+            onPressed: () => _logOut(context),
+            icon: const Icon(
+              Icons.exit_to_app,
+              color: Colors.white,
+            ),
+          ),
+        ],
       ),
+      body: BodyLayout(currentUser),
     );
-  }
-
-  Future<bool> _onBackPressed() {
-    return Future.value(false);
   }
 
   _logOut(BuildContext context) {
@@ -46,26 +39,30 @@ class SelectOpponentsScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Logout"),
-          content: Text("Are you sure you want logout current user"),
+          title: const Text("Logout"),
+          content: const Text("Are you sure you want logout current user"),
           actions: <Widget>[
             TextButton(
-              child: Text("CANCEL"),
+              child: const Text("CANCEL"),
               onPressed: () {
                 Navigator.pop(context);
               },
             ),
             TextButton(
-              child: Text("OK"),
-              onPressed: () async {
+              child: const Text("OK"),
+              onPressed: () {
                 CallManager.instance.destroy();
                 CubeChatConnection.instance.destroy();
-                await PushNotificationsManager.instance.unsubscribe();
-                await SharedPrefs.deleteUserData();
-                await signOut();
-
-                Navigator.pop(context); // cancel current Dialog
-                _navigateToLoginScreen(context);
+                PushNotificationsManager.instance
+                    .unsubscribe()
+                    .whenComplete(() {
+                  SharedPrefs.deleteUserData().whenComplete(() {
+                    signOut().whenComplete(() {
+                      Navigator.pop(context); // cancel current Dialog
+                      _navigateToLoginScreen(context);
+                    });
+                  });
+                });
               },
             ),
           ],
@@ -78,13 +75,13 @@ class SelectOpponentsScreen extends StatelessWidget {
     Navigator.pushAndRemoveUntil(
       context,
       MaterialPageRoute(
-        builder: (context) => LoginScreen(),
+        builder: (context) => const LoginScreen(),
       ),
       (r) => false,
     );
   }
 
-  SelectOpponentsScreen(this.currentUser);
+  const SelectOpponentsScreen(this.currentUser, {Key? key}) : super(key: key);
 }
 
 class BodyLayout extends StatefulWidget {
@@ -92,25 +89,23 @@ class BodyLayout extends StatefulWidget {
 
   @override
   State<StatefulWidget> createState() {
-    return _BodyLayoutState(currentUser);
+    return _BodyLayoutState();
   }
 
-  BodyLayout(this.currentUser);
+  const BodyLayout(this.currentUser, {Key? key}) : super(key: key);
 }
 
 class _BodyLayoutState extends State<BodyLayout> {
-  final CubeUser currentUser;
   late Set<int> _selectedUsers;
-
-  _BodyLayoutState(this.currentUser);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: EdgeInsets.only(top: 48, left: 48, right: 48, bottom: 12),
+        padding:
+            const EdgeInsets.only(top: 48, left: 48, right: 48, bottom: 12),
         child: Column(
           children: [
-            Text(
+            const Text(
               "Select users to call:",
               style: TextStyle(fontSize: 22),
             ),
@@ -121,29 +116,29 @@ class _BodyLayoutState extends State<BodyLayout> {
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
                 Padding(
-                  padding: EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(12),
                   child: FloatingActionButton(
                     heroTag: "VideoCall",
-                    child: Icon(
-                      Icons.videocam,
-                      color: Colors.white,
-                    ),
                     backgroundColor: Colors.blue,
                     onPressed: () => CallManager.instance.startNewCall(
                         context, CallType.VIDEO_CALL, _selectedUsers),
+                    child: const Icon(
+                      Icons.videocam,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(12),
                   child: FloatingActionButton(
                     heroTag: "AudioCall",
-                    child: Icon(
-                      Icons.call,
-                      color: Colors.white,
-                    ),
                     backgroundColor: Colors.green,
                     onPressed: () => CallManager.instance.startNewCall(
                         context, CallType.AUDIO_CALL, _selectedUsers),
+                    child: const Icon(
+                      Icons.call,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ],

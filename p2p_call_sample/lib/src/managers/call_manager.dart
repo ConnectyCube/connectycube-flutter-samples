@@ -12,7 +12,7 @@ import '../utils/configs.dart';
 import '../utils/consts.dart';
 
 class CallManager {
-  static String TAG = "CallManager";
+  static String tag = "CallManager";
 
   static CallManager get instance => _getInstance();
   static CallManager? _instance;
@@ -158,7 +158,7 @@ class CallManager {
   }
 
   void acceptCall(String sessionId, bool fromCallkit) {
-    log('acceptCall, from callKit: $fromCallkit', TAG);
+    log('acceptCall, from callKit: $fromCallkit', tag);
     ConnectycubeFlutterCallKit.setOnLockScreenVisibility(isVisible: true);
 
     if (_currentCall != null) {
@@ -217,11 +217,11 @@ class CallManager {
     params.parameters = {
       'message':
           "Incoming ${currentCall.callType == CallType.VIDEO_CALL ? "Video" : "Audio"} call",
-      PARAM_CALL_TYPE: currentCall.callType,
-      PARAM_SESSION_ID: currentCall.sessionId,
-      PARAM_CALLER_ID: currentCall.callerId,
-      PARAM_CALLER_NAME: callerName,
-      PARAM_CALL_OPPONENTS: currentCall.opponentsIds.join(','),
+      paramCallType: currentCall.callType,
+      paramSessionId: currentCall.sessionId,
+      paramCallerId: currentCall.callerId,
+      paramCallerName: callerName,
+      paramCallOpponents: currentCall.opponentsIds.join(','),
     };
 
     params.notificationType = NotificationType.PUSH;
@@ -234,9 +234,9 @@ class CallManager {
 
   void _sendStartCallSignalForOffliners(P2PSession currentCall) {
     CreateEventParams params = _getCallEventParameters(currentCall);
-    params.parameters[PARAM_SIGNAL_TYPE] = SIGNAL_TYPE_START_CALL;
-    params.parameters[PARAM_IOS_VOIP] = 1;
-    params.parameters[PARAM_EXPIRATION] = 0;
+    params.parameters[paramSignalType] = signalTypeStartCall;
+    params.parameters[paramIosVoip] = 1;
+    params.parameters[paramExpiration] = 0;
     params.parameters['ios_push_type'] = 'voip';
 
     createEvent(params.getEventForRequest()).then((cubeEvent) {
@@ -253,7 +253,7 @@ class CallManager {
     if (currentUser == null || currentUser.id != currentCall.callerId) return;
 
     CreateEventParams params = _getCallEventParameters(currentCall);
-    params.parameters[PARAM_SIGNAL_TYPE] = SIGNAL_TYPE_END_CALL;
+    params.parameters[paramSignalType] = signalTypeEndCall;
 
     createEvent(params.getEventForRequest()).then((cubeEvent) {
       log("Event for offliners created");

@@ -2,17 +2,17 @@ import '../utils/consts.dart';
 import 'package:flutter/material.dart';
 
 class Loading extends StatelessWidget {
-  const Loading();
+  const Loading({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Center(
+      color: Colors.white.withOpacity(0.8),
+      child: const Center(
         child: CircularProgressIndicator(
           valueColor: AlwaysStoppedAnimation<Color>(themeColor),
         ),
       ),
-      color: Colors.white.withOpacity(0.8),
     );
   }
 }

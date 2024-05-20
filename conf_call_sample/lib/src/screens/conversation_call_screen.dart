@@ -22,103 +22,87 @@ import '../widgets/private_call_widget.dart';
 import '../widgets/speaker_view_call_widget.dart';
 
 class ConversationCallScreen extends StatefulWidget {
-  final CubeUser _currentUser;
-  final ConferenceSession _callSession;
-  final String _meetingId;
+  final CubeUser currentUser;
+  final ConferenceSession callSession;
+  final String meetingId;
   final List<int> opponents;
-  final bool _isIncoming;
-  final String _callName;
+  final bool isIncoming;
+  final String callName;
   final MediaStream? initialLocalMediaStream;
   final bool? isFrontCameraUsed;
   final bool? isSharedCall;
 
   @override
   State<StatefulWidget> createState() {
-    return _ConversationCallScreenState(
-      _currentUser,
-      _callSession,
-      _meetingId,
-      opponents,
-      _isIncoming,
-      _callName,
-      initialLocalMediaStream: initialLocalMediaStream,
-      isFrontCameraUsed: isFrontCameraUsed,
-      isSharedCall: isSharedCall,
-    );
+    return _ConversationCallScreenState();
   }
 
-  ConversationCallScreen(this._currentUser, this._callSession, this._meetingId,
-      this.opponents, this._isIncoming, this._callName,
-      {this.initialLocalMediaStream,
+  const ConversationCallScreen(this.currentUser, this.callSession,
+      this.meetingId, this.opponents, this.isIncoming, this.callName,
+      {super.key,
+      this.initialLocalMediaStream,
       this.isFrontCameraUsed = true,
       this.isSharedCall = false});
 }
 
 class _ConversationCallScreenState extends State<ConversationCallScreen> {
-  static const String TAG = "_ConversationCallScreenState";
-  static final LayoutMode DEFAULT_LAYOUT_MODE = LayoutMode.speaker;
-  final CubeUser _currentUser;
-  final ConferenceSession _callSession;
-  CallManager _callManager = CallManager.instance;
-  final String _callName;
-  final bool _isIncoming;
-  final String _meetingId;
-  final List<int> _opponents;
+  static const String tag = "_ConversationCallScreenState";
+  static const LayoutMode defaultLayoutMode = LayoutMode.speaker;
+
+  final CallManager _callManager = CallManager.instance;
   final CubeStatsReportsManager _statsReportsManager =
       CubeStatsReportsManager();
-  MediaStream? initialLocalMediaStream;
 
-  LayoutMode layoutMode = DEFAULT_LAYOUT_MODE;
+  LayoutMode layoutMode = defaultLayoutMode;
   String _callStatus = 'Waiting...';
   bool _isCameraEnabled = true;
   bool _isSpeakerEnabled = true;
   bool _isMicMute = false;
-  bool _enableScreenSharing;
+  bool _enableScreenSharing = false;
   bool _isFrontCameraUsed = true;
-  bool _isSharedCall;
+  bool _isSharedCall = false;
   RTCVideoViewObjectFit primaryVideoFit =
       RTCVideoViewObjectFit.RTCVideoViewObjectFitCover;
-  final int currentUserId;
-  DurationTimer _callTimer = DurationTimer();
+  int currentUserId = -1;
+  final DurationTimer _callTimer = DurationTimer();
   MapEntry<int, RTCVideoRenderer>? primaryRenderer;
   Map<int, RTCVideoRenderer> minorRenderers = {};
   Map<int, Map<String, bool>> participantsMediaConfigs = {};
   WidgetPosition _minorWidgetPosition = WidgetPosition.topRight;
-  AssetsAudioPlayer _ringtonePlayer = AssetsAudioPlayer.newPlayer();
-
-  _ConversationCallScreenState(this._currentUser, this._callSession,
-      this._meetingId, this._opponents, this._isIncoming, this._callName,
-      {this.initialLocalMediaStream,
-      bool? isFrontCameraUsed = true,
-      bool? isSharedCall = false})
-      : _enableScreenSharing = !_callSession.startScreenSharing,
-        _isCameraEnabled = _callSession.callType == CallType.VIDEO_CALL,
-        currentUserId = _currentUser.id!,
-        _isFrontCameraUsed = isFrontCameraUsed ?? true,
-        _isSharedCall = isSharedCall ?? false {
-    if (_opponents.length == 1) {
-      layoutMode = LayoutMode.private;
-    }
-
-    if (initialLocalMediaStream != null) {
-      _isMicMute =
-          !(initialLocalMediaStream?.getAudioTracks().firstOrNull?.enabled ??
-              false);
-      _isCameraEnabled =
-          initialLocalMediaStream?.getVideoTracks().firstOrNull?.enabled ??
-              false;
-    }
-
-    participantsMediaConfigs[currentUserId] = {
-      PARAM_IS_MIC_ENABLED: !_isMicMute,
-      PARAM_IS_CAMERA_ENABLED: _isCameraEnabled
-    };
-  }
+  final AssetsAudioPlayer _ringtonePlayer = AssetsAudioPlayer.newPlayer();
 
   @override
   void initState() {
     super.initState();
-    _statsReportsManager.init(_callSession);
+    _enableScreenSharing = !widget.callSession.startScreenSharing;
+    _isCameraEnabled = widget.callSession.callType == CallType.VIDEO_CALL;
+    currentUserId = widget.currentUser.id!;
+    _isFrontCameraUsed = widget.isFrontCameraUsed ?? true;
+    _isSharedCall = widget.isSharedCall ?? false;
+
+    if (widget.opponents.length == 1) {
+      layoutMode = LayoutMode.private;
+    }
+
+    if (widget.initialLocalMediaStream != null) {
+      _isMicMute = !(widget.initialLocalMediaStream
+          ?.getAudioTracks()
+          .firstOrNull
+          ?.enabled ??
+          false);
+      _isCameraEnabled = widget.initialLocalMediaStream
+          ?.getVideoTracks()
+          .firstOrNull
+          ?.enabled ??
+          false;
+    }
+
+    participantsMediaConfigs[currentUserId] = {
+      paramIsMicEnabled: !_isMicMute,
+      paramIsCameraEnabled: _isCameraEnabled
+    };
+
+    _statsReportsManager.init(widget.callSession);
 
     _callManager.onReceiveRejectCall = _onReceiveRejectCall;
     _callManager.onReceiveAcceptCall = _onReceiveAcceptCall;
@@ -127,35 +111,35 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     _callManager.getMediaState = _getMediaState;
     _callManager.onParticipantMediaUpdated = _onParticipantMediaUpdated;
 
-    _callSession.onLocalStreamReceived = _addLocalMediaStream;
-    _callSession.onRemoteStreamTrackReceived = _addRemoteMediaStream;
-    _callSession.onSessionClosed = _onSessionClosed;
-    _callSession.onPublishersReceived = onPublishersReceived;
-    _callSession.onPublisherLeft = onPublisherLeft;
-    _callSession.onError = onError;
-    _callSession.onSubStreamChanged = onSubStreamChanged;
-    _callSession.onLayerChanged = onLayerChanged;
+    widget.callSession.onLocalStreamReceived = _addLocalMediaStream;
+    widget.callSession.onRemoteStreamTrackReceived = _addRemoteMediaStream;
+    widget.callSession.onSessionClosed = _onSessionClosed;
+    widget.callSession.onPublishersReceived = onPublishersReceived;
+    widget.callSession.onPublisherLeft = onPublisherLeft;
+    widget.callSession.onError = onError;
+    widget.callSession.onSubStreamChanged = onSubStreamChanged;
+    widget.callSession.onLayerChanged = onLayerChanged;
 
-    if (initialLocalMediaStream != null) {
-      _callSession.localStream = initialLocalMediaStream;
-      _addLocalMediaStream(initialLocalMediaStream!);
+    if (widget.initialLocalMediaStream != null) {
+      widget.callSession.localStream = widget.initialLocalMediaStream;
+      _addLocalMediaStream(widget.initialLocalMediaStream!);
     }
 
-    _callSession.joinDialog(_meetingId, ((publishers) {
-      log("join session= $publishers", TAG);
+    widget.callSession.joinDialog(widget.meetingId, ((publishers) {
+      log("join session= $publishers", tag);
 
       _callManager.requestParticipantsMediaConfig(publishers);
 
-      _callSession.setMaxBandwidth(0);
+      widget.callSession.setMaxBandwidth(0);
 
-      if (!_isIncoming) {
+      if (!widget.isIncoming) {
         _callManager.startNewOutgoingCall(
-            _meetingId,
-            _opponents,
-            _callSession.currentUserId,
-            _callSession.callType,
-            _callName,
-            _currentUser.avatar);
+            widget.meetingId,
+            widget.opponents,
+            widget.callSession.currentUserId,
+            widget.callSession.callType,
+            widget.callName,
+            widget.currentUser.avatar);
         _playDialing();
       } else {
         setState(() {
@@ -176,7 +160,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     primaryRenderer?.value.dispose();
 
     minorRenderers.forEach((opponentId, renderer) {
-      log("[dispose] dispose renderer for $opponentId", TAG);
+      log("[dispose] dispose renderer for $opponentId", tag);
       try {
         renderer.srcObject = null;
         renderer.dispose();
@@ -191,16 +175,16 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   void _onCloseCall() {
-    log("_onCloseCall", TAG);
-    _callSession.leave();
+    log("_onCloseCall", tag);
+    widget.callSession.leave();
   }
 
   void _onReceiveRejectCall(String meetingId, int participantId, bool isBusy) {
-    log("_onReceiveRejectCall got reject from user $participantId", TAG);
+    log("_onReceiveRejectCall got reject from user $participantId", tag);
   }
 
   void _onReceiveAcceptCall(int participantId) {
-    log('[_onReceiveAcceptCall] from user $participantId', TAG);
+    log('[_onReceiveAcceptCall] from user $participantId', tag);
 
     setState(() {
       _callStatus = 'Connected';
@@ -210,20 +194,20 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   Future<void> _addLocalMediaStream(MediaStream stream) async {
-    log("_addLocalMediaStream", TAG);
+    log("_addLocalMediaStream", tag);
 
     _addMediaStream(currentUserId, true, stream);
   }
 
   void _addRemoteMediaStream(session, int userId, MediaStream stream,
       {String? trackId}) {
-    log("_addRemoteMediaStream for user $userId", TAG);
+    log("_addRemoteMediaStream for user $userId", tag);
 
     _addMediaStream(userId, false, stream, trackId: trackId);
   }
 
   void _removeMediaStream(callSession, int userId) {
-    log("_removeMediaStream for user $userId", TAG);
+    log("_removeMediaStream for user $userId", tag);
     RTCVideoRenderer? videoRenderer = minorRenderers[userId];
     if (videoRenderer != null) {
       videoRenderer.srcObject = null;
@@ -248,7 +232,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
 
           primaryRenderer = MapEntry(userIdToRemoveRenderer,
               minorRenderers.remove(userIdToRemoveRenderer)!);
-          chooseOpponentsStreamsQuality(_callSession, currentUserId,
+          chooseOpponentsStreamsQuality(widget.callSession, currentUserId,
               {userIdToRemoveRenderer: StreamType.high});
         });
       }
@@ -256,53 +240,53 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   void _closeSessionIfLast() {
-    log("[_closeSessionIfLast]", TAG);
-    if (_callSession.allActivePublishers.length < 1) {
-      log("[_closeSessionIfLast] 1", TAG);
-      _callSession.leave();
+    log("[_closeSessionIfLast]", tag);
+    if (widget.callSession.allActivePublishers.isEmpty) {
+      log("[_closeSessionIfLast] 1", tag);
+      widget.callSession.leave();
     }
   }
 
   void _onSessionClosed(session) {
-    log("[_onSessionClosed]", TAG);
+    log("[_onSessionClosed]", tag);
     _statsReportsManager.dispose();
-    _callManager.stopCall(_currentUser);
+    _callManager.stopCall(widget.currentUser);
     _stopCallTimer();
 
     Navigator.of(context).pushNamedAndRemoveUntil(
-        SELECT_OPPONENTS_SCREEN, ModalRoute.withName(SELECT_OPPONENTS_SCREEN),
-        arguments: {ARG_USER: _currentUser});
+        selectOpponentsScreen, ModalRoute.withName(selectOpponentsScreen),
+        arguments: {argUser: widget.currentUser});
   }
 
   void onPublishersReceived(publishers) {
-    log("onPublishersReceived", TAG);
+    log("onPublishersReceived", tag);
     handlePublisherReceived(publishers);
   }
 
   void onPublisherLeft(publisher) {
-    log("onPublisherLeft $publisher", TAG);
-    _removeMediaStream(_callSession, publisher);
+    log("onPublisherLeft $publisher", tag);
+    _removeMediaStream(widget.callSession, publisher);
     _callManager.processParticipantLeave(publisher);
     _closeSessionIfLast();
   }
 
   void onError(ex) {
-    log("onError $ex", TAG);
+    log("onError $ex", tag);
   }
 
   void onSubStreamChanged(int userId, StreamType streamType) {
-    log("onSubStreamChanged userId: $userId, streamType: $streamType", TAG);
+    log("onSubStreamChanged userId: $userId, streamType: $streamType", tag);
   }
 
   void onLayerChanged(int userId, int layer) {
-    log("onLayerChanged userId: $userId, layer: $layer", TAG);
+    log("onLayerChanged userId: $userId, layer: $layer", tag);
   }
 
   Future<void> _addMediaStream(
       int userId, bool isLocalStream, MediaStream stream,
       {String? trackId}) async {
     log('[_addMediaStream] userId: $userId, isLocalStream: $isLocalStream',
-        TAG);
+        tag);
 
     if (primaryRenderer == null) {
       primaryRenderer = MapEntry(userId, RTCVideoRenderer());
@@ -312,7 +296,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
         _setSourceForRenderer(primaryRenderer!.value, stream, isLocalStream,
             trackId: trackId);
 
-        chooseOpponentsStreamsQuality(_callSession, currentUserId, {
+        chooseOpponentsStreamsQuality(widget.callSession, currentUserId, {
           userId: StreamType.high,
         });
       });
@@ -324,7 +308,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
       _setSourceForRenderer(primaryRenderer!.value, stream, isLocalStream,
           trackId: trackId);
 
-      chooseOpponentsStreamsQuality(_callSession, currentUserId, {
+      chooseOpponentsStreamsQuality(widget.callSession, currentUserId, {
         userId: StreamType.high,
       });
 
@@ -359,12 +343,12 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   void handlePublisherReceived(List<int?> publishers) {
-    if (!_isIncoming) {
-      publishers.forEach((id) {
+    if (!widget.isIncoming) {
+      for (var id in publishers) {
         if (id != null) {
           _callManager.handleAcceptCall(id);
         }
-      });
+      }
     }
 
     if (publishers.isNotEmpty) {
@@ -373,11 +357,11 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   void _updatePrimaryUser(int userId, bool force) {
-    log("[_updatePrimaryUser] userId: $userId, force: $force", TAG);
+    log("[_updatePrimaryUser] userId: $userId, force: $force", tag);
 
     if (layoutMode == LayoutMode.grid) return;
 
-    log("[_updatePrimaryUser] 2", TAG);
+    log("[_updatePrimaryUser] 2", tag);
     updatePrimaryUser(
       userId,
       force,
@@ -387,13 +371,13 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
       participantsMediaConfigs,
       onRenderersUpdated: _updateRenderers,
     );
-    log("[_updatePrimaryUser] 3", TAG);
+    log("[_updatePrimaryUser] 3", tag);
   }
 
   _updateRenderers(MapEntry<int, RTCVideoRenderer>? updatedPrimaryRenderer,
       Map<int, RTCVideoRenderer> updatedMinorRenderers) {
     if (updatedPrimaryRenderer?.key != primaryRenderer?.key) {
-      chooseOpponentsStreamsQuality(_callSession, currentUserId, {
+      chooseOpponentsStreamsQuality(widget.callSession, currentUserId, {
         if (updatedPrimaryRenderer?.key != null)
           updatedPrimaryRenderer!.key: StreamType.high,
         if (primaryRenderer?.key != null) primaryRenderer!.key: StreamType.low,
@@ -406,8 +390,8 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () => _onBackPressed(context),
+    return PopScope(
+      canPop: false,
       child: Stack(
         children: [
           Scaffold(
@@ -437,19 +421,19 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
                   alignment: Alignment.topLeft,
                   child: Container(
                     margin: orientation == Orientation.portrait
-                        ? EdgeInsets.only(top: 40, left: 16)
-                        : EdgeInsets.only(left: 16, top: 20),
+                        ? const EdgeInsets.only(top: 40, left: 16)
+                        : const EdgeInsets.only(left: 16, top: 20),
                     child: FloatingActionButton(
                       elevation: 0,
                       heroTag: "ToggleScreenMode",
+                      onPressed: () => _switchLayoutMode(),
+                      backgroundColor: Colors.black38,
                       child: Icon(
                         layoutMode == LayoutMode.speaker
                             ? Icons.grid_view_rounded
                             : Icons.view_sidebar_rounded,
                         color: Colors.white,
                       ),
-                      onPressed: () => _switchLayoutMode(),
-                      backgroundColor: Colors.black38,
                     ),
                   ),
                 );
@@ -461,18 +445,18 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
             child: Align(
               alignment: Alignment.bottomLeft,
               child: Container(
-                margin: EdgeInsets.only(bottom: 96, left: 16),
+                margin: const EdgeInsets.only(bottom: 96, left: 16),
                 child: FloatingActionButton(
                   elevation: 0,
                   heroTag: "CopyConferenceUrl",
-                  child: Icon(
-                    Icons.share,
-                    color: Colors.white,
-                  ),
                   onPressed: () {
                     _copyConferenceUrlToClipboard();
                   },
                   backgroundColor: Colors.green,
+                  child: const Icon(
+                    Icons.share,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
@@ -488,7 +472,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
           ? LayoutMode.grid
           : LayoutMode.speaker;
 
-      var config;
+      Map<int, StreamType> config;
       if (layoutMode == LayoutMode.grid) {
         config = Map.fromEntries(minorRenderers
             .map((key, value) => MapEntry(key, StreamType.medium))
@@ -501,7 +485,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
         config.addEntries([MapEntry(primaryRenderer!.key, StreamType.high)]);
       }
 
-      chooseOpponentsStreamsQuality(_callSession, currentUserId, config);
+      chooseOpponentsStreamsQuality(widget.callSession, currentUserId, config);
     });
   }
 
@@ -590,20 +574,16 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   _endCall() {
-    _callManager.stopCall(_currentUser);
-    _callSession.leave();
+    _callManager.stopCall(widget.currentUser);
+    widget.callSession.leave();
     _stopCallTimer();
-  }
-
-  Future<bool> _onBackPressed(BuildContext context) {
-    return Future.value(false);
   }
 
   _muteMic() {
     setState(() {
       _isMicMute = !_isMicMute;
-      _callSession.setMicrophoneMute(_isMicMute);
-      _callManager.muteMic(_meetingId, _isMicMute);
+      widget.callSession.setMicrophoneMute(_isMicMute);
+      _callManager.muteMic(widget.meetingId, _isMicMute);
       notifyParticipantsMediaUpdated();
     });
   }
@@ -612,7 +592,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     if (!_isVideoEnabled()) return;
 
     if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-      _callSession.switchCamera().then((isFrontCameraUsed) {
+      widget.callSession.switchCamera().then((isFrontCameraUsed) {
         setState(() {
           _isFrontCameraUsed = isFrontCameraUsed;
         });
@@ -622,7 +602,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
         context: context,
         builder: (BuildContext context) {
           return FutureBuilder<List<MediaDeviceInfo>>(
-            future: _callSession.getCameras(),
+            future: widget.callSession.getCameras(),
             builder: (context, snapshot) {
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return AlertDialog(
@@ -658,8 +638,10 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
           );
         },
       ).then((deviceId) {
-        log("onCameraSelected deviceId: $deviceId", TAG);
-        if (deviceId != null) _callSession.switchCamera(deviceId: deviceId);
+        log("onCameraSelected deviceId: $deviceId", tag);
+        if (deviceId != null) {
+          widget.callSession.switchCamera(deviceId: deviceId);
+        }
       });
     }
   }
@@ -698,7 +680,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     } else {
       setState(() {
         _isCameraEnabled = !_isCameraEnabled;
-        _callSession.setVideoEnabled(_isCameraEnabled);
+        widget.callSession.setVideoEnabled(_isCameraEnabled);
         notifyParticipantsMediaUpdated();
       });
     }
@@ -708,13 +690,13 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     navigator.mediaDevices
         .getUserMedia({'video': getVideoConfig()}).then((newMediaStream) {
       if (newMediaStream.getVideoTracks().isNotEmpty) {
-        _callSession
+        widget.callSession
             .addMediaTrack(newMediaStream.getVideoTracks().first)
             .whenComplete(() {
-          log('The track added successfully', TAG);
+          log('The track added successfully', tag);
           setState(() {
             _isCameraEnabled = true;
-            _callSession.callType = CallType.VIDEO_CALL;
+            widget.callSession.callType = CallType.VIDEO_CALL;
             notifyParticipantsMediaUpdated();
           });
         });
@@ -733,7 +715,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
       await initForegroundService();
     }
 
-    var desktopCapturerSource = _enableScreenSharing && isDesktop
+    var desktopCapturerSource = _enableScreenSharing && isDesktop && mounted
         ? await showDialog<DesktopCapturerSource>(
             context: context,
             builder: (context) => ScreenSelectDialog(),
@@ -741,7 +723,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
         : null;
 
     foregroundServiceFuture.then((_) {
-      _callSession
+      widget.callSession
           .enableScreenSharing(_enableScreenSharing,
               desktopCapturerSource: desktopCapturerSource,
               useIOSBroadcasting: true,
@@ -760,7 +742,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   bool _isVideoCall() {
-    return CallType.VIDEO_CALL == _callSession.callType;
+    return CallType.VIDEO_CALL == widget.callSession.callType;
   }
 
   _switchSpeaker() {
@@ -769,7 +751,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
         context: context,
         builder: (BuildContext context) {
           return FutureBuilder<List<MediaDeviceInfo>>(
-            future: _callSession.getAudioOutputs(),
+            future: widget.callSession.getAudioOutputs(),
             builder: (context, snapshot) {
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return AlertDialog(
@@ -805,7 +787,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
           );
         },
       ).then((deviceId) {
-        log("onAudioOutputSelected deviceId: $deviceId", TAG);
+        log("onAudioOutputSelected deviceId: $deviceId", tag);
         if (deviceId != null) {
           setState(() {
             if (kIsWeb) {
@@ -814,7 +796,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
                 renderer.audioOutput(deviceId);
               });
             } else {
-              _callSession.selectAudioOutput(deviceId);
+              widget.callSession.selectAudioOutput(deviceId);
             }
           });
         }
@@ -822,7 +804,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
     } else {
       setState(() {
         _isSpeakerEnabled = !_isSpeakerEnabled;
-        _callSession.enableSpeakerphone(_isSpeakerEnabled);
+        widget.callSession.enableSpeakerphone(_isSpeakerEnabled);
       });
     }
   }
@@ -833,7 +815,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
         context: context,
         builder: (BuildContext context) {
           return FutureBuilder<List<MediaDeviceInfo>>(
-            future: _callSession.getAudioInputs(),
+            future: widget.callSession.getAudioInputs(),
             builder: (context, snapshot) {
               if (!snapshot.hasData || snapshot.data!.isEmpty) {
                 return AlertDialog(
@@ -869,10 +851,10 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
           );
         },
       ).then((deviceId) {
-        log("onAudioOutputSelected deviceId: $deviceId", TAG);
+        log("onAudioOutputSelected deviceId: $deviceId", tag);
         if (deviceId != null) {
           setState(() {
-            _callSession.selectAudioInput(deviceId);
+            widget.callSession.selectAudioInput(deviceId);
           });
         }
       });
@@ -923,12 +905,12 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   String _getCallName() {
     if (_isSharedCall) return 'Shared conference';
 
-    if (_isIncoming) return _callName;
+    if (widget.isIncoming) return widget.callName;
 
-    if (_opponents.length > 1) return 'Group call';
+    if (widget.opponents.length > 1) return 'Group call';
 
     var opponent = users.firstWhere(
-        (savedUser) => savedUser.id == _opponents.firstOrNull,
+        (savedUser) => savedUser.id == widget.opponents.firstOrNull,
         orElse: () => CubeUser(fullName: 'Unknown user'));
 
     return opponent.fullName ?? 'Unknown user';
@@ -943,18 +925,18 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   void _onCallMuted(String meetingId, bool isMuted) {
-    if (meetingId == _meetingId) {
+    if (meetingId == widget.meetingId) {
       setState(() {
         _isMicMute = isMuted;
-        _callSession.setMicrophoneMute(isMuted);
+        widget.callSession.setMicrophoneMute(isMuted);
       });
     }
   }
 
   Map<String, bool> _getMediaState() {
     return {
-      PARAM_IS_MIC_ENABLED: !_isMicMute,
-      PARAM_IS_CAMERA_ENABLED: _isCameraEnabled
+      paramIsMicEnabled: !_isMicMute,
+      paramIsCameraEnabled: _isCameraEnabled
     };
   }
 
@@ -966,13 +948,13 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
 
   void notifyParticipantsMediaUpdated() {
     participantsMediaConfigs[currentUserId] = {
-      PARAM_IS_MIC_ENABLED: !_isMicMute,
-      PARAM_IS_CAMERA_ENABLED: _isCameraEnabled
+      paramIsMicEnabled: !_isMicMute,
+      paramIsCameraEnabled: _isCameraEnabled
     };
 
     _callManager.notifyParticipantsMediaUpdated({
-      PARAM_IS_MIC_ENABLED: !_isMicMute,
-      PARAM_IS_CAMERA_ENABLED: _isCameraEnabled
+      paramIsMicEnabled: !_isMicMute,
+      paramIsCameraEnabled: _isCameraEnabled
     });
   }
 
@@ -991,25 +973,25 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   Future<String> _getUserName(int userId) {
-    if (userId == _currentUser.id) return Future.value('Me');
+    if (userId == widget.currentUser.id) return Future.value('Me');
 
     return getUserNameCached(userId);
   }
 
   void _copyConferenceUrlToClipboard() {
-    Clipboard.setData(
-            ClipboardData(text: '${getAppHost()}?$ARG_MEETING_ID=$_meetingId'))
+    Clipboard.setData(ClipboardData(
+            text: '${getAppHost()}?$argMeetingId=$widget.meetingId'))
         .then((_) {
       showDialog(
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('URL copied'),
-            content: Text(
+            title: const Text('URL copied'),
+            content: const Text(
                 'The conference URL was copied to the clipboard. Any user can join the current call by this link.'),
             actions: <Widget>[
               TextButton(
-                child: Text("OK"),
+                child: const Text("OK"),
                 onPressed: () {
                   Navigator.pop(context);
                 },

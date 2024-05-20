@@ -11,34 +11,27 @@ import '../utils/pref_util.dart';
 class SelectOpponentsScreen extends StatelessWidget {
   final CubeUser currentUser;
 
-  SelectOpponentsScreen(this.currentUser);
+  const SelectOpponentsScreen(this.currentUser, {super.key});
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () => _onBackPressed(),
-      child: Scaffold(
-        appBar: AppBar(
-          automaticallyImplyLeading: false,
-          title: Text(
-            'Logged in as ${currentUser.fullName}',
-          ),
-          actions: <Widget>[
-            IconButton(
-              onPressed: () => _logOut(context),
-              icon: Icon(
-                Icons.exit_to_app,
-              ),
-            ),
-          ],
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        title: Text(
+          'Logged in as ${currentUser.fullName}',
         ),
-        body: BodyLayout(currentUser),
+        actions: <Widget>[
+          IconButton(
+            onPressed: () => _logOut(context),
+            icon: const Icon(
+              Icons.exit_to_app,
+            ),
+          ),
+        ],
       ),
+      body: BodyLayout(currentUser),
     );
-  }
-
-  Future<bool> _onBackPressed() {
-    return Future.value(true);
   }
 
   _logOut(BuildContext context) {
@@ -46,17 +39,17 @@ class SelectOpponentsScreen extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Logout"),
-          content: Text("Are you sure you want logout current user"),
+          title: const Text("Logout"),
+          content: const Text("Are you sure you want logout current user"),
           actions: <Widget>[
             TextButton(
-              child: Text("CANCEL"),
+              child: const Text("CANCEL"),
               onPressed: () {
                 Navigator.pop(context);
               },
             ),
             TextButton(
-              child: Text("OK"),
+              child: const Text("OK"),
               onPressed: () {
                 signOut().then(
                   (voidValue) {
@@ -81,38 +74,36 @@ class SelectOpponentsScreen extends StatelessWidget {
   }
 
   _navigateToLoginScreen(BuildContext context) {
-    Navigator.of(context).pushReplacementNamed(LOGIN_SCREEN);
+    Navigator.of(context).pushReplacementNamed(loginScreen);
   }
 }
 
 class BodyLayout extends StatefulWidget {
   final CubeUser currentUser;
 
-  BodyLayout(this.currentUser);
+  const BodyLayout(this.currentUser, {super.key});
 
   @override
   State<StatefulWidget> createState() {
-    return _BodyLayoutState(currentUser);
+    return _BodyLayoutState();
   }
 }
 
 class _BodyLayoutState extends State<BodyLayout> {
-  static final String TAG = 'SelectOpponentsScreen';
+  static const String tag = 'SelectOpponentsScreen';
 
-  Set<int> _selectedUsers = {};
-  final CubeUser _currentUser;
-
-  _BodyLayoutState(this._currentUser);
+  final Set<int> _selectedUsers = {};
 
   @override
   Widget build(BuildContext context) {
-    log('[build]', TAG);
+    log('[build]', tag);
     return SingleChildScrollView(
       child: Container(
-        padding: EdgeInsets.only(top: 48, bottom: 24, left: 24, right: 24),
+        padding:
+            const EdgeInsets.only(top: 48, bottom: 24, left: 24, right: 24),
         alignment: Alignment.topCenter,
         child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: 400),
+          constraints: const BoxConstraints(maxWidth: 400),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
@@ -120,7 +111,7 @@ class _BodyLayoutState extends State<BodyLayout> {
                 onPressed: () {
                   startSharedCall();
                 },
-                child: Container(
+                child: const SizedBox(
                   width: 400,
                   height: 48,
                   child: Row(
@@ -141,44 +132,44 @@ class _BodyLayoutState extends State<BodyLayout> {
                   ),
                 ),
               ),
-              SizedBox(height: 16),
-              Text(
+              const SizedBox(height: 16),
+              const Text(
                 'or',
                 style: TextStyle(fontSize: 18),
               ),
-              SizedBox(height: 16),
-              Text(
+              const SizedBox(height: 16),
+              const Text(
                 "Select users to start call:",
                 style: TextStyle(fontSize: 18),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               _getOpponentsList(),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: <Widget>[
                   FloatingActionButton(
                     heroTag: "VideoCall",
+                    backgroundColor: Colors.blue,
+                    onPressed: () =>
+                        _startCall(_selectedUsers, CallType.VIDEO_CALL),
                     child: Icon(
                       _selectedUsers.isNotEmpty
                           ? Icons.videocam
                           : Icons.video_call,
                       color: Colors.white,
                     ),
-                    backgroundColor: Colors.blue,
-                    onPressed: () =>
-                        _startCall(_selectedUsers, CallType.VIDEO_CALL),
                   ),
-                  SizedBox(width: 32),
+                  const SizedBox(width: 32),
                   FloatingActionButton(
                     heroTag: "AudioCall",
+                    backgroundColor: Colors.green,
+                    onPressed: () =>
+                        _startCall(_selectedUsers, CallType.AUDIO_CALL),
                     child: Icon(
                       _selectedUsers.isNotEmpty ? Icons.call : Icons.add_call,
                       color: Colors.white,
                     ),
-                    backgroundColor: Colors.green,
-                    onPressed: () =>
-                        _startCall(_selectedUsers, CallType.AUDIO_CALL),
                   ),
                 ],
               ),
@@ -190,15 +181,15 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   Widget _getOpponentsList() {
-    log('[_getOpponentsList]', TAG);
-    CubeUser? currentUser = _currentUser;
+    log('[_getOpponentsList]', tag);
+    CubeUser? currentUser = widget.currentUser;
     final users =
         utils.users.where((user) => user.id != currentUser.id).toList();
     return ListView.builder(
       shrinkWrap: true,
       itemCount: users.length,
       itemBuilder: (context, index) {
-        log('[itemBuilder] index $index', TAG);
+        log('[itemBuilder] index $index', tag);
         return Card(
           child: CheckboxListTile(
             title: Center(
@@ -208,7 +199,7 @@ class _BodyLayoutState extends State<BodyLayout> {
             ),
             value: _selectedUsers.contains(users[index].id),
             onChanged: ((checked) {
-              log('[CheckboxListTile][onChanged]', TAG);
+              log('[CheckboxListTile][onChanged]', tag);
               setState(() {
                 if (checked!) {
                   _selectedUsers.add(users[index].id!);
@@ -226,7 +217,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   @override
   void initState() {
     super.initState();
-    log('[initState]', TAG);
+    log('[initState]', tag);
 
     initForegroundService();
     checkSystemAlertWindowPermission(context);
@@ -238,7 +229,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   void _initCalls() {
-    log('[_initCalls]', TAG);
+    log('[_initCalls]', tag);
     CallManager.instance.onReceiveNewCall =
         (callId, meetingId, initiatorId, participantIds, callType, callName) {
       _showIncomingCallScreen(
@@ -247,7 +238,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   }
 
   void _startCall(Set<int> opponents, int callType) async {
-    log('[_startCall] call type $callType', TAG);
+    log('[_startCall] call type $callType', tag);
 
     var attendees = opponents.map((entry) {
       return CubeMeetingAttendee(userId: entry);
@@ -261,43 +252,45 @@ class _BodyLayoutState extends State<BodyLayout> {
       startDate: startDate,
       endDate: endDate,
       attendees: attendees.isEmpty
-          ? [CubeMeetingAttendee(userId: _currentUser.id)]
+          ? [CubeMeetingAttendee(userId: widget.currentUser.id)]
           : attendees,
     );
-    createMeeting(meeting).then((createdMeeting) async {
-      var callSession = await ConferenceClient.instance.createCallSession(
+    createMeeting(meeting).then((createdMeeting) {
+      ConferenceClient.instance
+          .createCallSession(
         createdMeeting.hostId!,
         callType: callType,
-      );
-
-      Navigator.of(context).pushNamed(CONVERSATION_SCREEN, arguments: {
-        ARG_USER: _currentUser,
-        ARG_CALL_SESSION: callSession,
-        ARG_MEETING_ID: createdMeeting.meetingId!,
-        ARG_OPPONENTS: opponents.toList(),
-        ARG_IS_INCOMING: false,
-        ARG_CALL_NAME: opponents.isEmpty
-            ? 'Shared conference'
-            : '${_currentUser.fullName ?? 'Unknown User'}${opponents.length > 1 ? ' (in Group call)' : ''}',
-        ARG_IS_SHARED_CALL: opponents.isEmpty
+      )
+          .then((callSession) {
+        Navigator.of(context).pushNamed(conversationScreen, arguments: {
+          argUser: widget.currentUser,
+          argCallSession: callSession,
+          argMeetingId: createdMeeting.meetingId!,
+          argOpponents: opponents.toList(),
+          argIsIncoming: false,
+          argCallName: opponents.isEmpty
+              ? 'Shared conference'
+              : '${widget.currentUser.fullName ?? 'Unknown User'}${opponents.length > 1 ? ' (in Group call)' : ''}',
+          argIsSharedCall: opponents.isEmpty
+        });
       });
     });
   }
 
   void _showIncomingCallScreen(String callId, String meetingId, int initiatorId,
       List<int> participantIds, int callType, String callName) {
-    log('[_showIncomingCallScreen]', TAG);
+    log('[_showIncomingCallScreen]', tag);
 
     Navigator.of(context).pushNamed(
-      INCOMING_CALL_SCREEN,
+      incomingCallScreen,
       arguments: {
-        ARG_USER: _currentUser,
-        ARG_CALL_ID: callId,
-        ARG_MEETING_ID: meetingId,
-        ARG_INITIATOR_ID: initiatorId,
-        ARG_OPPONENTS: participantIds,
-        ARG_CALL_TYPE: callType,
-        ARG_CALL_NAME: callName,
+        argUser: widget.currentUser,
+        argCallId: callId,
+        argMeetingId: meetingId,
+        argInitiatorId: initiatorId,
+        argOpponents: participantIds,
+        argCallType: callType,
+        argCallName: callName,
       },
     );
   }
@@ -307,18 +300,18 @@ class _BodyLayoutState extends State<BodyLayout> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Create Shared Conference'),
-          content: Text(
+          title: const Text('Create Shared Conference'),
+          content: const Text(
               'The shared Video conference will be created. Any user can join it by link.'),
           actions: <Widget>[
             TextButton(
-              child: Text("Cancel"),
+              child: const Text("Cancel"),
               onPressed: () {
                 Navigator.pop(context);
               },
             ),
             TextButton(
-              child: Text("OK"),
+              child: const Text("OK"),
               onPressed: () {
                 _startCall({}, CallType.VIDEO_CALL);
               },

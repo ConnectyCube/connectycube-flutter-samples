@@ -27,7 +27,7 @@ class SpeakerViewLayout extends StatefulWidget {
   final CubeStatsReportsManager statsReportsManager;
   final Future<String> Function(int userId)? getUserName;
 
-  SpeakerViewLayout({
+  const SpeakerViewLayout({
     super.key,
     required this.currentUserId,
     required this.participants,
@@ -48,33 +48,28 @@ class SpeakerViewLayout extends StatefulWidget {
 
   @override
   State<SpeakerViewLayout> createState() {
-    return _SpeakerViewLayoutState(
-      primaryRenderer: primaryRenderer,
-      minorRenderers: minorRenderers,
-      primaryVideoFit: primaryVideoFit,
-    );
+    return _SpeakerViewLayoutState();
   }
 }
 
 class _SpeakerViewLayoutState extends State<SpeakerViewLayout> {
-  static final String TAG = 'SpeakerViewLayout';
+  static const String tag = 'SpeakerViewLayout';
+  late MapEntry<int, RTCVideoRenderer>? _primaryRenderer;
+  late Map<int, RTCVideoRenderer> _minorRenderers;
+  late RTCVideoViewObjectFit _primaryVideoFit;
+
   final SpeakersManager _speakersManager = SpeakersManager();
 
-  MapEntry<int, RTCVideoRenderer>? _primaryRenderer;
-  Map<int, RTCVideoRenderer> _minorRenderers;
-  RTCVideoViewObjectFit _primaryVideoFit;
   bool _isPrimaryUserForciblySelected = false;
-
-  _SpeakerViewLayoutState({
-    required MapEntry<int, RTCVideoRenderer>? primaryRenderer,
-    required Map<int, RTCVideoRenderer> minorRenderers,
-    required RTCVideoViewObjectFit primaryVideoFit,
-  })  : _primaryRenderer = primaryRenderer,
-        _minorRenderers = minorRenderers,
-        _primaryVideoFit = primaryVideoFit;
 
   @override
   void initState() {
+    super.initState();
+
+    _primaryRenderer = widget.primaryRenderer;
+    _minorRenderers = widget.minorRenderers;
+    _primaryVideoFit = widget.primaryVideoFit;
+
     _speakersManager.init(widget.statsReportsManager, _onSpeakerChanged);
   }
 
@@ -90,23 +85,21 @@ class _SpeakerViewLayoutState extends State<SpeakerViewLayout> {
   Widget build(BuildContext context) {
     var orientation = MediaQuery.of(context).orientation;
     return Center(
-        child: Container(
-      child: Stack(children: [
-        orientation == Orientation.portrait
-            ? Column(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: renderSpeakerModeViews(orientation))
-            : Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: renderSpeakerModeViews(orientation)),
-        buildCallInfoWidget(),
-      ]),
-    ));
+        child: Stack(children: [
+      orientation == Orientation.portrait
+          ? Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: renderSpeakerModeViews(orientation))
+          : Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: renderSpeakerModeViews(orientation)),
+      buildCallInfoWidget(),
+    ]));
   }
 
   void _onSpeakerChanged(int userId) {
     log('[_onSpeakerChanged] userId: $userId, currentUserId: ${widget.currentUserId}',
-        TAG);
+        tag);
     if (userId == widget.currentUserId) return;
 
     if (canShowVideo(userId, _minorRenderers[userId]?.srcObject,
@@ -132,7 +125,7 @@ class _SpeakerViewLayoutState extends State<SpeakerViewLayout> {
   }
 
   List<Widget> renderSpeakerModeViews(Orientation orientation) {
-    log("[renderSpeakerModeViews]", TAG);
+    log("[renderSpeakerModeViews]", tag);
     List<Widget> streamsExpanded = [];
 
     var primaryVideo = buildPrimaryVideoWidget();
@@ -150,7 +143,7 @@ class _SpeakerViewLayoutState extends State<SpeakerViewLayout> {
 
   buildPrimaryVideoWidget() {
     Widget? createPrimaryVideoView() {
-      var primaryVideo;
+      Widget? primaryVideo;
       if (canShowVideo(_primaryRenderer?.key, _primaryRenderer?.value.srcObject,
           widget.participantsMediaConfigs)) {
         primaryVideo = Expanded(
@@ -177,7 +170,7 @@ class _SpeakerViewLayoutState extends State<SpeakerViewLayout> {
       return primaryVideo;
     }
 
-    var primaryVideoWidget;
+    Widget? primaryVideoWidget;
 
     var minorUserWithEnabledVideo = getUserWithEnabledVideo(
         _minorRenderers, widget.currentUserId, widget.participantsMediaConfigs);
@@ -211,8 +204,8 @@ class _SpeakerViewLayoutState extends State<SpeakerViewLayout> {
   }
 
   Widget? buildMinorVideoItems(Orientation orientation) {
-    var itemHeight;
-    var itemWidth;
+    double itemHeight;
+    double itemWidth;
 
     if (orientation == Orientation.portrait) {
       itemHeight = MediaQuery.of(context).size.height / 3 * 0.8;
@@ -240,7 +233,7 @@ class _SpeakerViewLayoutState extends State<SpeakerViewLayout> {
                     : snapshot.data!.micLevel * defaultBorderWidth;
 
                 return Padding(
-                    padding: EdgeInsets.all(2),
+                    padding: const EdgeInsets.all(2),
                     child: Container(
                       margin: EdgeInsets.all(defaultBorderWidth),
                       decoration: ShapeDecoration(
@@ -262,7 +255,7 @@ class _SpeakerViewLayoutState extends State<SpeakerViewLayout> {
                         getUserName: widget.getUserName?.call(key),
                         onTap: () => setState(
                           () {
-                            log("[onTap] userId: $key", TAG);
+                            log("[onTap] userId: $key", tag);
                             updatePrimaryUser(
                               key,
                               true,
@@ -290,7 +283,7 @@ class _SpeakerViewLayoutState extends State<SpeakerViewLayout> {
       },
     );
 
-    var minorVideoItems;
+    Widget? minorVideoItems;
 
     if (videoItems.isNotEmpty) {
       var membersList = Expanded(

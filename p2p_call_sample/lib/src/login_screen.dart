@@ -7,19 +7,23 @@ import 'utils/configs.dart' as utils;
 import 'utils/pref_util.dart';
 
 class LoginScreen extends StatelessWidget {
-  static const String TAG = "LoginScreen";
+  static const String tag = "LoginScreen";
+
+  const LoginScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:
-          AppBar(automaticallyImplyLeading: false, title: Text('P2P calls')),
-      body: BodyLayout(),
+      appBar: AppBar(
+          automaticallyImplyLeading: false, title: const Text('P2P calls')),
+      body: const BodyLayout(),
     );
   }
 }
 
 class BodyLayout extends StatefulWidget {
+  const BodyLayout({Key? key}) : super(key: key);
+
   @override
   State<StatefulWidget> createState() {
     return BodyState();
@@ -27,7 +31,7 @@ class BodyLayout extends StatefulWidget {
 }
 
 class BodyState extends State<BodyLayout> {
-  static const String TAG = "LoginScreen.BodyState";
+  static const String tag = "LoginScreen.BodyState";
 
   bool _isLoginContinues = false;
   int? _selectedUserId;
@@ -35,11 +39,11 @@ class BodyState extends State<BodyLayout> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.all(48),
+      padding: const EdgeInsets.all(48),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
+          const Text(
             "Select user to login:",
             style: TextStyle(
               fontSize: 22,
@@ -85,13 +89,13 @@ class BodyState extends State<BodyLayout> {
                             : Colors.black87),
                   ),
                   Container(
-                    margin: EdgeInsets.only(left: 8),
+                    margin: const EdgeInsets.only(left: 8),
                     height: 18,
                     width: 18,
                     child: Visibility(
                       visible: _isLoginContinues &&
                           users[index].id == _selectedUserId,
-                      child: CircularProgressIndicator(
+                      child: const CircularProgressIndicator(
                         strokeWidth: 2,
                       ),
                     ),
@@ -151,7 +155,7 @@ class BodyState extends State<BodyLayout> {
   }
 
   void _processLoginError(exception) {
-    log("Login error $exception", TAG);
+    log("Login error $exception", tag);
 
     setState(() {
       _isLoginContinues = false;
@@ -162,11 +166,12 @@ class BodyState extends State<BodyLayout> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("Login Error"),
-            content: Text("Something went wrong during login to ConnectyCube"),
+            title: const Text("Login Error"),
+            content:
+                const Text("Something went wrong during login to ConnectyCube"),
             actions: <Widget>[
               TextButton(
-                child: Text("OK"),
+                child: const Text("OK"),
                 onPressed: () => Navigator.of(context).pop(),
               )
             ],

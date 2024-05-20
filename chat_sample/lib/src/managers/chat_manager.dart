@@ -22,4 +22,11 @@ class ChatManager {
   Stream<MessageStatus> get readMessagesStream {
     return readMessagesController.stream;
   }
+
+  StreamController<CubeDialog> addDialogController =
+      StreamController.broadcast();
+
+  Stream<CubeDialog> get addDialogStream {
+    return addDialogController.stream;
+  }
 }

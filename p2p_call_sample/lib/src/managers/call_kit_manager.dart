@@ -6,7 +6,7 @@ import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart
 class CallKitManager {
   static CallKitManager get instance => _getInstance();
   static CallKitManager? _instance;
-  static String TAG = "CallKitManager";
+  static String tag = "CallKitManager";
 
   static CallKitManager _getInstance() {
     return _instance ??= CallKitManager._internal();
@@ -21,9 +21,9 @@ class CallKitManager {
   late Function(bool mute, String uuid) onMuteCall;
 
   init({
-    required onCallAccepted(uuid),
-    required onCallEnded(uuid),
-    required onMuteCall(mute, uuid),
+    required Function(String uuid) onCallAccepted,
+    required Function(String uuid) onCallEnded,
+    required Function(bool mute, String uuid) onMuteCall,
   }) {
     this.onCallAccepted = onCallAccepted;
     this.onCallEnded = onCallEnded;
@@ -44,7 +44,7 @@ class CallKitManager {
   }
 
   Future<void> processCallFinished(String uuid) async {
-    if(Platform.isAndroid || Platform.isIOS) {
+    if (Platform.isAndroid || Platform.isIOS) {
       ConnectycubeFlutterCallKit.reportCallEnded(sessionId: uuid);
       ConnectycubeFlutterCallKit.setOnLockScreenVisibility(isVisible: false);
     }
@@ -57,7 +57,8 @@ class CallKitManager {
   }
 
   void muteCall(String sessionId, bool mute) {
-    ConnectycubeFlutterCallKit.reportCallMuted(sessionId: sessionId, muted: mute);
+    ConnectycubeFlutterCallKit.reportCallMuted(
+        sessionId: sessionId, muted: mute);
   }
 
   Future<void> _onCallAccepted(CallEvent callEvent) async {
