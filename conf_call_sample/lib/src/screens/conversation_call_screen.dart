@@ -980,7 +980,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
 
   void _copyConferenceUrlToClipboard() {
     Clipboard.setData(ClipboardData(
-            text: '${getAppHost()}?$argMeetingId=$widget.meetingId'))
+            text: '${getAppHost()}?$argMeetingId=${widget.meetingId}'))
         .then((_) {
       showDialog(
         context: context,
