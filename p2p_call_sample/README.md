@@ -23,10 +23,10 @@ ConnectyCube P2P Calls API documentation - [https://developers.connectycube.com/
 
 ## Screenshots
 
-<kbd><img alt="Flutter P2P Calls code sample, login" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/login_screen.png" height="440" /></kbd> 
-<kbd><img alt="Flutter P2P Calls code sample, select users" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/select_opponents_screen.png" height="440" /></kbd> 
-<kbd><img alt="Flutter P2P Calls code sample, video chat" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen.png" height="440" /></kbd>
-<kbd><img alt="Flutter P2P Calls code sample, video chat (macOS)" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/call_screen_macos.png" height="440" /></kbd>
+<kbd><img alt="Flutter P2P Calls code sample, login" src="https://developers.connectycube.com/images/code_samples/flutter/login_screen.png" height="440" /></kbd> 
+<kbd><img alt="Flutter P2P Calls code sample, select users" src="https://developers.connectycube.com/images/code_samples/flutter/select_opponents_screen.png" height="440" /></kbd> 
+<kbd><img alt="Flutter P2P Calls code sample, video chat" src="https://developers.connectycube.com/images/code_samples/flutter/call_screen.png" height="440" /></kbd>
+<kbd><img alt="Flutter P2P Calls code sample, video chat (macOS)" src="https://developers.connectycube.com/images/code_samples/flutter/call_screen_macos.png" height="440" /></kbd>
 
 ## Roadmap
 
@@ -66,10 +66,10 @@ The app will automatically run on a selected iOS device or simulator.
 
 ## Receiving calls on the mobile platforms
 
-<kbd><img alt="Flutter P2P Calls code sample, incoming call in background Android" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/background_call_android.png" height="440" /></kbd>
-<kbd><img alt="Flutter P2P Calls code sample, incoming call locked Android" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/background_call_android_locked.png" height="440" /></kbd>
-<kbd><img alt="Flutter P2P Calls code sample, incoming call in background iOS" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/background_call_ios.PNG" height="440" /></kbd>
-<kbd><img alt="Flutter P2P Calls code sample, incoming call locked iOS" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/background_call_ios_locked.PNG" height="440" /></kbd>
+<kbd><img alt="Flutter P2P Calls code sample, incoming call in background Android" src="https://developers.connectycube.com/images/code_samples/flutter/background_call_android.png" height="440" /></kbd>
+<kbd><img alt="Flutter P2P Calls code sample, incoming call locked Android" src="https://developers.connectycube.com/images/code_samples/flutter/background_call_android_locked.png" height="440" /></kbd>
+<kbd><img alt="Flutter P2P Calls code sample, incoming call in background iOS" src="https://developers.connectycube.com/images/code_samples/flutter/background_call_ios.PNG" height="440" /></kbd>
+<kbd><img alt="Flutter P2P Calls code sample, incoming call locked iOS" src="https://developers.connectycube.com/images/code_samples/flutter/background_call_ios_locked.PNG" height="440" /></kbd>
 
 For notifying mobile platforms we use Connectycube Push notifications feature and own [Connectycube Call Kit plugin](https://pub.dev/packages/connectycube_flutter_call_kit) for supporting Call Kit feature.
 
