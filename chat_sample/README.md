@@ -32,9 +32,9 @@ ConnectyCube Chat API documentation - [https://developers.connectycube.com/flutt
 
 ## Screenshots
 
-<kbd><img alt="Flutter Chat sample, select dialogs" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/dialogs_screen.png" height="440" />
-</kbd> <kbd><img alt="Flutter Chat code sample, chat" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/chat_screen.png" height="440" /></kbd>
-</kbd> <kbd><img alt="Flutter Chat code sample, chat (Windows)" src="https://developers.connectycube.com/docs/_images/code_samples/flutter/chat_screen_windows.png" height="440" /></kbd>
+<kbd><img alt="Flutter Chat sample, select dialogs" src="https://developers.connectycube.com/images/code_samples/flutter/dialogs_screen.png" height="440" />
+</kbd> <kbd><img alt="Flutter Chat code sample, chat" src="https://developers.connectycube.com/images/code_samples/flutter/chat_screen.png" height="440" /></kbd>
+</kbd> <kbd><img alt="Flutter Chat code sample, chat (Windows)" src="https://developers.connectycube.com/images/code_samples/flutter/chat_screen_windows.png" height="440" /></kbd>
 
 ## Quickstart and develop
 
