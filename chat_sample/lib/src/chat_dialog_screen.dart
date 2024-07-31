@@ -17,6 +17,7 @@ import 'package:universal_io/io.dart';
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 import 'managers/chat_manager.dart';
+import 'managers/e2e_encryption_manager.dart';
 import 'update_dialog_flow.dart';
 import 'utils/api_utils.dart';
 import 'utils/consts.dart';
@@ -227,9 +228,13 @@ class ChatScreenState extends State<ChatScreen> {
     });
   }
 
-  void onReceiveMessage(CubeMessage message) {
+  Future<void> onReceiveMessage(CubeMessage message) async {
     log("onReceiveMessage message= $message");
     if (message.dialogId != widget.cubeDialog.dialogId) return;
+
+    if (widget.cubeDialog.isEncrypted ?? false) {
+      message = await E2EEncryptionManager.instance.decryptMessage(message);
+    }
 
     addMessageToListView(message);
   }
@@ -352,7 +357,19 @@ class ChatScreenState extends State<ChatScreen> {
   void onSendMessage(CubeMessage message) async {
     log("onSendMessage message= $message");
     textEditingController.clear();
-    await widget.cubeDialog.sendMessage(message);
+
+    if (widget.cubeDialog.isEncrypted ?? false) {
+      await widget.cubeDialog.sendMessage(await E2EEncryptionManager.instance
+          .encryptMessage(
+              message,
+              widget.cubeDialog.dialogId!,
+              widget.cubeDialog.occupantsIds!
+                  .where((userId) => userId != widget.cubeUser.id)
+                  .first));
+    } else {
+      await widget.cubeDialog.sendMessage(message);
+    }
+
     message.senderId = widget.cubeUser.id;
     addMessageToListView(message);
     listScrollController.animateTo(0.0,
@@ -1008,8 +1025,13 @@ class ChatScreenState extends State<ChatScreen> {
 
     return getMessages(
             widget.cubeDialog.dialogId!, params.getRequestParameters())
-        .then((result) {
+        .then((result) async {
           lastPartSize = result!.items.length;
+
+          if (widget.cubeDialog.isEncrypted ?? false) {
+            return await E2EEncryptionManager.instance
+                .decryptMessages(result.items);
+          }
 
           return result.items;
         })
@@ -1031,7 +1053,12 @@ class ChatScreenState extends State<ChatScreen> {
 
     return getMessages(
             widget.cubeDialog.dialogId!, params.getRequestParameters())
-        .then((result) {
+        .then((result) async {
+      if (widget.cubeDialog.isEncrypted ?? false) {
+        return await E2EEncryptionManager.instance
+            .decryptMessages(result!.items);
+      }
+
       return result!.items;
     });
   }

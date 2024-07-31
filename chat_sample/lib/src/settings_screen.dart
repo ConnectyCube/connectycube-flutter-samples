@@ -6,6 +6,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
+import 'managers/e2e_encryption_manager.dart';
 import 'managers/push_notifications_manager.dart';
 import 'utils/api_utils.dart';
 import 'utils/consts.dart';
@@ -322,6 +323,7 @@ class _BodyLayoutState extends State<BodyLayout> {
                   },
                 ).whenComplete(() {
                   CubeChatConnection.instance.destroy();
+                  E2EEncryptionManager.instance.destroy();
                   if (loginType == LoginType.phone) {
                     FirebaseAuth.instance.currentUser
                         ?.unlink(PhoneAuthProvider.PROVIDER_ID);
@@ -366,6 +368,7 @@ class _BodyLayoutState extends State<BodyLayout> {
               child: const Text("OK"),
               onPressed: () async {
                 CubeChatConnection.instance.destroy();
+                E2EEncryptionManager.instance.destroy();
                 await SharedPrefs.instance.deleteUser();
 
                 await PushNotificationsManager.instance
