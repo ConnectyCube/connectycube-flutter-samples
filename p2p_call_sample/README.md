@@ -48,9 +48,10 @@ Prepare environment for Flutter and clone the project.
 The app will automatically run on your Android device.
 
 ### Run on iOS:
-- Start Xcode;
-- Select `Runner.xcworkspace` to run Xcode project;
-- Press the' Build' button to start project building.
+- `cd ios`
+- `pod install`
+- Open `Runner.xcworkspace` from `ios` dir
+- Run project 
 
 The app will automatically run on a selected iOS device or simulator.
 
