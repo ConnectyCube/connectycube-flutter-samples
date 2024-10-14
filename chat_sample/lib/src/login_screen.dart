@@ -13,6 +13,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:universal_io/io.dart';
 
 import '../firebase_options.dart';
+import 'managers/e2e_encryption_manager.dart';
 import 'managers/push_notifications_manager.dart';
 import 'phone_auth_flow.dart';
 import 'utils/api_utils.dart';
@@ -677,6 +678,7 @@ class LoginPageState extends State<LoginPage> {
     CubeChatConnection.instance.login(user).then((cubeUser) {
       _isLoginContinues = false;
       _goDialogScreen(context, cubeUser);
+      E2EEncryptionManager.instance.init();
     }).catchError((error) {
       _processLoginError(error);
     });

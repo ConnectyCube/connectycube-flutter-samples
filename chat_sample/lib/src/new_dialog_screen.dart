@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_chat.dart';
 
+import 'managers/e2e_encryption_manager.dart';
 import 'utils/api_utils.dart';
 import 'utils/consts.dart';
 import 'widgets/common.dart';
@@ -308,9 +309,13 @@ class _BodyLayoutState extends State<BodyLayout> {
         selectedUsersArgName: usersToAdd,
       });
     } else {
-      CubeDialog newDialog =
-          CubeDialog(CubeDialogType.PRIVATE, occupantsIds: users.toList());
+      CubeDialog newDialog = CubeDialog(
+        CubeDialogType.PRIVATE,
+        occupantsIds: users.toList(),
+      )..isEncrypted = true;
       createDialog(newDialog).then((createdDialog) {
+        E2EEncryptionManager.instance
+            .initKeyExchangeForUserDialog(createdDialog.dialogId!, users.first);
         Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
             'chat_dialog', (route) => false, arguments: {
           userArgName: widget.currentUser,

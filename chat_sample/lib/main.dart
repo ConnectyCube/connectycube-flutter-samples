@@ -15,6 +15,7 @@ import 'src/chat_details_screen.dart';
 import 'src/chat_dialog_screen.dart';
 import 'src/chat_dialog_resizable_screen.dart';
 import 'src/login_screen.dart';
+import 'src/managers/e2e_encryption_manager.dart';
 import 'src/managers/push_notifications_manager.dart';
 import 'src/select_dialog_screen.dart';
 import 'src/settings_screen.dart';
@@ -227,7 +228,9 @@ class _AppState extends State<App> with WidgetsBindingObserver {
                 user.password = facebookAuthSession.token;
               }
             }
-            CubeChatConnection.instance.login(user);
+            CubeChatConnection.instance.login(user).then((cubeUser){
+              E2EEncryptionManager.instance.init();
+            });
           } else {
             CubeChatConnection.instance.markActive();
           }
