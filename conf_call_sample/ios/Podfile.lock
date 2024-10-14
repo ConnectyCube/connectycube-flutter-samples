@@ -8,20 +8,20 @@ PODS:
   - device_info_plus (0.0.1):
     - Flutter
   - Flutter (1.0.0)
-  - flutter_webrtc (0.9.36):
+  - flutter_webrtc (0.11.3):
     - Flutter
-    - WebRTC-SDK (= 114.5735.10)
+    - WebRTC-SDK (= 125.6422.04)
   - package_info_plus (0.4.5):
     - Flutter
   - path_provider_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - permission_handler_apple (9.1.1):
+  - permission_handler_apple (9.3.0):
     - Flutter
   - shared_preferences_foundation (0.0.1):
     - Flutter
     - FlutterMacOS
-  - WebRTC-SDK (114.5735.10)
+  - WebRTC-SDK (125.6422.04)
 
 DEPENDENCIES:
   - assets_audio_player (from `.symlinks/plugins/assets_audio_player/ios`)
@@ -67,13 +67,13 @@ SPEC CHECKSUMS:
   connectycube_flutter_call_kit: 4a95d2e8b248ed78fe9d805c8550b2120b19b2b7
   device_info_plus: 97af1d7e84681a90d0693e63169a5d50e0839a0d
   Flutter: e0871f40cf51350855a761d2e70bf5af5b9b5de7
-  flutter_webrtc: b33475c3a57d59ff05bf87b4f5d3feceac63f291
-  package_info_plus: 115f4ad11e0698c8c1c5d8a689390df880f47e85
-  path_provider_foundation: eaf5b3e458fc0e5fbb9940fb09980e853fe058b8
-  permission_handler_apple: e76247795d700c14ea09e3a2d8855d41ee80a2e6
-  shared_preferences_foundation: 5b919d13b803cadd15ed2dc053125c68730e5126
-  WebRTC-SDK: 8c0edd05b880a39648118192c252667ea06dea51
+  flutter_webrtc: 75b868e4f9e817c7a9a42ca4b6169063de4eec9f
+  package_info_plus: 58f0028419748fad15bf008b270aaa8e54380b1c
+  path_provider_foundation: 2b6b4c569c0fb62ec74538f866245ac84301af46
+  permission_handler_apple: 9878588469a2b0d0fc1e048d9f43605f92e6cec2
+  shared_preferences_foundation: fcdcbc04712aee1108ac7fda236f363274528f78
+  WebRTC-SDK: c3d69a87e7185fad3568f6f3cff7c9ac5890acf3
 
-PODFILE CHECKSUM: 4e8f8b2be68aeea4c0d5beb6ff1e79fface1d048
+PODFILE CHECKSUM: eb179eda02c4d9ce45db6b1912a419962f739320
 
 COCOAPODS: 1.15.2

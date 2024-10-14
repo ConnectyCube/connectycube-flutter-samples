@@ -20,12 +20,13 @@ dependencies:
   device_info_plus: ^10.1.0
   flutter_background: ^1.2.0
   flutter_speed_dial: ^7.0.0
-  package_info_plus: ^5.0.0
+  package_info_plus: ^8.0.3
   permission_handler: ^11.0.1
   shared_preferences: ^2.2.1
   universal_io: ^2.2.2
   uuid: ^3.0.7
   web_browser_detect: ^2.0.3
+  firebase_core: ^3.6.0
 
 dependency_overrides:
   uuid: ^4.3.3
