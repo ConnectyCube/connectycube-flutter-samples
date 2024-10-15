@@ -36,7 +36,7 @@ android {
 
     defaultConfig {
         applicationId "com.connectycube.flutter.chat_sample"
-        minSdkVersion 21
+        minSdkVersion 23
         targetSdkVersion 34
         versionCode flutterVersionCode.toInteger()
         versionName flutterVersionName
