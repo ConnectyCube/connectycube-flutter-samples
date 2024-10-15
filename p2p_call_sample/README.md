@@ -42,8 +42,8 @@ Quickstart [Flutter](https://flutter.dev/docs/get-started) app.
 Prepare environment for Flutter and clone the project.
 
 ### Run on Android:
-- Right mouse button click on `main.dart`;
-- Chose 'Run 'main.dart''.
+- Right mouse button click on `main.dart`
+- Chose 'Run 'main.dart''
 
 The app will automatically run on your Android device.
 
@@ -56,13 +56,13 @@ The app will automatically run on your Android device.
 The app will automatically run on a selected iOS device or simulator.
 
 ### Run on macOS
-- Run command from the Terminal `flutter run -d macos`;
+- Run command from the Terminal `flutter run -d macos`
 ### Run on Windows
-- Run command from the Terminal `flutter run -d windows`;
+- Run command from the Terminal `flutter run -d windows`
 ### Run on Web
-- Run command from the Terminal `flutter run -d chrome`;
+- Run command from the Terminal `flutter run -d chrome`
 ### Run on Linux
-- Run command from the Terminal `flutter run -d linux`;
+- Run command from the Terminal `flutter run -d linux`
 
 ## Receiving calls on the mobile platforms
 
