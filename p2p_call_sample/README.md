@@ -85,4 +85,4 @@ For notifying mobile platforms we use Connectycube Push notifications feature an
 
 ## Can't build yourself?
 
-Got troubles with building Flutter code samples? Just create an issue at [Issues page](https://github.com/ConnectyCube/connectycube-flutter-samples/issues) - we will create the sample for you. For FREE!
+Got troubles with building Flutter code samples? Create an issue at [Issues page](https://github.com/ConnectyCube/connectycube-flutter-samples/issues)
