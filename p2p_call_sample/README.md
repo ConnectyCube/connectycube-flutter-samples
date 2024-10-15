@@ -28,15 +28,6 @@ ConnectyCube P2P Calls API documentation - [https://developers.connectycube.com/
 <kbd><img alt="Flutter P2P Calls code sample, video chat" src="https://developers.connectycube.com/images/code_samples/flutter/call_screen.png" height="440" /></kbd>
 <kbd><img alt="Flutter P2P Calls code sample, video chat (macOS)" src="https://developers.connectycube.com/images/code_samples/flutter/call_screen_macos.png" height="440" /></kbd>
 
-## Roadmap
-
-- Members call statuses
-
-## Quickstart and develop
-
-Quickstart [Flutter](https://flutter.dev/docs/get-started) app.
-
-
 ## Run
 
 Prepare environment for Flutter and clone the project.
