@@ -22,13 +22,7 @@ The project contains the following features implemented:
 - Push notification: subscribe/unsubscribe, show local notification, navigate to the app click on a local notification
 - Messages' reactions
 
-[**Chat Sample Web App**](https://connectycube.github.io/connectycube-flutter-samples/chat_sample/build/web)
-
-## Documentation
-
-ConnectyCube Flutter getting started - [https://developers.connectycube.com/flutter](https://developers.connectycube.com/flutter)
-
-ConnectyCube Chat API documentation - [https://developers.connectycube.com/flutter/messaging](https://developers.connectycube.com/flutter/messaging)
+[**LIVE demo**](https://connectycube.github.io/connectycube-flutter-samples/chat_sample/build/web)
 
 ## Screenshots
 
@@ -41,11 +35,13 @@ ConnectyCube Chat API documentation - [https://developers.connectycube.com/flutt
 Quickstart [Flutter](https://flutter.dev/docs/get-started) app.
 
 
-## Run
+## How to run
 
-Prepare environment for Flutter and clone the project.
+### Preparations
 
-Install depenencies `flutter pub get`
+1. Prepare environment for Flutter and clone the project.
+2. Install depenencies via `flutter pub get`
+3. Generate config file `firebase_options.dart` via [FlutterFire CLI](https://firebase.flutter.dev/docs/cli/) (a simple util provided for avoiding manual configuration for each platforms) and put it in `lib/firebase_options.dart`;
 
 ### Run on Android:
 - Right mouse button click on `main.dart`;
@@ -83,7 +79,12 @@ or follow the [link](https://connectycube.github.io/connectycube-flutter-samples
 
 > **Note:** For displaying notifications on the Web platform from the background you should feel the file `web/firebase-messaging-sw.js` with data from your Firebase developer console.
 
+## Documentation
+
+ConnectyCube Flutter getting started - [https://developers.connectycube.com/flutter](https://developers.connectycube.com/flutter)
+
+ConnectyCube Chat API documentation - [https://developers.connectycube.com/flutter/messaging](https://developers.connectycube.com/flutter/messaging)
 
 ## Can't build yourself?
 
-Got troubles with building Flutter code samples? Just create an issue at [Issues page](https://github.com/ConnectyCube/connectycube-flutter-samples/issues) - we will create the sample for you. For FREE!
+Got troubles with building Flutter code samples? Just create an issue at [Issues page](https://github.com/ConnectyCube/connectycube-flutter-samples/issues).
