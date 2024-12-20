@@ -41,7 +41,7 @@ Quickstart [Flutter](https://flutter.dev/docs/get-started) app.
 
 1. Prepare environment for Flutter and clone the project.
 2. Install depenencies via `flutter pub get`
-3. Generate config file `firebase_options.dart` via [FlutterFire CLI](https://firebase.flutter.dev/docs/cli/) (a simple util provided for avoiding manual configuration for each platforms) and put it in `lib/firebase_options.dart`;
+3. Generate config file `firebase_options.dart` via https://firebase.google.com/docs/flutter/setup and put it in `lib/firebase_options.dart`;
 
 ### Run on Android:
 - Right mouse button click on `main.dart`;
