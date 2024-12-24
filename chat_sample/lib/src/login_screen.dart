@@ -443,19 +443,13 @@ class LoginPageState extends State<LoginPage> {
     setState(() {
       _isLoginContinues = true;
     });
-    if (!CubeSessionManager.instance.isActiveSessionValid()) {
-      try {
-        await createSession();
-      } catch (error) {
-        _processLoginError(error);
-      }
-    }
+
     signUp(user).then((newUser) {
       log("signUp newUser $newUser");
       user.id = newUser.id;
       SharedPrefs.instance.saveNewUser(
           user, isEmailSelected ? LoginType.email : LoginType.login);
-      signIn(user).then((result) {
+      createSession(user).then((result) {
         PushNotificationsManager.instance.init();
         _loginToCubeChat(context, user);
       });
@@ -538,16 +532,15 @@ class LoginPageState extends State<LoginPage> {
         return;
       }
 
-      signInFuture = createSession().then((cubeSession) {
-        return signInUsingFirebasePhone(
-                DefaultFirebaseOptions.currentPlatform.projectId,
-                phoneAuthToken)
-            .then((cubeUser) {
-          return SharedPrefs.instance.init().then((sharedPrefs) {
-            sharedPrefs.saveNewUser(cubeUser, LoginType.phone);
-            return cubeUser
-              ..password = CubeSessionManager.instance.activeSession?.token;
-          });
+      signInFuture = createSessionUsingSocialProvider(
+              CubeProvider.FIREBASE_PHONE,
+              DefaultFirebaseOptions.currentPlatform.projectId,
+              phoneAuthToken)
+          .then((session) {
+        return SharedPrefs.instance.init().then((sharedPrefs) {
+          sharedPrefs.saveNewUser(session.user!, LoginType.phone);
+          return session.user!
+            ..password = CubeSessionManager.instance.activeSession?.token;
         });
       });
     } else if (loginType == LoginType.login || loginType == LoginType.email) {
@@ -596,16 +589,14 @@ class LoginPageState extends State<LoginPage> {
         return;
       }
 
-      signInFuture = createSession().then((cubeSession) {
-        return signInUsingSocialProvider(
-          CubeProvider.FACEBOOK,
-          accessToken.token,
-        ).then((cubeUser) {
-          return SharedPrefs.instance.init().then((sharedPrefs) {
-            sharedPrefs.saveNewUser(cubeUser, LoginType.facebook);
-            return cubeUser
-              ..password = CubeSessionManager.instance.activeSession?.token;
-          });
+      signInFuture = createSessionUsingSocialProvider(
+        CubeProvider.FACEBOOK,
+        accessToken.token,
+      ).then((session) {
+        return SharedPrefs.instance.init().then((sharedPrefs) {
+          sharedPrefs.saveNewUser(session.user!, LoginType.facebook);
+          return session.user!
+            ..password = CubeSessionManager.instance.activeSession?.token;
         });
       });
     } else if (loginType == LoginType.google) {
@@ -648,16 +639,15 @@ class LoginPageState extends State<LoginPage> {
         return;
       }
 
-      signInFuture = createSession().then((cubeSession) {
-        return signInUsingFirebaseEmail(
-                DefaultFirebaseOptions.currentPlatform.projectId,
-                googleAuthToken)
-            .then((cubeUser) {
-          return SharedPrefs.instance.init().then((sharedPrefs) {
-            sharedPrefs.saveNewUser(cubeUser, LoginType.google);
-            return cubeUser
-              ..password = CubeSessionManager.instance.activeSession?.token;
-          });
+      signInFuture = createSessionUsingSocialProvider(
+              CubeProvider.FIREBASE_EMAIL,
+              DefaultFirebaseOptions.currentPlatform.projectId,
+              googleAuthToken)
+          .then((session) {
+        return SharedPrefs.instance.init().then((sharedPrefs) {
+          sharedPrefs.saveNewUser(session.user!, LoginType.google);
+          return session.user!
+            ..password = CubeSessionManager.instance.activeSession?.token;
         });
       });
     }

@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
+import 'src/config.dart' as config;
 import 'src/login_screen.dart';
-import 'src/utils/configs.dart' as config;
 import 'src/utils/pref_util.dart';
 
 void main() => runApp(const App());

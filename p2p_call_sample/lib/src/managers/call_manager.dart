@@ -6,9 +6,9 @@ import 'package:connectycube_flutter_call_kit/connectycube_flutter_call_kit.dart
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 import 'call_kit_manager.dart';
+import '../config.dart';
 import '../conversation_screen.dart';
 import '../incoming_call_screen.dart';
-import '../utils/configs.dart';
 import '../utils/consts.dart';
 
 class CallManager {

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 import '../managers/call_manager.dart';
-import '../utils/configs.dart' as utils;
+import '../config.dart' as config;
 import '../utils/consts.dart';
 import '../utils/platform_utils.dart';
 import '../utils/pref_util.dart';
@@ -51,7 +51,7 @@ class SelectOpponentsScreen extends StatelessWidget {
             TextButton(
               child: const Text("OK"),
               onPressed: () {
-                signOut().then(
+                deleteSession().then(
                   (voidValue) {
                     CubeChatConnection.instance.destroy();
                     SharedPrefs.deleteSessionData();
@@ -184,7 +184,7 @@ class _BodyLayoutState extends State<BodyLayout> {
     log('[_getOpponentsList]', tag);
     CubeUser? currentUser = widget.currentUser;
     final users =
-        utils.users.where((user) => user.id != currentUser.id).toList();
+        config.users.where((user) => user.id != currentUser.id).toList();
     return ListView.builder(
       shrinkWrap: true,
       itemCount: users.length,

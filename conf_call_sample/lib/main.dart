@@ -4,12 +4,12 @@ import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
+import 'src/config.dart' as config;
 import 'src/managers/call_manager.dart';
 import 'src/screens/conversation_call_screen.dart';
 import 'src/screens/incoming_call_screen.dart';
 import 'src/screens/login_screen.dart';
 import 'src/screens/select_opponents_screen.dart';
-import 'src/utils/configs.dart' as config;
 import 'src/utils/consts.dart';
 import 'src/utils/platform_utils.dart';
 import 'src/utils/pref_util.dart';

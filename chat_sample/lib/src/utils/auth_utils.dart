@@ -11,13 +11,12 @@ Future<CubeSession> createPhoneAuthSession() async {
     return createSession();
   }
 
-  return createSession().then((cubeSession) {
-    return signInUsingFirebasePhone(
-      DefaultFirebaseOptions.currentPlatform.projectId,
-      phoneAuthIdToken,
-    ).then((_) {
-      return CubeSessionManager.instance.activeSession!;
-    });
+  return createSessionUsingSocialProvider(
+    CubeProvider.FIREBASE_PHONE,
+    DefaultFirebaseOptions.currentPlatform.projectId,
+    phoneAuthIdToken,
+  ).then((_) {
+    return CubeSessionManager.instance.activeSession!;
   });
 }
 
@@ -27,13 +26,11 @@ Future<CubeSession> createFacebookAuthSession() async {
     return createSession();
   }
 
-  return createSession().then((cubeSession) {
-    return signInUsingSocialProvider(
-      CubeProvider.FACEBOOK,
-      accessToken.token,
-    ).then((cubeUser) {
-      return CubeSessionManager.instance.activeSession!;
-    });
+  return createSessionUsingSocialProvider(
+    CubeProvider.FACEBOOK,
+    accessToken.token,
+  ).then((_) {
+    return CubeSessionManager.instance.activeSession!;
   });
 }
 
@@ -43,12 +40,11 @@ Future<CubeSession> createGoogleAuthSession() async {
     return createSession();
   }
 
-  return createSession().then((cubeSession) {
-    return signInUsingFirebaseEmail(
-      DefaultFirebaseOptions.currentPlatform.projectId,
-      googleAuthIdToken,
-    ).then((_) {
-      return CubeSessionManager.instance.activeSession!;
-    });
+  return createSessionUsingSocialProvider(
+    CubeProvider.FIREBASE_EMAIL,
+    DefaultFirebaseOptions.currentPlatform.projectId,
+    googleAuthIdToken,
+  ).then((_) {
+    return CubeSessionManager.instance.activeSession!;
   });
 }

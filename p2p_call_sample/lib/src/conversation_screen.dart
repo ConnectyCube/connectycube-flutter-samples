@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
-import 'package:p2p_call_sample/src/utils/configs.dart';
 import 'package:universal_io/io.dart';
 import 'package:web_browser_detect/web_browser_detect.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
+import 'config.dart';
 import 'login_screen.dart';
 import 'managers/call_manager.dart';
 import 'utils/platform_utils.dart';

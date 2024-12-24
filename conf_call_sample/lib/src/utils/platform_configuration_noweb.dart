@@ -1,4 +1,4 @@
-import 'configs.dart';
+import '../config.dart';
 
 void configureNavigation() {}
 

@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
+import '../config.dart' as config;
 import '../managers/call_manager.dart';
-import '../utils/configs.dart' as utils;
 import '../utils/consts.dart';
 import '../utils/pref_util.dart';
 
@@ -149,7 +149,7 @@ class BodyState extends State<BodyLayout> {
 
   Widget _getUsersList(BuildContext context) {
     log("[_getUsersList]", tag);
-    final users = utils.users;
+    final users = config.users;
 
     return ListView.builder(
       shrinkWrap: true,
