@@ -34,7 +34,7 @@ Prepare environment for Flutter and clone the project.
 
 ## Config
 
-Replace vars in config file `lib/src/utils/configs.dart`
+Replace vars in config file `lib/src/config.dart`
 
 - `REPLACE_APP_ID`
 - `REPLACE_APP_AUTH_KEY`
