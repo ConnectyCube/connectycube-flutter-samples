@@ -32,6 +32,15 @@ ConnectyCube P2P Calls API documentation - [https://developers.connectycube.com/
 
 Prepare environment for Flutter and clone the project.
 
+## Config
+
+Replace vars in config file `lib/src/utils/configs.dart`
+
+- `REPLACE_APP_ID`
+- `REPLACE_APP_AUTH_KEY`
+- `REPLACE_APP_AUTH_SECRET`
+- `REPLACE_USER_{1/2/3/4}_{LOGIN/FULL_NAME/PASSWORD}`
+
 ### Run on Android:
 - Right mouse button click on `main.dart`
 - Chose 'Run 'main.dart''

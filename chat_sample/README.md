@@ -45,6 +45,14 @@ Quickstart [Flutter](https://flutter.dev/docs/get-started) app.
 
 Prepare environment for Flutter and clone the project.
 
+## Config
+
+Replace vars in config file `lib/src/utils/configs.dart`
+
+- `REPLACE_APP_ID`
+- `REPLACE_APP_AUTH_KEY`
+- `REPLACE_APP_AUTH_SECRET`
+
 ### Run on Android:
 - Right mouse button click on `main.dart`;
 - Chose 'Run 'main.dart''.
