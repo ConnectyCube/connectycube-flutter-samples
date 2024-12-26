@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
+import 'config.dart' as config;
 import 'select_opponents_screen.dart';
-import 'utils/configs.dart' as utils;
 import 'utils/pref_util.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -69,7 +69,7 @@ class BodyState extends State<BodyLayout> {
   }
 
   Widget _getUsersList(BuildContext context) {
-    final users = utils.users;
+    final users = config.users;
 
     return ListView.builder(
       itemCount: users.length,
