@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
+import 'config.dart' as config;
 import 'login_screen.dart';
 import 'managers/call_manager.dart';
 import 'managers/push_notifications_manager.dart';
-import 'utils/configs.dart' as utils;
 import 'utils/platform_utils.dart';
 import 'utils/pref_util.dart';
 
@@ -57,7 +57,7 @@ class SelectOpponentsScreen extends StatelessWidget {
                     .unsubscribe()
                     .whenComplete(() {
                   SharedPrefs.deleteUserData().whenComplete(() {
-                    signOut().whenComplete(() {
+                    deleteSession().whenComplete(() {
                       Navigator.pop(context); // cancel current Dialog
                       _navigateToLoginScreen(context);
                     });
@@ -150,7 +150,7 @@ class _BodyLayoutState extends State<BodyLayout> {
   Widget _getOpponentsList(BuildContext context) {
     CubeUser? currentUser = CubeChatConnection.instance.currentUser;
     final users =
-        utils.users.where((user) => user.id != currentUser!.id).toList();
+        config.users.where((user) => user.id != currentUser!.id).toList();
 
     return ListView.builder(
       itemCount: users.length,

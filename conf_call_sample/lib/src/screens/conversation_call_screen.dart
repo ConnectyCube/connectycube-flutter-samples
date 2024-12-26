@@ -8,8 +8,8 @@ import 'package:flutter/services.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
+import '../config.dart';
 import '../managers/call_manager.dart';
-import '../utils/configs.dart';
 import '../utils/consts.dart';
 import '../utils/duration_timer.dart';
 import '../utils/media_utils.dart';
