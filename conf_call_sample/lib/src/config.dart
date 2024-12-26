@@ -1,9 +1,9 @@
 import 'package:connectycube_sdk/connectycube_sdk.dart';
 
-const String appId = '476';
-const String authKey = 'PDZjPBzAO8WPfCp';
-const String authSecret = '6247kjxXCLRaua6';
-const String defaultPass = 'xxasBUM3gQs36bhj';
+const String appId = 'REPLACE_APP_ID';
+const String authKey = 'REPLACE_APP_AUTH_KEY';
+const String authSecret = 'REPLACE_APP_AUTH_SECRET';
+
 const String apiEndpoint = 'https://api.connectycube.com';
 const String chatEndpoint = 'chat.connectycube.com';
 const String confServerEndpoint = 'wss://janus.connectycube.com:8989';
@@ -12,27 +12,27 @@ const String appHost =
 
 List<CubeUser> users = [
   CubeUser(
-    id: 1253158,
-    login: "call_user_1",
-    fullName: "User 1",
-    password: defaultPass,
+    id: int.parse('REPLACE_USER_1_ID'),
+    login: "REPLACE_USER_1_LOGIN",
+    fullName: "REPLACE_USER_1_FULL_NAME",
+    password: "REPLACE_USER_1_PASSWORD",
   ),
   CubeUser(
-    id: 1253159,
-    login: "call_user_2",
-    fullName: "User 2",
-    password: defaultPass,
+    id: int.parse('REPLACE_USER_2_ID'),
+    login: "REPLACE_USER_2_LOGIN",
+    fullName: "REPLACE_USER_2_FULL_NAME",
+    password: "REPLACE_USER_2_PASSWORD",
   ),
   CubeUser(
-    id: 1253160,
-    login: "call_user_3",
-    fullName: "User 3",
-    password: defaultPass,
+    id: int.parse('REPLACE_USER_3_ID'),
+    login: "REPLACE_USER_3_LOGIN",
+    fullName: "REPLACE_USER_3_FULL_NAME",
+    password: "REPLACE_USER_3_PASSWORD",
   ),
   CubeUser(
-    id: 1253162,
-    login: "call_user_4",
-    fullName: "User 4",
-    password: defaultPass,
+    id: int.parse('REPLACE_USER_4_ID'),
+    login: "REPLACE_USER_4_LOGIN",
+    fullName: "REPLACE_USER_4_FULL_NAME",
+    password: "REPLACE_USER_4_PASSWORD",
   ),
 ];

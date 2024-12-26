@@ -43,6 +43,14 @@ Quickstart [Flutter](https://flutter.dev/docs/get-started) app.
 2. Install depenencies via `flutter pub get`
 3. Generate config file `firebase_options.dart` via https://firebase.google.com/docs/flutter/setup and put it in `lib/firebase_options.dart`;
 
+## Config
+
+Replace vars in config file `lib/src/config.dart`
+
+- `REPLACE_APP_ID`
+- `REPLACE_APP_AUTH_KEY`
+- `REPLACE_APP_AUTH_SECRET`
+
 ### Run on Android:
 - Right mouse button click on `main.dart`;
 - Chose 'Run 'main.dart''.

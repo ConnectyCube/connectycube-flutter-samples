@@ -1,6 +1,6 @@
-const String appId = "476";
-const String authKey = "PDZjPBzAO8WPfCp";
-const String authSecret = "6247kjxXCLRaua6";
+const String appId = "REPLACE_APP_ID";
+const String authKey = "REPLACE_APP_AUTH_KEY";
+const String authSecret = "REPLACE_APP_AUTH_SECRET";
 
 // set custom API and Char server domains
 const String apiEndpoint = "https://api.connectycube.com";
