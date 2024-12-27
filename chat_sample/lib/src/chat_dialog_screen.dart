@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:universal_io/io.dart';
 
@@ -1113,9 +1114,8 @@ class ChatScreenState extends State<ChatScreen> {
                                 children: [
                                   Text(reaction,
                                       style: kIsWeb
-                                          ? const TextStyle(
-                                              color: Colors.green,
-                                              fontFamily: 'NotoColorEmoji')
+                                          ? GoogleFonts.notoColorEmoji(
+                                              color: Colors.green)
                                           : null),
                                   Text(
                                       ' ${message.reactions!.total[reaction].toString()}',
@@ -1144,22 +1144,21 @@ class ChatScreenState extends State<ChatScreen> {
                   width: 400,
                   height: 400,
                   child: EmojiPicker(
-                    config: const Config(
+                    config: Config(
                       emojiTextStyle: kIsWeb
-                          ? TextStyle(
-                              color: Colors.green, fontFamily: 'NotoColorEmoji')
+                          ? GoogleFonts.notoColorEmoji(color: Colors.green)
                           : null,
-                      categoryViewConfig: CategoryViewConfig(
+                      categoryViewConfig: const CategoryViewConfig(
                         backgroundColor: Colors.white,
                         indicatorColor: Colors.green,
                         iconColorSelected: Colors.green,
                       ),
-                      emojiViewConfig: EmojiViewConfig(
+                      emojiViewConfig: const EmojiViewConfig(
                         backgroundColor: Colors.white,
                         columns: 8,
                       ),
                       bottomActionBarConfig:
-                          BottomActionBarConfig(enabled: false),
+                          const BottomActionBarConfig(enabled: false),
                     ),
                     onEmojiSelected: (category, emoji) {
                       Navigator.pop(context, emoji);
