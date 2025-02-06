@@ -2,7 +2,6 @@ import 'package:connectycube_sdk/connectycube_sdk.dart';
 
 const String appId = 'REPLACE_APP_ID';
 const String authKey = 'REPLACE_APP_AUTH_KEY';
-const String authSecret = 'REPLACE_APP_AUTH_SECRET';
 
 const String apiEndpoint = 'https://api.connectycube.com';
 const String chatEndpoint = 'chat.connectycube.com';
