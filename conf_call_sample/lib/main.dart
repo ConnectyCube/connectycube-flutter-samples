@@ -191,7 +191,7 @@ initConnectycube() {
   init(
     config.appId,
     config.authKey,
-    config.authSecret,
+    '',
     onSessionRestore: () {
       return SharedPrefs.getUser().then((savedUser) async {
         if (savedUser?.isGuest ?? false) {
@@ -217,7 +217,6 @@ initConnectycube() {
 initConnectycubeContextLess() async {
   CubeSettings.instance.applicationId = config.appId;
   CubeSettings.instance.authorizationKey = config.authKey;
-  CubeSettings.instance.authorizationSecret = config.authSecret;
   CubeSettings.instance.onSessionRestore = () {
     return SharedPrefs.getUser().then((savedUser) {
       return createSession(savedUser);

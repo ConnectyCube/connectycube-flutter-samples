@@ -142,7 +142,7 @@ class _AppState extends State<App> with WidgetsBindingObserver {
   void initState() {
     super.initState();
 
-    init(config.appId, config.authKey, config.authSecret,
+    init(config.appId, config.authKey, '',
         onSessionRestore: () async {
       SharedPrefs sharedPrefs = await SharedPrefs.instance.init();
 
