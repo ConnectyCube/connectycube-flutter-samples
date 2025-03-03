@@ -38,6 +38,8 @@ All the samples use ConnectyCube SDK. The following tech integration documentati
 
 ## Have an issue?
 
+Join our [Discord](https://discord.gg/wDwbvJmD) for quick answers to your questions!
+
 Got troubles with integration? Сreate an issue at [Issues page](https://github.com/ConnectyCube/connectycube-flutter-samples/issues)
 
 **Want to support our team**:<br>
