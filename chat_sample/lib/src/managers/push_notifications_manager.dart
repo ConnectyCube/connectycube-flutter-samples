@@ -76,13 +76,15 @@ class PushNotificationsManager {
     );
 
     String? token;
-    if (Platform.isAndroid || kIsWeb || Platform.isIOS || Platform.isMacOS) {
-      firebaseMessaging.getToken().then((token) {
-        log('[getToken] token: $token', tag);
-        subscribe(token);
-      }).catchError((onError) {
-        log('[getToken] onError: $onError', tag);
-      });
+    try {
+      if (Platform.isAndroid || kIsWeb) {
+        token = await firebaseMessaging.getToken();
+      } else if (Platform.isIOS || Platform.isMacOS) {
+        token = await firebaseMessaging.getAPNSToken();
+      }
+      log('[getToken] token: $token', tag);
+    } catch (onError) {
+      log('[getToken] onError: $onError', tag);
     }
 
     if (!isEmpty(token)) {
@@ -123,9 +125,12 @@ class PushNotificationsManager {
     parameters.environment =
         isProduction ? CubeEnvironment.PRODUCTION : CubeEnvironment.DEVELOPMENT;
 
-    if (Platform.isAndroid || kIsWeb || Platform.isIOS || Platform.isMacOS) {
+    if (Platform.isAndroid || kIsWeb) {
       parameters.channel = NotificationsChannels.GCM;
       parameters.platform = CubePlatform.ANDROID;
+    } else if (Platform.isIOS || Platform.isMacOS) {
+      parameters.channel = NotificationsChannels.GCM; // or APNS
+      parameters.platform = CubePlatform.IOS;
     }
 
     var deviceInfoPlugin = DeviceInfoPlugin();

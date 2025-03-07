@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
+import 'package:just_audio/just_audio.dart';
 
 import '../config.dart';
 import '../managers/call_manager.dart';
@@ -69,7 +69,7 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   Map<int, RTCVideoRenderer> minorRenderers = {};
   Map<int, Map<String, bool>> participantsMediaConfigs = {};
   WidgetPosition _minorWidgetPosition = WidgetPosition.topRight;
-  final AssetsAudioPlayer _ringtonePlayer = AssetsAudioPlayer.newPlayer();
+  final AudioPlayer _ringtonePlayer = AudioPlayer();
 
   @override
   void initState() {
@@ -86,14 +86,14 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
 
     if (widget.initialLocalMediaStream != null) {
       _isMicMute = !(widget.initialLocalMediaStream
-          ?.getAudioTracks()
-          .firstOrNull
-          ?.enabled ??
+              ?.getAudioTracks()
+              .firstOrNull
+              ?.enabled ??
           false);
       _isCameraEnabled = widget.initialLocalMediaStream
-          ?.getVideoTracks()
-          .firstOrNull
-          ?.enabled ??
+              ?.getVideoTracks()
+              .firstOrNull
+              ?.enabled ??
           false;
     }
 
@@ -959,8 +959,9 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   void _playDialing() {
-    _ringtonePlayer.open(Audio("assets/audio/dialing.mp3"),
-        loopMode: LoopMode.single);
+    _ringtonePlayer.setAsset("assets/audio/dialing.mp3");
+    _ringtonePlayer.setLoopMode(LoopMode.one);
+    _ringtonePlayer.play();
   }
 
   void _stopDialing() {
@@ -968,8 +969,9 @@ class _ConversationCallScreenState extends State<ConversationCallScreen> {
   }
 
   void _playStoppingCall() {
-    _ringtonePlayer.open(Audio("assets/audio/end_call.mp3"),
-        loopMode: LoopMode.none);
+    _ringtonePlayer.setAsset("assets/audio/end_call.mp3");
+    _ringtonePlayer.setLoopMode(LoopMode.off);
+    _ringtonePlayer.play();
   }
 
   Future<String> _getUserName(int userId) {
