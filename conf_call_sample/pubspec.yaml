@@ -10,18 +10,18 @@ dependencies:
   flutter:
     sdk: flutter
 
-  assets_audio_player: ^3.1.1
-  connectycube_sdk: ^3.0.2
+  just_audio: ^0.9.46
+  connectycube_sdk: ^3.0.3
 #  connectycube_sdk:
 #    path: ../../flutter-sdk
-  connectycube_flutter_call_kit: ^2.7.0
+  connectycube_flutter_call_kit: ^2.8.0
 #  connectycube_flutter_call_kit:
 #    path: ../../connectycube-flutter-call-kit/connectycube_flutter_call_kit
   device_info_plus: ^10.1.2
-  flutter_background: ^1.2.0
+  flutter_background: ^1.3.0+1
   flutter_speed_dial: ^7.0.0
   package_info_plus: ^8.0.3
-  permission_handler: ^11.0.1
+  permission_handler: ^11.4.0
   shared_preferences: ^2.2.1
   universal_io: ^2.2.2
   uuid: ^3.0.7

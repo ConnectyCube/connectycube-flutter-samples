@@ -1,6 +1,6 @@
-import 'package:assets_audio_player/assets_audio_player.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:connectycube_sdk/connectycube_sdk.dart';
@@ -34,7 +34,7 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
   bool _isMicMute = false;
   MediaStream? _localMediaStream;
   RTCVideoRenderer? _localVideoRenderer;
-  final AssetsAudioPlayer _ringtonePlayer = AssetsAudioPlayer.newPlayer();
+  final AudioPlayer _ringtonePlayer = AudioPlayer();
 
   @override
   void initState() {
@@ -487,8 +487,9 @@ class _IncomingCallScreenState extends State<IncomingCallScreen> {
   }
 
   void _playRingtone() {
-    _ringtonePlayer.open(Audio("assets/audio/calling.mp3"),
-        loopMode: LoopMode.single);
+    _ringtonePlayer.setAsset("assets/audio/calling.mp3");
+    _ringtonePlayer.setLoopMode(LoopMode.one);
+    _ringtonePlayer.play();
   }
 
   void _stopRingtone() {
