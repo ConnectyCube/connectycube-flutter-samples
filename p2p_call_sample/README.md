@@ -28,18 +28,21 @@ ConnectyCube P2P Calls API documentation - [https://developers.connectycube.com/
 <kbd><img alt="Flutter P2P Calls code sample, video chat" src="https://developers.connectycube.com/images/code_samples/flutter/call_screen.png" height="440" /></kbd>
 <kbd><img alt="Flutter P2P Calls code sample, video chat (macOS)" src="https://developers.connectycube.com/images/code_samples/flutter/call_screen_macos.png" height="440" /></kbd>
 
-## Run
+## Quick start
 
-Prepare environment for Flutter and clone the project.
+### Preparations
 
-## Config
+1. Prepare environment for Flutter and clone the project.
+2. Install dependencies via `flutter pub get`
 
-Replace vars in config file `lib/src/config.dart`
+### Obtain ConnectyCube credentials
+
+Register new account and application at https://admin.connectycube.com and then put ***Application credentials*** from `Overview` page into config file `lib/src/config.dart` instead of the following vars:
 
 - `REPLACE_APP_ID`
 - `REPLACE_APP_AUTH_KEY`
-- `REPLACE_APP_AUTH_SECRET`
-- `REPLACE_USER_{1/2/3/4}_{LOGIN/FULL_NAME/PASSWORD}`
+
+Also, go to ConnectyCube dashboard, `Users` page, create 4 test users (if it's not created yet) and set their credentials in config file `lib/src/config.dart` instead of `REPLACE_USER_x_ID, REPLACE_USER_x_LOGIN, REPLACE_USER_x_FULL_NAME, REPLACE_USER_x_PASSWORD`
 
 ### Run on Android:
 - Right mouse button click on `main.dart`
@@ -57,10 +60,13 @@ The app will automatically run on a selected iOS device or simulator.
 
 ### Run on macOS
 - Run command from the Terminal `flutter run -d macos`
+
 ### Run on Windows
 - Run command from the Terminal `flutter run -d windows`
+
 ### Run on Web
 - Run command from the Terminal `flutter run -d chrome`
+
 ### Run on Linux
 - Run command from the Terminal `flutter run -d linux`
 
@@ -73,7 +79,7 @@ The app will automatically run on a selected iOS device or simulator.
 
 For notifying mobile platforms we use Connectycube Push notifications feature and own [Connectycube Call Kit plugin](https://pub.dev/packages/connectycube_flutter_call_kit) for supporting Call Kit feature.
 
-### Configure Push notifications:
+## Configure Push notifications:
 1. Create your own app in the ConnectyCube admin panel (if not created yet);
 2. Create a project in the Firebase developer console (if not created yet);
 3. Add the Server API key from the Firebase developer console to the ConnectyCube admin panel for the Android platform ([short guide](https://developers.connectycube.com/flutter/push-notifications?id=android));
@@ -83,6 +89,14 @@ For notifying mobile platforms we use Connectycube Push notifications feature an
 7. Create users in the ConnectyCube admin panel and add them to the configure file `p2p_call_sample/lib/src/utils/configs.dart`
 8. Build and run the app as usual;
 
-## Can't build yourself?
+## Have an issue?
 
-Got troubles with building Flutter code samples? Create an issue at [Issues page](https://github.com/ConnectyCube/connectycube-flutter-samples/issues)
+Join our [Discord](https://discord.com/invite/zqbBWNCCFJ) community to get real-time help from our team or create an issue at [GitHub issues page](https://github.com/ConnectyCube/connectycube-flutter-samples/issues).
+
+## Community
+
+- [Blog](https://connectycube.com/blog)
+- X (twitter)[@ConnectyCube](https://x.com/ConnectyCube)
+- [Facebook](https://www.facebook.com/ConnectyCube)
+- [Medium](https://medium.com/@connectycube)
+- [YouTube](https://www.youtube.com/@ConnectyCube)

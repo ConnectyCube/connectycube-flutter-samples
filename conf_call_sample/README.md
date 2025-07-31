@@ -36,23 +36,21 @@ ConnectyCube Conference Calls API documentation - [https://developers.connectycu
 <kbd><img alt="Flutter Conference Calls code sample, video chat" src="https://developers.connectycube.com/images/code_samples/flutter/call_screen_group_conf.png" height="440" /></kbd></kbd> 
 <kbd><img alt="Flutter Conference Calls code sample, video chat (macOS)" src="https://developers.connectycube.com/images/code_samples/flutter/call_screen_macos_conf.png" height="440" /></kbd>
 
-## Quick start and develop
+## Quick start
 
-Quick start [Flutter](https://flutter.dev/docs/get-started) app.
+### Preparations
 
+1. Prepare environment for Flutter and clone the project.
+2. Install dependencies via `flutter pub get`
 
-## Run
+### Obtain ConnectyCube credentials
 
-Prepare environment for Flutter and clone the project.
-
-## Config
-
-Replace vars in config file `lib/src/config.dart`
+Register new account and application at https://admin.connectycube.com and then put ***Application credentials*** from `Overview` page into config file `lib/src/config.dart` instead of the following vars:
 
 - `REPLACE_APP_ID`
 - `REPLACE_APP_AUTH_KEY`
-- `REPLACE_APP_AUTH_SECRET`
-- `REPLACE_USER_{1/2/3/4}_{LOGIN/FULL_NAME/PASSWORD}`
+
+Also, go to ConnectyCube dashboard, `Users` page, create 4 test users (if it's not created yet) and set their credentials in config file `lib/src/config.dart` instead of `REPLACE_USER_x_ID, REPLACE_USER_x_LOGIN, REPLACE_USER_x_FULL_NAME, REPLACE_USER_x_PASSWORD`
 
 ### Run on Android:
 - Right mouse button click on `main.dart`;
@@ -69,8 +67,10 @@ The app will automatically run on the selected iOS device or simulator.
 
 ### Run on macOS
 - Run command from the Terminal `flutter run -d macos`;
+
 ### Run on Windows
 - Run command from the Terminal `flutter run -d windows`;
+
 ### Run on Linux
 - Run command from the Terminal `flutter run -d linux`;
 
@@ -89,6 +89,14 @@ new call event. Do the next for configuration:
 7. Create users in the ConnectyCube admin panel and add them to the configure file `conf_call_sample/lib/src/utils/configs.dart`
 8. Build and run the app as usual;
 
-## Can't build yourself?
+## Have an issue?
 
-Got troubles with building Flutter code sample? Just create an issue at [Issues page](https://github.com/ConnectyCube/connectycube-flutter-samples/issues) - we will create the sample for you. For FREE!
+Join our [Discord](https://discord.com/invite/zqbBWNCCFJ) community to get real-time help from our team or create an issue at [GitHub issues page](https://github.com/ConnectyCube/connectycube-flutter-samples/issues).
+
+## Community
+
+- [Blog](https://connectycube.com/blog)
+- X (twitter)[@ConnectyCube](https://x.com/ConnectyCube)
+- [Facebook](https://www.facebook.com/ConnectyCube)
+- [Medium](https://medium.com/@connectycube)
+- [YouTube](https://www.youtube.com/@ConnectyCube)

@@ -40,39 +40,39 @@ The project contains the following features implemented:
 
 ### Obtain ConnectyCube credentials
 
-Register new account and application at https://admin.connectycube.com and then put ***Application credentials*** from `Overview` page instead of the following vars in config file `lib/src/config.dart`
+Register new account and application at https://admin.connectycube.com and then put ***Application credentials*** from `Overview` page into config file `lib/src/config.dart` instead of the following vars:
 
 - `REPLACE_APP_ID`
 - `REPLACE_APP_AUTH_KEY`
 
-#### Run on Android:
+### Run on Android:
 - Right mouse button click on `main.dart`;
 - Chose 'Run 'main.dart''.
 
 The app will automatically run on your Android device.
 
-#### Run on iOS:
+### Run on iOS:
 - Start Xcode;
 - Select `Runner.xcworkspace` to run Xcode project;
 - Press the' Build' button to start project building.
 
 The app will automatically run on a selected iOS device or simulator.
 
-#### Run on macOS
+### Run on macOS
 - Run command from the Terminal `flutter run -d macos`;
 
-#### Run on Windows
+### Run on Windows
 - Run command from the Terminal `flutter run -d windows`;
 
-#### Run on Web
+### Run on Web
 - Run command from the Terminal `flutter run -d chrome`;
 
 or follow the [link](https://connectycube.github.io/connectycube-flutter-samples/chat_sample/build/web) to take a look at the deployed version
 
-#### Run on Linux
+### Run on Linux
 - Run command from the Terminal `flutter run -d linux`;
 
-#### Configure Push notifications:
+### Configure Push notifications:
 1. Create your own app in the ConnectyCube admin panel (if not created yet);
 2. Create a project in the Firebase developer console (if not created yet);
 3. Add the Server API key from the Firebase developer console to the ConnectyCube admin panel for the Android platform ([short guide](https://developers.connectycube.com/flutter/push-notifications?id=android));
@@ -90,6 +90,14 @@ ConnectyCube Flutter getting started - [https://developers.connectycube.com/flut
 
 ConnectyCube Chat API documentation - [https://developers.connectycube.com/flutter/messaging](https://developers.connectycube.com/flutter/messaging)
 
-## Can't build yourself?
+## Have an issue?
 
-Got troubles with building Flutter code samples? Just create an issue at [Issues page](https://github.com/ConnectyCube/connectycube-flutter-samples/issues).
+Join our [Discord](https://discord.com/invite/zqbBWNCCFJ) community to get real-time help from our team or create an issue at [GitHub issues page](https://github.com/ConnectyCube/connectycube-flutter-samples/issues).
+
+## Community
+
+- [Blog](https://connectycube.com/blog)
+- X (twitter)[@ConnectyCube](https://x.com/ConnectyCube)
+- [Facebook](https://www.facebook.com/ConnectyCube)
+- [Medium](https://medium.com/@connectycube)
+- [YouTube](https://www.youtube.com/@ConnectyCube)
