@@ -22,8 +22,6 @@ The project contains the following features implemented:
 - Push notification: subscribe/unsubscribe, show local notification, navigate to the app click on a local notification
 - Messages' reactions
 
-[**LIVE demo**](https://connectycube.github.io/connectycube-flutter-samples/chat_sample/build/web)
-
 ## Screenshots
 
 <kbd><img alt="Flutter Chat sample, select dialogs" src="https://developers.connectycube.com/images/code_samples/flutter/dialogs_screen.png" height="440" />
