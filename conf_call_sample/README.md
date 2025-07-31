@@ -23,12 +23,6 @@ Project contains the following features implemented:
 
 [**Conference calls Sample Web app**](https://connectycube.github.io/connectycube-flutter-samples/conf_call_sample/build/web)
 
-## Documentation
-
-ConnectyCube Flutter getting started - [https://developers.connectycube.com/flutter](https://developers.connectycube.com/flutter)
-
-ConnectyCube Conference Calls API documentation - [https://developers.connectycube.com/flutter/videocalling-conference](https://developers.connectycube.com/flutter/videocalling-conference)
-
 ## Screenshots
 
 <kbd><img alt="Flutter Conference Calls code sample, select users" src="https://developers.connectycube.com/images/code_samples/flutter/select_opponents_screen_conf.png" height="440" /></kbd>

@@ -15,12 +15,6 @@ The project contains the following features implemented:
 - Screen Sharing
 - Background calls (via push notifications)
 
-## Documentation
-
-ConnectyCube Flutter getting started - [https://developers.connectycube.com/flutter](https://developers.connectycube.com/flutter)
-
-ConnectyCube P2P Calls API documentation - [https://developers.connectycube.com/flutter/videocalling](https://developers.connectycube.com/flutter/videocalling)
-
 ## Screenshots
 
 <kbd><img alt="Flutter P2P Calls code sample, login" src="https://developers.connectycube.com/images/code_samples/flutter/login_screen.png" height="440" /></kbd>
