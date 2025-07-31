@@ -26,25 +26,24 @@ The following code samples are available:
 <kbd><img alt="Flutter Conference Calls code sample, select users" src="https://developers.connectycube.com/images/code_samples/flutter/select_opponents_screen_conf.png" height="440" /></kbd>
 <kbd><img alt="Flutter Conference Calls code sample, video chat" src="https://developers.connectycube.com/images/code_samples/flutter/call_screen_group_conf.png" height="440" /></kbd>
 </kbd> <kbd><img alt="Flutter Conference Calls code sample, video chat (macOS)" src="https://developers.connectycube.com/images/code_samples/flutter/call_screen_macos_conf.png" height="440" /></kbd>
+
 ## Documentation
 
-All the samples use ConnectyCube SDK. The following tech integration documentation is available:
+Send first chat message guide - https://developers.connectycube.com/flutter/getting-started/send-first-chat-message
 
-- [Flutter SDK documentation](https://developers.connectycube.com/flutter/)
-- [Chat API](https://developers.connectycube.com/flutter/messaging)
-- [Video Chat API](https://developers.connectycube.com/flutter/videocalling)
-- [Conference Chat API](https://developers.connectycube.com/flutter/videocalling-conference)
-- [Authentication and Users](https://developers.connectycube.com/flutter/authentication-and-users)
+Make first call guide - https://developers.connectycube.com/flutter/getting-started/make-first-call/
 
 ## Have an issue?
 
-Join our [Discord](https://discord.com/invite/zqbBWNCCFJ) for quick answers to your questions
+Join our [Discord](https://discord.com/invite/zqbBWNCCFJ) community to get real-time help from our team or create an issue at [GitHub issues page](https://github.com/ConnectyCube/connectycube-flutter-samples/issues).
 
 ## Community
 
 - [Blog](https://connectycube.com/blog)
 - X (twitter)[@ConnectyCube](https://x.com/ConnectyCube)
 - [Facebook](https://www.facebook.com/ConnectyCube)
+- [Medium](https://medium.com/@connectycube)
+- [YouTube](https://www.youtube.com/@ConnectyCube)
 
 **Want to support our team**:<br>
 <a href="https://www.buymeacoffee.com/connectycube" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-blue.png" alt="Buy Me A Coffee" style="height: 60px !important;width: 217px !important;" ></a>
