@@ -21,7 +21,7 @@ Project contains the following features implemented:
 - Switching from audio call to video without reconnection
 - Shared conferences (join by link)
 
-[**Conference calls Sample Web app**](https://connectycube.github.io/connectycube-flutter-samples/conf_call_sample/build/web)
+[**DEMO app**](https://connectycube.github.io/connectycube-flutter-samples/conf_call_sample/build/web)
 
 ## Screenshots
 
