@@ -84,9 +84,9 @@ or follow the [link](https://connectycube.github.io/connectycube-flutter-samples
 
 ## Documentation
 
-ConnectyCube Flutter getting started - [https://developers.connectycube.com/flutter](https://developers.connectycube.com/flutter)
+Send first chat message guide - https://developers.connectycube.com/flutter/getting-started/send-first-chat-message
 
-ConnectyCube Chat API documentation - [https://developers.connectycube.com/flutter/messaging](https://developers.connectycube.com/flutter/messaging)
+Advanced Chat API documentation - https://developers.connectycube.com/flutter/messaging
 
 ## Have an issue?
 

@@ -31,9 +31,9 @@ ConnectyCube Conference Calls API documentation - [https://developers.connectycu
 
 ## Screenshots
 
-<kbd><img alt="Flutter Conference Calls code sample, select users" src="https://developers.connectycube.com/images/code_samples/flutter/select_opponents_screen_conf.png" height="440" /></kbd> 
-<kbd><img alt="Flutter Conference Calls code sample, video chat private" src="https://developers.connectycube.com/images/code_samples/flutter/call_screen_private.png" height="440" /></kbd></kbd> 
-<kbd><img alt="Flutter Conference Calls code sample, video chat" src="https://developers.connectycube.com/images/code_samples/flutter/call_screen_group_conf.png" height="440" /></kbd></kbd> 
+<kbd><img alt="Flutter Conference Calls code sample, select users" src="https://developers.connectycube.com/images/code_samples/flutter/select_opponents_screen_conf.png" height="440" /></kbd>
+<kbd><img alt="Flutter Conference Calls code sample, video chat private" src="https://developers.connectycube.com/images/code_samples/flutter/call_screen_private.png" height="440" /></kbd></kbd>
+<kbd><img alt="Flutter Conference Calls code sample, video chat" src="https://developers.connectycube.com/images/code_samples/flutter/call_screen_group_conf.png" height="440" /></kbd></kbd>
 <kbd><img alt="Flutter Conference Calls code sample, video chat (macOS)" src="https://developers.connectycube.com/images/code_samples/flutter/call_screen_macos_conf.png" height="440" /></kbd>
 
 ## Quick start
@@ -45,7 +45,7 @@ ConnectyCube Conference Calls API documentation - [https://developers.connectycu
 
 ### Obtain ConnectyCube credentials
 
-Register new account and application at https://admin.connectycube.com and then put ***Application credentials*** from `Overview` page into config file `lib/src/config.dart` instead of the following vars:
+Register new account and application at https://admin.connectycube.com and then put **_Application credentials_** from `Overview` page into config file `lib/src/config.dart` instead of the following vars:
 
 - `REPLACE_APP_ID`
 - `REPLACE_APP_AUTH_KEY`
@@ -53,12 +53,14 @@ Register new account and application at https://admin.connectycube.com and then 
 Also, go to ConnectyCube dashboard, `Users` page, create 4 test users (if it's not created yet) and set their credentials in config file `lib/src/config.dart` instead of `REPLACE_USER_x_ID, REPLACE_USER_x_LOGIN, REPLACE_USER_x_FULL_NAME, REPLACE_USER_x_PASSWORD`
 
 ### Run on Android:
+
 - Right mouse button click on `main.dart`;
 - Chose 'Run 'main.dart''.
 
 App will automatically run on your Android device.
 
 ### Run on iOS:
+
 - Start Xcode;
 - Select `Runner.xcworkspace` to run Xcode project;
 - Press 'Build' button to start project building.
@@ -66,18 +68,22 @@ App will automatically run on your Android device.
 The app will automatically run on the selected iOS device or simulator.
 
 ### Run on macOS
+
 - Run command from the Terminal `flutter run -d macos`;
 
 ### Run on Windows
+
 - Run command from the Terminal `flutter run -d windows`;
 
 ### Run on Linux
+
 - Run command from the Terminal `flutter run -d linux`;
 
 ## Config for the CallKit feature
-The CallKit feature is enabled by default in current version. 
 
-The push notification feature is used for implementation the participants notification about the 
+The CallKit feature is enabled by default in current version.
+
+The push notification feature is used for implementation the participants notification about the
 new call event. Do the next for configuration:
 
 1. Create your own app in the ConnectyCube admin panel (if not created yet);
@@ -88,6 +94,10 @@ new call event. Do the next for configuration:
 6. Configure file `conf_call_sample/lib/src/utils/configs.dart` with your endpoints from the 1st. point of this guide;
 7. Create users in the ConnectyCube admin panel and add them to the configure file `conf_call_sample/lib/src/utils/configs.dart`
 8. Build and run the app as usual;
+
+## Documentation
+
+Advanced Conferencing calling documentation - https://developers.connectycube.com/flutter/videocalling-conference/
 
 ## Have an issue?
 
