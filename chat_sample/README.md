@@ -30,52 +30,49 @@ The project contains the following features implemented:
 </kbd> <kbd><img alt="Flutter Chat code sample, chat" src="https://developers.connectycube.com/images/code_samples/flutter/chat_screen.png" height="440" /></kbd>
 </kbd> <kbd><img alt="Flutter Chat code sample, chat (Windows)" src="https://developers.connectycube.com/images/code_samples/flutter/chat_screen_windows.png" height="440" /></kbd>
 
-## Quickstart and develop
-
-Quickstart [Flutter](https://flutter.dev/docs/get-started) app.
-
-
-## How to run
+## Quick start
 
 ### Preparations
 
 1. Prepare environment for Flutter and clone the project.
-2. Install depenencies via `flutter pub get`
+2. Install dependencies via `flutter pub get`
 3. Generate config file `firebase_options.dart` via https://firebase.google.com/docs/flutter/setup and put it in `lib/firebase_options.dart`;
 
-## Config
+### Obtain ConnectyCube credentials
 
-Replace vars in config file `lib/src/config.dart`
+Register new account and application at https://admin.connectycube.com and then put ***Application credentials*** from `Overview` page instead of the following vars in config file `lib/src/config.dart`
 
 - `REPLACE_APP_ID`
 - `REPLACE_APP_AUTH_KEY`
-- `REPLACE_APP_AUTH_SECRET`
 
-### Run on Android:
+#### Run on Android:
 - Right mouse button click on `main.dart`;
 - Chose 'Run 'main.dart''.
 
 The app will automatically run on your Android device.
 
-### Run on iOS:
+#### Run on iOS:
 - Start Xcode;
 - Select `Runner.xcworkspace` to run Xcode project;
 - Press the' Build' button to start project building.
 
 The app will automatically run on a selected iOS device or simulator.
 
-### Run on macOS
+#### Run on macOS
 - Run command from the Terminal `flutter run -d macos`;
-### Run on Windows
+
+#### Run on Windows
 - Run command from the Terminal `flutter run -d windows`;
-### Run on Web
+
+#### Run on Web
 - Run command from the Terminal `flutter run -d chrome`;
 
 or follow the [link](https://connectycube.github.io/connectycube-flutter-samples/chat_sample/build/web) to take a look at the deployed version
-### Run on Linux
+
+#### Run on Linux
 - Run command from the Terminal `flutter run -d linux`;
 
-### Configure Push notifications:
+#### Configure Push notifications:
 1. Create your own app in the ConnectyCube admin panel (if not created yet);
 2. Create a project in the Firebase developer console (if not created yet);
 3. Add the Server API key from the Firebase developer console to the ConnectyCube admin panel for the Android platform ([short guide](https://developers.connectycube.com/flutter/push-notifications?id=android));
