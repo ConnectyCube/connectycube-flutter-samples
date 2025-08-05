@@ -36,14 +36,14 @@ The project contains the following features implemented:
 
 1. Prepare environment for Flutter and clone the project.
 2. Install dependencies via `flutter pub get`
-3. Generate config file `firebase_options.dart` via https://firebase.google.com/docs/flutter/setup and put it in `lib/firebase_options.dart`;
-
-### Obtain ConnectyCube credentials
-
-Register new account and application at https://admin.connectycube.com and then put ***Application credentials*** from `Overview` page into config file `lib/src/config.dart` instead of the following vars:
-
-- `REPLACE_APP_ID`
-- `REPLACE_APP_AUTH_KEY`
+3. Setup Firebase
+   - generate config file `firebase_options.dart` via https://firebase.google.com/docs/flutter/setup and put it in `lib/firebase_options.dart`;
+4. Obtain ConnectyCube credentials
+   - register new account and application at https://admin.connectycube.com and then put ***Application credentials*** from `Overview` page into config file `lib/src/config.dart` instead of the following vars:
+      ```
+      REPLACE_APP_ID
+      REPLACE_APP_AUTH_KEY
+      ```
 
 ### Run on Android:
 - Right mouse button click on `main.dart`;
