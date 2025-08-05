@@ -74,12 +74,10 @@ or follow the [link](https://connectycube.github.io/connectycube-flutter-samples
 - Run command from the Terminal `flutter run -d linux`
 
 ### Configure Push notifications:
-1. Create your own app in the ConnectyCube admin panel (if not created yet)
-2. Create a project in the Firebase developer console (if not created yet)
-3. Add the Server API key from the Firebase developer console to the ConnectyCube admin panel for the Android platform ([short guide](https://developers.connectycube.com/flutter/push-notifications?id=android))
-4. Add Apple certificate for the iOS platform ([short guide, how to generate and set it to the admin panel](https://developers.connectycube.com/ios/push-notifications?id=create-apns-certificate))
-5. Generate config file `firebase_options.dart` via [FlutterFire CLI](https://firebase.flutter.dev/docs/cli/)(the simple util provided for avoiding manual configuration for each platforms) and put it by place `lib/firebase_options.dart`
-6. Build and run the app as usual
+1. Add the **FCM Service account key** from the Firebase developer console to the ConnectyCube admin panel for the Android platform ([short guide](https://developers.connectycube.com/flutter/push-notifications?id=android))
+2. Add Apple certificate for the iOS platform ([short guide, how to generate and set it in the ConnectyCube admin panel](https://developers.connectycube.com/ios/push-notifications?id=create-apns-certificate))
+3. re-generate config file `firebase_options.dart` via https://firebase.google.com/docs/flutter/setup and put it in `lib/firebase_options.dart`;
+4. Build and run the app as usual
 
 > **Note:** For working with push notifications on the macOS platform you should generate a separate certificate similar to p.4 but with other app bundle id.
 
