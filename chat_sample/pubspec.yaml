@@ -14,7 +14,7 @@ dependencies:
   #  connectycube_sdk:
   #      path: ../../flutter-sdk
   shared_preferences: ^2.2.2
-  file_picker: ^9.0.2
+  file_picker: ^10.1.0
   fluttertoast: ^8.2.12
   cached_network_image: ^3.3.1
   photo_view: ^0.14.0
