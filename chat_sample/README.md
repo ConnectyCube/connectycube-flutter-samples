@@ -46,39 +46,40 @@ The project contains the following features implemented:
       ```
 
 ### Run on Android:
-- Right mouse button click on `main.dart`;
-- Chose 'Run 'main.dart''.
+- Open project in Android Studio
+- Right mouse button click on `main.dart`
+- Chose 'Run 'main.dart'
 
 The app will automatically run on your Android device.
 
 ### Run on iOS:
-- Start Xcode;
-- Select `Runner.xcworkspace` to run Xcode project;
+- Open project in Xcode
+- Select `Runner.xcworkspace` to run Xcode project
 - Press the' Build' button to start project building.
 
 The app will automatically run on a selected iOS device or simulator.
 
 ### Run on macOS
-- Run command from the Terminal `flutter run -d macos`;
+- Run command from the Terminal `flutter run -d macos`
 
 ### Run on Windows
-- Run command from the Terminal `flutter run -d windows`;
+- Run command from the Terminal `flutter run -d windows`
 
 ### Run on Web
-- Run command from the Terminal `flutter run -d chrome`;
+- Run command from the Terminal `flutter run -d chrome`
 
 or follow the [link](https://connectycube.github.io/connectycube-flutter-samples/chat_sample/build/web) to take a look at the deployed version
 
 ### Run on Linux
-- Run command from the Terminal `flutter run -d linux`;
+- Run command from the Terminal `flutter run -d linux`
 
 ### Configure Push notifications:
-1. Create your own app in the ConnectyCube admin panel (if not created yet);
-2. Create a project in the Firebase developer console (if not created yet);
-3. Add the Server API key from the Firebase developer console to the ConnectyCube admin panel for the Android platform ([short guide](https://developers.connectycube.com/flutter/push-notifications?id=android));
-4. Add Apple certificate for the iOS platform ([short guide, how to generate and set it to the admin panel](https://developers.connectycube.com/ios/push-notifications?id=create-apns-certificate));
-5. Generate config file `firebase_options.dart` via [FlutterFire CLI](https://firebase.flutter.dev/docs/cli/)(the simple util provided for avoiding manual configuration for each platforms) and put it by place `lib/firebase_options.dart`;
-6. Build and run the app as usual;
+1. Create your own app in the ConnectyCube admin panel (if not created yet)
+2. Create a project in the Firebase developer console (if not created yet)
+3. Add the Server API key from the Firebase developer console to the ConnectyCube admin panel for the Android platform ([short guide](https://developers.connectycube.com/flutter/push-notifications?id=android))
+4. Add Apple certificate for the iOS platform ([short guide, how to generate and set it to the admin panel](https://developers.connectycube.com/ios/push-notifications?id=create-apns-certificate))
+5. Generate config file `firebase_options.dart` via [FlutterFire CLI](https://firebase.flutter.dev/docs/cli/)(the simple util provided for avoiding manual configuration for each platforms) and put it by place `lib/firebase_options.dart`
+6. Build and run the app as usual
 
 > **Note:** For working with push notifications on the macOS platform you should generate a separate certificate similar to p.4 but with other app bundle id.
 
