@@ -15,7 +15,7 @@ dependencies:
   #      path: ../../flutter-sdk
   shared_preferences: ^2.2.2
   file_picker: ^9.0.2
-  fluttertoast: ^8.2.4
+  fluttertoast: ^8.2.12
   cached_network_image: ^3.3.1
   photo_view: ^0.14.0
   device_info_plus: ^10.1.2
@@ -37,7 +37,7 @@ dependencies:
       url: https://github.com/g123k/flutter_app_badger.git
       ref: 33cbee6
   just_audio: ^0.9.36
-  record: ^5.0.4
+  record: ^6.0.0
   http: ^1.1.0
   cached_video_player_plus: ^2.0.0
   url_launcher: ^6.2.4

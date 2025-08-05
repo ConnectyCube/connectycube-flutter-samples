@@ -32,6 +32,7 @@
 !build/
 build/*
 !build/web/
+android/build/
 
 # Web related
 

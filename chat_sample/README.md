@@ -84,6 +84,19 @@ or follow the [link](https://connectycube.github.io/connectycube-flutter-samples
 
 > **Note:** For displaying notifications on the Web platform from the background you should feel the file `web/firebase-messaging-sw.js` with data from your Firebase developer console.
 
+
+### Troubleshooting
+
+- Unresolved reference:
+
+```
+flutter clean
+flutter pub get
+cd android
+./gradlew clean
+cd ..
+```
+
 ## Documentation
 
 Send first chat message guide - https://developers.connectycube.com/flutter/getting-started/send-first-chat-message
